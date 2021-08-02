@@ -26,7 +26,7 @@ As below is part of the user story:
 - When "- Bot" clicked, a bot the newest bot should be destroyed. If the bot is processing some order, the process should be abandon. The specific order should remain "PENDING" until the bot process another order.
 
 ### Functioning Prototype
-You may delivery your working prototype with one of the following method:
+You may demostrate your final funtioning prototype with **one (only)** of the following method:
 - CLI application
 - UI application
 - E2E test case
