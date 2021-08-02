@@ -1,7 +1,7 @@
 ## FeedMe Take Home Assignment
 Below is a take home assignment before the interview of the position. You are required to
 1. Understand the situation and use case. You may contact the interviewer for further clarification.
-2. Implement the requirement with your most .
+2. Implement the requirement with your most effective tools.
 3. Complete the requirement and perform your own testing.
 4. Provide any documentation for the part needed.
 5. Commit into your own github and share your repo with the interviewer.
@@ -33,5 +33,5 @@ You may delivery your implementation using one of the following method:
 
 ### Tips on completing this task
 - Testing, testing and testing. Make sure the deliverable is functioning and meet all the requirements.
-- Do not over engineering, try to scope your working hour within 3 hours (1 hour per day). You may document all the optimization that you think good to implement.
+- Do not over engineering or bring in all the fancy tech stuff, try to scope your working hour within 3 hours (1 hour per day). You may document all the optimization or technology concern that you think good to implement.
 - Complete the implementation as clean as possible, clean code is a strong plus point.
