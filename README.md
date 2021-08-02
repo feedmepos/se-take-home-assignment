@@ -3,7 +3,7 @@ Below is a take home assignment before the interview of the position. You are re
 1. Understand the situation and use case. You may contact the interviewer for further clarification.
 2. Implement the requirement with your most effective tools.
 3. Complete the requirement and perform your own testing.
-4. Provide any documentation for the part needed.
+4. Provide documentation for the any part that you think is needed.
 5. Commit into your own github and share your repo with the interviewer.
 6. Bring the source code and functioning prototype to the interview session.
 
@@ -25,13 +25,13 @@ As below is part of the user story:
 - If there is no more order in the "PENDING", the bot should do nothing until a new order come in.
 - When "- Bot" clicked, a bot the newest bot should be destroyed. If the bot is processing some order, the process should be abandon. The specific order should remain "PENDING" until the bot process another order.
 
-### Deliverable
-You may delivery your implementation using one of the following method:
-- A CLI application
-- A sandbox UI with some control
-- A E2E test case
+### Functioning Prototype
+You may delivery your working prototype with one of the following method:
+- CLI application
+- UI application
+- E2E test case
 
 ### Tips on completing this task
-- Testing, testing and testing. Make sure the deliverable is functioning and meet all the requirements.
-- Do not over engineering or bring in all the fancy tech stuff, try to scope your working hour within 3 hours (1 hour per day). You may document all the optimization or technology concern that you think good to implement.
-- Complete the implementation as clean as possible, clean code is a strong plus point.
+- Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.
+- Do not over engineering. Try to scope your working hour within 3 hours (1 hour per day). You may document all the optimization or technology concern that you think good to bring in the solution.
+- Complete the implementation as clean as possible, clean code is a strong plus point, do not bring in all the fancy tech stuff.
