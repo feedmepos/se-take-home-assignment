@@ -23,7 +23,7 @@ As below is part of the user story:
 - The Order number should be unique and increasing.
 - When "+ Bot" clicked, a bot should be created and process the order inside "PENDING", after 10 seconds, the order should move to "COMPLETE". Then the bot should start processing another order if there is any left.
 - If there is no more order in the "PENDING", the bot should do nothing until a new order come in.
-- When "- Bot" clicked, a bot the newest bot should be destroyed. If the bot is processing some order, the process should be abandon. The specific order should remain "PENDING" until the bot process another order.
+- When "- Bot" clicked, the newest bot should be destroyed. If the bot is processing some order, the process should be abandon. The order now become "PENDING" and ready to process by other bot.
 - No data persistance is needed for this prototype, you may perform all the process inside memory.
 
 ### Functioning Prototype
