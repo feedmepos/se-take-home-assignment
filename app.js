@@ -5,13 +5,14 @@ let orderNumber = 0;
 let botNumber = 0;
 let bots = [];
 let pendingOrders = [];
+let completedOrders = [];
 
 function checkPendingOrders() {
     // Look for idle bot to process order
     const idleBot = bots.find(bot => bot.status === 'IDLE');
     if (idleBot && pendingOrders.length > 0) {
         const nextOrder = pendingOrders.shift();
-        idleBot.processOrder(nextOrder, checkPendingOrders);
+        idleBot.processOrder(nextOrder, checkPendingOrders, completedOrders);
     }
 }
 
@@ -78,31 +79,48 @@ function showPendingOrder() {
         console.log('There are no pending order');
         return;
     }
+    console.log(`===== PENDING AREA =====`)
     pendingOrders.forEach(pendingOrder => console.log(`Order No : ${pendingOrder.orderNumber}(${pendingOrder.type}) `))
+}
+
+function showCompletedOrder() {
+    if (completedOrders.length === 0) {
+        console.log('There are no completed order');
+        return;
+    }
+    console.log(`===== COMPLETED AREA =====`)
+    completedOrders.forEach(completedOrder => console.log(`Order No : ${completedOrder.orderNumber}(${completedOrder.type}) `))
 }
 
 function promptUser(rl) {
     // Prompt for user input
-    process.stdout.write("Please enter a command (n for normal order, v for VIP order, + to add bot, - to remove bot, show to display bots, p to show pending orders, exit to exit): ");
+    process.stdout.write("Please enter a command (n for normal order, v for VIP order, + to add bot, - to remove bot, b to display bots, p to show pending orders, exit to exit): ");
     rl.on('line', (input) => {
         switch (input.trim().toLowerCase()) {
             case 'n':
+            case 'new normal order':
                 addOrder('Normal');
                 break;
             case 'v':
+            case 'new vip order':
                 addOrder('VIP');
                 break;
             case '+':
+            case '+ bot':
                 addBot();
                 break;
             case '-':
+            case '- bot':
                 removeBot();
                 break;
-            case 'show':
+            case 'b':
                 showBots();
                 break;
             case 'p':
                 showPendingOrder();
+                break;
+            case 'c':
+                showCompletedOrder();
                 break;
             case 'exit':
                 rl.close();

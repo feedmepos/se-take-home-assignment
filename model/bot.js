@@ -7,16 +7,17 @@ module.exports = class Bot {
         this.timeoutId = null; // initialize timeout ID to null
     }
 
-    processOrder(order, fn) {
+    processOrder(order, checkPendingOrders, completedOrders) {
         this.status = 'PROCESSING';
         this.currentOrder = order;
         console.log(`Bot ${this.botNumber} is now processing order ${order.orderNumber} (${order.type})`);
         this.timeoutId = setTimeout(() => {
             this.currentOrder.status = 'COMPLETE';
+            completedOrders.push(this.currentOrder)
             console.log(`Bot ${this.botNumber} has completed processing order ${order.orderNumber} (${order.type})`);
             this.currentOrder = null;
             this.status = 'IDLE';
-            fn();
+            checkPendingOrders();
         }, this.currentOrder.processingTime);
     }
 

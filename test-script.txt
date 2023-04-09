@@ -1,0 +1,105 @@
+Test Case 1
+(To check is new order show up in 'PENDING' area)
+(To check is new vip order show up in in-front of normal but behind existing vip order)
+-----------------
+1. Add New Normal Order (n)
+2. Add New Normal Order (n)
+3. Add New VIP order (v)
+4. Add New VIP order (v)
+5. Check pending area (p) 
+
+Expected Result:
+The pending area should show:
+
+===== PENDING AREA =====
+Order No : 3(VIP) 
+Order No : 4(VIP) 
+Order No : 1(Normal) 
+Order No : 2(Normal) 
+
+Test Case 2
+(To show the number of bot)
+-----------------
+1. Continue from test case 1
+2. Check bot (b)
+
+Expected Result:
+There are no bots
+
+Test Case 3
+(To check are bots will be created and start processing order inside 'PENDING' area)
+-----------------
+1. Continue from test case 2
+2. Add new bot (+)
+3. Add new bot (+) immediately again
+4. Check bot (b) immediately before 10s of procesing time
+
+Expected Result:
+Bot 1 is processing order 3 (VIP)
+Bot 2 is processing order 4 (VIP)
+
+Test Case 4
+(To check are bots will be start processing another order when completed previous order)
+-----------------
+1. Continue from test case 3
+2. Check bot (b) again after 10s from test case 3
+
+Expected Result:
+Bot 1 is processing order 1 (VIP)
+Bot 2 is processing order 2 (VIP)
+
+Test Case 5
+(to check will bot become IDLE when no more order in 'PENDING' area)
+-----------------
+1. Continue from test case 4
+2. Check bot (b) again after 20s
+
+Expected Result:
+Bot 1 is idle
+Bot 2 is idle
+
+Test Case 6
+(To check whenever bot destroyed, the order processing will be stopped and back to 'PENDING' area )
+(To check the stopped order will be process by other bot )
+-----------------
+1. Add New Normal Order (n)
+2. Add New Normal Order (n)
+3. Destroy newest bot (-)
+4. Check pending area (p) 
+
+Expected Result:
+
+===== PENDING AREA =====
+Order No : 6(Normal)
+
+**Bot 1 will be processing the remaining order
+Bot 1 has completed processing order 5 (Normal)
+Bot 1 has completed processing order 6 (Normal)
+
+Test Case 7
+(To check is the bot destroyed from Test Case 6)
+-----------------
+1. Check bot (b) after order processed.
+
+Expected Result:
+Bot 1 is idle
+
+Test Case 8
+(To check is processed order move to 'COMPLETE' area after 10s)
+-----------------
+1. Add New Normal Order (n)
+2. Wait 10s
+1. Check complete area (c)
+
+Expected Result:
+===== COMPLETED AREA =====
+Order No : 3(VIP) 
+Order No : 4(VIP) 
+Order No : 1(Normal) 
+Order No : 2(Normal) 
+Order No : 5(Normal) 
+Order No : 6(Normal) 
+Order No : 7(Normal) 
+
+
+
