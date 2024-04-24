@@ -36,3 +36,55 @@ You may demostrate your final funtioning prototype with **one and only one** of 
 - Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.
 - Do not over engineering. Try to scope your working hour within 3 hours (1 hour per day). You may document all the optimization or technology concern that you think good to bring in the solution.
 - Complete the implementation as clean as possible, clean code is a strong plus point, do not bring in all the fancy tech stuff.
+
+## Answer Description
+
+### Features
+- **Order Management**: Users can place new normal or VIP orders and view them categorized as pending, processing, or completed.
+- **Bot Management**: Users can add or remove bots to process pending orders.
+- **Cancellation**: Users can cancel pending orders if necessary.
+
+### Installation
+
+1. Clone this repository to your local machine:
+
+```
+git clone https://github.com/TheRealNaery/se-take-home-assignment.git
+```
+2. Navigate to the project directory:
+
+```
+cd feedme
+```
+
+3. Install dependencies using npm or yarn:
+
+```
+npm install
+```
+
+4. Run the development server:
+
+```
+npm run serve
+```
+
+5. Visit http://localhost:8080 in your web browser to access the application.
+
+### Example
+
+1. To test the answer, please run through `example/index.html`
+
+### Usage
+
+1. **Place New Orders**: Click on the "New Normal Order" or "New VIP Order" buttons to place new orders. Each order will be displayed in the pending orders section.
+2. **Manage Bots**: Use the "+ Bot" and "- Bot" buttons to add or remove bots for processing orders. Bots help automate the order processing.
+3. **Cancel Orders**: To cancel a pending order, click the "Cancel" button next to the order in the pending orders section.
+4. **View Order Status**: Orders are categorized into pending, processing, and completed sections based on their status. You can track the status of each order accordingly.
+
+### Technologies Used
+- Vue 3
+- Tailwind CSS
+
+### License
+This project is licensed under the MIT License.
