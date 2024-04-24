@@ -75,6 +75,15 @@ npm run serve
 
 1. To test the answer, please run through `example/index.html`
 
+- Web View
+
+![image](https://github.com/TheRealNaery/se-take-home-assignment/assets/35795164/fbac99c1-1ddf-42b1-87bd-34a37624b20f)
+
+- Mobile View
+
+![image](https://github.com/TheRealNaery/se-take-home-assignment/assets/35795164/8bf521ef-5053-4afd-9886-b1e8859a77de)
+
+
 ### Usage
 
 1. **Place New Orders**: Click on the "New Normal Order" or "New VIP Order" buttons to place new orders. Each order will be displayed in the pending orders section.
