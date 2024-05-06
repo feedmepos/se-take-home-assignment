@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>McDonald's Order Controller</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>McDonald's Order Controller</h1>
+        <div id="pending-orders" class="orders">
+            <h2>Pending Orders</h2>
+            <ul id="pending-list"></ul>
+        </div>
+        <div id="complete-orders" class="orders">
+            <h2>Complete Orders</h2>
+            <ul id="complete-list"></ul>
+        </div>
+        <div id="bot-status">
+            <h2>Bot Status</h2>
+            <p><span id="bot-count">0</span> Bots</p>
+            <button data-action="add">+ Bot</button>
+            <button data-action="minus">- Bot</button>
+        </div>
+        <div id="order-buttons">
+            <button data-type="Normal">New Normal Order</button>
+            <button data-type="VIP">New VIP Order</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script>
+        $(function() {
+            // Array to store bot information
+            var botsList = [];
+    
+            // Event listener for order buttons
+            $('#order-buttons').on('click', 'button', function () {
+                const type = $(this).data('type');
+                const ul = $('#pending-list');
+                const num = $('li', ul).length;
+                const li = $('<li/>')
+                            .data('oid', (num + 1))
+                            .addClass('order-id-' + (num + 1))
+                            .text('Order ' + (num + 1) + ': ' + type);
+                switch(type) {
+                    case 'Normal':
+                        ul.append(li); // Append Normal order to the pending list
+                        break;
+                    case 'VIP':
+                        // Find the position to insert the new VIP order before the first Normal order
+                        let vipInsertIndex = -1;
+                        $('#pending-list li').each(function(index) {
+                            if ($(this).text().includes('Normal')) {
+                                vipInsertIndex = index;
+                                return false; // Exit the loop once the first Normal order is found
+                            }
+                        });
+                        if (vipInsertIndex !== -1) {
+                            $('#pending-list li:eq(' + vipInsertIndex + ')').before(li); // Insert VIP order before the first Normal order
+                        } else {
+                            ul.append(li); // If no Normal order exists, append the VIP order to the end
+                        }
+                        break;   
+                }
+                console.log(li,type)
+            });
+    
+            // Event listener for bot status buttons
+            $('#bot-status').on('click', 'button', function() {
+                const action = $(this).data('action');
+                const list = $('#pending-list li');
+                switch(action) {
+                    case 'add':
+                        if (list.length) {
+                            const firstOrder = $('#pending-list li:not(.is-processing):eq(0)');
+                            firstOrder.append($('<span/>').text(' (Processing)')); // Add processing indication to the first order
+                            const cloneOrder = firstOrder.clone(); // Clone the first order
+                            firstOrder.addClass('is-processing'); // Mark the first order as processing
+                            const instance = setTimeout(() => {
+                                completedOrder(instance)
+                            }, 10000) // Set timeout for order completion
+                            botsList.push({
+                                botId: instance,
+                                isIdle: false,
+                                orderId: firstOrder.data('oid'),
+                                cloneOrder: cloneOrder
+                            }); // Push bot information to the botsList array
+                        }
+                        break;
+                    default:
+                        // Remove the last added bot
+                        const removedBot = botsList.pop();
+                        if (removedBot) {
+                            clearTimeout(removedBot.botId); // Remove the bot's timer
+                            const processingOrder = $('#pending-list li.order-id-' + removedBot.orderId);
+                            if (processingOrder.length) {
+                                processingOrder.removeClass('is-processing').find('span').remove(); // Remove processing indication
+                                removedBot.isIdle = true; // Update bot status to idle
+                            }
+                        }
+                        break;
+                }
+                $('#bot-count').text(botsList.length); // Update the bot count display
+            });
+    
+            // Function to handle completed orders
+            function completedOrder(instance) {
+                for (const bot of botsList) {
+                    const { botId, isIdle, orderId, cloneOrder } = bot
+                    if (botId == instance) {
+                        $('#pending-list li.order-id-' + orderId +'').remove(); // Remove completed order from pending list
+                        $('span', cloneOrder).text(' (Completed)') // Add completion indication to the order clone
+                        $('#complete-list').append(cloneOrder); // Append completed order to the complete list
+    
+                        const firstOrder = $('#pending-list li:not(.is-processing):eq(0)');
+                        if (firstOrder.length) {
+                            firstOrder.append($('<span/>').text(' (Processing)')); // Add processing indication to the next order
+                            const cloneOrder = firstOrder.clone(); // Clone the next order
+                            firstOrder.addClass('is-processing'); // Mark the next order as processing
+                            const instance = setTimeout(() => {
+                                completedOrder(instance)
+                            }, 10000) // Set timeout for order completion
+                            bot['botId'] = instance;
+                            bot['orderId'] = firstOrder.data('oid');
+                            bot['cloneOrder'] = cloneOrder;
+                        } else {
+                            bot['isIdle'] = true; // Update bot status to idle
+                            delete bot['botId'];
+                            delete bot['orderId'];
+                            delete bot['cloneOrder'];
+                        }
+                    }
+                }
+    
+                console.log(botsList); // Log updated botsList array
+            }
+        });
+    </script>
+    
+</body>
+</html>

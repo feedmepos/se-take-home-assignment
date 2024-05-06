@@ -1,0 +1,79 @@
+body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f7f7f7; /* Light gray background */
+}
+
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff; /* White background */
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #d22630; /* McDonald's red */
+}
+
+.orders h2 {
+    margin-top: 0;
+    color: #d22630; /* McDonald's red */
+}
+
+.orders ul {
+    list-style: none;
+    padding: 0;
+}
+
+.orders li {
+    margin-bottom: 5px;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #fff; /* White background */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Soft shadow */
+}
+
+#bot-status {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    padding: 15px;
+    border-radius: 5px;
+    background-color: #fff; /* White background */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Soft shadow */
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    color: #fff;
+}
+
+button[data-type="Normal"] {
+    background-color: #d22630; /* McDonald's red */
+}
+
+button[data-type="VIP"] {
+    background-color: #f6a800; /* McDonald's yellow */
+}
+
+button[data-action="add"] {
+    background-color: #009639; /* McDonald's green */
+}
+
+button[data-action="minus"] {
+    background-color: #d22630; /* McDonald's red */
+}
+
+li.is-processing {
+    color: #d22630; /* McDonald's red */
+}
+
+#bot-status p {
+    margin: 0;
+}
+
