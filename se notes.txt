@@ -1,0 +1,4 @@
+﻿Optimization
+the app should add in delete order function?
+the bot should have an idle timer and after the timer reach it should automatically goes into sleep or delete itself to reduce the cost?
+the status booard should also show timer for each order to be completed or remaning time for the order?
