@@ -83,7 +83,7 @@ function getFirstIdleBot() {
 }
 
 function createOrderInterval(orderAtom: OrderAtom) {
-    return setInterval(() => {
+    return window.setInterval(() => {
         const order = store.get(orderAtom);
         if (order.progress >= order.duration) completeOrder(orderAtom);
         else updateProgress(orderAtom);
