@@ -60,7 +60,7 @@ export function TransitionOutlet() {
 
     return (
         <AnimatePresence mode="wait">
-            <AnimatedOutlet key={nextMatch.id} />
+            <AnimatedOutlet key={nextMatch?.id} />
         </AnimatePresence>
     );
 }
