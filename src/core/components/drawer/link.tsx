@@ -20,7 +20,7 @@ export function DrawerLink({ label, href, ...rest }: NavLinkProps & { href: Vali
             whileHover={{ scale: 1.05, translateX: 10 }}
             transition={{ type: 'spring', duration: 0.3 }}
             label={
-                <motion.span className="inline-block text-base" variants={item}>
+                <motion.span className="block whitespace-nowrap text-base" variants={item}>
                     {label}
                 </motion.span>
             }
