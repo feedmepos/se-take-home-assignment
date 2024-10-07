@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>McDonald bot prototype</title>
+  <style>
+    .row-container {
+        display: flex;
+    }
+    .column-container {
+        flex-direction: column;
+    }
+    #pending-orders, #completed-orders, #bot-status {
+      border: 1px solid #333;
+      padding: 10px;
+      min-height: 100px;
+      width: 300px;
+      margin: 20px;
+    }
+    .order {
+      background-color: #f0f0f0;
+      border: 1px solid #ccc;
+      padding: 8px;
+      margin-bottom: 10px;
+    }
+    .vip-order {
+      background-color: #ffdf00;
+      font-weight: bold;
+    }
+    #new-order-btn, #new-vip-order-btn, #create-bot-btn, #remove-bot-btn {
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+    #new-vip-order-btn {
+      background-color: #FF5733;
+    }
+    #create-bot-btn {
+      background-color: #007BFF;
+    }
+    #remove-bot-btn {
+        background-color: #ff0000;
+    }
+    .bot {
+      background-color: #d1e7dd;
+      border: 1px solid #ccc;
+      padding: 8px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>McDonald Bot Prototype</h1>
+
+  <!-- Buttons to create new orders and bot -->
+  <button id="new-order-btn">New Normal Order</button>
+  <button id="new-vip-order-btn">New VIP Order</button>
+  <button id="create-bot-btn">+ Bot</button>
+  <button id="remove-bot-btn">- Bot</button>
+
+  <div class="row-container">
+    <div class="column-container">
+        <h2>Pending Orders</h2>
+        <div id="pending-orders"></div>
+    </div>  
+    <div class="column-container">
+        <h2>Bot Status</h2>
+        <div id="bot-status"></div>
+    </div>  
+  </div>
+
+  <div>
+    <h2>Completed Orders</h2>
+    <div id="completed-orders"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
