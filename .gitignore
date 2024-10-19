@@ -1,7 +1,7 @@
 # compiled output
-/backend/dist
-/backend/node_modules
-/backend/build
+se-backend/dist
+se-backend/node_modules
+se-backend/build
 
 # Logs
 logs
@@ -16,8 +16,8 @@ lerna-debug.log*
 .DS_Store
 
 # Tests
-/backend/coverage
-/backend/.nyc_output
+backend/coverage
+backend/.nyc_output
 
 # IDEs and editors
 backend/.idea
