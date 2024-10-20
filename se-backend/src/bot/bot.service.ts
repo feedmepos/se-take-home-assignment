@@ -1,19 +1,78 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { OrderService } from 'src/order/order.service';
 
 @Injectable()
 export class BotService {
+    constructor(private readonly orderService: OrderService) {}
+    private bots = [];
 
-    // get all bots
+    findAll(state?: 'IDLE' | 'WORKING') {
+        if (state) {
+            const botArray = this.bots.filter(bot => bot.state === state)
+            if (botArray.length === 0) throw new NotFoundException('No bots with the requested state')
+            return botArray
+        }
 
-    // add bot
+        return this.bots
+    }
 
-    // delete bot
+    findOne(id: number) {
+        const bot = this.bots.find(bot => bot.id === id)
+        if (!bot) return null;
+        return bot
+    }
 
-    // process pending orders
+    async create() {
+        const botsByHighestId = [...this.bots].sort((a,b) => b.id - a.id)
+        const newId = botsByHighestId.length > 0 ? botsByHighestId[0].id + 1 : 1;
+        const newBot = {
+            id: newId,
+            state: 'IDLE'
+        };
 
-    // process order
+        this.bots.push(newBot);
+        this.processOrders(newBot);
+        return newBot;
+    }
 
-    // stop bot (change state to idle)
+    async remove(id: number) {
+        const botIndex = this.bots.findIndex(bot => bot.id === id);
+        if (botIndex === -1) {
+            throw new NotFoundException('Bot not found');
+        }
+        const bot = this.bots[botIndex];
+        if (bot.state === 'WORKING' && bot.currentOrder) {
+            console.log(`Bot ${bot.id} is processing order ${bot.currentOrder}. Halting and updating order status...`);
+            await this.orderService.updateStatus(bot.currentOrder);
+            console.log(`Waiting for 2 seconds before removing bot ${bot.id}...`);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+        this.bots.splice(botIndex, 1);
+        return { message: `Bot ${id} removed successfully` };
+    }
 
-    // start bot (change state to active)
+    async processOrders(bot:  {id: number; state: string; currentOrder?: number }) {
+
+        while(true) {
+            const botExist = await this.findOne(bot.id);
+            if (!botExist) {
+                console.log(`Bot ${bot.id} no longer exists. Stopping order processing.`);
+                break;
+            }
+            const order = await this.orderService.getFirstPendingOrder();
+            if (order) {
+                bot.state = 'WORKING'
+                bot.currentOrder = order.id
+                await this.orderService.updateStatus(order.id)
+                console.log(`Waiting for 10 seconds to update status again for order ${order.id}...`);
+                await new Promise(resolve => setTimeout(resolve, 10000));
+                console.log(`Updating status again for order ${order.id}`);
+                await this.orderService.updateStatus(order.id);
+            } else {
+                bot.state = 'IDLE'
+                console.log(`Bot ${bot.id} is idle. Waiting for new orders...`);
+                await new Promise(resolve => setTimeout(resolve, 5000));
+            }
+        }
+    }
 }

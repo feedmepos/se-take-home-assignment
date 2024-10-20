@@ -89,7 +89,7 @@ export class OrderService {
 
     getFirstPendingOrder() {
         const pendingOrder = this.orders.find(order => order.status === 'PENDING');
-        if (!pendingOrder) throw new NotFoundException('No pending orders');
+        if (!pendingOrder) return null;
         return pendingOrder;
     }
 

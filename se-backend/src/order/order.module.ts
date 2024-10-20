@@ -6,6 +6,7 @@ import { CustomerModule } from 'src/customer/customer.module';
 @Module({
   imports: [CustomerModule],
   controllers: [OrderController],
-  providers: [OrderService]
+  providers: [OrderService],
+  exports: [OrderService]
 })
 export class OrderModule {}
