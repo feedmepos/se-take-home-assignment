@@ -1,9 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Gateway } from 'src/gateway/gateway';
 import { OrderService } from 'src/order/order.service';
 
 @Injectable()
 export class BotService {
-    constructor(private readonly orderService: OrderService) {}
+    constructor(private readonly orderService: OrderService, private readonly gateway: Gateway) {}
+    
     private bots = [];
 
     findAll(state?: 'IDLE' | 'WORKING') {
@@ -31,6 +33,7 @@ export class BotService {
         };
 
         this.bots.push(newBot);
+        this.gateway.emitBotCreated(newBot);
         this.processOrders(newBot);
         return newBot;
     }
@@ -43,11 +46,12 @@ export class BotService {
         const bot = this.bots[botIndex];
         if (bot.state === 'WORKING' && bot.currentOrder) {
             console.log(`Bot ${bot.id} is processing order ${bot.currentOrder}. Halting and updating order status...`);
-            await this.orderService.updateStatus(bot.currentOrder);
+            await this.orderService.updateStatus(bot.currentOrder, true);
             console.log(`Waiting for 2 seconds before removing bot ${bot.id}...`);
             await new Promise(resolve => setTimeout(resolve, 2000));
         }
         this.bots.splice(botIndex, 1);
+        this.gateway.emitBotRemoved(id);
         return { message: `Bot ${id} removed successfully` };
     }
 
@@ -64,13 +68,16 @@ export class BotService {
                 bot.state = 'WORKING'
                 bot.currentOrder = order.id
                 await this.orderService.updateStatus(order.id)
+                this.gateway.emitOrderProcessing(order.id, bot.id);
                 console.log(`Waiting for 10 seconds to update status again for order ${order.id}...`);
                 await new Promise(resolve => setTimeout(resolve, 10000));
                 console.log(`Updating status again for order ${order.id}`);
                 await this.orderService.updateStatus(order.id);
+                this.gateway.emitOrderCompleted(order.id, bot.id);
             } else {
                 bot.state = 'IDLE'
                 console.log(`Bot ${bot.id} is idle. Waiting for new orders...`);
+                this.gateway.emitBotIdle(bot.id)
                 await new Promise(resolve => setTimeout(resolve, 5000));
             }
         }

@@ -1,9 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { CreateCustomerDto } from './dto/create_customer_dto';
 import { NotFoundException } from '@nestjs/common';
+import { Gateway } from 'src/gateway/gateway';
 
 @Injectable()
 export class CustomerService {
+
+    constructor(private readonly gateway:Gateway) {}
     private customers = []
 
 
@@ -40,6 +43,7 @@ export class CustomerService {
         };
 
         this.customers.push(newCustomer)
+        this.gateway.emitCustomerCreated(newCustomer)
         return newCustomer
     }
 }

@@ -1,10 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CustomerService } from 'src/customer/customer.service';
 import { CreateOrderDto } from './dto/create-order-dto';
+import { Gateway } from 'src/gateway/gateway';
 @Injectable()
 export class OrderService {
 
-    constructor(private readonly customerService: CustomerService) {}
+    constructor(private readonly customerService: CustomerService, private readonly gateway:Gateway) {}
     private orders = [];
 
     findAll(status?: 'PENDING' | 'PROCESSING' | 'COMPLETED') {
@@ -59,10 +60,12 @@ export class OrderService {
         } else {
             this.orders.push(newOrder);
         }
+        this.gateway.emitOrderCreated(newOrder)
+        this.gateway.emitOrderListUpdated(this.orders)
         return newOrder
     }
 
-    updateStatus(id:number) {
+    updateStatus(id:number, halted:Boolean = false) {
         console.log('ID to update:', id, 'Type of ID:', typeof id);
         console.log(this.orders)
         const order = this.orders.find(order => order.id === id)
@@ -72,11 +75,12 @@ export class OrderService {
 
         if (order.status === 'PENDING') {
             order.status = 'PROCESSING'
-        } else if (order.status === 'PROCESSING') {
+        } else if (order.status === 'PROCESSING' && !halted) {
             order.status = 'COMPLETED'
         } else {
             order.status = 'PENDING'
         }
+        this.gateway.emitOrderListUpdated(this.orders)
         return order
     }
 
@@ -84,6 +88,8 @@ export class OrderService {
         const index = this.orders.findIndex(order => order.id === id);
         if (index === -1) throw new NotFoundException('Order Not Found');
         this.orders.splice(index, 1);
+        this.gateway.emitOrderRemoved(id)
+        this.gateway.emitOrderListUpdated(this.orders)
         return { message: 'Order removed successfully' };
     }
 
