@@ -1,6 +1,8 @@
 # compiled output
 se-backend/dist
+se-frontend/dist
 se-backend/node_modules
+se-frontend/node_modules
 se-backend/build
 
 # Logs
