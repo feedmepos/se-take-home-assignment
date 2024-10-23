@@ -1,16 +1,11 @@
-// vue.config.js
-module.exports = {
+const { defineConfig } = require('@vue/cli-service');
+module.exports = defineConfig({
+  transpileDependencies: true,
   configureWebpack: {
     resolve: {
       alias: {
-        vue$: 'vue/dist/vue.esm.js' // Ensure the correct Vue build is used
+        vue$: 'vue/dist/vue.esm-bundler.js' // Ensure the correct Vue build is used
       },
     },
-    plugins: [
-      // Add feature flags here
-      new webpack.DefinePlugin({
-        '__VUE_PROD_HYDRATION_MISMATCH_DETAILS__': JSON.stringify(true),
-      }),
-    ],
   },
-};
+});

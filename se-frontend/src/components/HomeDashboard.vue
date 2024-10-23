@@ -1,11 +1,17 @@
 <template>
     <div>
-        this is the dashboard
+        <h1>Dashboard</h1>
+        <Customers />
     </div>
 </template>
 
 <script>
+import Customers from './Customers/Customers.vue';
+
 export default {
-    name: 'HomeDashboard'
+    name: 'HomeDashboard',
+    components: {
+        Customers
+    },
 }
 </script>

@@ -1,4 +1,8 @@
 import { createStore } from 'vuex';
+import customers from './modules/customers';
+import { io } from 'socket.io-client';
+
+const socket = io(process.env.VUE_APP_WS_URL);
 
 const store = createStore({
     state: {
@@ -25,6 +29,10 @@ const store = createStore({
             state.loading = status; // Sets loading state
         },
     },
+    modules: {
+        customers
+    }
 });
 
+export { store, socket };
 export default store;

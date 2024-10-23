@@ -8,7 +8,12 @@ import {
   } from '@nestjs/websockets';
   import { Server } from 'socket.io';
   
-  @WebSocketGateway()
+  @WebSocketGateway({
+    cors: {
+      origin: 'http://localhost:8080', // Allow your frontend origin
+      credentials: true,
+    },
+  })
   export class Gateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   
     @WebSocketServer() server: Server;

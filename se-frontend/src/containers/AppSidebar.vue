@@ -18,7 +18,6 @@
   </template>
   
   <script>
-  import { CSidebar, CSidebarNav } from '@coreui/vue';
   import '@coreui/coreui/dist/css/coreui.min.css';
   export default {
     name: 'AppSidebar',

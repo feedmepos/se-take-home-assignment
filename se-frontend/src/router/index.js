@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router"; // Use createRouter and createWebHistory
 
-const MainLayout = () => import("@/containers/MainLayout");
 const HomeDashboard = () => import("@/components/HomeDashboard");
 const Orders = () => import("@/components/Orders/ListOrders");
 const Bots = () => import("@/components/Bots/ListBots");
