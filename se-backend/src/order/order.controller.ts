@@ -38,7 +38,7 @@ export class OrderController {
         return this.orderService.updateStatus(body.id)
     }
 
-    @Delete(':id')
+    @Delete('remove/:id')
     async remove(@Param('id') id: number) {
         return this.orderService.remove(id)
     }

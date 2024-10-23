@@ -1,5 +1,6 @@
 import { createStore } from 'vuex';
 import customers from './modules/customers';
+import orders from './modules/orders';
 import { io } from 'socket.io-client';
 
 const socket = io(process.env.VUE_APP_WS_URL);
@@ -30,7 +31,8 @@ const store = createStore({
         },
     },
     modules: {
-        customers
+        customers,
+        orders
     }
 });
 
