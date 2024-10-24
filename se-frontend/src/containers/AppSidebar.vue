@@ -1,7 +1,8 @@
 <template>
     <CSidebar colorScheme="dark" class="sidebar">
       <CSidebarHeader class="border-bottom">
-        <CSidebarBrand>Mcdonalds</CSidebarBrand>
+        <CSidebarBrand class="macd"> <img src="@/assets/mcdonalds.png" alt="McDonald's Icon" class="macd-icon" />
+          McDonald's</CSidebarBrand>
       </CSidebarHeader>
       <CSidebarNav>
         <CNavItem href="/">
@@ -26,11 +27,23 @@
   
   <style scoped>
   .sidebar {
-    height: 100vh; /* Set height to 100% of the viewport height */
-    position: fixed; /* Fix the sidebar in place */
-    top: 0; /* Align to the top */
-    left: 0; /* Align to the left */
-    z-index: 1000; /* Ensure the sidebar appears above other content */
+    height: 100vh; 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    z-index: 1000;
   }
+
+  .macd {
+    font-size: 3vh;
+    margin: 2vh 0 2vh 0;
+  }
+
+  .macd-icon {
+  height: 9vh;
+  margin-right: 1vw;
+  vertical-align: middle; 
+  }
+
   </style>
   

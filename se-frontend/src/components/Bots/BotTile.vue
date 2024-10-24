@@ -1,13 +1,23 @@
 <template>
     <div class="bot-tile">
-      <p>Bot 1</p>
-      <p>State: Idle</p>
+      <p>Bot {{ id }}</p>
+      <p>State: {{ state }}</p>
     </div>
   </template>
   
   <script>
   export default {
     name: "BotTile",
+    props: {
+        id: {
+            type: Number,
+            required: true
+        },
+        state: {
+            type: String,
+            required: true
+        }
+    }
   };
   </script>
   

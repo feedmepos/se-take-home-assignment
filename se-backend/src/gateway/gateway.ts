@@ -10,7 +10,7 @@ import {
   
   @WebSocketGateway({
     cors: {
-      origin: 'http://localhost:8080', // Allow your frontend origin
+      origin: 'http://localhost:8081', // Allow your frontend origin
       credentials: true,
     },
   })
@@ -43,6 +43,11 @@ import {
     emitBotIdle(botId: number) {
         this.server.emit('botIdle', { botId });
         console.log(`botIdle ${botId}`)
+    }
+
+    emitBotListUpdated(bots: any) {
+      this.server.emit('botListUpdated', {bots});
+      console.log('bot list updated');
     }
   
     emitOrderProcessing(orderId: number, botId: number) {

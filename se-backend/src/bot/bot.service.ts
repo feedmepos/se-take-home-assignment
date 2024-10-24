@@ -33,7 +33,7 @@ export class BotService {
         };
 
         this.bots.push(newBot);
-        this.gateway.emitBotCreated(newBot);
+        this.gateway.emitBotListUpdated(this.bots);
         this.processOrders(newBot);
         return newBot;
     }
@@ -51,7 +51,7 @@ export class BotService {
             await new Promise(resolve => setTimeout(resolve, 2000));
         }
         this.bots.splice(botIndex, 1);
-        this.gateway.emitBotRemoved(id);
+        this.gateway.emitBotListUpdated(this.bots);
         return { message: `Bot ${id} removed successfully` };
     }
 
@@ -73,11 +73,10 @@ export class BotService {
                 await new Promise(resolve => setTimeout(resolve, 10000));
                 console.log(`Updating status again for order ${order.id}`);
                 await this.orderService.updateStatus(order.id);
-                this.gateway.emitOrderCompleted(order.id, bot.id);
             } else {
                 bot.state = 'IDLE'
                 console.log(`Bot ${bot.id} is idle. Waiting for new orders...`);
-                this.gateway.emitBotIdle(bot.id)
+                this.gateway.emitBotListUpdated(this.bots)
                 await new Promise(resolve => setTimeout(resolve, 5000));
             }
         }

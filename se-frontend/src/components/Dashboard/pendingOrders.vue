@@ -1,18 +1,20 @@
 <template>
-    <div>
-        <h1>Orders</h1>
+    <div class="order-category" style="margin-bottom: 4rem;">
+        <h2>Pending Orders</h2>
         <p v-if="loading">Loading orders...</p>
         <div v-else style="display: flex; gap: 1rem;">
-            <OrderCategory :orders="pendingOrders" status="PENDING" />
-            <OrderCategory :orders="processingOrders" status="PROCESSING" />
-            <OrderCategory :orders="completedOrders" status="COMPLETED" />
+            <OrderTile v-for="order in pendingOrders"
+                :key="order.id"
+                :id="order.id"
+                :type="order.type"
+                />
         </div>
     </div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
-import OrderCategory from './OrderCategory.vue';
+import OrderTile from '../Orders/OrderTile.vue';
 export default {
     name: "ListOrders",
     props: {
@@ -22,7 +24,7 @@ export default {
         }
     },
     components: {
-        OrderCategory
+        OrderTile
     },
     computed: {
         ...mapGetters(['allOrders']), 
@@ -34,16 +36,6 @@ export default {
             ? this.allOrders.filter(order => order.status === 'PENDING') 
             : null;
         },
-        processingOrders() {
-            return Array.isArray(this.allOrders) 
-            ? this.allOrders.filter(order => order.status === 'PROCESSING') 
-            : null;
-        },
-        completedOrders() {
-            return Array.isArray(this.allOrders) 
-            ? this.allOrders.filter(order => order.status === 'COMPLETED') 
-            : null;
-        }
     },
     created() {
         this.initializeWebSocket();
@@ -57,3 +49,13 @@ export default {
     },
 }
 </script>
+
+<style>
+.order-category {
+    gap: 1rem;
+    padding: 20px;
+    background-color: rgb(203, 203, 203);
+    border-radius: 15px;
+    width: 100%;
+}
+</style>

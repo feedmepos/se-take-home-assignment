@@ -1,11 +1,12 @@
 <template>
-    <div class="customer-tile">
+    <CButton class="customer-tile" @click="clicked(id)">
         <img :src="source" alt="Customer Type Image" class="customer-image">
         <p class="customer-type">{{ type }}</p>
-    </div>
+    </CButton>
 </template>
 
 <script>
+import { mapActions } from 'vuex';
 export default {
     name: "CustomerTile",
     props: {
@@ -24,6 +25,13 @@ export default {
             return this.type === "NORMAL" 
                 ? require('@/assets/normal.png') 
                 : require('@/assets/vip.png'); // Add other types as necessary
+        }
+    },
+    methods: {
+        ...mapActions(['createOrder']),
+
+        async clicked(id){
+            await this.createOrder({ customerId: id });
         }
     }
 };

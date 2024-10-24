@@ -1,7 +1,7 @@
 <template>
     <div class="order-category">
         <h3>{{ status }}</h3>
-        <div style="display: flex; gap: 0.5rem;">
+        <div v-if="orders.length > 0" style="">
             <OrderTile 
             v-for="order in orders"
                 :key="order.id"
@@ -9,6 +9,7 @@
                 :type="order.type"
                 />
         </div>
+        <div v-else>No {{ status.toLowerCase() }} Orders</div>
     </div>
 </template>
 
@@ -24,13 +25,13 @@ export default {
     props: {
         orders: {
             type: Array,
-            required: true
+            default: () => []
         },
         status: {
             type: String,
             required: true
         }
-    },
+    }
 }
 </script>
 
@@ -44,5 +45,7 @@ export default {
     display: flex;
     flex-direction: column;
     margin-bottom: 1rem;
+    max-height: 550px;
+    overflow-y: scroll;
 }
 </style>

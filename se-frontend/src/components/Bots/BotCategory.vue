@@ -1,9 +1,15 @@
 <template>
     <div class="bot-category">
-      <div>Pending</div>
-      <BotTile />
-      <BotTile />
-      <BotTile />
+      <div>{{ state }}</div>
+      <div v-if="bots.length > 0">
+        <BotTile 
+          v-for="bot in bots"
+                :key="bot.id"
+                :id="bot.id"
+                :state="bot.state"
+                />
+      </div>
+      
     </div>
   </template>
   
@@ -14,7 +20,17 @@
     name: "BotCategory",
     components: {
       BotTile
-    }
+    },
+    props: {
+        bots: {
+            type: Array,
+            default: () => []
+        },
+        state: {
+            type: String,
+            required: true
+        }
+    },
   }
   </script>
   
