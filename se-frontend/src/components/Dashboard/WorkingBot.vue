@@ -1,8 +1,8 @@
 <template>
-    <div class="order-category" style="margin-bottom: 4rem;">
+    <div class="bot-category" style="margin-bottom: 4rem;">
         <h2>Working Bots</h2>
         <p v-if="loading">Loading working bots...</p>
-        <div v-else-if="workingBots.length > 0" style="display: flex; gap: 1rem;">
+        <div v-else-if="workingBots.length > 0" class="working-bot-scroll">
             <WorkingBotTile v-for="bot in workingBots"
                 :key="bot.id"
                 :botId="bot.id"
@@ -47,11 +47,18 @@ export default {
 </script>
 
 <style>
-.order-category {
+.bot-category {
     gap: 1rem;
     padding: 20px;
     background-color: rgb(203, 203, 203);
     border-radius: 15px;
-    width: 100%;
+    max-width: 100%;
+}
+.working-bot-scroll {
+    display: flex; 
+    gap: 1rem; 
+    width: 750px;
+    overflow-x: auto;
+    scrollbar-width: none;
 }
 </style>

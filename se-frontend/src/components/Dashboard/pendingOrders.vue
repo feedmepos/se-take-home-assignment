@@ -2,7 +2,7 @@
     <div class="order-category" style="margin-bottom: 4rem;">
         <h2>Pending Orders</h2>
         <p v-if="loading">Loading orders...</p>
-        <div v-else-if="pendingOrders.length > 0" style="display: flex; gap: 1rem;">
+        <div v-else-if="pendingOrders.length > 0" class="order-scroll">
             <OrderTile v-for="order in pendingOrders"
                 :key="order.id"
                 :id="order.id"
@@ -53,10 +53,20 @@ export default {
 
 <style>
 .order-category {
-    gap: 1rem;
     padding: 20px;
     background-color: rgb(203, 203, 203);
     border-radius: 15px;
     width: 100%;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.order-scroll {
+    display: flex; /* Align children in a row */
+    overflow-x: auto; /* Enable horizontal scrolling */
+    padding-bottom: 10px; /* Optional padding for better aesthetics */
+    gap: 1rem; /* Space between tiles */
+    scrollbar-width: none; 
 }
 </style>

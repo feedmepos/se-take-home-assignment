@@ -1,7 +1,7 @@
 <template>
     <div class="bot-category">
       <div>{{ state }}</div>
-      <div v-if="bots.length > 0">
+      <div v-if="bots.length > 0" class="bot-scroll">
         <BotTile 
           v-for="bot in bots"
                 :key="bot.id"
@@ -45,6 +45,11 @@
     padding: 15px; /* Padding around the content */
     text-align: center; /* Center text */
     border-radius: 15px;
+    
+  }
+  .bot-scroll {
+    overflow-y: scroll;
+    scrollbar-width: none;
   }
   </style>
   

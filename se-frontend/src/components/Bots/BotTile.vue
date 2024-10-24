@@ -50,7 +50,8 @@ import { mapActions } from 'vuex';
   
   <style scoped>
   .bot-tile {
-    width: 200px; /* Full width of the container */
+    min-width: 200px; /* Full width of the container */
+    width: 200px;
     height: 225px;
     text-align: center; /* Center text */
     background-color: white; /* Background color */

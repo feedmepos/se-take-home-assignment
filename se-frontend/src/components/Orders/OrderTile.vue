@@ -23,14 +23,15 @@ export default {
 
 <style>
 .order-tile {
-    width: 200px; /* Full width of the container */
+    min-width: 200px;
+    max-width: 200px;
     text-align: center; 
     display: flex; /* Use flexbox for layout */
     flex-direction: column; /* Stack children vertically */
     justify-content: center; /* Center children vertically */
     align-items: center; /* Center children horizontally */
     background-color: white; /* Background color */
-    border-radius: 15px; /* Increase for smoother rounded corners */
+    border-radius: 15px; /* Smooth rounded corners */
     border: 1px solid #ccc; /* Optional border color */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optional shadow for depth */
     padding: 1rem;

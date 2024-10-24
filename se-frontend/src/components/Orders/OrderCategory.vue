@@ -1,7 +1,7 @@
 <template>
     <div class="order-category">
         <h3>{{ status }}</h3>
-        <div v-if="orders.length > 0" style="">
+        <div v-if="orders.length > 0" class="order-scroll">
             <OrderTile 
             v-for="order in orders"
                 :key="order.id"
@@ -46,6 +46,10 @@ export default {
     flex-direction: column;
     margin-bottom: 1rem;
     max-height: 550px;
-    overflow-y: scroll;
+   
+}
+.order-scroll {
+    overflow-x: auto;
+    scrollbar-width: none; 
 }
 </style>

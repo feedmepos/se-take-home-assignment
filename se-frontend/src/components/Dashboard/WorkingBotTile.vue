@@ -64,6 +64,7 @@ import { mapActions } from 'vuex';
 }
 
 .bot-tile {
+  min-width: 200px;
   width: 200px; /* Full width of the container */
   height: 225px;
   text-align: center; /* Center text */

@@ -1,12 +1,12 @@
 <template>
-    <div class="customer-category">
+    <div class="bot-category">
         <div style="display: flex;justify-content: space-between;">
             <h3>Idle Bots</h3>
         <CButton color="primary" style="width:200px" @click="createNewBot">+ New Bot</CButton>
         </div>
         
-        <div style="display: flex; gap: 1rem; width: 750px;">
-            <div v-if="idleBots.length > 0">
+        <div>
+            <div v-if="idleBots.length > 0" class="bot-scroll">
                 <BotTile 
                   v-for="bot in idleBots"
                         :key="bot.id"
@@ -60,11 +60,18 @@ export default {
 </script>
 
 <style>
-.customer-category {
+.bot-category {
     gap: 1rem;
     padding: 20px;
     background-color: rgb(203, 203, 203);
     border-radius: 15px;
     max-width: fit-content;
+}
+.bot-scroll {
+    display: flex; 
+    gap: 1rem; 
+    width: 750px;
+    overflow-x: auto;
+    scrollbar-width: none;
 }
 </style>
