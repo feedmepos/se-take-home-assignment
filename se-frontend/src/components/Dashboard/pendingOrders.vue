@@ -2,13 +2,14 @@
     <div class="order-category" style="margin-bottom: 4rem;">
         <h2>Pending Orders</h2>
         <p v-if="loading">Loading orders...</p>
-        <div v-else style="display: flex; gap: 1rem;">
+        <div v-else-if="pendingOrders.length > 0" style="display: flex; gap: 1rem;">
             <OrderTile v-for="order in pendingOrders"
                 :key="order.id"
                 :id="order.id"
                 :type="order.type"
                 />
         </div>
+        <div v-else>No pending orders</div>
     </div>
 </template>
 

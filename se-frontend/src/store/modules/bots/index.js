@@ -68,7 +68,7 @@ const state = {
         commit('SET_LOADING', true);
       axios
         .delete(
-          process.env.VUE_APP_DELETE_BOT + id,
+          process.env.VUE_APP_DELETE_BOT + "/" + id,
         )
         .then(() => {
           console.log("removed an bot from frontend side");
@@ -85,8 +85,10 @@ const state = {
             console.log('Bot updated:', data.bots);
             commit('SET_BOTS', data.bots); // Update Vuex state with the new bot
         });
-        
-        console.log('WebSocket connected');
+        socket.on('orderProcessing', (data) => {
+            console.log('Order processing:', data);
+            commit('SET_WORKING_BOT', { botId: data.botId, orderId: data.orderId }); // Update bot's current order
+        });
     }
   };
   
@@ -107,7 +109,16 @@ const state = {
     REMOVE_BOT: (state, value) => {
         state.bots = state.bots.filter((bot) => bot.id !== value.botId)
         console.log("bot has been removed from list")
-    }
+    },
+    SET_WORKING_BOT: (state, { botId, orderId }) => {
+        const bot = state.bots.find(bot => bot.id === botId);
+        if (bot) {
+            bot.state = 'WORKING';
+            bot.currentOrder = orderId; // Update current order for the bot
+        } else {
+            console.log(`Bot with id ${botId} not found.`);
+        }
+    },
   };
   
   export default {

@@ -7,6 +7,7 @@
 
 <script>
 import { mapActions } from 'vuex';
+import Swal from 'sweetalert2';
 export default {
     name: "CustomerTile",
     props: {
@@ -31,7 +32,18 @@ export default {
         ...mapActions(['createOrder']),
 
         async clicked(id){
-            await this.createOrder({ customerId: id });
+            const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: `Do you want to add order for ${this.type} customer?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, order!',
+            cancelButtonText: 'No, cancel!'
+            });
+            
+            if (result.isConfirmed) {
+                await this.createOrder({ customerId: id });
+            }
         }
     }
 };

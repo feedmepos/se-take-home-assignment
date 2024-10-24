@@ -3,7 +3,12 @@
         <h1 style="margin-bottom: 4rem">Dashboard</h1>
         <div>
             <PendingOrders />
+            <WorkingBot />
+            <div style="display: flex; gap: 1rem;">
+                
             <Customers />
+            <IdleBot />
+            </div>
         </div>
         
     </div>
@@ -12,12 +17,16 @@
 <script>
 import Customers from './Customers/Customers.vue';
 import PendingOrders from './Dashboard/pendingOrders.vue';
+import IdleBot from './Dashboard/IdleBot.vue';
+import WorkingBot from './Dashboard/WorkingBot.vue';
 
 export default {
     name: 'HomeDashboard',
     components: {
         Customers,
-        PendingOrders
+        PendingOrders,
+        IdleBot,
+        WorkingBot
     },
 }
 </script>

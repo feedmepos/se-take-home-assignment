@@ -82,20 +82,10 @@ const state = {
         });
     },
     initializeWebSocket({ commit }) {
-        // socket.on('orderCreated', (data) => {
-        //     console.log('Order created:', data);
-        //     commit('ADD_OR_UPDATE_ORDER', data); // Update Vuex state with the new order
-        // });
-        // socket.on('orderRemoved', (data) => {
-        //     console.log('Order Removed:', data);
-        //     commit('REMOVE_ORDER', data); // Update Vuex state with the new order
-        // });
         socket.on('orderListUpdated', (data) => {
             console.log('Order updated:', data.orders);
             commit('SET_ORDERS', data.orders); // Update Vuex state with the new order
         });
-        
-        console.log('WebSocket connected');
     }
   };
   

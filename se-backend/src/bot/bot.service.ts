@@ -65,7 +65,10 @@ export class BotService {
             }
             const order = await this.orderService.getFirstPendingOrder();
             if (order) {
-                bot.state = 'WORKING'
+                if (bot.state !== 'WORKING'){
+                    bot.state = 'WORKING'
+                    this.gateway.emitBotListUpdated(this.bots)
+                }
                 bot.currentOrder = order.id
                 await this.orderService.updateStatus(order.id)
                 this.gateway.emitOrderProcessing(order.id, bot.id);
@@ -74,9 +77,12 @@ export class BotService {
                 console.log(`Updating status again for order ${order.id}`);
                 await this.orderService.updateStatus(order.id);
             } else {
-                bot.state = 'IDLE'
-                console.log(`Bot ${bot.id} is idle. Waiting for new orders...`);
-                this.gateway.emitBotListUpdated(this.bots)
+                if(bot.state !== 'IDLE'){
+                    bot.state = 'IDLE'
+                    console.log(`Bot ${bot.id} is idle. Waiting for new orders...`);
+                    this.gateway.emitBotListUpdated(this.bots)
+                }
+                
                 await new Promise(resolve => setTimeout(resolve, 5000));
             }
         }

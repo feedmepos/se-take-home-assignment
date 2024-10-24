@@ -68,7 +68,6 @@ const state = {
             console.log('Customer created:', data);
             commit('ADD_OR_UPDATE_CUSTOMER', data); // Update Vuex state with the new customer
         });
-        console.log('WebSocket connected');
     }
   };
   
