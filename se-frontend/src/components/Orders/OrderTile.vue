@@ -32,9 +32,9 @@ export default {
     align-items: center; /* Center children horizontally */
     background-color: white; /* Background color */
     border-radius: 15px; /* Smooth rounded corners */
-    border: 1px solid #ccc; /* Optional border color */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optional shadow for depth */
     padding: 1rem;
+    margin-bottom: 16px;
 }
 
 .order-image {
@@ -48,10 +48,14 @@ export default {
     font-weight: 600;
     font-size: large;
     margin: 10px 0 -1px 0;
+    color: black;
 }
 
 .order-type {
-    margin-top: 5px;
+    margin-top: 4px;
+    color: black;
+
 }
+
 
 </style>

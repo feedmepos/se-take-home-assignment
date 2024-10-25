@@ -2,10 +2,9 @@
     <div class="bot-category">
         <div style="display: flex;justify-content: space-between;">
             <h3>Idle Bots</h3>
-        <CButton color="primary" style="width:200px" @click="createNewBot">+ New Bot</CButton>
+            <CButton class="button" @click="createNewBot">+ New Bot</CButton>
         </div>
-        
-        <div>
+        <div class="bot-scroll-container">
             <div v-if="idleBots.length > 0" class="bot-scroll">
                 <BotTile 
                   v-for="bot in idleBots"
@@ -63,15 +62,52 @@ export default {
 .bot-category {
     gap: 1rem;
     padding: 20px;
-    background-color: rgb(203, 203, 203);
     border-radius: 15px;
     max-width: fit-content;
+    background-color: #DA291C;
+    color: white;
+    max-width: fit-content;
 }
+
+.bot-scroll-container {
+    position: relative; 
+    padding: 10px; 
+    overflow-x: auto; 
+    overflow-y: hidden; 
+    scrollbar-width: none; 
+    width: 750px;
+}
+
 .bot-scroll {
     display: flex; 
     gap: 1rem; 
-    width: 750px;
-    overflow-x: auto;
-    scrollbar-width: none;
 }
+
+.button {
+    width: 200px;
+    margin: -4px 0 -4px 0;
+    background-color: #ffcb3b;
+    text-align: center; 
+    color: #333; 
+    padding: 8px;
+    font-weight: bold;
+    font-size: 16px;
+    border-radius: 30px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+}
+
+.button:hover {
+    background-color: #ffc72c; 
+    color: white; 
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3); 
+    transform: translateY(-4px) scale(1.05); 
+}
+
+.button:active {
+    transform: scale(0.98);
+    box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.2); 
+}
+
 </style>

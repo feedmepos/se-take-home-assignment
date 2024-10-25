@@ -54,12 +54,14 @@ export default {
 <style>
 .order-category {
     padding: 20px;
-    background-color: rgb(203, 203, 203);
     border-radius: 15px;
     width: 100%;
     max-width: 100%;
     display: flex;
     flex-direction: column;
+    background-color: #DA291C;
+    color: white; /* Set font color to white */
+
 }
 
 .order-scroll {
@@ -68,5 +70,7 @@ export default {
     padding-bottom: 10px; /* Optional padding for better aesthetics */
     gap: 1rem; /* Space between tiles */
     scrollbar-width: none; 
+    align-items: center;
+
 }
 </style>

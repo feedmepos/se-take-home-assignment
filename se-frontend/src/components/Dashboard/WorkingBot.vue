@@ -50,15 +50,18 @@ export default {
 .bot-category {
     gap: 1rem;
     padding: 20px;
-    background-color: rgb(203, 203, 203);
+    background-color: #DA291C;
+    color: white; 
     border-radius: 15px;
     max-width: 100%;
 }
+
 .working-bot-scroll {
     display: flex; 
     gap: 1rem; 
-    width: 750px;
+    overflow-y: scroll;
     overflow-x: auto;
-    scrollbar-width: none;
+    scrollbar-width: none; 
 }
+
 </style>

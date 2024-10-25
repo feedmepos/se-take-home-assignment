@@ -36,20 +36,23 @@
   
   <style scoped>
   .bot-category {
-    display: flex; /* Use flexbox to arrange items */
-    flex-direction: column; /* Arrange items in a column */
+    display: flex; 
+    flex-direction: column;
     align-items: center; 
-    width: 400px; /* Set width */
-    height: 550px; /* Set height */
-    background-color: rgb(203, 203, 203); /* Background color */
-    padding: 15px; /* Padding around the content */
-    text-align: center; /* Center text */
+    width: 400px; 
+    height: 550px; 
+    background-color: rgb(203, 203, 203); 
+    padding: 15px; 
+    text-align: center; 
     border-radius: 15px;
     
   }
   .bot-scroll {
     overflow-y: scroll;
-    scrollbar-width: none;
+    overflow-x: auto;
+    scrollbar-width: none; 
+    display: grid;
+    padding: 10px;
   }
   </style>
   

@@ -46,6 +46,7 @@ export default {
     flex-direction: column;
     margin-bottom: 1rem;
     max-height: 550px;
+    align-items: center;
    
 }
 .order-scroll {

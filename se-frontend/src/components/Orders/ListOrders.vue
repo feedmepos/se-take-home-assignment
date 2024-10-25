@@ -3,9 +3,9 @@
         <h1 style="margin: 1rem 0 2rem 0">Orders</h1>
         <p v-if="loading">Loading orders...</p>
         <div v-else style="display: flex; gap: 1rem;">
-            <OrderCategory :orders="pendingOrders" status="PENDING" />
-            <OrderCategory :orders="processingOrders" status="PROCESSING" />
-            <OrderCategory :orders="completedOrders" status="COMPLETED" />
+            <OrderCategory :orders="pendingOrders" status="PENDING" style="background-color: #DA291C; color: white"/>
+            <OrderCategory :orders="processingOrders" status="PROCESSING" style="background-color: #DA291C; color: white"/>
+            <OrderCategory :orders="completedOrders" status="COMPLETED" style="background-color: #DA291C; color: white"/>
         </div>
     </div>
 </template>

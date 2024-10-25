@@ -1,0 +1,8 @@
+@import 'variables'; // Ensure to import your variables file if not already imported
+
+$prefix: ''; // Adjust if you have a prefix defined
+
+:root {
+// Override the sidebar color using the variable
+--#{$prefix}sidebar-bg: #{$sidebar-color};
+}

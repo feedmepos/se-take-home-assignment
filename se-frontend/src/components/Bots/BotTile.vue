@@ -1,20 +1,16 @@
 <template>
     <CButton class="bot-tile" @click="clicked">
       <img src="@/assets/bot.png" alt="Bot Type Image" class="bot-image">
-      <p>Bot {{ id }}</p>
+      <p class="bot-id">Bot {{ id }}</p>
     </CButton>
   </template>
   
   <script>
-import { CButton } from '@coreui/vue';
 import Swal from 'sweetalert2';
 import { mapActions } from 'vuex';
 
   export default {
     name: "BotTile",
-    components: {
-      CButton
-    },
     props: {
         id: {
             type: Number,
@@ -50,23 +46,48 @@ import { mapActions } from 'vuex';
   
   <style scoped>
   .bot-tile {
-    min-width: 200px; /* Full width of the container */
+    min-width: 200px;
     width: 200px;
-    height: 225px;
-    text-align: center; /* Center text */
-    background-color: white; /* Background color */
-    border-radius: 15px; /* Increase for smoother rounded corners */
-    border: 1px solid #ccc; /* Optional border color */
-    padding: 20px; /* Padding inside the tile */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optional shadow for depth */
-    margin-bottom: 10px; /* Space between multiple tiles, if needed */
-  }
-  .bot-image {
-    width: auto; /* Set a fixed width for the image */
-    height: auto; /* Maintain aspect ratio */
-    max-width: 100%; /* Ensure the image does not exceed the tile's width */
-    border-radius: 10px; /* Optional: round the image corners */
-    object-fit: contain; /* Ensures the image is contained within its box */
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+    border-radius: 15px;
+    padding: 1rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+    transition: all 0.3s ease;
+    cursor: pointer;
+    margin: 20px 0 2px 0;
 }
-  </style>
-  
+
+.bot-tile:hover {
+  background-color: #FFC72C;
+  color: white; 
+  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3); 
+  transform: translateY(-2px) scale(1.05); 
+}
+
+.bot-id {
+  margin: 10px 0 0 0; 
+    font-size: large;
+    font-weight: 600;
+    color: inherit; 
+}
+
+.bot-image {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    border-radius: 10px;
+    object-fit: contain;
+}
+
+.bot-type {
+    margin-top: 10px;
+    font-size: large;
+    font-weight: 600;
+    color: inherit; 
+}
+</style>

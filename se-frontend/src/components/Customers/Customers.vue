@@ -1,6 +1,9 @@
 <template>
     <div class="customer-category">
-        <h3>Customers</h3>
+        <div>
+            <h3>Customers</h3>
+        </div>
+        
         <div style="display: flex; gap: 1rem;">
             <CustomerTile
                 v-for="customer in allCustomers"
@@ -46,9 +49,9 @@ export default {
     watch: {
         allCustomers: {
             handler(newCustomers) {
-                console.log('Updated customers:', newCustomers); // Log the updated customers whenever they change
+                console.log('Updated customers:', newCustomers); 
             },
-            deep: true // Ensure it watches for nested changes
+            deep: true 
         }
     }
 }
@@ -58,8 +61,9 @@ export default {
 .customer-category {
     gap: 1rem;
     padding: 20px;
-    background-color: rgb(203, 203, 203);
     border-radius: 15px;
     max-width: fit-content;
+    background-color: #DA291C;
+    color: white; 
 }
 </style>

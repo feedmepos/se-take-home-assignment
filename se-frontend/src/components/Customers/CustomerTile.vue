@@ -49,7 +49,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .customer-tile {
     width: 200px; 
     text-align: center; 
@@ -59,9 +59,19 @@ export default {
     align-items: center; 
     background-color: white; 
     border-radius: 15px; 
-    border: 1px solid #ccc; 
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
     padding: 1rem;
+    transition: all 0.3s ease; 
+    cursor: pointer;
+    margin-top: 30px;
+    
+}
+
+.customer-tile:hover {
+    background-color: #ffc72c; 
+    color: white; 
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3); 
+    transform: translateY(-4px) scale(1.05); 
 }
 
 .customer-image {
@@ -76,5 +86,8 @@ export default {
     margin: 10px 0 0 0; 
     font-size: large;
     font-weight: 600;
+    color: inherit;
 }
+
 </style>
+

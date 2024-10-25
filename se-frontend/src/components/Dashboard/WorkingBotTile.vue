@@ -2,7 +2,7 @@
     <div class="bot-tile-container">
       <CButton class="bot-tile" @click="clicked">
         <img src="@/assets/bot.png" alt="Bot Type Image" class="bot-image">
-        <p>Bot {{ botId }}</p>
+        <p class="bot-id">Bot {{ botId }}</p>
       </CButton>
       <img src="@/assets/burger.png" alt="Burger Image" class="burger-image">
       <p>Order {{ orderId }}</p>
@@ -65,29 +65,44 @@ import { mapActions } from 'vuex';
 
 .bot-tile {
   min-width: 200px;
-  width: 200px; /* Full width of the container */
+  width: 200px;
   height: 225px;
-  text-align: center; /* Center text */
-  background-color: white; /* Background color */
-  border-radius: 15px; /* Increase for smoother rounded corners */
-  border: 1px solid #ccc; /* Optional border color */
-  padding: 20px; /* Padding inside the tile */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optional shadow for depth */
-  margin-bottom: 10px; /* Space between multiple tiles, if needed */
+  text-align: center;
+  background-color: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  margin-bottom: 10px;
+  transition: all 0.3s ease; /* Smooth transition for hover */
+  cursor: pointer;
+  
+}
+
+.bot-tile:hover {
+  background-color: #ffc72c; /* Darker shade on hover */
+    color: white; /* Change text color on hover */
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3); /* Add shadow effect */
+    transform: translateY(-4px) scale(1.05); 
+}
+
+.bot-id {
+  margin-top: 60px;
+  font-weight: bold;
 }
 
 .bot-image {
-  width: auto; /* Set a fixed width for the image */
-  height: auto; /* Maintain aspect ratio */
-  max-width: 100%; /* Ensure the image does not exceed the tile's width */
-  border-radius: 10px; /* Optional: round the image corners */
-  object-fit: contain; /* Ensures the image is contained within its box */
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  border-radius: 10px;
+  object-fit: contain;
 }
 
 .burger-image {
-  width: 100px; /* Set a fixed width for the image */
-  height: auto; /* Maintain aspect ratio */
-  margin-bottom: 10px; /* Add some space below the burger image */
+  width: 100px;
+  height: auto;
+  margin-bottom: 10px;
 }
+
 </style>
   
