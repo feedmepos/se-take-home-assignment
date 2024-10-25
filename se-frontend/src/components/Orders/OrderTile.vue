@@ -1,7 +1,7 @@
 <template>
     <div class="order-tile">
-        <p>Order {{ id }}</p>
-        <p>Type: {{ type }}</p>
+        <p class="order-id">Order {{ id }}</p>
+        <p class="order-type">Type: {{ type }}</p>
     </div>
 </template>
 
@@ -38,14 +38,20 @@ export default {
 }
 
 .order-image {
-    width: auto; /* Set a fixed width for the image */
-    height: auto; /* Maintain aspect ratio */
-    max-width: 100%; /* Ensure the image does not exceed the tile's width */
-    border-radius: 10px; /* Optional: round the image corners */
-    object-fit: contain; /* Ensures the image is contained within its box */
+    width: auto; 
+    height: auto; 
+    max-width: 100%; 
+    object-fit: contain; 
+}
+
+.order-id {
+    font-weight: 600;
+    font-size: large;
+    margin: 10px 0 -1px 0;
 }
 
 .order-type {
-    margin: 0; /* Remove default margin from the paragraph */
+    margin-top: 5px;
 }
+
 </style>

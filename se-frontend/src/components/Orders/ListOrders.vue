@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h1>Orders</h1>
+        <h1 style="margin: 1rem 0 2rem 0">Orders</h1>
         <p v-if="loading">Loading orders...</p>
         <div v-else style="display: flex; gap: 1rem;">
             <OrderCategory :orders="pendingOrders" status="PENDING" />
@@ -56,4 +56,6 @@ export default {
         },
     },
 }
+
+
 </script>
