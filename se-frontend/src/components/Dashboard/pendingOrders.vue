@@ -1,5 +1,5 @@
 <template>
-    <div class="order-category" style="margin-bottom: 4rem;">
+    <div class="order-category" style="margin-bottom: 1rem;">
         <h2>Pending Orders</h2>
         <p v-if="loading">Loading orders...</p>
         <div v-else-if="pendingOrders.length > 0" class="order-scroll">

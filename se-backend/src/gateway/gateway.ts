@@ -10,7 +10,7 @@ import {
   
   @WebSocketGateway({
     cors: {
-      origin: 'http://localhost:8081', // Allow your frontend origin
+      origin: 'http://localhost:8080', // Allow your frontend origin
       credentials: true,
     },
   })

@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h1 style="margin: 1rem 0 2rem 0">Dashboard</h1>
+        <h1 style="margin: 0.5rem 0 0.5rem 0">Dashboard</h1>
         <div>
             <PendingOrders />
             <WorkingBot />

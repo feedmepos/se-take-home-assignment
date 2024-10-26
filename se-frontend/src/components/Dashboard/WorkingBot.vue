@@ -1,16 +1,22 @@
 <template>
-    <div class="bot-category" style="margin-bottom: 4rem;">
+    <div class="bot-category" style="margin-bottom: 1rem;">
         <h2>Working Bots</h2>
-        <p v-if="loading">Loading working bots...</p>
-        <div v-else-if="workingBots.length > 0" class="working-bot-scroll">
-            <WorkingBotTile v-for="bot in workingBots"
-                :key="bot.id"
-                :botId="bot.id"
-                :orderId="bot.currentOrder"
-                :orderType="bot.currentOrderType"
-            />
+       
+        <div class="working-bot-scroll-container">
+            <p v-if="loading">Loading working bots...</p>
+            <div v-else-if="workingBots.length > 0" class="working-bot-scroll">
+                <WorkingBotTile v-for="bot in workingBots"
+                    :key="bot.id"
+                    :botId="bot.id"
+                    :orderId="bot.currentOrder"
+                    :orderType="bot.currentOrderType"
+                />
+            </div>
+            <div v-else>No working bots</div>
+            
         </div>
-        <div v-else>No working bots</div>
+        
+        
     </div>
 </template>
 
@@ -59,8 +65,13 @@ export default {
 .working-bot-scroll {
     display: flex; 
     gap: 1rem; 
-    overflow-y: scroll;
-    overflow-x: auto;
+}
+
+.working-bot-scroll-container {
+    position: relative; 
+    padding: 10px; 
+    overflow-x: auto; 
+    overflow-y: hidden; 
     scrollbar-width: none; 
 }
 
