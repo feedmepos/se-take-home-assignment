@@ -61,10 +61,11 @@ function removeBot() {
   const bot = bots.pop();
   console.log(`${bot.id} removed.`);
 
-  if (bot.order) {
+  if (!bot.isIdle) {
     clearTimeout(bot.timeoutId); // Cancel the completion timeout
-    pendingOrders.unshift(bot.order); // Return the order to the pending queue
-    console.log(`Re-added ${bot.order.id} to PENDING.`);
+    pendingOrders.unshift(bot.currentOrder); // Return the order to the pending queue
+    console.log(`Re-added ${bot.currentOrder.id} to PENDING.`);
+    bot.reset();
   }
 }
 
