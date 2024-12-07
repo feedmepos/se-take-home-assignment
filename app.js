@@ -97,7 +97,7 @@ function viewBots() {
         console.log(`${bot.id} is IDLE.`);
       } else {
         console.log(
-          `${bot.id} is processing ${bot.order.id} (${bot.order.type}).`
+          `${bot.id} is processing ${bot.currentOrder.id} (${bot.currentOrder.type}).`
         );
       }
     });
