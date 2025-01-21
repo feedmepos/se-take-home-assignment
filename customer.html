@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>McDonald's Ordering System - Customer View</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container customer-view">
+        <header>
+            <h1>McDonald's Ordering System</h1>
+            <div class="view-switch">
+                <a href="customer.html" class="active">Customer View</a>
+                <a href="manager.html">Manager View</a>
+            </div>
+        </header>
+        
+        <div class="controls customer-controls">
+            <div class="order-buttons">
+                <button id="newNormalOrder" class="btn-primary">Place Normal Order</button>
+                <button id="newVipOrder" class="btn-vip">Place VIP Order</button>
+            </div>
+        </div>
+
+        <div class="orders-container">
+            <div class="order-section">
+                <h2>Your Orders in Progress</h2>
+                <div id="pendingOrders" class="order-list"></div>
+            </div>
+            <div class="order-section">
+                <h2>Your Completed Orders</h2>
+                <div id="completedOrders" class="order-list"></div>
+            </div>
+        </div>
+
+        <div class="status-bar">
+            <span id="botCount">Active Bots: 0</span>
+            <span id="orderCount">Orders in Queue: 0</span>
+        </div>
+    </div>
+    <script src="shared.js"></script>
+    <script src="customer.js"></script>
+</body>
+</html>

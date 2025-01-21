@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>McDonald's Management System - Manager View</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container manager-view">
+        <header>
+            <h1>McDonald's Management System</h1>
+            <div class="view-switch">
+                <a href="customer.html">Customer View</a>
+                <a href="manager.html" class="active">Manager View</a>
+            </div>
+        </header>
+
+        <div class="controls manager-controls">
+            <div class="bot-management">
+                <h2>Bot Management</h2>
+                <div class="bot-controls">
+                    <button id="addBot" class="btn-primary">+ Add Bot</button>
+                    <button id="removeBot" class="btn-secondary">- Remove Bot</button>
+                </div>
+                <div class="bot-stats">
+                    <div id="botCount" class="stat-box">Active Bots: 0</div>
+                    <div id="botUtilization" class="stat-box">Bot Utilization: 0%</div>
+                </div>
+            </div>
+
+            <div class="order-stats">
+                <h2>Order Statistics</h2>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <span>Pending Orders</span>
+                        <span id="pendingCount">0</span>
+                    </div>
+                    <div class="stat-box">
+                        <span>Processing Orders</span>
+                        <span id="processingCount">0</span>
+                    </div>
+                    <div class="stat-box">
+                        <span>Completed Today</span>
+                        <span id="completedCount">0</span>
+                    </div>
+                    <div class="stat-box">
+                        <span>Avg. Processing Time</span>
+                        <span id="avgProcessingTime">0s</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="orders-container">
+            <div class="order-section">
+                <h2>All Active Orders</h2>
+                <div id="activeOrders" class="order-list"></div>
+            </div>
+            <div class="order-section">
+                <h2>Recent Completed Orders</h2>
+                <div id="recentCompletedOrders" class="order-list"></div>
+            </div>
+        </div>
+    </div>
+    <script src="shared.js"></script>
+    <script src="manager.js"></script>
+</body>
+</html>

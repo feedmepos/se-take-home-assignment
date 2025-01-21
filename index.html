@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>McDonald's Bot System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>McDonald's Bot System</h1>
+        
+        <div class="controls">
+            <button id="newNormalOrder">New Normal Order</button>
+            <button id="newVipOrder">New VIP Order</button>
+            <div class="bot-controls">
+                <button id="addBot">+ Bot</button>
+                <button id="removeBot">- Bot</button>
+                <span id="botCount">Active Bots: 0</span>
+            </div>
+        </div>
+
+        <div class="orders-container">
+            <div class="order-section">
+                <h2>Pending Orders</h2>
+                <div id="pendingOrders" class="order-list"></div>
+            </div>
+            <div class="order-section">
+                <h2>Completed Orders</h2>
+                <div id="completedOrders" class="order-list"></div>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
