@@ -5,14 +5,23 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "lint:check": "next lint",
+    "lint:fix": "next lint --fix"
   },
   "dependencies": {
-    "next": "15.2.4"
+    "amqplib": "^0.10.7",
+    "mongodb": "^6.15.0",
+    "next": "15.2.4",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@types/amqplib": "^0.10.7",
     "@types/node": "^20",
-    "@types/react": "^19"
+    "@types/react": "^19",
+    "eslint": "9.24.0",
+    "eslint-config-next": "15.2.4",
+    "typescript": "^5"
   }
 }

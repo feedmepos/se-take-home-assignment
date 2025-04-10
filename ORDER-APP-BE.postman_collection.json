@@ -1,0 +1,90 @@
+{
+	"info": {
+		"_postman_id": "da339409-5804-4545-9109-57d50d05cf8b",
+		"name": "ORDER-APP-BE",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "2248319"
+	},
+	"item": [
+		{
+			"name": "save order",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"serial_number\" : \"4545454\",\n        \"status\" : \"PENDING\",\n        \"type\" : \"NORMAL_ORDER\",\n        \"products\": [\n        {\n                \"name\": \"Product 5454\",\n                \"order_quantity\" : 10,\n                \"confirmed_quantity\" : 10,\n                \"delivered_quantity\" : 10\n        },\n        {\n                \"name\": \"Product 434343\",\n                \"order_quantity\" : 10,\n                \"confirmed_quantity\" : 10,\n                \"delivered_quantity\" : 10\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/orders/store",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"orders",
+						"store"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update size",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"number_of_workers\" : 1,\n        \"type\" : \"REDUCED\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/workers/update",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"workers",
+						"update"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
