@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     };
 
     const optionParam = {
-        priority: (param.type == 'NORMAL_ORDER') ? 1 : 2
+        priority: (param.type == 'VIP_ORDER') ? 2 : 1
     };
 
     dispatch('PROCESS_NEW_ORDERS', queueParam, optionParam);

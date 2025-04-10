@@ -3,6 +3,9 @@ import { Db, ObjectId } from 'mongodb';
 import { connectToDatabase } from '@/lib/mongodb';
 
 export async function processOrder(channel: Channel): Promise<void> {
+    //Code below is to ensure each consumer only fetch one message at time and process other message when current one is done
+    channel.prefetch(1); // 
+    
     const db: Db = await connectToDatabase();
     const consumerInfo = await channel.consume('PROCESS_NEW_ORDERS', async (message: any) => {
         if (message !== null) {
