@@ -19,7 +19,7 @@ export function OrderScreen() {
     orders.filter((order) => order.status === OrderStatus.PROCESSING),
     orders
       .filter((order) => order.status === OrderStatus.COMPLETED)
-      .sort((a, b) => b.created_at.localeCompare(a.created_at)),
+      .sort((a, b) => b.updated_at.localeCompare(a.updated_at)),
   ];
 
   const createOrder = async (isPriority: boolean) => {

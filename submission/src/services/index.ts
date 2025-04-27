@@ -7,7 +7,6 @@ import OrderDispatchService from "./order-dispatch";
 /**
  * This is for the purpose of quick setup, ideally we should use a DI library like Inversify.
  */
-
 export const persistenceOrders: Map<number, Order> = new Map();
 export const persistenceBots: Map<number, Bot> = new Map();
 export const botAllocationService = new BotAllocationService(persistenceBots);

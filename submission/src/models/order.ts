@@ -6,6 +6,7 @@ export type OrderDTO = {
   assigned_bot_id: number | null;
   is_priority: boolean;
   created_at: string;
+  updated_at: string;
 };
 
 export default class Order {
@@ -14,27 +15,33 @@ export default class Order {
   public assignedBotId: number | null;
   public isPriority: boolean;
   public createdAt: string;
+  public updatedAt: string;
 
   constructor(id: number, isPriority: boolean) {
+    const now = new Date().toISOString();
     this.id = id;
     this.status = OrderStatus.PENDING;
     this.assignedBotId = null;
     this.isPriority = isPriority;
-    this.createdAt = new Date().toISOString();
+    this.createdAt = now;
+    this.updatedAt = now;
   }
 
   public assign(botId: number): void {
     this.assignedBotId = botId;
     this.status = OrderStatus.PROCESSING;
+    this.updatedAt = new Date().toISOString();
   }
 
   public unassign(): void {
     this.assignedBotId = null;
     this.status = OrderStatus.PENDING;
+    this.updatedAt = new Date().toISOString();
   }
 
   public complete(): void {
     this.status = OrderStatus.COMPLETED;
+    this.updatedAt = new Date().toISOString();
     console.log(`Order ${this.id} completed`);
   }
 
@@ -45,6 +52,7 @@ export default class Order {
       assigned_bot_id: this.assignedBotId,
       is_priority: this.isPriority,
       created_at: this.createdAt,
+      updated_at: this.updatedAt,
     };
   }
 }
