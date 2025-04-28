@@ -15,14 +15,12 @@ export default class OrderService {
   }
 
   public getOrders(): Order[] {
-    const sortFn = (a: Order, b: Order) =>
-      a.createdAt.localeCompare(b.createdAt);
-    const priority = [...this.orders.values().filter((o) => o.isPriority)].sort(
-      sortFn,
-    );
-    const regular = [...this.orders.values().filter((o) => !o.isPriority)].sort(
-      sortFn,
-    );
+    const priority = [...this.orders.values()]
+      .filter((o) => o.isPriority)
+      .sort(this.sortOrder);
+    const regular = [...this.orders.values()]
+      .filter((o) => !o.isPriority)
+      .sort(this.sortOrder);
 
     return [...priority, ...regular];
   }
@@ -32,5 +30,9 @@ export default class OrderService {
     this.orders.set(order.id, order);
     this.orderDispatchService.enqueue(order);
     return order;
+  }
+
+  private sortOrder(a: Order, b: Order) {
+    return a.createdAt.localeCompare(b.createdAt);
   }
 }
