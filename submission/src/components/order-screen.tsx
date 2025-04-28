@@ -8,6 +8,10 @@ const renderItems = (items: OrderDTO[]) => {
   return items.map((item) => <OrderCard key={item.id} order={item} />);
 };
 
+const sortUpdatedAtDesc = (a: OrderDTO, b: OrderDTO) => {
+  return b.updated_at.localeCompare(a.updated_at);
+};
+
 export function OrderScreen() {
   const res = useSWR<OrderDTO[]>("/api/v1/orders", {
     refreshInterval: 500,
@@ -16,10 +20,12 @@ export function OrderScreen() {
   const orders = res.data ?? [];
   const [pending, processing, completed] = [
     orders.filter((order) => order.status === OrderStatus.PENDING),
-    orders.filter((order) => order.status === OrderStatus.PROCESSING),
+    orders
+      .filter((order) => order.status === OrderStatus.PROCESSING)
+      .sort(sortUpdatedAtDesc),
     orders
       .filter((order) => order.status === OrderStatus.COMPLETED)
-      .sort((a, b) => b.updated_at.localeCompare(a.updated_at)),
+      .sort(sortUpdatedAtDesc),
   ];
 
   const createOrder = async (isPriority: boolean) => {
