@@ -4,7 +4,7 @@ import useSWR from "swr";
 
 export function ManagerPanel() {
   const res = useSWR<BotDTO[]>("/api/v1/bots", {
-    refreshInterval: 500,
+    refreshInterval: 1000,
   });
   const bots = res.data ?? [];
 

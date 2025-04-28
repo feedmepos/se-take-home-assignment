@@ -14,7 +14,7 @@ const sortUpdatedAtDesc = (a: OrderDTO, b: OrderDTO) => {
 
 export function OrderScreen() {
   const res = useSWR<OrderDTO[]>("/api/v1/orders", {
-    refreshInterval: 500,
+    refreshInterval: 1000,
   });
 
   const orders = res.data ?? [];
