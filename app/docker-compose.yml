@@ -1,0 +1,10 @@
+version: "3.8"
+
+services:
+  mcdonalds-order-system:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    restart: unless-stopped
