@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>McDonald's Order System</title>
+    </head>
+    <body>
+        <button onclick="toggleView()">🔁 Switch to Manager View</button>
+
+        <!-- shared order view -->
+        <div class="container">
+            <div class="section">
+                <h3>PENDING</h3>
+                <div id="pending"></div>
+            </div>
+            <div class="section">
+                <h3>COMPLETE</h3>
+                <div id="complete"></div>
+            </div>
+        </div>
+
+        <!-- customer controls -->
+        <div id="customerControls">
+            <h2>Customer View</h2>
+            <div class="buttons">
+                <button onclick="createOrder('normal')">New Normal Order</button>
+                <button onclick="createOrder('vip')">New VIP Order</button>
+            </div>
+        </div>
+
+        <!-- manager controls -->
+        <div id="managerControls" class="hidden">
+            <h2>Manager View</h2>
+            <div class="buttons">
+                <button onclick="addBot()">+ Bot</button>
+                <button onclick="removeBot()">- Bot</button>
+            </div>
+            <div class="section">
+                <h3>Bot Status</h3>
+                <div id="bots"></div>
+            </div>
+        </div>
+
+        <script>
+            let orderCounter = 1;
+            const pendingOrders = [];
+            const completedOrders = [];
+            const bots = [];
+            let isCustomerView = true;
+
+            function toggleView() {
+                isCustomerView = !isCustomerView;
+                document.getElementById("customerControls").classList.toggle("hidden", !isCustomerView);
+                document.getElementById("managerControls").classList.toggle("hidden", isCustomerView);
+                const button = document.querySelector("button");
+                button.textContent = isCustomerView ? "🔁 Switch to Manager View" : "🔁 Switch to Customer View";
+                render();
+            }
+
+            function createOrder(type) {
+                const order = {
+                id: orderCounter++,
+                type,
+                status: "pending"
+                };
+
+                if (type === "vip") {
+                const index = pendingOrders.findIndex(o => o.type === "normal");
+                if (index === -1) pendingOrders.push(order);
+                else pendingOrders.splice(index, 0, order);
+                } else {
+                pendingOrders.push(order);
+                }
+
+                render();
+                notifyBots();
+            }
+
+            function addBot() {
+                const id = bots.length + 1;
+                const bot = {
+                id,
+                busy: false,
+                status: "IDLE",
+                currentTimeout: null
+                };
+                bots.push(bot);
+                assignOrder(bot);
+                render();
+            }
+
+            function removeBot() {
+                if (bots.length === 0) return;
+                const bot = bots.pop();
+                if (bot.busy && bot.order) {
+                clearTimeout(bot.currentTimeout);
+                pendingOrders.unshift(bot.order);
+                }
+                render();
+            }
+
+            function notifyBots() {
+                bots.forEach(bot => {
+                if (!bot.busy) assignOrder(bot);
+                });
+            }
+
+            function assignOrder(bot) {
+                if (pendingOrders.length === 0) {
+                bot.status = "IDLE";
+                render();
+                return;
+                }
+
+                const order = pendingOrders.shift();
+                bot.busy = true;
+                bot.status = `Processing #${order.id}`;
+                bot.order = order;
+
+                bot.currentTimeout = setTimeout(() => {
+                completedOrders.push(order);
+                render();
+
+                setTimeout(() => {
+                    const index = completedOrders.findIndex(o => o.id === order.id);
+                    if (index !== -1) {
+                    completedOrders.splice(index, 1);
+                    render();
+                    }
+                }, 20000);
+
+                bot.busy = false;
+                bot.status = "IDLE";
+                delete bot.order;
+                assignOrder(bot);
+                }, 10000);
+
+                render();
+            }
+
+            function render() {
+                const pendingEl = document.getElementById("pending");
+                const completeEl = document.getElementById("complete");
+                pendingEl.innerHTML = "";
+                completeEl.innerHTML = "";
+
+                pendingOrders.forEach(order => {
+                const div = document.createElement("div");
+                div.className = `order ${order.type}`;
+                div.textContent = `${order.type.toUpperCase()} #${order.id}`;
+                pendingEl.appendChild(div);
+                });
+
+                completedOrders.forEach(order => {
+                const div = document.createElement("div");
+                div.className = "order complete";
+                div.textContent = `${order.type.toUpperCase()} #${order.id}`;
+                completeEl.appendChild(div);
+                });
+
+                const botsEl = document.getElementById("bots");
+                if (botsEl) {
+                botsEl.innerHTML = "";
+                bots.forEach(bot => {
+                    const div = document.createElement("div");
+                    div.className = "bot";
+                    div.textContent = `Bot #${bot.id} - ${bot.status}`;
+                    botsEl.appendChild(div);
+                });
+                }
+            }
+        </script>
+
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+            }
+
+            .hidden {
+                display: none;
+            }
+
+            button {
+                margin: 5px;
+                padding: 10px 15px;
+                cursor: pointer;
+            }
+
+            .buttons {
+                margin: 10px 0;
+            }
+
+            .container {
+                display: flex;
+                gap: 40px;
+                margin-top: 20px;
+                flex-wrap: wrap;
+            }
+
+            .section {
+                flex: 1;
+                min-width: 200px;
+                border: 1px solid #ccc;
+                padding: 10px;
+                border-radius: 5px;
+            }
+
+            .order {
+                padding: 8px;
+                margin: 5px 0;
+                border-radius: 3px;
+            }
+
+            .normal {
+                background-color: #ffeb3b;
+            }
+
+            .vip {
+                background-color: #f44336;
+                color: white;
+            }
+
+            .complete {
+                background-color: #4caf50;
+                color: white;
+            }
+
+            .bot {
+                padding: 6px;
+                background-color: #90caf9;
+                border-radius: 3px;
+                margin-bottom: 5px;
+            }
+        </style>
+    </body>
+</html>
