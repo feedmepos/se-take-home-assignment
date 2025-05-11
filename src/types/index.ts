@@ -12,5 +12,5 @@ export interface Bot {
   id: number;
   status: BotStatus;
   currentOrder: Order | null;
-  timeoutId: NodeJS.Timeout | null;
+  timeoutId: any; // 或 unknown，但需注意类型安全
 }
