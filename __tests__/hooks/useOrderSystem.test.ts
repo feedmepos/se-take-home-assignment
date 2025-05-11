@@ -36,7 +36,6 @@ describe('useOrderSystem Hook', () => {
         result.current.createNormalOrder();
         result.current.createNormalOrder();
       });
-      // console.log(result.current.orders)
       expect(result.current.orders.length).toBe(3);
       expect(result.current.orders[0].id).toBe(1);
       expect(result.current.orders[1].id).toBe(2);

@@ -13,8 +13,6 @@ export const createOrder = async (order: Order): Promise<Order | null> => {
             body: order
         });
 
-        console.log('result------->', result);
-
         if (!result?.success) {
             // 可选：弹框提示用户
             return null;

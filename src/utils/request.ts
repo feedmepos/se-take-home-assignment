@@ -46,7 +46,6 @@ const request = async <T>(url: string, options: RequestOptions): Promise<T> => {
     if (!apiResponse.success) {
         throw new Error(`HTTP error! status: ${apiResponse.status}, message: ${apiResponse.message}`);
     }
-    console.log('apiResponse-------->',apiResponse);
     return apiResponse.data;
 };
 
