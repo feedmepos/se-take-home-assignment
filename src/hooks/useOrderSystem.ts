@@ -7,7 +7,6 @@ const useOrderSystem = () => {
   // 状态管理
   const [orders, setOrders] = useState<Order[]>([]); // 订单
   const [bots, setBots] = useState<Bot[]>([]); // 机器人
-
   // 抽象 ID 生成逻辑
   // const generateNewId = useCallback((items: Array<{ id: number }>) => 
   //   items.length > 0 ? Math.max(...items.map(i => i.id)) + 1 : 1
@@ -32,11 +31,35 @@ const useOrderSystem = () => {
   //   }
   // }, [orders]);
 
+  // 更新处理中机器人的倒计时
+  const updateBotsCountdown = useCallback(() => {
+    setBots(prevBots =>
+      prevBots.map(bot => {
+        if (bot.status !== BotStatus.PROCESSING || !bot?.count) {
+          return bot;
+        }
+        return {
+          ...bot,
+          count: bot?.count ? bot?.count - 1 : 0
+        };
+      })
+    );
+  }, []);
+  // 添加倒计时更新的定时器
+  useEffect(() => {
+    // 每秒更新一次倒计时
+    const countdownInterval = setInterval(updateBotsCountdown, 1000);
+
+    return () => {
+      clearInterval(countdownInterval);
+    };
+  }, [updateBotsCountdown]);
+
   // 创建普通订单
   const createNormalOrder = useCallback(() => {
     setOrders(prevOrders => {
-      const newId = prevOrders.length > 0 
-        ? Math.max(...prevOrders.map(o => o.id)) + 1 
+      const newId = prevOrders.length > 0
+        ? Math.max(...prevOrders.map(o => o.id)) + 1
         : 1;
       return [
         ...prevOrders,
@@ -142,7 +165,7 @@ const useOrderSystem = () => {
     setBots(prevBots =>
       prevBots.map(bot =>
         bot.id === botId
-          ? { ...bot, status: BotStatus.IDLE, currentOrder: null, timeoutId: null }
+          ? { ...bot, status: BotStatus.IDLE, currentOrder: null, timeoutId: null, count: 0 }
           : bot
       )
     );
@@ -172,6 +195,7 @@ const useOrderSystem = () => {
             status: BotStatus.PROCESSING,
             currentOrder: order,
             timeoutId: timeoutId, // setTimeout的定时器ID被保存在机器人状态中，这样在移除机器人时可以清除定时器，避免内存泄漏
+            count: 10, // 10秒倒计时
           }
           : b
       )

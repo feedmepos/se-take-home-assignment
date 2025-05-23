@@ -1,4 +1,5 @@
 import React from 'react';
+import '@testing-library/jest-dom';
 import { render, screen, fireEvent, act, within } from '@testing-library/react';
 import OrderController from '../../src/components/OrderController';
 // 新增全局类型声明
@@ -8,7 +9,8 @@ declare global {
   }
 }
 
-// 模拟定时器
+// 模拟定时器,使用 fake timers 控制时间
+
 jest.useFakeTimers();
 
 describe('OrderController 组件', () => {
