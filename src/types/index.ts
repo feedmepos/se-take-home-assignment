@@ -13,4 +13,5 @@ export interface Bot {
   status: BotStatus;
   currentOrder: Order | null;
   timeoutId: any; // 或 unknown，但需注意类型安全
+  count?: number; // 倒计时
 }

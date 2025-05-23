@@ -1,9 +1,10 @@
 import React from 'react';
-import { Row, Col, Button, Card, Typography, Divider } from 'antd';
+import { Row, Col, Button, Card, Divider } from 'antd';
 import { PlusOutlined, MinusOutlined, UserOutlined, CrownOutlined } from '@ant-design/icons';
 import OrderList from './OrderList';
 import BotController from './BotController';
 import useOrderSystem from '../hooks/useOrderSystem';
+import { useDebounce } from '../utils/util';
 
 const OrderController: React.FC = () => {
   const {
@@ -16,6 +17,10 @@ const OrderController: React.FC = () => {
     getProcessingOrders,
     getCompletedOrders,
   } = useOrderSystem();
+  const debouncedCreateNormalOrder = useDebounce(createNormalOrder, 300);
+  const useDebouncedCreateVipOrder = useDebounce(createVipOrder, 300);
+  const debouncedAddBot = useDebounce(addBot, 300);
+  const debouncedRemoveBot = useDebounce(removeBot, 300);
 
   return (
     <div className="order-controller" data-testid="order-controller">
@@ -25,7 +30,7 @@ const OrderController: React.FC = () => {
             <Button
               type="primary"
               icon={<UserOutlined />}
-              onClick={createNormalOrder}
+              onClick={debouncedCreateNormalOrder}
               style={{ marginRight: 16 }}
               data-testid="add-normal-order-btn"
             >
@@ -34,7 +39,7 @@ const OrderController: React.FC = () => {
             <Button
               type="primary"
               icon={<CrownOutlined />}
-              onClick={createVipOrder}
+              onClick={useDebouncedCreateVipOrder}
               style={{ backgroundColor: '#FFD700', borderColor: '#FFD700' }}
               data-testid="add-vip-order-btn"
             >
@@ -47,7 +52,7 @@ const OrderController: React.FC = () => {
             <Button
               type="primary"
               icon={<PlusOutlined />}
-              onClick={addBot}
+              onClick={debouncedAddBot}
               style={{ marginRight: 16 }}
               data-testid="add-bot-btn"
             >
@@ -56,7 +61,7 @@ const OrderController: React.FC = () => {
             <Button
               danger
               icon={<MinusOutlined />}
-              onClick={removeBot}
+              onClick={debouncedRemoveBot}
               data-testid="remove-bot-btn"
             >
               移除机器人
