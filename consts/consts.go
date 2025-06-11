@@ -1,5 +1,7 @@
 package consts
 
+import "slices"
+
 type OrderStatus int
 
 const (
@@ -14,6 +16,15 @@ const (
 	OrderPriorityNormal OrderPriority = 0
 	OrderPriorityVip    OrderPriority = 1
 )
+
+var orderPriorities = []OrderPriority{
+	OrderPriorityNormal,
+	OrderPriorityVip,
+}
+
+func OrderPriorityValidate(priority int) bool {
+	return slices.Contains(orderPriorities, OrderPriority(priority))
+}
 
 type BotStatus int
 

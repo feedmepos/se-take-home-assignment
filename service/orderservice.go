@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"idreamshen.com/fmcode/consts"
+	"idreamshen.com/fmcode/err"
 	"idreamshen.com/fmcode/models"
 	"idreamshen.com/fmcode/storage"
 )
@@ -12,7 +13,7 @@ var orderServicePtr OrderService
 
 type OrderService interface {
 	// int64 customerID
-	Create(context.Context, int64, consts.OrderPriority) int64
+	Create(context.Context, int64, consts.OrderPriority) (int64, error)
 
 	FindByID(context.Context, int64) (*models.Order, error)
 
@@ -34,7 +35,11 @@ func GetOrderService() OrderService {
 
 type orderServiceImpl struct{}
 
-func (orderServiceImpl) Create(ctx context.Context, customerID int64, priority consts.OrderPriority) int64 {
+func (orderServiceImpl) Create(ctx context.Context, customerID int64, priority consts.OrderPriority) (int64, error) {
+
+	if consts.OrderPriorityValidate(int(priority)) == false {
+		return 0, err.ErrOrderPriorityInvalid
+	}
 
 	orderID := storage.GetOrderStorage().GenerateID(ctx)
 
@@ -46,9 +51,11 @@ func (orderServiceImpl) Create(ctx context.Context, customerID int64, priority c
 		BotID:      0,
 	}
 
-	storage.GetOrderStorage().Add(ctx, &order)
+	if err := storage.GetOrderStorage().Add(ctx, &order); err != nil {
+		return 0, err
+	}
 
-	return orderID
+	return orderID, nil
 }
 
 func (orderServiceImpl) ResetOrder(ctx context.Context, order *models.Order) error {

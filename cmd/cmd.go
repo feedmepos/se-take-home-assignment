@@ -68,7 +68,11 @@ func handleCmdTypeCustomerCreateOrder(ctx context.Context, cmds []string) {
 	priorityStr := cmds[2]
 	priority, _ := strconv.Atoi(priorityStr)
 
-	controller.CreateOrder(ctx, customerID, consts.OrderPriority(priority))
+	if v, err := controller.CreateOrder(ctx, customerID, consts.OrderPriority(priority)); err != nil {
+		log.Printf("创建订单失败: %v\n", err.Error())
+	} else {
+		log.Printf("创建订单成功，ID=%v\n", v.OrderID)
+	}
 }
 
 func handleCmdTypeManagerAddBot(ctx context.Context) {

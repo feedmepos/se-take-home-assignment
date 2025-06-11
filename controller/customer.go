@@ -2,31 +2,37 @@ package controller
 
 import (
 	"context"
+	"log"
 
 	"idreamshen.com/fmcode/consts"
 	"idreamshen.com/fmcode/service"
+	"idreamshen.com/fmcode/view"
 )
 
 // return orderID
-func CreateOrder(ctx context.Context, customerID int64, priority consts.OrderPriority) int64 {
-	orderID := service.GetOrderService().Create(ctx, customerID, priority)
-	return orderID
+func CreateOrder(ctx context.Context, customerID int64, priority consts.OrderPriority) (view.CreateOrderView, error) {
+	orderID, err := service.GetOrderService().Create(ctx, customerID, priority)
+	if err != nil {
+		return view.CreateOrderView{}, err
+	}
+
+	return view.CreateOrderView{
+		OrderID: orderID,
+	}, nil
 }
 
 func GetOrderStatus(ctx context.Context, customerID int64, orderID int64) (bool, consts.OrderStatus) {
 	order, err := service.GetOrderService().FindByID(ctx, orderID)
 	if err != nil {
-		// todo
+		log.Println("订单查询出错", err)
 		return false, consts.OrderStatusPending
 	}
 
 	if order == nil {
-		// todo not found
 		return false, consts.OrderStatusPending
 	}
 
 	if order.CustomerID != customerID {
-		// todo not allow
 		return false, consts.OrderStatusPending
 	}
 
