@@ -7,7 +7,6 @@ import (
 	"sync/atomic"
 
 	"idreamshen.com/fmcode/consts"
-	"idreamshen.com/fmcode/eventbus"
 	"idreamshen.com/fmcode/models"
 )
 
@@ -61,8 +60,6 @@ func (p *OrderPoolMemory) Add(ctx context.Context, order *models.Order) error {
 	default:
 		break
 	}
-
-	eventbus.PublishOrderCreated(ctx, order.ID)
 
 	return nil
 }

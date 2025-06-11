@@ -5,6 +5,7 @@ import (
 
 	"idreamshen.com/fmcode/consts"
 	"idreamshen.com/fmcode/err"
+	"idreamshen.com/fmcode/eventbus"
 	"idreamshen.com/fmcode/models"
 	"idreamshen.com/fmcode/storage"
 )
@@ -54,6 +55,8 @@ func (orderServiceImpl) Create(ctx context.Context, customerID int64, priority c
 	if err := storage.GetOrderStorage().Add(ctx, &order); err != nil {
 		return 0, err
 	}
+
+	eventbus.PublishOrderCreated(ctx, order.ID)
 
 	return orderID, nil
 }

@@ -1,6 +1,9 @@
 package eventbus
 
-import "context"
+import (
+	"context"
+	"log"
+)
 
 var orderCreatedChan chan int64
 var botAddedChan chan int64
@@ -13,6 +16,7 @@ func InitEventBus() {
 }
 
 func PublishOrderCreated(ctx context.Context, orderID int64) {
+	log.Printf("生成事件，订单 %v 创建成功\n", orderID)
 	orderCreatedChan <- orderID
 }
 
@@ -21,6 +25,7 @@ func GetOrderCreatedChan(ctx context.Context) chan int64 {
 }
 
 func PublishBotAdded(ctx context.Context, botID int64) {
+	log.Printf("生成事件，机器人 %v 被添加\n", botID)
 	botAddedChan <- botID
 }
 
@@ -29,6 +34,7 @@ func GetBotAddedChan(ctx context.Context) chan int64 {
 }
 
 func PublishBotDecred(ctx context.Context, botID int64) {
+	log.Printf("生成事件，机器人 %v 被删除\n", botID)
 	botDecredChan <- botID
 }
 

@@ -2,9 +2,11 @@ package service
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"idreamshen.com/fmcode/consts"
+	"idreamshen.com/fmcode/eventbus"
 	"idreamshen.com/fmcode/models"
 	"idreamshen.com/fmcode/storage"
 )
@@ -42,7 +44,14 @@ func (BotServiceImpl) Add(ctx context.Context) error {
 		OrderProcessStart: nil,
 	}
 
-	return storage.GetBotStorage().Add(ctx, &bot)
+	if err := storage.GetBotStorage().Add(ctx, &bot); err != nil {
+		return err
+	}
+
+	log.Printf("机器人 %d 添加成功\n", id)
+
+	eventbus.PublishBotAdded(ctx, id)
+	return nil
 }
 
 func (BotServiceImpl) Decr(ctx context.Context) error {
@@ -54,6 +63,8 @@ func (BotServiceImpl) Decr(ctx context.Context) error {
 }
 
 func (BotServiceImpl) Cook(ctx context.Context, bot *models.Bot, order *models.Order) error {
+	log.Printf("机器人 %d 开始处理订单 %d\n", bot.ID, order.ID)
+
 	bot.Lock()
 	order.Lock()
 
@@ -78,5 +89,6 @@ func (BotServiceImpl) Cook(ctx context.Context, bot *models.Bot, order *models.O
 	order.Unlock()
 	bot.Unlock()
 
+	log.Printf("机器人 %d 处理完成订单 %d\n", bot.ID, order.ID)
 	return nil
 }

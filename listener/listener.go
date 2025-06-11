@@ -2,7 +2,7 @@ package listener
 
 import (
 	"context"
-	"fmt"
+	"log"
 
 	"idreamshen.com/fmcode/consts"
 	"idreamshen.com/fmcode/eventbus"
@@ -14,8 +14,8 @@ import (
 func ProcessEventOrderCreated(ctx context.Context, bot *models.Bot) {
 	for {
 		select {
-		case v, ok := <-eventbus.GetOrderCreatedChan(ctx):
-			fmt.Printf("v=%v, ok=%v\n", v, ok)
+		case <-eventbus.GetOrderCreatedChan(ctx):
+			log.Println("新订单需要处理")
 
 			var order *models.Order
 			var err error
@@ -27,12 +27,12 @@ func ProcessEventOrderCreated(ctx context.Context, bot *models.Bot) {
 			}
 
 			if err != nil {
-				// todo handle err
-				panic(err)
+				log.Printf("获取订单失败: %s\n", err.Error())
 				continue
 			}
 
 			if order == nil {
+				log.Printf("未找到需要处理的订单\n")
 				continue
 			}
 
@@ -46,9 +46,7 @@ func ProcessEventOrderCreated(ctx context.Context, bot *models.Bot) {
 func ProcessEventBotAdded(ctx context.Context) {
 	for {
 		select {
-		case botID, ok := <-eventbus.GetBotAddedChan(ctx):
-			fmt.Printf("v=%v, ok=%v\n", botID, ok)
-
+		case botID, _ := <-eventbus.GetBotAddedChan(ctx):
 			if bot, err := storage.GetBotStorage().FindByID(ctx, botID); err != nil {
 				// todo err ?
 			} else {
@@ -61,8 +59,7 @@ func ProcessEventBotAdded(ctx context.Context) {
 func ProcessEventBotDecred(ctx context.Context) {
 	for {
 		select {
-		case botID, ok := <-eventbus.GetBotDecredChan(ctx):
-			fmt.Printf("v=%v, ok=%v\n", botID, ok)
+		case botID, _ := <-eventbus.GetBotDecredChan(ctx):
 			processBotDecred(ctx, botID)
 		}
 	}
