@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"log"
 
 	"idreamshen.com/fmcode/consts"
 	"idreamshen.com/fmcode/errdef"
@@ -47,28 +46,14 @@ func (orderServiceImpl) Create(ctx context.Context, customerID int64, priority c
 		return 0, errdef.ErrOrderPriorityInvalid
 	}
 
-	orderID := repository.GetOrderRepository().GenerateID(ctx)
-
-	cancelCtx, cancelFunc := context.WithCancel(ctx)
-
-	order := models.Order{
-		ID:         orderID,
-		CustomerID: customerID,
-		Priority:   priority,
-		Status:     consts.OrderStatusPending,
-		BotID:      0,
-
-		CancelCtx:  cancelCtx,
-		CancelFunc: cancelFunc,
-	}
-
-	if err := repository.GetOrderRepository().Add(ctx, &order); err != nil {
+	if order, err := repository.GetOrderRepository().CreatePending(ctx, customerID, priority); err != nil {
 		return 0, err
+	} else if order == nil {
+		return 0, errdef.ErrOrderNotFound
+	} else {
+		eventbus.PublishOrderCreated(ctx, order.ID)
+		return order.ID, nil
 	}
-
-	eventbus.PublishOrderCreated(ctx, order.ID)
-
-	return orderID, nil
 }
 
 func (orderServiceImpl) ResetOrder(ctx context.Context, order *models.Order) error {
@@ -76,20 +61,12 @@ func (orderServiceImpl) ResetOrder(ctx context.Context, order *models.Order) err
 		return nil
 	}
 
-	order.Lock()
-	defer order.Unlock()
-
-	if order.Status != consts.OrderStatusProcessing {
-		log.Printf("Order %d status is not processing, ignore reset", order.ID)
-		return nil
+	if err := repository.GetOrderRepository().ChangeStatusFromProcessingToPending(ctx, order); err != nil {
+		return err
 	}
 
-	order.Status = consts.OrderStatusPending
-	order.BotID = 0
-
-	order.CancelFunc()
-
-	return repository.GetOrderRepository().Add(ctx, order)
+	eventbus.PublishOrderCreated(ctx, order.ID)
+	return nil
 }
 
 func (orderServiceImpl) FindByID(ctx context.Context, id int64) (*models.Order, error) {
@@ -97,48 +74,17 @@ func (orderServiceImpl) FindByID(ctx context.Context, id int64) (*models.Order, 
 }
 
 func (orderServiceImpl) FindUnfinished(ctx context.Context) ([]*models.Order, error) {
-	return nil, nil
+	return repository.GetOrderRepository().FetchUncompleted(ctx)
 }
 
 func (orderServiceImpl) FindRecentFinished(ctx context.Context, num int) ([]*models.Order, error) {
-	return nil, nil
+	return repository.GetOrderRepository().FetchRecentCompleted(ctx, num)
 }
 
 func (o orderServiceImpl) ChangeStatusToProcessing(ctx context.Context, order *models.Order, bot *models.Bot) error {
-
-	if order == nil {
-		return errdef.ErrOrderNotFound
-	}
-
-	if bot == nil {
-		return errdef.ErrBotNotFound
-	}
-
-	order.Lock()
-	defer order.Unlock()
-
-	if order.Status != consts.OrderStatusPending {
-		return errdef.ErrOrderStatusNotMatch
-	}
-
-	order.Status = consts.OrderStatusProcessing
-	order.BotID = bot.ID
-
-	return nil
+	return repository.GetOrderRepository().ChangeStatusToProcessing(ctx, order, bot)
 }
 
 func (o orderServiceImpl) ChangeStatusToFinish(ctx context.Context, order *models.Order) error {
-	if order == nil {
-		return errdef.ErrOrderNotFound
-	}
-
-	order.Lock()
-	defer order.Unlock()
-
-	if order.Status != consts.OrderStatusProcessing {
-		return errdef.ErrOrderStatusNotMatch
-	}
-
-	order.Status = consts.OrderStatusFinished
-	return nil
+	return repository.GetOrderRepository().ChangeStatusToFinish(ctx, order)
 }

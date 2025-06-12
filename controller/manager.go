@@ -38,7 +38,6 @@ func DecrBot(ctx context.Context) error {
 			}
 
 			service.GetBotService().Delete(ctx, bot)
-
 			break
 		default:
 			break

@@ -53,10 +53,10 @@ func processOrderCreated(ctx context.Context, bot *models.Bot) {
 	var order *models.Order
 	var err error
 
-	if repository.GetOrderRepository().HasVipOrder(ctx) {
-		order, err = repository.GetOrderRepository().Take(ctx, consts.OrderPriorityVip)
+	if repository.GetOrderRepository().HasVipPending(ctx) {
+		order, err = repository.GetOrderRepository().TakePending(ctx, consts.OrderPriorityVip)
 	} else {
-		order, err = repository.GetOrderRepository().Take(ctx, consts.OrderPriorityNormal)
+		order, err = repository.GetOrderRepository().TakePending(ctx, consts.OrderPriorityNormal)
 	}
 
 	if err != nil {
