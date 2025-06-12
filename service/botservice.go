@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"idreamshen.com/fmcode/consts"
+	"idreamshen.com/fmcode/errdef"
 	"idreamshen.com/fmcode/eventbus"
 	"idreamshen.com/fmcode/models"
 	"idreamshen.com/fmcode/storage"
@@ -14,12 +15,15 @@ import (
 var botServicePtr BotService
 
 type BotService interface {
+	FindLast(context.Context) (*models.Bot, error)
+
 	// 增加机器人
 	Add(context.Context) error
 
-	// 减少机器人
-	// 自动移除最新加入的机器人
-	Decr(context.Context) error
+	Delete(context.Context, *models.Bot) error
+
+	ChangeStatusToCooking(context.Context, *models.Bot, *models.Order) error
+	ChangeStatusToIdle(context.Context, *models.Bot) error
 
 	Cook(context.Context, *models.Bot, *models.Order) error
 }
@@ -34,14 +38,22 @@ func GetBotService() BotService {
 
 type BotServiceImpl struct{}
 
+func (BotServiceImpl) FindLast(ctx context.Context) (*models.Bot, error) {
+	return storage.GetBotStorage().FindLast(ctx)
+}
+
 func (BotServiceImpl) Add(ctx context.Context) error {
 	id := storage.GetBotStorage().GenerateID(ctx)
+
+	cancelCtx, cancelFunc := context.WithCancel(ctx)
 
 	bot := models.Bot{
 		ID:                id,
 		Status:            consts.BotStatusIdle,
 		OrderID:           0,
 		OrderProcessStart: nil,
+		CancelCtx:         cancelCtx,
+		CancelFunc:        cancelFunc,
 	}
 
 	if err := storage.GetBotStorage().Add(ctx, &bot); err != nil {
@@ -54,11 +66,18 @@ func (BotServiceImpl) Add(ctx context.Context) error {
 	return nil
 }
 
-func (BotServiceImpl) Decr(ctx context.Context) error {
-	if _, err := storage.GetBotStorage().DecrLast(ctx); err != nil {
+func (BotServiceImpl) Delete(ctx context.Context, bot *models.Bot) error {
+	if bot == nil {
+		return nil
+	}
+
+	bot.CancelFunc()
+
+	if err := storage.GetBotStorage().Delete(ctx, bot); err != nil {
 		return err
 	}
 
+	log.Printf("机器人 %d 删除成功\n", bot.ID)
 	return nil
 }
 
@@ -77,18 +96,70 @@ func (BotServiceImpl) Cook(ctx context.Context, bot *models.Bot, order *models.O
 	order.Unlock()
 	bot.Unlock()
 
-	time.Sleep(time.Second * 10)
+	var newOrderStatus consts.OrderStatus
+
+	select {
+	case <-time.After(10 * time.Second):
+		newOrderStatus = consts.OrderStatusFinished
+		order.Lock()
+		order.Status = consts.OrderStatusFinished
+		order.Unlock()
+		break
+	case <-order.CancelCtx.Done():
+		newOrderStatus = consts.OrderStatusPending
+		break
+	}
 
 	bot.Lock()
-	order.Lock()
-
 	bot.OrderID = 0
 	bot.Status = consts.BotStatusIdle
-	order.Status = consts.OrderStatusFinished
-
-	order.Unlock()
 	bot.Unlock()
 
-	log.Printf("机器人 %d 处理完成订单 %d\n", bot.ID, order.ID)
+	if newOrderStatus == consts.OrderStatusFinished {
+		log.Printf("机器人 %d 处理完成订单 %d\n", bot.ID, order.ID)
+	} else if newOrderStatus == consts.OrderStatusPending {
+		log.Printf("机器人 %d 未完成订单 %d, 订单被取消\n", bot.ID, order.ID)
+	}
+
+	return nil
+}
+
+func (BotServiceImpl) ChangeStatusToCooking(ctx context.Context, bot *models.Bot, order *models.Order) error {
+	if bot == nil {
+		return errdef.ErrBotNotFound
+	}
+
+	if order == nil {
+		return errdef.ErrOrderNotFound
+	}
+
+	bot.Lock()
+	defer bot.Unlock()
+
+	if bot.Status != consts.BotStatusIdle {
+		return errdef.ErrBotStatusNotIdle
+	}
+
+	bot.Status = consts.BotStatusCooking
+	bot.OrderID = order.ID
+
+	return nil
+}
+
+func (BotServiceImpl) ChangeStatusToIdle(ctx context.Context, bot *models.Bot) error {
+	if bot == nil {
+		return errdef.ErrBotNotFound
+	}
+
+	bot.Lock()
+	defer bot.Unlock()
+
+	if bot.Status != consts.BotStatusCooking {
+		return errdef.ErrBotStatusNotCooking
+	}
+
+	bot.Status = consts.BotStatusIdle
+	bot.OrderID = 0
+
 	return nil
 }

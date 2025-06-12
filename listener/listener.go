@@ -3,94 +3,127 @@ package listener
 import (
 	"context"
 	"log"
+	"time"
 
 	"idreamshen.com/fmcode/consts"
+	"idreamshen.com/fmcode/errdef"
 	"idreamshen.com/fmcode/eventbus"
 	"idreamshen.com/fmcode/models"
 	"idreamshen.com/fmcode/service"
 	"idreamshen.com/fmcode/storage"
 )
 
-func ProcessEventOrderCreated(ctx context.Context, bot *models.Bot) {
-	for {
-		select {
-		case <-eventbus.GetOrderCreatedChan(ctx):
-			log.Println("新订单需要处理")
-
-			var order *models.Order
-			var err error
-
-			if storage.GetOrderStorage().HasVipOrder(ctx) {
-				order, err = storage.GetOrderStorage().Take(ctx, consts.OrderPriorityVip)
-			} else {
-				order, err = storage.GetOrderStorage().Take(ctx, consts.OrderPriorityNormal)
-			}
-
-			if err != nil {
-				log.Printf("获取订单失败: %s\n", err.Error())
-				continue
-			}
-
-			if order == nil {
-				log.Printf("未找到需要处理的订单\n")
-				continue
-			}
-
-			service.GetBotService().Cook(ctx, bot, order)
-
-		}
-	}
-
-}
-
-func ProcessEventBotAdded(ctx context.Context) {
+func LoopProcessEventBotAdded(ctx context.Context) {
 	for {
 		select {
 		case botID, _ := <-eventbus.GetBotAddedChan(ctx):
 			if bot, err := storage.GetBotStorage().FindByID(ctx, botID); err != nil {
 				// todo err ?
 			} else {
-				go ProcessEventOrderCreated(ctx, bot)
+				if bot == nil {
+					log.Printf("机器人 %d 未找到\n", botID)
+					continue
+				}
+
+				go loopProcessEventOrderCreated(ctx, bot)
 			}
 		}
 	}
 }
 
-func ProcessEventBotDecred(ctx context.Context) {
+func loopProcessEventOrderCreated(ctx context.Context, bot *models.Bot) {
+	log.Printf("机器人 %d 进入订单处理循环", bot.ID)
+
+LOOP:
 	for {
 		select {
-		case botID, _ := <-eventbus.GetBotDecredChan(ctx):
-			processBotDecred(ctx, botID)
+		case <-eventbus.GetOrderCreatedChan(ctx):
+			log.Println("有新订单需要处理")
+			processOrderCreated(ctx, bot)
+		case <-bot.CancelCtx.Done():
+			log.Printf("机器人 %d 被取消\n", bot.ID)
+			break LOOP
 		}
+	}
+
+	log.Printf("机器人 %d 退出订单处理循环\n", bot.ID)
+}
+
+func processOrderCreated(ctx context.Context, bot *models.Bot) {
+	var order *models.Order
+	var err error
+
+	if storage.GetOrderStorage().HasVipOrder(ctx) {
+		order, err = storage.GetOrderStorage().Take(ctx, consts.OrderPriorityVip)
+	} else {
+		order, err = storage.GetOrderStorage().Take(ctx, consts.OrderPriorityNormal)
+	}
+
+	if err != nil {
+		log.Printf("获取订单失败: %s\n", err.Error())
+		return
+	}
+
+	if order == nil {
+		log.Printf("未找到需要处理的订单\n")
+		return
+	}
+
+	if err := botCookOrder(ctx, bot, order); err != nil {
+		log.Printf("机器人 %d 处理订单 %d 失败: %s\n", bot.ID, order.ID, err.Error())
 	}
 }
 
-func processBotDecred(ctx context.Context, botID int64) {
-	storage.GetBotStorage().Lock(ctx)
-	defer storage.GetBotStorage().Unlock(ctx)
-
-	// 查找最新的
-	if bot, err := storage.GetBotStorage().FindLast(ctx); err != nil {
-		// todo err ?
-	} else {
-		switch bot.Status {
-		case consts.BotStatusIdle:
-			// 空闲直接删
-			storage.GetBotStorage().DecrLast(ctx)
-			break
-		case consts.BotStatusCooking:
-			// 制餐中，需要把订单状态还原
-			orderID := bot.OrderID
-			if order, err := storage.GetOrderStorage().FindByID(ctx, orderID); err != nil {
-				// err ?
-			} else {
-				service.GetOrderService().ResetOrder(ctx, order)
-			}
-
-			break
-		default:
-			break
-		}
+func botCookOrder(ctx context.Context, bot *models.Bot, order *models.Order) error {
+	if bot == nil {
+		return errdef.ErrBotNotFound
 	}
 
+	if order == nil {
+		return errdef.ErrOrderNotFound
+	}
+
+	log.Printf("机器人 %d 开始处理订单 %d\n", bot.ID, order.ID)
+
+	if err := service.GetBotService().ChangeStatusToCooking(ctx, bot, order); err != nil {
+		return err
+	}
+
+	if err := service.GetOrderService().ChangeStatusToProcessing(ctx, order, bot); err != nil {
+		return err
+	}
+
+	var newOrderStatus consts.OrderStatus
+
+	select {
+	case <-time.After(10 * time.Second):
+		newOrderStatus = consts.OrderStatusFinished
+
+		if err := service.GetOrderService().ChangeStatusToFinish(ctx, order); err != nil {
+			log.Printf("无法将订单 %d 状态修改为 Finished: %s\n", order.ID, err.Error())
+			return err
+		}
+
+		break
+	case <-order.CancelCtx.Done():
+		newOrderStatus = consts.OrderStatusPending
+		if err := service.GetOrderService().ResetOrder(ctx, order); err != nil {
+			log.Printf("无法将订单 %d 状态重置: %s\n", order.ID, err.Error())
+			return err
+		}
+		break
+	}
+
+	if err := service.GetBotService().ChangeStatusToIdle(ctx, bot); err != nil {
+		log.Printf("无法将机器人状态修改为 IDLE: %s\n", err.Error())
+		return err
+	}
+
+	if newOrderStatus == consts.OrderStatusFinished {
+		log.Printf("机器人 %d 处理完成订单 %d\n", bot.ID, order.ID)
+	} else if newOrderStatus == consts.OrderStatusPending {
+		log.Printf("机器人 %d 未完成订单 %d, 订单被取消\n", bot.ID, order.ID)
+	}
+
+	return nil
 }

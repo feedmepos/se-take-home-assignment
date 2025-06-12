@@ -80,7 +80,9 @@ func handleCmdTypeManagerAddBot(ctx context.Context) {
 }
 
 func handleCmdTypeManagerDecrBot(ctx context.Context) {
-	controller.DecrBot(ctx)
+	if err := controller.DecrBot(ctx); err != nil {
+		log.Printf("删除机器人失败: %s\n", err.Error())
+	}
 }
 
 func handleCmdTypeScreen(ctx context.Context) {

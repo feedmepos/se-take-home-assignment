@@ -20,7 +20,7 @@ func main() {
 	service.InitBotService()
 	service.InitOrderService()
 
-	go listener.ProcessEventBotAdded(context.Background())
-	go listener.ProcessEventBotDecred(context.Background())
+	go listener.LoopProcessEventBotAdded(context.Background())
+
 	cmd.RunCmdLoopHandler()
 }

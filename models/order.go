@@ -1,6 +1,7 @@
 package models
 
 import (
+	"context"
 	"sync"
 
 	"idreamshen.com/fmcode/consts"
@@ -14,6 +15,9 @@ type Order struct {
 	BotID      int64
 
 	mutex sync.Mutex
+
+	CancelCtx  context.Context
+	CancelFunc context.CancelFunc
 }
 
 func (o *Order) Lock() {

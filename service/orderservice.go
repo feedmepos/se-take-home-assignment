@@ -2,9 +2,10 @@ package service
 
 import (
 	"context"
+	"log"
 
 	"idreamshen.com/fmcode/consts"
-	"idreamshen.com/fmcode/err"
+	"idreamshen.com/fmcode/errdef"
 	"idreamshen.com/fmcode/eventbus"
 	"idreamshen.com/fmcode/models"
 	"idreamshen.com/fmcode/storage"
@@ -21,6 +22,10 @@ type OrderService interface {
 	FindUnfinished(context.Context) ([]*models.Order, error)
 
 	FindRecentFinished(context.Context, int) ([]*models.Order, error)
+
+	ChangeStatusToProcessing(context.Context, *models.Order, *models.Bot) error
+
+	ChangeStatusToFinish(context.Context, *models.Order) error
 
 	// 将 order 重置
 	ResetOrder(context.Context, *models.Order) error
@@ -39,10 +44,12 @@ type orderServiceImpl struct{}
 func (orderServiceImpl) Create(ctx context.Context, customerID int64, priority consts.OrderPriority) (int64, error) {
 
 	if consts.OrderPriorityValidate(int(priority)) == false {
-		return 0, err.ErrOrderPriorityInvalid
+		return 0, errdef.ErrOrderPriorityInvalid
 	}
 
 	orderID := storage.GetOrderStorage().GenerateID(ctx)
+
+	cancelCtx, cancelFunc := context.WithCancel(ctx)
 
 	order := models.Order{
 		ID:         orderID,
@@ -50,6 +57,9 @@ func (orderServiceImpl) Create(ctx context.Context, customerID int64, priority c
 		Priority:   priority,
 		Status:     consts.OrderStatusPending,
 		BotID:      0,
+
+		CancelCtx:  cancelCtx,
+		CancelFunc: cancelFunc,
 	}
 
 	if err := storage.GetOrderStorage().Add(ctx, &order); err != nil {
@@ -70,19 +80,20 @@ func (orderServiceImpl) ResetOrder(ctx context.Context, order *models.Order) err
 	defer order.Unlock()
 
 	if order.Status != consts.OrderStatusProcessing {
-		// todo warning
+		log.Printf("Order %d status is not processing, ignore reset", order.ID)
 		return nil
 	}
 
 	order.Status = consts.OrderStatusPending
 	order.BotID = 0
 
-	storage.GetOrderStorage().Add(ctx, order)
-	return nil
+	order.CancelFunc()
+
+	return storage.GetOrderStorage().Add(ctx, order)
 }
 
 func (orderServiceImpl) FindByID(ctx context.Context, id int64) (*models.Order, error) {
-	return nil, nil
+	return storage.GetOrderStorage().FindByID(ctx, id)
 }
 
 func (orderServiceImpl) FindUnfinished(ctx context.Context) ([]*models.Order, error) {
@@ -91,4 +102,43 @@ func (orderServiceImpl) FindUnfinished(ctx context.Context) ([]*models.Order, er
 
 func (orderServiceImpl) FindRecentFinished(ctx context.Context, num int) ([]*models.Order, error) {
 	return nil, nil
+}
+
+func (o orderServiceImpl) ChangeStatusToProcessing(ctx context.Context, order *models.Order, bot *models.Bot) error {
+
+	if order == nil {
+		return errdef.ErrOrderNotFound
+	}
+
+	if bot == nil {
+		return errdef.ErrBotNotFound
+	}
+
+	order.Lock()
+	defer order.Unlock()
+
+	if order.Status != consts.OrderStatusPending {
+		return errdef.ErrOrderStatusNotMatch
+	}
+
+	order.Status = consts.OrderStatusProcessing
+	order.BotID = bot.ID
+
+	return nil
+}
+
+func (o orderServiceImpl) ChangeStatusToFinish(ctx context.Context, order *models.Order) error {
+	if order == nil {
+		return errdef.ErrOrderNotFound
+	}
+
+	order.Lock()
+	defer order.Unlock()
+
+	if order.Status != consts.OrderStatusProcessing {
+		return errdef.ErrOrderStatusNotMatch
+	}
+
+	order.Status = consts.OrderStatusFinished
+	return nil
 }

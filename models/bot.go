@@ -1,6 +1,8 @@
 package models
 
 import (
+	"container/list"
+	"context"
 	"sync"
 	"time"
 
@@ -14,6 +16,11 @@ type Bot struct {
 	OrderProcessStart *time.Time       // 订单处理开始时间
 
 	mutex sync.Mutex
+
+	E *list.Element
+
+	CancelCtx  context.Context
+	CancelFunc context.CancelFunc
 }
 
 func (b *Bot) Lock() {

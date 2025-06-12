@@ -14,14 +14,14 @@ var botStoragePtr BotStorage
 type BotStorage interface {
 	GenerateID(context.Context) int64
 
-	Lock(context.Context)
-	Unlock(context.Context)
+	LockAll(context.Context)
+	UnlockAll(context.Context)
 
 	FindByID(context.Context, int64) (*models.Bot, error)
 	FindLast(context.Context) (*models.Bot, error)
 
 	Add(context.Context, *models.Bot) error
-	DecrLast(context.Context) (*models.Bot, error)
+	Delete(context.Context, *models.Bot) error
 }
 
 type BotPoolMemory struct {
@@ -47,25 +47,29 @@ func (p *BotPoolMemory) GenerateID(ctx context.Context) int64 {
 	return atomic.AddInt64(&p.currentBotID, 1)
 }
 
-func (p *BotPoolMemory) Lock(context.Context) {
+func (p *BotPoolMemory) LockAll(context.Context) {
 	p.mutex.Lock()
 }
-func (p *BotPoolMemory) Unlock(context.Context) {
+func (p *BotPoolMemory) UnlockAll(context.Context) {
 	p.mutex.Unlock()
 }
 
 func (p *BotPoolMemory) Add(ctx context.Context, bot *models.Bot) error {
-	p.mutex.Lock()
-	defer p.mutex.Unlock()
+	if bot == nil {
+		return nil
+	}
 
-	p.Bots.PushBack(bot)
+	p.LockAll(ctx)
+	defer p.UnlockAll(ctx)
+
+	bot.E = p.Bots.PushBack(bot)
 	p.BotMap[bot.ID] = bot
 	return nil
 }
 
 func (p *BotPoolMemory) FindByID(ctx context.Context, id int64) (*models.Bot, error) {
-	p.mutex.Lock()
-	defer p.mutex.Unlock()
+	p.LockAll(ctx)
+	defer p.UnlockAll(ctx)
 
 	v, ok := p.BotMap[id]
 	if !ok {
@@ -76,8 +80,8 @@ func (p *BotPoolMemory) FindByID(ctx context.Context, id int64) (*models.Bot, er
 }
 
 func (p *BotPoolMemory) FindLast(ctx context.Context) (*models.Bot, error) {
-	p.mutex.Lock()
-	defer p.mutex.Unlock()
+	p.LockAll(ctx)
+	defer p.UnlockAll(ctx)
 
 	e := p.Bots.Back()
 
@@ -88,19 +92,16 @@ func (p *BotPoolMemory) FindLast(ctx context.Context) (*models.Bot, error) {
 	return e.Value.(*models.Bot), nil
 }
 
-func (p *BotPoolMemory) DecrLast(ctx context.Context) (*models.Bot, error) {
-	p.mutex.Lock()
-	defer p.mutex.Unlock()
-
-	e := p.Bots.Back()
-
-	if e == nil {
-		return nil, nil
+func (p *BotPoolMemory) Delete(ctx context.Context, bot *models.Bot) error {
+	if bot == nil {
+		return nil
 	}
 
-	bot := e.Value.(*models.Bot)
-	p.Bots.Remove(e)
+	p.LockAll(ctx)
+	defer p.UnlockAll(ctx)
+
+	p.Bots.Remove(bot.E)
 	delete(p.BotMap, bot.ID)
 
-	return bot, nil
+	return nil
 }
