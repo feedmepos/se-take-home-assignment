@@ -9,15 +9,15 @@ import (
 	"idreamshen.com/fmcode/errdef"
 	"idreamshen.com/fmcode/eventbus"
 	"idreamshen.com/fmcode/models"
+	"idreamshen.com/fmcode/repository"
 	"idreamshen.com/fmcode/service"
-	"idreamshen.com/fmcode/storage"
 )
 
 func LoopProcessEventBotAdded(ctx context.Context) {
 	for {
 		select {
 		case botID, _ := <-eventbus.GetBotAddedChan(ctx):
-			if bot, err := storage.GetBotStorage().FindByID(ctx, botID); err != nil {
+			if bot, err := repository.GetBotRepository().FindByID(ctx, botID); err != nil {
 				// todo err ?
 			} else {
 				if bot == nil {
@@ -53,10 +53,10 @@ func processOrderCreated(ctx context.Context, bot *models.Bot) {
 	var order *models.Order
 	var err error
 
-	if storage.GetOrderStorage().HasVipOrder(ctx) {
-		order, err = storage.GetOrderStorage().Take(ctx, consts.OrderPriorityVip)
+	if repository.GetOrderRepository().HasVipOrder(ctx) {
+		order, err = repository.GetOrderRepository().Take(ctx, consts.OrderPriorityVip)
 	} else {
-		order, err = storage.GetOrderStorage().Take(ctx, consts.OrderPriorityNormal)
+		order, err = repository.GetOrderRepository().Take(ctx, consts.OrderPriorityNormal)
 	}
 
 	if err != nil {

@@ -1,4 +1,4 @@
-package storage
+package repository
 
 import (
 	"container/list"
@@ -34,7 +34,7 @@ type OrderPoolMemory struct {
 	currentOrderID int64
 }
 
-func InitOrderStorage() {
+func InitOrderRepository() {
 	orderStoragePtr = &OrderPoolMemory{
 		NormalPendingOrders: list.New(),
 		VipPendingOrders:    list.New(),
@@ -42,7 +42,7 @@ func InitOrderStorage() {
 	}
 }
 
-func GetOrderStorage() OrderStorage {
+func GetOrderRepository() OrderStorage {
 	return orderStoragePtr
 }
 

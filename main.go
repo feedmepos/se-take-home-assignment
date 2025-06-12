@@ -6,16 +6,16 @@ import (
 	"idreamshen.com/fmcode/cmd"
 	"idreamshen.com/fmcode/eventbus"
 	"idreamshen.com/fmcode/listener"
+	"idreamshen.com/fmcode/repository"
 	"idreamshen.com/fmcode/service"
-	"idreamshen.com/fmcode/storage"
 )
 
 func main() {
 
 	eventbus.InitEventBus()
 
-	storage.InitBotStorage()
-	storage.InitOrderStorage()
+	repository.InitBotRepository()
+	repository.InitOrderRepository()
 
 	service.InitBotService()
 	service.InitOrderService()

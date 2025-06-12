@@ -8,7 +8,7 @@ import (
 	"idreamshen.com/fmcode/errdef"
 	"idreamshen.com/fmcode/eventbus"
 	"idreamshen.com/fmcode/models"
-	"idreamshen.com/fmcode/storage"
+	"idreamshen.com/fmcode/repository"
 )
 
 var orderServicePtr OrderService
@@ -47,7 +47,7 @@ func (orderServiceImpl) Create(ctx context.Context, customerID int64, priority c
 		return 0, errdef.ErrOrderPriorityInvalid
 	}
 
-	orderID := storage.GetOrderStorage().GenerateID(ctx)
+	orderID := repository.GetOrderRepository().GenerateID(ctx)
 
 	cancelCtx, cancelFunc := context.WithCancel(ctx)
 
@@ -62,7 +62,7 @@ func (orderServiceImpl) Create(ctx context.Context, customerID int64, priority c
 		CancelFunc: cancelFunc,
 	}
 
-	if err := storage.GetOrderStorage().Add(ctx, &order); err != nil {
+	if err := repository.GetOrderRepository().Add(ctx, &order); err != nil {
 		return 0, err
 	}
 
@@ -89,11 +89,11 @@ func (orderServiceImpl) ResetOrder(ctx context.Context, order *models.Order) err
 
 	order.CancelFunc()
 
-	return storage.GetOrderStorage().Add(ctx, order)
+	return repository.GetOrderRepository().Add(ctx, order)
 }
 
 func (orderServiceImpl) FindByID(ctx context.Context, id int64) (*models.Order, error) {
-	return storage.GetOrderStorage().FindByID(ctx, id)
+	return repository.GetOrderRepository().FindByID(ctx, id)
 }
 
 func (orderServiceImpl) FindUnfinished(ctx context.Context) ([]*models.Order, error) {

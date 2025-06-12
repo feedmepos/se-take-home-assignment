@@ -9,7 +9,7 @@ import (
 	"idreamshen.com/fmcode/errdef"
 	"idreamshen.com/fmcode/eventbus"
 	"idreamshen.com/fmcode/models"
-	"idreamshen.com/fmcode/storage"
+	"idreamshen.com/fmcode/repository"
 )
 
 var botServicePtr BotService
@@ -39,11 +39,11 @@ func GetBotService() BotService {
 type BotServiceImpl struct{}
 
 func (BotServiceImpl) FindLast(ctx context.Context) (*models.Bot, error) {
-	return storage.GetBotStorage().FindLast(ctx)
+	return repository.GetBotRepository().FindLast(ctx)
 }
 
 func (BotServiceImpl) Add(ctx context.Context) error {
-	id := storage.GetBotStorage().GenerateID(ctx)
+	id := repository.GetBotRepository().GenerateID(ctx)
 
 	cancelCtx, cancelFunc := context.WithCancel(ctx)
 
@@ -56,7 +56,7 @@ func (BotServiceImpl) Add(ctx context.Context) error {
 		CancelFunc:        cancelFunc,
 	}
 
-	if err := storage.GetBotStorage().Add(ctx, &bot); err != nil {
+	if err := repository.GetBotRepository().Add(ctx, &bot); err != nil {
 		return err
 	}
 
@@ -73,7 +73,7 @@ func (BotServiceImpl) Delete(ctx context.Context, bot *models.Bot) error {
 
 	bot.CancelFunc()
 
-	if err := storage.GetBotStorage().Delete(ctx, bot); err != nil {
+	if err := repository.GetBotRepository().Delete(ctx, bot); err != nil {
 		return err
 	}
 

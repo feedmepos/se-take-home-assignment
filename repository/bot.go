@@ -1,4 +1,4 @@
-package storage
+package repository
 
 import (
 	"container/list"
@@ -32,14 +32,14 @@ type BotPoolMemory struct {
 	mutex  sync.Mutex
 }
 
-func InitBotStorage() {
+func InitBotRepository() {
 	botStoragePtr = &BotPoolMemory{
 		Bots:   list.New(),
 		BotMap: make(map[int64]*models.Bot, 64),
 	}
 }
 
-func GetBotStorage() BotStorage {
+func GetBotRepository() BotStorage {
 	return botStoragePtr
 }
 
