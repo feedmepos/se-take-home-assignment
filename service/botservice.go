@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"log"
-	"time"
 
 	"idreamshen.com/fmcode/consts"
 	"idreamshen.com/fmcode/errdef"
@@ -24,8 +23,6 @@ type BotService interface {
 
 	ChangeStatusToCooking(context.Context, *models.Bot, *models.Order) error
 	ChangeStatusToIdle(context.Context, *models.Bot) error
-
-	Cook(context.Context, *models.Bot, *models.Order) error
 }
 
 func InitBotService() {
@@ -78,49 +75,6 @@ func (BotServiceImpl) Delete(ctx context.Context, bot *models.Bot) error {
 	}
 
 	log.Printf("机器人 %d 删除成功\n", bot.ID)
-	return nil
-}
-
-func (BotServiceImpl) Cook(ctx context.Context, bot *models.Bot, order *models.Order) error {
-	log.Printf("机器人 %d 开始处理订单 %d\n", bot.ID, order.ID)
-
-	bot.Lock()
-	order.Lock()
-
-	bot.OrderID = order.ID
-	bot.Status = consts.BotStatusCooking
-
-	order.BotID = bot.ID
-	order.Status = consts.OrderStatusProcessing
-
-	order.Unlock()
-	bot.Unlock()
-
-	var newOrderStatus consts.OrderStatus
-
-	select {
-	case <-time.After(10 * time.Second):
-		newOrderStatus = consts.OrderStatusFinished
-		order.Lock()
-		order.Status = consts.OrderStatusFinished
-		order.Unlock()
-		break
-	case <-order.CancelCtx.Done():
-		newOrderStatus = consts.OrderStatusPending
-		break
-	}
-
-	bot.Lock()
-	bot.OrderID = 0
-	bot.Status = consts.BotStatusIdle
-	bot.Unlock()
-
-	if newOrderStatus == consts.OrderStatusFinished {
-		log.Printf("机器人 %d 处理完成订单 %d\n", bot.ID, order.ID)
-	} else if newOrderStatus == consts.OrderStatusPending {
-		log.Printf("机器人 %d 未完成订单 %d, 订单被取消\n", bot.ID, order.ID)
-	}
-
 	return nil
 }
 
