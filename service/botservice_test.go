@@ -11,9 +11,9 @@ import (
 )
 
 func initBot() {
-	// 初始化存储库
+	// Initialize repository
 	repository.InitBotRepository()
-	// 初始化服务
+	// Initialize service
 	InitBotService()
 }
 
@@ -22,31 +22,31 @@ func TestBotServiceImpl_FindLast(t *testing.T) {
 	ctx := context.Background()
 	service := GetBotService()
 
-	// 初始应该没有机器人
+	// Initially there should be no bots
 	lastBot, err := service.FindLast(ctx)
 	if err != nil {
-		t.Fatalf("查找最后一个机器人失败: %v", err)
+		t.Fatalf("Failed to find last bot: %v", err)
 	}
 	if lastBot != nil {
-		t.Errorf("期望初始没有机器人，实际得到 %+v", lastBot)
+		t.Errorf("Expected no bots initially, got %+v", lastBot)
 	}
 
-	// 创建一个机器人
+	// Create a bot
 	bot, err := repository.GetBotRepository().Create(ctx)
 	if err != nil {
-		t.Fatalf("创建机器人失败: %v", err)
+		t.Fatalf("Failed to create bot: %v", err)
 	}
 
-	// 查找最后一个机器人
+	// Find the last bot
 	lastBot, err = service.FindLast(ctx)
 	if err != nil {
-		t.Fatalf("查找最后一个机器人失败: %v", err)
+		t.Fatalf("Failed to find last bot: %v", err)
 	}
 	if lastBot == nil {
-		t.Fatal("期望找到最后一个机器人，实际得到nil")
+		t.Fatal("Expected to find last bot, got nil")
 	}
 	if lastBot.ID != bot.ID {
-		t.Errorf("期望最后一个机器人ID为 %d，实际得到 %d", bot.ID, lastBot.ID)
+		t.Errorf("Expected last bot ID to be %d, got %d", bot.ID, lastBot.ID)
 	}
 }
 
@@ -55,31 +55,31 @@ func TestBotServiceImpl_Add(t *testing.T) {
 	ctx := context.Background()
 	service := GetBotService()
 
-	// 添加机器人前，应该没有机器人
+	// Before adding a bot, there should be no bots
 	lastBot, err := service.FindLast(ctx)
 	if err != nil {
-		t.Fatalf("查找最后一个机器人失败: %v", err)
+		t.Fatalf("Failed to find last bot: %v", err)
 	}
 	if lastBot != nil {
-		t.Errorf("期望初始没有机器人，实际得到 %+v", lastBot)
+		t.Errorf("Expected no bots initially, got %+v", lastBot)
 	}
 
-	// 添加机器人
+	// Add a bot
 	err = service.Add(ctx)
 	if err != nil {
-		t.Fatalf("添加机器人失败: %v", err)
+		t.Fatalf("Failed to add bot: %v", err)
 	}
 
-	// 添加后应该有一个机器人
+	// After adding, there should be one bot
 	lastBot, err = service.FindLast(ctx)
 	if err != nil {
-		t.Fatalf("查找最后一个机器人失败: %v", err)
+		t.Fatalf("Failed to find last bot: %v", err)
 	}
 	if lastBot == nil {
-		t.Fatal("期望找到最后一个机器人，实际得到nil")
+		t.Fatal("Expected to find last bot, got nil")
 	}
 	if lastBot.ID != 1 {
-		t.Errorf("期望最后一个机器人ID为1，实际得到 %d", lastBot.ID)
+		t.Errorf("Expected last bot ID to be 1, got %d", lastBot.ID)
 	}
 }
 
@@ -88,31 +88,31 @@ func TestBotServiceImpl_Delete(t *testing.T) {
 	ctx := context.Background()
 	service := GetBotService()
 
-	// 创建一个机器人
+	// Create a bot
 	bot, err := repository.GetBotRepository().Create(ctx)
 	if err != nil {
-		t.Fatalf("创建机器人失败: %v", err)
+		t.Fatalf("Failed to create bot: %v", err)
 	}
 
-	// 删除机器人
+	// Delete the bot
 	err = service.Delete(ctx, bot)
 	if err != nil {
-		t.Fatalf("删除机器人失败: %v", err)
+		t.Fatalf("Failed to delete bot: %v", err)
 	}
 
-	// 删除后应该没有机器人
+	// After deletion, there should be no bots
 	lastBot, err := service.FindLast(ctx)
 	if err != nil {
-		t.Fatalf("查找最后一个机器人失败: %v", err)
+		t.Fatalf("Failed to find last bot: %v", err)
 	}
 	if lastBot != nil {
-		t.Errorf("期望删除后没有机器人，实际得到 %+v", lastBot)
+		t.Errorf("Expected no bots after deletion, got %+v", lastBot)
 	}
 
-	// 测试删除nil机器人
+	// Test deleting nil bot
 	err = service.Delete(ctx, nil)
 	if err != nil {
-		t.Fatalf("删除nil机器人应该不返回错误，但得到: %v", err)
+		t.Fatalf("Deleting nil bot should not return error, but got: %v", err)
 	}
 }
 
@@ -121,13 +121,13 @@ func TestBotServiceImpl_ChangeStatusToCooking(t *testing.T) {
 	ctx := context.Background()
 	service := GetBotService()
 
-	// 创建一个机器人
+	// Create a bot
 	bot, err := repository.GetBotRepository().Create(ctx)
 	if err != nil {
-		t.Fatalf("创建机器人失败: %v", err)
+		t.Fatalf("Failed to create bot: %v", err)
 	}
 
-	// 创建一个订单
+	// Create an order
 	order := &models.Order{
 		ID:         1,
 		CustomerID: 1001,
@@ -135,32 +135,32 @@ func TestBotServiceImpl_ChangeStatusToCooking(t *testing.T) {
 		Status:     consts.OrderStatusPending,
 	}
 
-	// 将机器人状态改为制餐中
+	// Change bot status to cooking
 	err = service.ChangeStatusToCooking(ctx, bot, order)
 	if err != nil {
-		t.Fatalf("将机器人状态改为制餐中失败: %v", err)
+		t.Fatalf("Failed to change bot status to cooking: %v", err)
 	}
 
 	if bot.Status != consts.BotStatusCooking {
-		t.Errorf("期望机器人状态为制餐中(%d)，实际得到 %d", consts.BotStatusCooking, bot.Status)
+		t.Errorf("Expected bot status to be cooking(%d), got %d", consts.BotStatusCooking, bot.Status)
 	}
 	if bot.OrderID != order.ID {
-		t.Errorf("期望机器人订单ID为 %d，实际得到 %d", order.ID, bot.OrderID)
+		t.Errorf("Expected bot order ID to be %d, got %d", order.ID, bot.OrderID)
 	}
 
-	// 测试nil机器人
+	// Test nil bot
 	err = service.ChangeStatusToCooking(ctx, nil, order)
 	if err != errdef.ErrBotNotFound {
-		t.Errorf("期望错误为 %v，实际得到 %v", errdef.ErrBotNotFound, err)
+		t.Errorf("Expected error %v, got %v", errdef.ErrBotNotFound, err)
 	}
 
-	// 测试nil订单
+	// Test nil order
 	err = service.ChangeStatusToCooking(ctx, bot, nil)
 	if err != errdef.ErrOrderNotFound {
-		t.Errorf("期望错误为 %v，实际得到 %v", errdef.ErrOrderNotFound, err)
+		t.Errorf("Expected error %v, got %v", errdef.ErrOrderNotFound, err)
 	}
 
-	// 测试非空闲状态的机器人
+	// Test non-idle bot
 	nonIdleBot := &models.Bot{
 		ID:      2,
 		Status:  consts.BotStatusCooking,
@@ -168,7 +168,7 @@ func TestBotServiceImpl_ChangeStatusToCooking(t *testing.T) {
 	}
 	err = service.ChangeStatusToCooking(ctx, nonIdleBot, order)
 	if err != errdef.ErrBotStatusNotIdle {
-		t.Errorf("期望错误为 %v，实际得到 %v", errdef.ErrBotStatusNotIdle, err)
+		t.Errorf("Expected error %v, got %v", errdef.ErrBotStatusNotIdle, err)
 	}
 }
 
@@ -178,13 +178,13 @@ func TestBotServiceImpl_ChangeStatusToIdle(t *testing.T) {
 	ctx := context.Background()
 	service := GetBotService()
 
-	// 创建一个机器人
+	// Create a bot
 	bot, err := repository.GetBotRepository().Create(ctx)
 	if err != nil {
-		t.Fatalf("创建机器人失败: %v", err)
+		t.Fatalf("Failed to create bot: %v", err)
 	}
 
-	// 创建一个订单
+	// Create an order
 	order := &models.Order{
 		ID:         1,
 		CustomerID: 1001,
@@ -192,32 +192,32 @@ func TestBotServiceImpl_ChangeStatusToIdle(t *testing.T) {
 		Status:     consts.OrderStatusPending,
 	}
 
-	// 先将机器人状态改为制餐中
+	// First change bot status to cooking
 	err = service.ChangeStatusToCooking(ctx, bot, order)
 	if err != nil {
-		t.Fatalf("将机器人状态改为制餐中失败: %v", err)
+		t.Fatalf("Failed to change bot status to cooking: %v", err)
 	}
 
-	// 将机器人状态改为空闲
+	// Change bot status to idle
 	err = service.ChangeStatusToIdle(ctx, bot)
 	if err != nil {
-		t.Fatalf("将机器人状态改为空闲失败: %v", err)
+		t.Fatalf("Failed to change bot status to idle: %v", err)
 	}
 
 	if bot.Status != consts.BotStatusIdle {
-		t.Errorf("期望机器人状态为空闲(%d)，实际得到 %d", consts.BotStatusIdle, bot.Status)
+		t.Errorf("Expected bot status to be idle(%d), got %d", consts.BotStatusIdle, bot.Status)
 	}
 	if bot.OrderID != 0 {
-		t.Errorf("期望机器人订单ID为0，实际得到 %d", bot.OrderID)
+		t.Errorf("Expected bot order ID to be 0, got %d", bot.OrderID)
 	}
 
-	// 测试nil机器人
+	// Test nil bot
 	err = service.ChangeStatusToIdle(ctx, nil)
 	if err != errdef.ErrBotNotFound {
-		t.Errorf("期望错误为 %v，实际得到 %v", errdef.ErrBotNotFound, err)
+		t.Errorf("Expected error %v, got %v", errdef.ErrBotNotFound, err)
 	}
 
-	// 测试非制餐中状态的机器人
+	// Test non-cooking bot
 	idleBot := &models.Bot{
 		ID:      2,
 		Status:  consts.BotStatusIdle,
@@ -225,7 +225,7 @@ func TestBotServiceImpl_ChangeStatusToIdle(t *testing.T) {
 	}
 	err = service.ChangeStatusToIdle(ctx, idleBot)
 	if err != errdef.ErrBotStatusNotCooking {
-		t.Errorf("期望错误为 %v，实际得到 %v", errdef.ErrBotStatusNotCooking, err)
+		t.Errorf("Expected error %v, got %v", errdef.ErrBotStatusNotCooking, err)
 	}
 }
 
@@ -235,27 +235,27 @@ func TestBotServiceImpl_MultipleOperations(t *testing.T) {
 	ctx := context.Background()
 	service := GetBotService()
 
-	// 添加多个机器人
+	// Add multiple bots
 	for i := 0; i < 3; i++ {
 		err := service.Add(ctx)
 		if err != nil {
-			t.Fatalf("添加机器人%d失败: %v", i+1, err)
+			t.Fatalf("Failed to add bot %d: %v", i+1, err)
 		}
 	}
 
-	// 查找最后一个机器人
+	// Find the last bot
 	lastBot, err := service.FindLast(ctx)
 	if err != nil {
-		t.Fatalf("查找最后一个机器人失败: %v", err)
+		t.Fatalf("Failed to find last bot: %v", err)
 	}
 	if lastBot == nil {
-		t.Fatal("期望找到最后一个机器人，实际得到nil")
+		t.Fatal("Expected to find last bot, got nil")
 	}
 	if lastBot.ID != 3 {
-		t.Errorf("期望最后一个机器人ID为3，实际得到 %d", lastBot.ID)
+		t.Errorf("Expected last bot ID to be 3, got %d", lastBot.ID)
 	}
 
-	// 创建一个订单
+	// Create an order
 	order := &models.Order{
 		ID:         1,
 		CustomerID: 1001,
@@ -263,40 +263,40 @@ func TestBotServiceImpl_MultipleOperations(t *testing.T) {
 		Status:     consts.OrderStatusPending,
 	}
 
-	// 将机器人状态改为制餐中
+	// Change bot status to cooking
 	err = service.ChangeStatusToCooking(ctx, lastBot, order)
 	if err != nil {
-		t.Fatalf("将机器人状态改为制餐中失败: %v", err)
+		t.Fatalf("Failed to change bot status to cooking: %v", err)
 	}
 
-	// 删除第二个机器人
+	// Delete the second bot
 	secondBot, _ := repository.GetBotRepository().FindByID(ctx, 2)
 	err = service.Delete(ctx, secondBot)
 	if err != nil {
-		t.Fatalf("删除第二个机器人失败: %v", err)
+		t.Fatalf("Failed to delete second bot: %v", err)
 	}
 
-	// 将最后一个机器人状态改为空闲
+	// Change last bot status to idle
 	err = service.ChangeStatusToIdle(ctx, lastBot)
 	if err != nil {
-		t.Fatalf("将机器人状态改为空闲失败: %v", err)
+		t.Fatalf("Failed to change bot status to idle: %v", err)
 	}
 
-	// 删除最后一个机器人
+	// Delete the last bot
 	err = service.Delete(ctx, lastBot)
 	if err != nil {
-		t.Fatalf("删除最后一个机器人失败: %v", err)
+		t.Fatalf("Failed to delete last bot: %v", err)
 	}
 
-	// 查找最后一个机器人，应该是第一个机器人
+	// Find the last bot, should be the first bot
 	lastBot, err = service.FindLast(ctx)
 	if err != nil {
-		t.Fatalf("查找最后一个机器人失败: %v", err)
+		t.Fatalf("Failed to find last bot: %v", err)
 	}
 	if lastBot == nil {
-		t.Fatal("期望找到最后一个机器人，实际得到nil")
+		t.Fatal("Expected to find last bot, got nil")
 	}
 	if lastBot.ID != 1 {
-		t.Errorf("期望最后一个机器人ID为1，实际得到 %d", lastBot.ID)
+		t.Errorf("Expected last bot ID to be 1, got %d", lastBot.ID)
 	}
 }

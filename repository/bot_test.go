@@ -16,12 +16,12 @@ func TestBotPoolMemory_GenerateID(t *testing.T) {
 
 	id1 := pool.GenerateID(ctx)
 	if id1 != 1 {
-		t.Errorf("期望第一个ID为1，实际得到 %d", id1)
+		t.Errorf("Expected first ID to be 1, got %d", id1)
 	}
 
 	id2 := pool.GenerateID(ctx)
 	if id2 != 2 {
-		t.Errorf("期望第二个ID为2，实际得到 %d", id2)
+		t.Errorf("Expected second ID to be 2, got %d", id2)
 	}
 }
 
@@ -31,32 +31,32 @@ func TestBotPoolMemory_Create(t *testing.T) {
 	pool := botStoragePtr.(*BotPoolMemory)
 	ctx := context.Background()
 
-	// 创建一个机器人
+	// Create a bot
 	bot, err := pool.Create(ctx)
 	if err != nil {
-		t.Fatalf("创建机器人失败: %v", err)
+		t.Fatalf("Failed to create bot: %v", err)
 	}
 
-	// 验证机器人属性
+	// Verify bot attributes
 	if bot.ID != 1 {
-		t.Errorf("期望机器人ID为1，实际得到 %d", bot.ID)
+		t.Errorf("Expected bot ID to be 1, got %d", bot.ID)
 	}
 	if bot.Status != consts.BotStatusIdle {
-		t.Errorf("期望机器人状态为空闲(%d)，实际得到 %d", consts.BotStatusIdle, bot.Status)
+		t.Errorf("Expected bot status to be idle(%d), got %d", consts.BotStatusIdle, bot.Status)
 	}
 	if bot.OrderID != 0 {
-		t.Errorf("期望机器人订单ID为0，实际得到 %d", bot.OrderID)
+		t.Errorf("Expected bot order ID to be 0, got %d", bot.OrderID)
 	}
 
-	// 验证机器人是否已添加到池中
+	// Verify bot has been added to the pool
 	if pool.Bots.Len() != 1 {
-		t.Errorf("期望池中有1个机器人，实际有 %d", pool.Bots.Len())
+		t.Errorf("Expected 1 bot in pool, got %d", pool.Bots.Len())
 	}
 	if len(pool.BotMap) != 1 {
-		t.Errorf("期望BotMap中有1个机器人，实际有 %d", len(pool.BotMap))
+		t.Errorf("Expected 1 bot in BotMap, got %d", len(pool.BotMap))
 	}
 	if _, ok := pool.BotMap[bot.ID]; !ok {
-		t.Errorf("在BotMap中未找到ID为 %d 的机器人", bot.ID)
+		t.Errorf("Bot with ID %d not found in BotMap", bot.ID)
 	}
 }
 
@@ -65,39 +65,39 @@ func TestBotPoolMemory_Add(t *testing.T) {
 	pool := botStoragePtr.(*BotPoolMemory)
 	ctx := context.Background()
 
-	// 创建一个机器人对象
+	// Create a bot object
 	bot := &models.Bot{
 		ID:      42,
 		Status:  consts.BotStatusIdle,
 		OrderID: 0,
 	}
 
-	// 添加机器人到池中
+	// Add bot to the pool
 	err := pool.Add(ctx, bot)
 	if err != nil {
-		t.Fatalf("添加机器人失败: %v", err)
+		t.Fatalf("Failed to add bot: %v", err)
 	}
 
-	// 验证机器人是否已添加到池中
+	// Verify bot has been added to the pool
 	if pool.Bots.Len() != 1 {
-		t.Errorf("期望池中有1个机器人，实际有 %d", pool.Bots.Len())
+		t.Errorf("Expected 1 bot in pool, got %d", pool.Bots.Len())
 	}
 	if len(pool.BotMap) != 1 {
-		t.Errorf("期望BotMap中有1个机器人，实际有 %d", len(pool.BotMap))
+		t.Errorf("Expected 1 bot in BotMap, got %d", len(pool.BotMap))
 	}
 	if storedBot, ok := pool.BotMap[bot.ID]; !ok {
-		t.Errorf("在BotMap中未找到ID为 %d 的机器人", bot.ID)
+		t.Errorf("Bot with ID %d not found in BotMap", bot.ID)
 	} else if storedBot != bot {
-		t.Errorf("存储的机器人与添加的机器人不同")
+		t.Errorf("Stored bot is different from the added bot")
 	}
 
-	// 测试添加nil机器人
+	// Test adding nil bot
 	err = pool.Add(ctx, nil)
 	if err != nil {
-		t.Fatalf("添加nil机器人应该不返回错误，但得到: %v", err)
+		t.Fatalf("Adding nil bot should not return error, but got: %v", err)
 	}
 	if pool.Bots.Len() != 1 {
-		t.Errorf("添加nil机器人后，期望池中仍有1个机器人，实际有 %d", pool.Bots.Len())
+		t.Errorf("After adding nil bot, expected 1 bot in pool, got %d", pool.Bots.Len())
 	}
 }
 
@@ -106,31 +106,31 @@ func TestBotPoolMemory_FindByID(t *testing.T) {
 	pool := botStoragePtr.(*BotPoolMemory)
 	ctx := context.Background()
 
-	// 创建一个机器人
+	// Create a bot
 	bot, err := pool.Create(ctx)
 	if err != nil {
-		t.Fatalf("创建机器人失败: %v", err)
+		t.Fatalf("Failed to create bot: %v", err)
 	}
 
-	// 通过ID查找机器人
+	// Find bot by ID
 	foundBot, err := pool.FindByID(ctx, bot.ID)
 	if err != nil {
-		t.Fatalf("查找机器人失败: %v", err)
+		t.Fatalf("Failed to find bot: %v", err)
 	}
 	if foundBot == nil {
-		t.Fatal("期望找到机器人，实际得到nil")
+		t.Fatal("Expected to find bot, got nil")
 	}
 	if foundBot.ID != bot.ID {
-		t.Errorf("期望机器人ID为 %d，实际得到 %d", bot.ID, foundBot.ID)
+		t.Errorf("Expected bot ID to be %d, got %d", bot.ID, foundBot.ID)
 	}
 
-	// 尝试查找不存在的机器人
+	// Try to find non-existent bot
 	nonExistentBot, err := pool.FindByID(ctx, 9999)
 	if err != nil {
-		t.Fatalf("查找不存在机器人时出现意外错误: %v", err)
+		t.Fatalf("Unexpected error when finding non-existent bot: %v", err)
 	}
 	if nonExistentBot != nil {
-		t.Errorf("期望不存在机器人返回nil，实际得到 %+v", nonExistentBot)
+		t.Errorf("Expected nil for non-existent bot, got %+v", nonExistentBot)
 	}
 }
 
@@ -139,35 +139,35 @@ func TestBotPoolMemory_FindLast(t *testing.T) {
 	pool := botStoragePtr.(*BotPoolMemory)
 	ctx := context.Background()
 
-	// 初始应该没有机器人
+	// Initially there should be no bots
 	lastBot, err := pool.FindLast(ctx)
 	if err != nil {
-		t.Fatalf("查找最后一个机器人失败: %v", err)
+		t.Fatalf("Failed to find last bot: %v", err)
 	}
 	if lastBot != nil {
-		t.Errorf("期望初始没有机器人，实际得到 %+v", lastBot)
+		t.Errorf("Expected no bots initially, got %+v", lastBot)
 	}
 
-	// 创建多个机器人
+	// Create multiple bots
 	bots := make([]*models.Bot, 3)
 	for i := 0; i < 3; i++ {
 		bot, err := pool.Create(ctx)
 		if err != nil {
-			t.Fatalf("创建机器人%d失败: %v", i+1, err)
+			t.Fatalf("Failed to create bot %d: %v", i+1, err)
 		}
 		bots[i] = bot
 	}
 
-	// 查找最后一个机器人
+	// Find the last bot
 	lastBot, err = pool.FindLast(ctx)
 	if err != nil {
-		t.Fatalf("查找最后一个机器人失败: %v", err)
+		t.Fatalf("Failed to find last bot: %v", err)
 	}
 	if lastBot == nil {
-		t.Fatal("期望找到最后一个机器人，实际得到nil")
+		t.Fatal("Expected to find last bot, got nil")
 	}
 	if lastBot.ID != bots[2].ID {
-		t.Errorf("期望最后一个机器人ID为 %d，实际得到 %d", bots[2].ID, lastBot.ID)
+		t.Errorf("Expected last bot ID to be %d, got %d", bots[2].ID, lastBot.ID)
 	}
 }
 
@@ -176,33 +176,33 @@ func TestBotPoolMemory_Delete(t *testing.T) {
 	pool := botStoragePtr.(*BotPoolMemory)
 	ctx := context.Background()
 
-	// 创建一个机器人
+	// Create a bot
 	bot, err := pool.Create(ctx)
 	if err != nil {
-		t.Fatalf("创建机器人失败: %v", err)
+		t.Fatalf("Failed to create bot: %v", err)
 	}
 
-	// 删除机器人
+	// Delete the bot
 	err = pool.Delete(ctx, bot)
 	if err != nil {
-		t.Fatalf("删除机器人失败: %v", err)
+		t.Fatalf("Failed to delete bot: %v", err)
 	}
 
-	// 验证机器人是否已从池中删除
+	// Verify bot has been removed from the pool
 	if pool.Bots.Len() != 0 {
-		t.Errorf("期望池中有0个机器人，实际有 %d", pool.Bots.Len())
+		t.Errorf("Expected 0 bots in pool, got %d", pool.Bots.Len())
 	}
 	if len(pool.BotMap) != 0 {
-		t.Errorf("期望BotMap中有0个机器人，实际有 %d", len(pool.BotMap))
+		t.Errorf("Expected 0 bots in BotMap, got %d", len(pool.BotMap))
 	}
 	if _, ok := pool.BotMap[bot.ID]; ok {
-		t.Errorf("在BotMap中仍能找到已删除的机器人 %d", bot.ID)
+		t.Errorf("Deleted bot %d still found in BotMap", bot.ID)
 	}
 
-	// 测试删除nil机器人
+	// Test deleting nil bot
 	err = pool.Delete(ctx, nil)
 	if err != nil {
-		t.Fatalf("删除nil机器人应该不返回错误，但得到: %v", err)
+		t.Fatalf("Deleting nil bot should not return error, but got: %v", err)
 	}
 }
 
@@ -211,53 +211,53 @@ func TestBotPoolMemory_MultipleOperations(t *testing.T) {
 	pool := botStoragePtr.(*BotPoolMemory)
 	ctx := context.Background()
 
-	// 创建多个机器人
+	// Create multiple bots
 	bots := make([]*models.Bot, 5)
 	for i := 0; i < 5; i++ {
 		bot, err := pool.Create(ctx)
 		if err != nil {
-			t.Fatalf("创建机器人%d失败: %v", i+1, err)
+			t.Fatalf("Failed to create bot %d: %v", i+1, err)
 		}
 		bots[i] = bot
 	}
 
-	// 验证机器人数量
+	// Verify bot count
 	if pool.Bots.Len() != 5 {
-		t.Errorf("期望池中有5个机器人，实际有 %d", pool.Bots.Len())
+		t.Errorf("Expected 5 bots in pool, got %d", pool.Bots.Len())
 	}
 
-	// 删除中间的机器人
+	// Delete middle bot
 	err := pool.Delete(ctx, bots[2])
 	if err != nil {
-		t.Fatalf("删除机器人失败: %v", err)
+		t.Fatalf("Failed to delete bot: %v", err)
 	}
 
-	// 验证机器人数量
+	// Verify bot count after deletion
 	if pool.Bots.Len() != 4 {
-		t.Errorf("删除一个后期望池中有4个机器人，实际有 %d", pool.Bots.Len())
+		t.Errorf("After deleting one, expected 4 bots in pool, got %d", pool.Bots.Len())
 	}
 
-	// 查找最后一个机器人
+	// Find the last bot
 	lastBot, err := pool.FindLast(ctx)
 	if err != nil {
-		t.Fatalf("查找最后一个机器人失败: %v", err)
+		t.Fatalf("Failed to find last bot: %v", err)
 	}
 	if lastBot.ID != bots[4].ID {
-		t.Errorf("期望最后一个机器人ID为 %d，实际得到 %d", bots[4].ID, lastBot.ID)
+		t.Errorf("Expected last bot ID to be %d, got %d", bots[4].ID, lastBot.ID)
 	}
 
-	// 再创建一个机器人
+	// Create another bot
 	newBot, err := pool.Create(ctx)
 	if err != nil {
-		t.Fatalf("创建新机器人失败: %v", err)
+		t.Fatalf("Failed to create new bot: %v", err)
 	}
 
-	// 验证新机器人是最后一个
+	// Verify new bot is the last one
 	lastBot, err = pool.FindLast(ctx)
 	if err != nil {
-		t.Fatalf("查找最后一个机器人失败: %v", err)
+		t.Fatalf("Failed to find last bot: %v", err)
 	}
 	if lastBot.ID != newBot.ID {
-		t.Errorf("期望最后一个机器人ID为 %d，实际得到 %d", newBot.ID, lastBot.ID)
+		t.Errorf("Expected last bot ID to be %d, got %d", newBot.ID, lastBot.ID)
 	}
 }

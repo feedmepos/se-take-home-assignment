@@ -16,12 +16,12 @@ func TestOrderPoolMemory_GenerateID(t *testing.T) {
 
 	id1 := pool.GenerateID(ctx)
 	if id1 != 1 {
-		t.Errorf("期望第一个ID为1，实际得到 %d", id1)
+		t.Errorf("Expected first ID to be 1, got %d", id1)
 	}
 
 	id2 := pool.GenerateID(ctx)
 	if id2 != 2 {
-		t.Errorf("期望第二个ID为2，实际得到 %d", id2)
+		t.Errorf("Expected second ID to be 2, got %d", id2)
 	}
 }
 
@@ -31,39 +31,39 @@ func TestOrderPoolMemory_CreatePending(t *testing.T) {
 	pool := orderStoragePtr.(*OrderPoolMemory)
 	ctx := context.Background()
 
-	// 测试创建普通优先级订单
+	// Test creating normal priority order
 	customerID := int64(1001)
 	order, err := pool.CreatePending(ctx, customerID, consts.OrderPriorityNormal)
 	if err != nil {
-		t.Fatalf("创建普通订单失败: %v", err)
+		t.Fatalf("Failed to create normal order: %v", err)
 	}
 	if order.CustomerID != customerID {
-		t.Errorf("期望客户ID为 %d，实际得到 %d", customerID, order.CustomerID)
+		t.Errorf("Expected customer ID to be %d, got %d", customerID, order.CustomerID)
 	}
 	if order.Priority != consts.OrderPriorityNormal {
-		t.Errorf("期望优先级为 %d，实际得到 %d", consts.OrderPriorityNormal, order.Priority)
+		t.Errorf("Expected priority to be %d, got %d", consts.OrderPriorityNormal, order.Priority)
 	}
 	if order.Status != consts.OrderStatusPending {
-		t.Errorf("期望状态为 %d，实际得到 %d", consts.OrderStatusPending, order.Status)
+		t.Errorf("Expected status to be %d, got %d", consts.OrderStatusPending, order.Status)
 	}
 	if pool.NormalPendingOrders.Len() != 1 {
-		t.Errorf("期望有1个普通待处理订单，实际有 %d", pool.NormalPendingOrders.Len())
+		t.Errorf("Expected 1 normal pending order, got %d", pool.NormalPendingOrders.Len())
 	}
 
-	// 测试创建VIP优先级订单
+	// Test creating VIP priority order
 	vipCustomerID := int64(2001)
 	vipOrder, err := pool.CreatePending(ctx, vipCustomerID, consts.OrderPriorityVip)
 	if err != nil {
-		t.Fatalf("创建VIP订单失败: %v", err)
+		t.Fatalf("Failed to create VIP order: %v", err)
 	}
 	if vipOrder.CustomerID != vipCustomerID {
-		t.Errorf("期望客户ID为 %d，实际得到 %d", vipCustomerID, vipOrder.CustomerID)
+		t.Errorf("Expected customer ID to be %d, got %d", vipCustomerID, vipOrder.CustomerID)
 	}
 	if vipOrder.Priority != consts.OrderPriorityVip {
-		t.Errorf("期望优先级为 %d，实际得到 %d", consts.OrderPriorityVip, vipOrder.Priority)
+		t.Errorf("Expected priority to be %d, got %d", consts.OrderPriorityVip, vipOrder.Priority)
 	}
 	if pool.VipPendingOrders.Len() != 1 {
-		t.Errorf("期望有1个VIP待处理订单，实际有 %d", pool.VipPendingOrders.Len())
+		t.Errorf("Expected 1 VIP pending order, got %d", pool.VipPendingOrders.Len())
 	}
 }
 
@@ -72,20 +72,20 @@ func TestOrderPoolMemory_HasVipPending(t *testing.T) {
 	pool := orderStoragePtr.(*OrderPoolMemory)
 	ctx := context.Background()
 
-	// 初始应该没有VIP订单
+	// Initially there should be no VIP orders
 	if pool.HasVipPending(ctx) {
-		t.Error("期望初始没有VIP订单")
+		t.Error("Expected no VIP orders initially")
 	}
 
-	// 添加一个VIP订单
+	// Add a VIP order
 	_, err := pool.CreatePending(ctx, 1001, consts.OrderPriorityVip)
 	if err != nil {
-		t.Fatalf("创建VIP订单失败: %v", err)
+		t.Fatalf("Failed to create VIP order: %v", err)
 	}
 
-	// 现在应该有一个VIP订单
+	// Now there should be a VIP order
 	if !pool.HasVipPending(ctx) {
-		t.Error("添加VIP订单后期望有VIP订单")
+		t.Error("Expected to have VIP orders after adding one")
 	}
 }
 
@@ -94,40 +94,40 @@ func TestOrderPoolMemory_TakePending(t *testing.T) {
 	pool := orderStoragePtr.(*OrderPoolMemory)
 	ctx := context.Background()
 
-	// 创建一个普通订单
+	// Create a normal order
 	normalOrder, err := pool.CreatePending(ctx, 1001, consts.OrderPriorityNormal)
 	if err != nil {
-		t.Fatalf("创建普通订单失败: %v", err)
+		t.Fatalf("Failed to create normal order: %v", err)
 	}
 
-	// 创建一个VIP订单
+	// Create a VIP order
 	vipOrder, err := pool.CreatePending(ctx, 2001, consts.OrderPriorityVip)
 	if err != nil {
-		t.Fatalf("创建VIP订单失败: %v", err)
+		t.Fatalf("Failed to create VIP order: %v", err)
 	}
 
-	// 取出VIP订单
+	// Take VIP order
 	takenVipOrder, err := pool.TakePending(ctx, consts.OrderPriorityVip)
 	if err != nil {
-		t.Fatalf("取出VIP订单失败: %v", err)
+		t.Fatalf("Failed to take VIP order: %v", err)
 	}
 	if takenVipOrder.ID != vipOrder.ID {
-		t.Errorf("期望VIP订单ID为 %d，实际得到 %d", vipOrder.ID, takenVipOrder.ID)
+		t.Errorf("Expected VIP order ID to be %d, got %d", vipOrder.ID, takenVipOrder.ID)
 	}
 	if pool.VipPendingOrders.Len() != 0 {
-		t.Errorf("取出一个VIP订单后期望有0个VIP待处理订单，实际有 %d", pool.VipPendingOrders.Len())
+		t.Errorf("After taking one VIP order, expected 0 VIP pending orders, got %d", pool.VipPendingOrders.Len())
 	}
 
-	// 取出普通订单
+	// Take normal order
 	takenNormalOrder, err := pool.TakePending(ctx, consts.OrderPriorityNormal)
 	if err != nil {
-		t.Fatalf("取出普通订单失败: %v", err)
+		t.Fatalf("Failed to take normal order: %v", err)
 	}
 	if takenNormalOrder.ID != normalOrder.ID {
-		t.Errorf("期望普通订单ID为 %d，实际得到 %d", normalOrder.ID, takenNormalOrder.ID)
+		t.Errorf("Expected normal order ID to be %d, got %d", normalOrder.ID, takenNormalOrder.ID)
 	}
 	if pool.NormalPendingOrders.Len() != 0 {
-		t.Errorf("取出一个普通订单后期望有0个普通待处理订单，实际有 %d", pool.NormalPendingOrders.Len())
+		t.Errorf("After taking one normal order, expected 0 normal pending orders, got %d", pool.NormalPendingOrders.Len())
 	}
 }
 
@@ -136,31 +136,31 @@ func TestOrderPoolMemory_FindByID(t *testing.T) {
 	pool := orderStoragePtr.(*OrderPoolMemory)
 	ctx := context.Background()
 
-	// 创建一个订单
+	// Create an order
 	order, err := pool.CreatePending(ctx, 1001, consts.OrderPriorityNormal)
 	if err != nil {
-		t.Fatalf("创建订单失败: %v", err)
+		t.Fatalf("Failed to create order: %v", err)
 	}
 
-	// 通过ID查找订单
+	// Find order by ID
 	foundOrder, err := pool.FindByID(ctx, order.ID)
 	if err != nil {
-		t.Fatalf("查找订单失败: %v", err)
+		t.Fatalf("Failed to find order: %v", err)
 	}
 	if foundOrder == nil {
-		t.Fatal("期望找到订单，实际得到nil")
+		t.Fatal("Expected to find order, got nil")
 	}
 	if foundOrder.ID != order.ID {
-		t.Errorf("期望订单ID为 %d，实际得到 %d", order.ID, foundOrder.ID)
+		t.Errorf("Expected order ID to be %d, got %d", order.ID, foundOrder.ID)
 	}
 
-	// 尝试查找不存在的订单
+	// Try to find non-existent order
 	nonExistentOrder, err := pool.FindByID(ctx, 9999)
 	if err != nil {
-		t.Fatalf("查找不存在订单时出现意外错误: %v", err)
+		t.Fatalf("Unexpected error when finding non-existent order: %v", err)
 	}
 	if nonExistentOrder != nil {
-		t.Errorf("期望不存在订单返回nil，实际得到 %+v", nonExistentOrder)
+		t.Errorf("Expected nil for non-existent order, got %+v", nonExistentOrder)
 	}
 }
 
@@ -169,29 +169,29 @@ func TestOrderPoolMemory_ChangeStatusToProcessing(t *testing.T) {
 	pool := orderStoragePtr.(*OrderPoolMemory)
 	ctx := context.Background()
 
-	// 创建一个订单
+	// Create an order
 	order, err := pool.CreatePending(ctx, 1001, consts.OrderPriorityNormal)
 	if err != nil {
-		t.Fatalf("创建订单失败: %v", err)
+		t.Fatalf("Failed to create order: %v", err)
 	}
 
-	// 创建一个机器人
+	// Create a bot
 	bot := &models.Bot{
 		ID:     1,
 		Status: consts.BotStatusIdle,
 	}
 
-	// 将订单状态改为处理中
+	// Change order status to processing
 	err = pool.ChangeStatusToProcessing(ctx, order, bot)
 	if err != nil {
-		t.Fatalf("将订单状态改为处理中失败: %v", err)
+		t.Fatalf("Failed to change order status to processing: %v", err)
 	}
 
 	if order.Status != consts.OrderStatusProcessing {
-		t.Errorf("期望订单状态为 %d，实际得到 %d", consts.OrderStatusProcessing, order.Status)
+		t.Errorf("Expected order status to be %d, got %d", consts.OrderStatusProcessing, order.Status)
 	}
 	if order.BotID != bot.ID {
-		t.Errorf("期望订单机器人ID为 %d，实际得到 %d", bot.ID, order.BotID)
+		t.Errorf("Expected order bot ID to be %d, got %d", bot.ID, order.BotID)
 	}
 }
 
@@ -200,37 +200,37 @@ func TestOrderPoolMemory_ChangeStatusToCompleted(t *testing.T) {
 	pool := orderStoragePtr.(*OrderPoolMemory)
 	ctx := context.Background()
 
-	// 创建一个订单
+	// Create an order
 	order, err := pool.CreatePending(ctx, 1001, consts.OrderPriorityNormal)
 	if err != nil {
-		t.Fatalf("创建订单失败: %v", err)
+		t.Fatalf("Failed to create order: %v", err)
 	}
 
-	// 创建一个机器人
+	// Create a bot
 	bot := &models.Bot{
 		ID:     1,
 		Status: consts.BotStatusIdle,
 	}
 
-	// 先将订单状态改为处理中
+	// First change order status to processing
 	err = pool.ChangeStatusToProcessing(ctx, order, bot)
 	if err != nil {
-		t.Fatalf("将订单状态改为处理中失败: %v", err)
+		t.Fatalf("Failed to change order status to processing: %v", err)
 	}
 
-	// 将订单状态改为已完成
+	// Change order status to completed
 	err = pool.ChangeStatusToCompleted(ctx, order)
 	if err != nil {
-		t.Fatalf("将订单状态改为已完成失败: %v", err)
+		t.Fatalf("Failed to change order status to completed: %v", err)
 	}
 
 	if order.Status != consts.OrderStatusCompleted {
-		t.Errorf("期望订单状态为 %d，实际得到 %d", consts.OrderStatusCompleted, order.Status)
+		t.Errorf("Expected order status to be %d, got %d", consts.OrderStatusCompleted, order.Status)
 	}
 
-	// 验证订单是否在已完成订单列表中
+	// Verify order is in the completed orders list
 	if len(pool.CompletedOrders) != 1 {
-		t.Errorf("期望有1个已完成订单，实际有 %d", len(pool.CompletedOrders))
+		t.Errorf("Expected 1 completed order, got %d", len(pool.CompletedOrders))
 	}
 }
 
@@ -239,46 +239,46 @@ func TestOrderPoolMemory_ChangeStatusFromProcessingToPending(t *testing.T) {
 	pool := orderStoragePtr.(*OrderPoolMemory)
 	ctx := context.Background()
 
-	// 创建一个订单
+	// Create an order
 	order, err := pool.CreatePending(ctx, 1001, consts.OrderPriorityNormal)
 	if err != nil {
-		t.Fatalf("创建订单失败: %v", err)
+		t.Fatalf("Failed to create order: %v", err)
 	}
 
-	// 创建一个机器人
+	// Create a bot
 	bot := &models.Bot{
 		ID:     1,
 		Status: consts.BotStatusIdle,
 	}
 
-	// 从待处理队列中取出订单
+	// Take order from pending queue
 	_, err = pool.TakePending(ctx, consts.OrderPriorityNormal)
 	if err != nil {
-		t.Fatalf("取出待处理订单失败: %v", err)
+		t.Fatalf("Failed to take pending order: %v", err)
 	}
 
-	// 将订单状态改为处理中
+	// Change order status to processing
 	err = pool.ChangeStatusToProcessing(ctx, order, bot)
 	if err != nil {
-		t.Fatalf("将订单状态改为处理中失败: %v", err)
+		t.Fatalf("Failed to change order status to processing: %v", err)
 	}
 
-	// 将订单状态从处理中改回待处理
+	// Change order status from processing back to pending
 	err = pool.ChangeStatusFromProcessingToPending(ctx, order)
 	if err != nil {
-		t.Fatalf("将订单状态从处理中改回待处理失败: %v", err)
+		t.Fatalf("Failed to change order status from processing to pending: %v", err)
 	}
 
 	if order.Status != consts.OrderStatusPending {
-		t.Errorf("期望订单状态为 %d，实际得到 %d", consts.OrderStatusPending, order.Status)
+		t.Errorf("Expected order status to be %d, got %d", consts.OrderStatusPending, order.Status)
 	}
 	if order.BotID != 0 {
-		t.Errorf("期望订单机器人ID为0，实际得到 %d", order.BotID)
+		t.Errorf("Expected order bot ID to be 0, got %d", order.BotID)
 	}
 
-	// 验证订单是否回到待处理订单列表
+	// Verify order is back in the pending orders list
 	if pool.NormalPendingOrders.Len() != 1 {
-		t.Errorf("期望有1个普通待处理订单，实际有 %d", pool.NormalPendingOrders.Len())
+		t.Errorf("Expected 1 normal pending order, got %d", pool.NormalPendingOrders.Len())
 	}
 }
 
@@ -287,61 +287,61 @@ func TestOrderPoolMemory_FetchUncompleted(t *testing.T) {
 	pool := orderStoragePtr.(*OrderPoolMemory)
 	ctx := context.Background()
 
-	// 创建两个订单
+	// Create two orders
 	order1, err := pool.CreatePending(ctx, 1001, consts.OrderPriorityNormal)
 	if err != nil {
-		t.Fatalf("创建订单1失败: %v", err)
+		t.Fatalf("Failed to create order 1: %v", err)
 	}
 
 	order2, err := pool.CreatePending(ctx, 1002, consts.OrderPriorityVip)
 	if err != nil {
-		t.Fatalf("创建订单2失败: %v", err)
+		t.Fatalf("Failed to create order 2: %v", err)
 	}
 
 	if order2 == nil {
-		t.Fatalf("创建订单2失败")
+		t.Fatalf("Failed to create order 2")
 	}
 
-	// 创建一个机器人
+	// Create a bot
 	bot := &models.Bot{
 		ID:     1,
 		Status: consts.BotStatusIdle,
 	}
 
-	// 将订单1状态改为处理中
+	// Change order 1 status to processing
 	err = pool.ChangeStatusToProcessing(ctx, order1, bot)
 	if err != nil {
-		t.Fatalf("将订单状态改为处理中失败: %v", err)
+		t.Fatalf("Failed to change order status to processing: %v", err)
 	}
 
-	// 获取未完成的订单
+	// Get uncompleted orders
 	uncompleted, err := pool.FetchUncompleted(ctx)
 	if err != nil {
-		t.Fatalf("获取未完成订单失败: %v", err)
+		t.Fatalf("Failed to fetch uncompleted orders: %v", err)
 	}
 
 	if len(uncompleted) != 2 {
-		t.Errorf("期望有2个未完成订单，实际有 %d", len(uncompleted))
+		t.Errorf("Expected 2 uncompleted orders, got %d", len(uncompleted))
 	}
 
 	if uncompleted[0].Priority != consts.OrderPriorityVip {
-		t.Errorf("期望VIP订单优先，实际 Normal 订单被排在前面")
+		t.Errorf("Expected VIP order to be prioritized, but Normal order was placed first")
 	}
 
-	// 完成订单1
+	// Complete order 1
 	err = pool.ChangeStatusToCompleted(ctx, order1)
 	if err != nil {
-		t.Fatalf("将订单状态改为已完成失败: %v", err)
+		t.Fatalf("Failed to change order status to completed: %v", err)
 	}
 
-	// 再次获取未完成的订单
+	// Get uncompleted orders again
 	uncompleted, err = pool.FetchUncompleted(ctx)
 	if err != nil {
-		t.Fatalf("获取未完成订单失败: %v", err)
+		t.Fatalf("Failed to fetch uncompleted orders: %v", err)
 	}
 
 	if len(uncompleted) != 1 {
-		t.Errorf("完成一个订单后期望有1个未完成订单，实际有 %d", len(uncompleted))
+		t.Errorf("After completing one order, expected 1 uncompleted order, got %d", len(uncompleted))
 	}
 }
 
@@ -350,7 +350,7 @@ func TestOrderPoolMemory_FetchRecentCompleted(t *testing.T) {
 	pool := orderStoragePtr.(*OrderPoolMemory)
 	ctx := context.Background()
 
-	// 创建三个订单
+	// Create three orders
 	orders := make([]*models.Order, 3)
 	bot := &models.Bot{
 		ID:     1,
@@ -360,44 +360,44 @@ func TestOrderPoolMemory_FetchRecentCompleted(t *testing.T) {
 	for i := 0; i < 3; i++ {
 		order, err := pool.CreatePending(ctx, int64(1001+i), consts.OrderPriorityNormal)
 		if err != nil {
-			t.Fatalf("创建订单%d失败: %v", i+1, err)
+			t.Fatalf("Failed to create order %d: %v", i+1, err)
 		}
 		orders[i] = order
 
-		// 从待处理队列中取出订单
+		// Take order from pending queue
 		_, err = pool.TakePending(ctx, consts.OrderPriorityNormal)
 		if err != nil {
-			t.Fatalf("取出待处理订单%d失败: %v", i+1, err)
+			t.Fatalf("Failed to take pending order %d: %v", i+1, err)
 		}
 
-		// 改为处理中
+		// Change to processing
 		err = pool.ChangeStatusToProcessing(ctx, order, bot)
 		if err != nil {
-			t.Fatalf("将订单%d状态改为处理中失败: %v", i+1, err)
+			t.Fatalf("Failed to change order %d status to processing: %v", i+1, err)
 		}
 
-		// 完成订单
+		// Complete order
 		err = pool.ChangeStatusToCompleted(ctx, order)
 		if err != nil {
-			t.Fatalf("将订单%d状态改为已完成失败: %v", i+1, err)
+			t.Fatalf("Failed to change order %d status to completed: %v", i+1, err)
 		}
 	}
 
-	// 获取最近的2个已完成订单
+	// Get the 2 most recent completed orders
 	completed, err := pool.FetchRecentCompleted(ctx, 2)
 	if err != nil {
-		t.Fatalf("获取最近已完成订单失败: %v", err)
+		t.Fatalf("Failed to fetch recent completed orders: %v", err)
 	}
 
 	if len(completed) != 2 {
-		t.Errorf("期望有2个最近已完成订单，实际有 %d", len(completed))
+		t.Errorf("Expected 2 recent completed orders, got %d", len(completed))
 	}
 
-	// 最近的订单应该是最后创建的那些
+	// Most recent orders should be the last ones created
 	if completed[0].ID != orders[1].ID {
-		t.Errorf("期望第一个最近订单ID为 %d，实际得到 %d", orders[1].ID, completed[0].ID)
+		t.Errorf("Expected first recent order ID to be %d, got %d", orders[1].ID, completed[0].ID)
 	}
 	if completed[1].ID != orders[2].ID {
-		t.Errorf("期望第二个最近订单ID为 %d，实际得到 %d", orders[2].ID, completed[1].ID)
+		t.Errorf("Expected second recent order ID to be %d, got %d", orders[2].ID, completed[1].ID)
 	}
 }
