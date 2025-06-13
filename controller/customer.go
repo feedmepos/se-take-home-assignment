@@ -24,7 +24,7 @@ func CreateOrder(ctx context.Context, customerID int64, priority consts.OrderPri
 func GetOrderStatus(ctx context.Context, customerID int64, orderID int64) (bool, consts.OrderStatus) {
 	order, err := service.GetOrderService().FindByID(ctx, orderID)
 	if err != nil {
-		log.Println("订单查询出错", err)
+		log.Println("Error querying order", err)
 		return false, consts.OrderStatusPending
 	}
 

@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// 制餐时间
+// Order cooking time
 var OrderCookTime = 10 * time.Second
 
 type OrderStatus int
@@ -35,6 +35,6 @@ func OrderPriorityValidate(priority int) bool {
 type BotStatus int
 
 const (
-	BotStatusIdle    BotStatus = 0 // 空闲
-	BotStatusCooking BotStatus = 1 // 制餐中
+	BotStatusIdle    BotStatus = 0 // Idle
+	BotStatusCooking BotStatus = 1 // Cooking
 )

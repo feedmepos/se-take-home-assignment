@@ -14,7 +14,7 @@ func InitEventBus() {
 }
 
 func PublishOrderCreated(ctx context.Context, orderID int64) {
-	log.Printf("生成事件，订单 %v 创建成功\n", orderID)
+	log.Printf("Event generated: Order %v created successfully\n", orderID)
 	orderCreatedChan <- orderID
 }
 
@@ -23,7 +23,7 @@ func GetOrderCreatedChan(ctx context.Context) chan int64 {
 }
 
 func PublishBotAdded(ctx context.Context, botID int64) {
-	log.Printf("生成事件，机器人 %v 被添加\n", botID)
+	log.Printf("Event generated: Bot %v added\n", botID)
 	botAddedChan <- botID
 }
 

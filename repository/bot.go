@@ -64,7 +64,7 @@ func (p *BotPoolMemory) Create(ctx context.Context) (*models.Bot, error) {
 	bot.E = p.Bots.PushBack(&bot)
 	p.BotMap[bot.ID] = &bot
 
-	log.Printf("机器人 %d 添加成功\n", id)
+	log.Printf("Bot %d added successfully\n", id)
 	return &bot, nil
 }
 

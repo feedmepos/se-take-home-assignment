@@ -22,7 +22,7 @@ const (
 
 func RunCmdLoopHandler() {
 	reader := bufio.NewReader(os.Stdin)
-	log.Println("欢迎来到麦当劳点餐系统")
+	log.Println("Welcome to McDonald's ordering system")
 
 	for {
 		cmdline, _ := reader.ReadString('\n')
@@ -30,7 +30,7 @@ func RunCmdLoopHandler() {
 
 		splits := strings.Split(cmdline, " ")
 		if len(splits) == 0 {
-			log.Panicln("错误指令")
+			log.Panicln("Invalid command")
 			continue
 		}
 
@@ -45,7 +45,7 @@ func RunCmdLoopHandler() {
 		case CmdTypeScreen:
 			handleCmdTypeScreen(context.Background())
 		default:
-			log.Printf("未知指令: %s\n", cmdType)
+			log.Printf("Unknown command: %s\n", cmdType)
 			continue
 		}
 	}
@@ -54,14 +54,14 @@ func RunCmdLoopHandler() {
 
 func handleCmdTypeCustomerCreateOrder(ctx context.Context, cmds []string) {
 	if len(cmds) <= 2 {
-		log.Println("需要 CustomerID 和 Priority 参数")
+		log.Println("CustomerID and Priority parameters required")
 		return
 	}
 
 	customerIDStr := cmds[1]
 	customerID, _ := strconv.ParseInt(customerIDStr, 10, 64)
 	if customerID <= 0 {
-		log.Println("CustomerID 无效")
+		log.Println("Invalid CustomerID")
 		return
 	}
 
@@ -69,9 +69,9 @@ func handleCmdTypeCustomerCreateOrder(ctx context.Context, cmds []string) {
 	priority, _ := strconv.Atoi(priorityStr)
 
 	if v, err := controller.CreateOrder(ctx, customerID, consts.OrderPriority(priority)); err != nil {
-		log.Printf("创建订单失败: %v\n", err.Error())
+		log.Printf("Failed to create order: %v\n", err.Error())
 	} else {
-		log.Printf("创建订单成功，ID=%v\n", v.OrderID)
+		log.Printf("Order created successfully, ID=%v\n", v.OrderID)
 	}
 }
 
@@ -81,7 +81,7 @@ func handleCmdTypeManagerAddBot(ctx context.Context) {
 
 func handleCmdTypeManagerDecrBot(ctx context.Context) {
 	if err := controller.DecrBot(ctx); err != nil {
-		log.Printf("删除机器人失败: %s\n", err.Error())
+		log.Printf("Failed to delete bot: %s\n", err.Error())
 	}
 }
 
@@ -89,7 +89,7 @@ func handleCmdTypeScreen(ctx context.Context) {
 	screenView := controller.DisplayScreen(ctx)
 
 	if bytes, err := json.Marshal(screenView); err != nil {
-		log.Println("序列化失败", err.Error())
+		log.Println("Serialization failed", err.Error())
 	} else {
 		log.Printf("%v\n", string(bytes))
 	}

@@ -17,19 +17,19 @@ func DecrBot(ctx context.Context) error {
 		return err
 	} else {
 		if bot == nil {
-			log.Printf("未找到机器人\n")
+			log.Printf("Bot not found\n")
 			return nil
 		}
 
 		switch bot.Status {
 		case consts.BotStatusIdle:
-			// 空闲直接删
+			// Delete directly if idle
 			if err := service.GetBotService().Delete(ctx, bot); err != nil {
-				log.Printf("删除机器人失败: %s", err.Error())
+				log.Printf("Failed to delete bot: %s", err.Error())
 			}
 			break
 		case consts.BotStatusCooking:
-			// 制餐中，需要把订单状态还原
+			// If cooking, need to restore order status
 			orderID := bot.OrderID
 			if order, err := service.GetOrderService().FindByID(ctx, orderID); err != nil {
 				// err ?

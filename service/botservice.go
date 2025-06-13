@@ -57,7 +57,7 @@ func (BotServiceImpl) Delete(ctx context.Context, bot *models.Bot) error {
 		return err
 	}
 
-	log.Printf("机器人 %d 删除成功\n", bot.ID)
+	log.Printf("Bot %d deleted successfully\n", bot.ID)
 	return nil
 }
 

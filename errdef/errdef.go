@@ -3,11 +3,11 @@ package errdef
 import "errors"
 
 var (
-	ErrOrderPriorityInvalid error = errors.New("订单优先级错误")
-	ErrOrderStatusNotMatch  error = errors.New("订单状态不匹配")
-	ErrOrderNotFound        error = errors.New("订单不存在")
+	ErrOrderPriorityInvalid error = errors.New("Invalid order priority")
+	ErrOrderStatusNotMatch  error = errors.New("Order status does not match")
+	ErrOrderNotFound        error = errors.New("Order not found")
 
-	ErrBotNotFound         error = errors.New("机器人不存在")
-	ErrBotStatusNotIdle    error = errors.New("机器人状态非空闲中")
-	ErrBotStatusNotCooking error = errors.New("机器人状态非制餐中")
+	ErrBotNotFound         error = errors.New("Bot not found")
+	ErrBotStatusNotIdle    error = errors.New("Bot status is not idle")
+	ErrBotStatusNotCooking error = errors.New("Bot status is not cooking")
 )
