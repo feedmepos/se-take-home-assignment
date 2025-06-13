@@ -22,7 +22,6 @@ type BotStorage interface {
 	FindByID(context.Context, int64) (*models.Bot, error)
 	FindLast(context.Context) (*models.Bot, error)
 
-	Add(context.Context, *models.Bot) error
 	Delete(context.Context, *models.Bot) error
 }
 
@@ -73,19 +72,6 @@ func (p *BotPoolMemory) LockAll(context.Context) {
 }
 func (p *BotPoolMemory) UnlockAll(context.Context) {
 	p.mutex.Unlock()
-}
-
-func (p *BotPoolMemory) Add(ctx context.Context, bot *models.Bot) error {
-	if bot == nil {
-		return nil
-	}
-
-	p.LockAll(ctx)
-	defer p.UnlockAll(ctx)
-
-	bot.E = p.Bots.PushBack(bot)
-	p.BotMap[bot.ID] = bot
-	return nil
 }
 
 func (p *BotPoolMemory) FindByID(ctx context.Context, id int64) (*models.Bot, error) {

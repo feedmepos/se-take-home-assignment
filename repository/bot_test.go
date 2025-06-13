@@ -60,47 +60,6 @@ func TestBotPoolMemory_Create(t *testing.T) {
 	}
 }
 
-func TestBotPoolMemory_Add(t *testing.T) {
-	InitBotRepository()
-	pool := botStoragePtr.(*BotPoolMemory)
-	ctx := context.Background()
-
-	// Create a bot object
-	bot := &models.Bot{
-		ID:      42,
-		Status:  consts.BotStatusIdle,
-		OrderID: 0,
-	}
-
-	// Add bot to the pool
-	err := pool.Add(ctx, bot)
-	if err != nil {
-		t.Fatalf("Failed to add bot: %v", err)
-	}
-
-	// Verify bot has been added to the pool
-	if pool.Bots.Len() != 1 {
-		t.Errorf("Expected 1 bot in pool, got %d", pool.Bots.Len())
-	}
-	if len(pool.BotMap) != 1 {
-		t.Errorf("Expected 1 bot in BotMap, got %d", len(pool.BotMap))
-	}
-	if storedBot, ok := pool.BotMap[bot.ID]; !ok {
-		t.Errorf("Bot with ID %d not found in BotMap", bot.ID)
-	} else if storedBot != bot {
-		t.Errorf("Stored bot is different from the added bot")
-	}
-
-	// Test adding nil bot
-	err = pool.Add(ctx, nil)
-	if err != nil {
-		t.Fatalf("Adding nil bot should not return error, but got: %v", err)
-	}
-	if pool.Bots.Len() != 1 {
-		t.Errorf("After adding nil bot, expected 1 bot in pool, got %d", pool.Bots.Len())
-	}
-}
-
 func TestBotPoolMemory_FindByID(t *testing.T) {
 	InitBotRepository()
 	pool := botStoragePtr.(*BotPoolMemory)
