@@ -3,9 +3,11 @@ package repository
 import (
 	"container/list"
 	"context"
+	"log"
 	"sync"
 	"sync/atomic"
 
+	"idreamshen.com/fmcode/consts"
 	"idreamshen.com/fmcode/models"
 )
 
@@ -13,6 +15,8 @@ var botStoragePtr BotStorage
 
 type BotStorage interface {
 	GenerateID(context.Context) int64
+
+	Create(context.Context) (*models.Bot, error)
 
 	LockAll(context.Context)
 	UnlockAll(context.Context)
@@ -45,6 +49,25 @@ func GetBotRepository() BotStorage {
 
 func (p *BotPoolMemory) GenerateID(ctx context.Context) int64 {
 	return atomic.AddInt64(&p.currentBotID, 1)
+}
+
+func (p *BotPoolMemory) Create(ctx context.Context) (*models.Bot, error) {
+	id := p.GenerateID(ctx)
+
+	bot := models.Bot{
+		ID:      id,
+		Status:  consts.BotStatusIdle,
+		OrderID: 0,
+	}
+
+	p.LockAll(ctx)
+	defer p.UnlockAll(ctx)
+
+	bot.E = p.Bots.PushBack(&bot)
+	p.BotMap[bot.ID] = &bot
+
+	log.Printf("机器人 %d 添加成功\n", id)
+	return &bot, nil
 }
 
 func (p *BotPoolMemory) LockAll(context.Context) {

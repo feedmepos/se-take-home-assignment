@@ -98,8 +98,10 @@ func (p *OrderPoolMemory) addPending(ctx context.Context, order *models.Order, i
 		break
 	}
 
-	p.AllOrders = append(p.AllOrders, order)
-	p.AllOrderMap[order.ID] = order
+	if _, ok := p.AllOrderMap[order.ID]; !ok {
+		p.AllOrderMap[order.ID] = order
+		p.AllOrders = append(p.AllOrders, order)
+	}
 
 	return nil
 }
@@ -169,6 +171,11 @@ func (p *OrderPoolMemory) ChangeStatusFromProcessingToPending(ctx context.Contex
 
 	order.Status = consts.OrderStatusPending
 	order.BotID = 0
+
+	// 重新生成 cancel ctx
+	cancelCtx, cancelFunc := context.WithCancel(ctx)
+	order.CancelCtx = cancelCtx
+	order.CancelFunc = cancelFunc
 
 	p.addPending(ctx, order, false)
 	return nil

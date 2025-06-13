@@ -37,7 +37,6 @@ func DecrBot(ctx context.Context) error {
 				order.CancelFunc()
 			}
 
-			service.GetBotService().Delete(ctx, bot)
 			break
 		default:
 			break

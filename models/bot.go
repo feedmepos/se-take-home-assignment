@@ -2,25 +2,19 @@ package models
 
 import (
 	"container/list"
-	"context"
 	"sync"
-	"time"
 
 	"idreamshen.com/fmcode/consts"
 )
 
 type Bot struct {
-	ID                int64            // 机器人 ID
-	Status            consts.BotStatus // 状态
-	OrderID           int64            // 订单 ID
-	OrderProcessStart *time.Time       // 订单处理开始时间
+	ID      int64            // 机器人 ID
+	Status  consts.BotStatus // 状态
+	OrderID int64            // 订单 ID
 
 	mutex sync.Mutex
 
 	E *list.Element
-
-	CancelCtx  context.Context
-	CancelFunc context.CancelFunc
 }
 
 func (b *Bot) Lock() {

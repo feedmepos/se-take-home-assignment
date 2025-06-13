@@ -40,10 +40,12 @@ LOOP:
 		case <-eventbus.GetOrderCreatedChan(ctx):
 			log.Println("有新订单需要处理")
 			processOrderCreated(ctx, bot)
-		case <-bot.CancelCtx.Done():
-			log.Printf("机器人 %d 被取消\n", bot.ID)
 			break LOOP
 		}
+	}
+
+	if err := service.GetBotService().Delete(ctx, bot); err != nil {
+		log.Printf("机器人 %d 删除失败: %s", bot.ID, err.Error())
 	}
 
 	log.Printf("机器人 %d 退出订单处理循环\n", bot.ID)

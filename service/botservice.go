@@ -40,35 +40,18 @@ func (BotServiceImpl) FindLast(ctx context.Context) (*models.Bot, error) {
 }
 
 func (BotServiceImpl) Add(ctx context.Context) error {
-	id := repository.GetBotRepository().GenerateID(ctx)
-
-	cancelCtx, cancelFunc := context.WithCancel(ctx)
-
-	bot := models.Bot{
-		ID:                id,
-		Status:            consts.BotStatusIdle,
-		OrderID:           0,
-		OrderProcessStart: nil,
-		CancelCtx:         cancelCtx,
-		CancelFunc:        cancelFunc,
-	}
-
-	if err := repository.GetBotRepository().Add(ctx, &bot); err != nil {
+	if bot, err := repository.GetBotRepository().Create(ctx); err != nil {
 		return err
+	} else {
+		eventbus.PublishBotAdded(ctx, bot.ID)
+		return nil
 	}
-
-	log.Printf("机器人 %d 添加成功\n", id)
-
-	eventbus.PublishBotAdded(ctx, id)
-	return nil
 }
 
 func (BotServiceImpl) Delete(ctx context.Context, bot *models.Bot) error {
 	if bot == nil {
 		return nil
 	}
-
-	bot.CancelFunc()
 
 	if err := repository.GetBotRepository().Delete(ctx, bot); err != nil {
 		return err
