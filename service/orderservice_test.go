@@ -89,18 +89,18 @@ func TestOrderServiceImpl_FindByID(t *testing.T) {
 	}
 }
 
-func TestOrderServiceImpl_FindUnfinished(t *testing.T) {
+func TestOrderServiceImpl_FindUncompleted(t *testing.T) {
 	initOrder()
 	ctx := context.Background()
 	service := GetOrderService()
 
 	// 初始应该没有未完成订单
-	unfinished, err := service.FindUnfinished(ctx)
+	uncompleted, err := service.FindUncompleted(ctx)
 	if err != nil {
 		t.Fatalf("查找未完成订单失败: %v", err)
 	}
-	if len(unfinished) != 0 {
-		t.Errorf("期望初始没有未完成订单，实际有 %d", len(unfinished))
+	if len(uncompleted) != 0 {
+		t.Errorf("期望初始没有未完成订单，实际有 %d", len(uncompleted))
 	}
 
 	// 创建两个订单
@@ -115,27 +115,27 @@ func TestOrderServiceImpl_FindUnfinished(t *testing.T) {
 	}
 
 	// 查找未完成订单
-	unfinished, err = service.FindUnfinished(ctx)
+	uncompleted, err = service.FindUncompleted(ctx)
 	if err != nil {
 		t.Fatalf("查找未完成订单失败: %v", err)
 	}
-	if len(unfinished) != 2 {
-		t.Errorf("期望有2个未完成订单，实际有 %d", len(unfinished))
+	if len(uncompleted) != 2 {
+		t.Errorf("期望有2个未完成订单，实际有 %d", len(uncompleted))
 	}
 }
 
-func TestOrderServiceImpl_FindRecentFinished(t *testing.T) {
+func TestOrderServiceImpl_FindRecentCompleted(t *testing.T) {
 	initOrder()
 	ctx := context.Background()
 	service := GetOrderService()
 
 	// 初始应该没有已完成订单
-	finished, err := service.FindRecentFinished(ctx, 10)
+	completed, err := service.FindRecentCompleted(ctx, 10)
 	if err != nil {
 		t.Fatalf("查找已完成订单失败: %v", err)
 	}
-	if len(finished) != 0 {
-		t.Errorf("期望初始没有已完成订单，实际有 %d", len(finished))
+	if len(completed) != 0 {
+		t.Errorf("期望初始没有已完成订单，实际有 %d", len(completed))
 	}
 
 	// 创建三个订单并完成它们
@@ -166,27 +166,27 @@ func TestOrderServiceImpl_FindRecentFinished(t *testing.T) {
 		}
 
 		// 将订单状态改为已完成
-		err = service.ChangeStatusToFinish(ctx, order)
+		err = service.ChangeStatusToCompleted(ctx, order)
 		if err != nil {
 			t.Fatalf("将订单%d状态改为已完成失败: %v", i+1, err)
 		}
 	}
 
 	// 查找最近的2个已完成订单
-	finished, err = service.FindRecentFinished(ctx, 2)
+	completed, err = service.FindRecentCompleted(ctx, 2)
 	if err != nil {
 		t.Fatalf("查找已完成订单失败: %v", err)
 	}
-	if len(finished) != 2 {
-		t.Errorf("期望有2个已完成订单，实际有 %d", len(finished))
+	if len(completed) != 2 {
+		t.Errorf("期望有2个已完成订单，实际有 %d", len(completed))
 	}
 
 	// 验证最近的订单是最后创建的那些
-	if finished[0].ID != orderIDs[1] {
-		t.Errorf("期望第一个最近订单ID为 %d，实际得到 %d", orderIDs[1], finished[0].ID)
+	if completed[0].ID != orderIDs[1] {
+		t.Errorf("期望第一个最近订单ID为 %d，实际得到 %d", orderIDs[1], completed[0].ID)
 	}
-	if finished[1].ID != orderIDs[2] {
-		t.Errorf("期望第二个最近订单ID为 %d，实际得到 %d", orderIDs[2], finished[1].ID)
+	if completed[1].ID != orderIDs[2] {
+		t.Errorf("期望第二个最近订单ID为 %d，实际得到 %d", orderIDs[2], completed[1].ID)
 	}
 }
 
@@ -239,7 +239,7 @@ func TestOrderServiceImpl_ChangeStatusToProcessing(t *testing.T) {
 	}
 }
 
-func TestOrderServiceImpl_ChangeStatusToFinish(t *testing.T) {
+func TestOrderServiceImpl_ChangeStatusToCompleted(t *testing.T) {
 	initOrder()
 	ctx := context.Background()
 	service := GetOrderService()
@@ -269,17 +269,17 @@ func TestOrderServiceImpl_ChangeStatusToFinish(t *testing.T) {
 	}
 
 	// 将订单状态改为已完成
-	err = service.ChangeStatusToFinish(ctx, order)
+	err = service.ChangeStatusToCompleted(ctx, order)
 	if err != nil {
 		t.Fatalf("将订单状态改为已完成失败: %v", err)
 	}
 
-	if order.Status != consts.OrderStatusFinished {
-		t.Errorf("期望订单状态为已完成(%d)，实际得到 %d", consts.OrderStatusFinished, order.Status)
+	if order.Status != consts.OrderStatusCompleted {
+		t.Errorf("期望订单状态为已完成(%d)，实际得到 %d", consts.OrderStatusCompleted, order.Status)
 	}
 
 	// 测试nil订单
-	err = service.ChangeStatusToFinish(ctx, nil)
+	err = service.ChangeStatusToCompleted(ctx, nil)
 	if err != errdef.ErrOrderNotFound {
 		t.Errorf("期望错误为 %v，实际得到 %v", errdef.ErrOrderNotFound, err)
 	}
@@ -290,7 +290,7 @@ func TestOrderServiceImpl_ChangeStatusToFinish(t *testing.T) {
 		t.Fatalf("创建新订单失败: %v", err)
 	}
 	newOrderObj, _ := service.FindByID(ctx, newOrder)
-	err = service.ChangeStatusToFinish(ctx, newOrderObj)
+	err = service.ChangeStatusToCompleted(ctx, newOrderObj)
 	if err != errdef.ErrOrderStatusNotMatch {
 		t.Errorf("期望错误为 %v，实际得到 %v", errdef.ErrOrderStatusNotMatch, err)
 	}
@@ -372,12 +372,12 @@ func TestOrderServiceImpl_MultipleOperations(t *testing.T) {
 	}
 
 	// 查找未完成订单
-	unfinished, err := service.FindUnfinished(ctx)
+	uncompleted, err := service.FindUncompleted(ctx)
 	if err != nil {
 		t.Fatalf("查找未完成订单失败: %v", err)
 	}
-	if len(unfinished) != 3 {
-		t.Errorf("期望有3个未完成订单，实际有 %d", len(unfinished))
+	if len(uncompleted) != 3 {
+		t.Errorf("期望有3个未完成订单，实际有 %d", len(uncompleted))
 	}
 
 	// 处理第一个订单
@@ -400,7 +400,7 @@ func TestOrderServiceImpl_MultipleOperations(t *testing.T) {
 	}
 
 	// 将订单状态改为已完成
-	err = service.ChangeStatusToFinish(ctx, order1)
+	err = service.ChangeStatusToCompleted(ctx, order1)
 	if err != nil {
 		t.Fatalf("将订单状态改为已完成失败: %v", err)
 	}
@@ -431,23 +431,23 @@ func TestOrderServiceImpl_MultipleOperations(t *testing.T) {
 	}
 
 	// 再次查找未完成订单
-	unfinished, err = service.FindUnfinished(ctx)
+	uncompleted, err = service.FindUncompleted(ctx)
 	if err != nil {
 		t.Fatalf("查找未完成订单失败: %v", err)
 	}
-	if len(unfinished) != 2 {
-		t.Errorf("期望有2个未完成订单，实际有 %d", len(unfinished))
+	if len(uncompleted) != 2 {
+		t.Errorf("期望有2个未完成订单，实际有 %d", len(uncompleted))
 	}
 
 	// 查找已完成订单
-	finished, err := service.FindRecentFinished(ctx, 10)
+	completed, err := service.FindRecentCompleted(ctx, 10)
 	if err != nil {
 		t.Fatalf("查找已完成订单失败: %v", err)
 	}
-	if len(finished) != 1 {
-		t.Errorf("期望有1个已完成订单，实际有 %d", len(finished))
+	if len(completed) != 1 {
+		t.Errorf("期望有1个已完成订单，实际有 %d", len(completed))
 	}
-	if finished[0].ID != orderIDs[0] {
-		t.Errorf("期望已完成订单ID为 %d，实际得到 %d", orderIDs[0], finished[0].ID)
+	if completed[0].ID != orderIDs[0] {
+		t.Errorf("期望已完成订单ID为 %d，实际得到 %d", orderIDs[0], completed[0].ID)
 	}
 }

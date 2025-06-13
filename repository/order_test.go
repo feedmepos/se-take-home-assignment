@@ -195,7 +195,7 @@ func TestOrderPoolMemory_ChangeStatusToProcessing(t *testing.T) {
 	}
 }
 
-func TestOrderPoolMemory_ChangeStatusToFinish(t *testing.T) {
+func TestOrderPoolMemory_ChangeStatusToCompleted(t *testing.T) {
 	InitOrderRepository()
 	pool := orderStoragePtr.(*OrderPoolMemory)
 	ctx := context.Background()
@@ -219,13 +219,13 @@ func TestOrderPoolMemory_ChangeStatusToFinish(t *testing.T) {
 	}
 
 	// 将订单状态改为已完成
-	err = pool.ChangeStatusToFinish(ctx, order)
+	err = pool.ChangeStatusToCompleted(ctx, order)
 	if err != nil {
 		t.Fatalf("将订单状态改为已完成失败: %v", err)
 	}
 
-	if order.Status != consts.OrderStatusFinished {
-		t.Errorf("期望订单状态为 %d，实际得到 %d", consts.OrderStatusFinished, order.Status)
+	if order.Status != consts.OrderStatusCompleted {
+		t.Errorf("期望订单状态为 %d，实际得到 %d", consts.OrderStatusCompleted, order.Status)
 	}
 
 	// 验证订单是否在已完成订单列表中
@@ -325,7 +325,7 @@ func TestOrderPoolMemory_FetchUncompleted(t *testing.T) {
 	}
 
 	// 完成订单1
-	err = pool.ChangeStatusToFinish(ctx, order1)
+	err = pool.ChangeStatusToCompleted(ctx, order1)
 	if err != nil {
 		t.Fatalf("将订单状态改为已完成失败: %v", err)
 	}
@@ -373,7 +373,7 @@ func TestOrderPoolMemory_FetchRecentCompleted(t *testing.T) {
 		}
 
 		// 完成订单
-		err = pool.ChangeStatusToFinish(ctx, order)
+		err = pool.ChangeStatusToCompleted(ctx, order)
 		if err != nil {
 			t.Fatalf("将订单%d状态改为已完成失败: %v", i+1, err)
 		}

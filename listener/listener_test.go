@@ -157,8 +157,8 @@ func TestBotCookOrderComplete(t *testing.T) {
 		t.Fatalf("查找订单失败: %v", err)
 	}
 
-	if updatedOrder.Status != consts.OrderStatusFinished {
-		t.Errorf("期望订单状态为已完成(%d)，实际得到 %d", consts.OrderStatusFinished, updatedOrder.Status)
+	if updatedOrder.Status != consts.OrderStatusCompleted {
+		t.Errorf("期望订单状态为已完成(%d)，实际得到 %d", consts.OrderStatusCompleted, updatedOrder.Status)
 	}
 
 	// 验证机器人状态已变为空闲

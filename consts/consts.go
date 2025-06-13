@@ -13,7 +13,7 @@ type OrderStatus int
 const (
 	OrderStatusPending    OrderStatus = 0
 	OrderStatusProcessing OrderStatus = 1
-	OrderStatusFinished   OrderStatus = 2
+	OrderStatusCompleted  OrderStatus = 2
 )
 
 type OrderPriority int

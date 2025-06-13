@@ -22,7 +22,7 @@ type OrderStorage interface {
 	TakePending(context.Context, consts.OrderPriority) (*models.Order, error)
 
 	ChangeStatusToProcessing(context.Context, *models.Order, *models.Bot) error
-	ChangeStatusToFinish(context.Context, *models.Order) error
+	ChangeStatusToCompleted(context.Context, *models.Order) error
 	ChangeStatusFromProcessingToPending(context.Context, *models.Order) error
 
 	// 获取未完成的订单列表
@@ -141,7 +141,7 @@ func (p *OrderPoolMemory) FetchUncompleted(ctx context.Context) ([]*models.Order
 	var uncompletedOrders []*models.Order
 
 	for _, order := range p.AllOrders {
-		if order.Status != consts.OrderStatusFinished {
+		if order.Status != consts.OrderStatusCompleted {
 			uncompletedOrders = append(uncompletedOrders, order)
 		}
 	}
@@ -179,7 +179,7 @@ func (p *OrderPoolMemory) ChangeStatusFromProcessingToPending(ctx context.Contex
 	return nil
 }
 
-func (p *OrderPoolMemory) ChangeStatusToFinish(ctx context.Context, order *models.Order) error {
+func (p *OrderPoolMemory) ChangeStatusToCompleted(ctx context.Context, order *models.Order) error {
 	if order == nil {
 		return errdef.ErrOrderNotFound
 	}
@@ -191,7 +191,7 @@ func (p *OrderPoolMemory) ChangeStatusToFinish(ctx context.Context, order *model
 		return errdef.ErrOrderStatusNotMatch
 	}
 
-	order.Status = consts.OrderStatusFinished
+	order.Status = consts.OrderStatusCompleted
 
 	p.CompletedOrders = append(p.CompletedOrders, order)
 	return nil

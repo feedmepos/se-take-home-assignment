@@ -18,13 +18,13 @@ type OrderService interface {
 
 	FindByID(context.Context, int64) (*models.Order, error)
 
-	FindUnfinished(context.Context) ([]*models.Order, error)
+	FindUncompleted(context.Context) ([]*models.Order, error)
 
-	FindRecentFinished(context.Context, int) ([]*models.Order, error)
+	FindRecentCompleted(context.Context, int) ([]*models.Order, error)
 
 	ChangeStatusToProcessing(context.Context, *models.Order, *models.Bot) error
 
-	ChangeStatusToFinish(context.Context, *models.Order) error
+	ChangeStatusToCompleted(context.Context, *models.Order) error
 
 	// 将 order 重置
 	ResetOrder(context.Context, *models.Order) error
@@ -73,11 +73,11 @@ func (orderServiceImpl) FindByID(ctx context.Context, id int64) (*models.Order, 
 	return repository.GetOrderRepository().FindByID(ctx, id)
 }
 
-func (orderServiceImpl) FindUnfinished(ctx context.Context) ([]*models.Order, error) {
+func (orderServiceImpl) FindUncompleted(ctx context.Context) ([]*models.Order, error) {
 	return repository.GetOrderRepository().FetchUncompleted(ctx)
 }
 
-func (orderServiceImpl) FindRecentFinished(ctx context.Context, num int) ([]*models.Order, error) {
+func (orderServiceImpl) FindRecentCompleted(ctx context.Context, num int) ([]*models.Order, error) {
 	return repository.GetOrderRepository().FetchRecentCompleted(ctx, num)
 }
 
@@ -85,6 +85,6 @@ func (o orderServiceImpl) ChangeStatusToProcessing(ctx context.Context, order *m
 	return repository.GetOrderRepository().ChangeStatusToProcessing(ctx, order, bot)
 }
 
-func (o orderServiceImpl) ChangeStatusToFinish(ctx context.Context, order *models.Order) error {
-	return repository.GetOrderRepository().ChangeStatusToFinish(ctx, order)
+func (o orderServiceImpl) ChangeStatusToCompleted(ctx context.Context, order *models.Order) error {
+	return repository.GetOrderRepository().ChangeStatusToCompleted(ctx, order)
 }

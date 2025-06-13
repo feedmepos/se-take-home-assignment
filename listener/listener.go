@@ -99,10 +99,10 @@ func botCookOrder(ctx context.Context, bot *models.Bot, order *models.Order) err
 
 	select {
 	case <-time.After(consts.OrderCookTime):
-		newOrderStatus = consts.OrderStatusFinished
+		newOrderStatus = consts.OrderStatusCompleted
 
-		if err := service.GetOrderService().ChangeStatusToFinish(ctx, order); err != nil {
-			log.Printf("Cannot change order %d status to Finished: %s\n", order.ID, err.Error())
+		if err := service.GetOrderService().ChangeStatusToCompleted(ctx, order); err != nil {
+			log.Printf("Cannot change order %d status to Completed: %s\n", order.ID, err.Error())
 			return err
 		}
 
@@ -121,7 +121,7 @@ func botCookOrder(ctx context.Context, bot *models.Bot, order *models.Order) err
 		return err
 	}
 
-	if newOrderStatus == consts.OrderStatusFinished {
+	if newOrderStatus == consts.OrderStatusCompleted {
 		log.Printf("Bot %d completed order %d\n", bot.ID, order.ID)
 	} else if newOrderStatus == consts.OrderStatusPending {
 		log.Printf("Bot %d did not complete order %d, order was cancelled\n", bot.ID, order.ID)
