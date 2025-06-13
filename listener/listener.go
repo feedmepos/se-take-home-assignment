@@ -39,8 +39,9 @@ LOOP:
 		select {
 		case <-eventbus.GetOrderCreatedChan(ctx):
 			log.Println("New order needs to be processed")
-			processOrderCreated(ctx, bot)
-			break LOOP
+			if !processOrderCreated(ctx, bot) {
+				break LOOP
+			}
 		}
 	}
 
@@ -51,7 +52,8 @@ LOOP:
 	log.Printf("Bot %d exited order processing loop\n", bot.ID)
 }
 
-func processOrderCreated(ctx context.Context, bot *models.Bot) {
+// @Return processNext bool if need process next order
+func processOrderCreated(ctx context.Context, bot *models.Bot) bool {
 	var order *models.Order
 	var err error
 
@@ -63,36 +65,42 @@ func processOrderCreated(ctx context.Context, bot *models.Bot) {
 
 	if err != nil {
 		log.Printf("Failed to get order: %s\n", err.Error())
-		return
+		return true
 	}
 
 	if order == nil {
 		log.Printf("No order found to process\n")
-		return
+		return true
 	}
 
-	if err := botCookOrder(ctx, bot, order); err != nil {
+	if processNext, err := botCookOrder(ctx, bot, order); err != nil {
 		log.Printf("Bot %d failed to process order %d: %s\n", bot.ID, order.ID, err.Error())
+		return true
+	} else {
+		return processNext
 	}
 }
 
-func botCookOrder(ctx context.Context, bot *models.Bot, order *models.Order) error {
+// @Return processNext bool if need process next order
+func botCookOrder(ctx context.Context, bot *models.Bot, order *models.Order) (bool, error) {
+	var isCancelled = false
+
 	if bot == nil {
-		return errdef.ErrBotNotFound
+		return false, errdef.ErrBotNotFound
 	}
 
 	if order == nil {
-		return errdef.ErrOrderNotFound
+		return true, errdef.ErrOrderNotFound
 	}
 
 	log.Printf("Bot %d started processing order %d\n", bot.ID, order.ID)
 
 	if err := service.GetBotService().ChangeStatusToCooking(ctx, bot, order); err != nil {
-		return err
+		return true, err
 	}
 
 	if err := service.GetOrderService().ChangeStatusToProcessing(ctx, order, bot); err != nil {
-		return err
+		return true, err
 	}
 
 	var newOrderStatus consts.OrderStatus
@@ -103,22 +111,24 @@ func botCookOrder(ctx context.Context, bot *models.Bot, order *models.Order) err
 
 		if err := service.GetOrderService().ChangeStatusToCompleted(ctx, order); err != nil {
 			log.Printf("Cannot change order %d status to Completed: %s\n", order.ID, err.Error())
-			return err
+			return true, err
 		}
 
 		break
 	case <-order.CancelCtx.Done():
+		// Currently, if order is cancelled, we consider the bot is also deleted
+		isCancelled = true
 		newOrderStatus = consts.OrderStatusPending
 		if err := service.GetOrderService().ResetOrder(ctx, order); err != nil {
 			log.Printf("Cannot reset order %d status: %s\n", order.ID, err.Error())
-			return err
+			return false, err
 		}
 		break
 	}
 
 	if err := service.GetBotService().ChangeStatusToIdle(ctx, bot); err != nil {
 		log.Printf("Cannot change bot status to IDLE: %s\n", err.Error())
-		return err
+		return !isCancelled, err
 	}
 
 	if newOrderStatus == consts.OrderStatusCompleted {
@@ -127,5 +137,5 @@ func botCookOrder(ctx context.Context, bot *models.Bot, order *models.Order) err
 		log.Printf("Bot %d did not complete order %d, order was cancelled\n", bot.ID, order.ID)
 	}
 
-	return nil
+	return !isCancelled, nil
 }
