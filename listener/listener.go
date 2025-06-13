@@ -98,7 +98,7 @@ func botCookOrder(ctx context.Context, bot *models.Bot, order *models.Order) err
 	var newOrderStatus consts.OrderStatus
 
 	select {
-	case <-time.After(10 * time.Second):
+	case <-time.After(consts.OrderCookTime):
 		newOrderStatus = consts.OrderStatusFinished
 
 		if err := service.GetOrderService().ChangeStatusToFinish(ctx, order); err != nil {

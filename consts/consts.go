@@ -1,6 +1,12 @@
 package consts
 
-import "slices"
+import (
+	"slices"
+	"time"
+)
+
+// 制餐时间
+var OrderCookTime = 10 * time.Second
 
 type OrderStatus int
 
