@@ -7,122 +7,122 @@ import (
 )
 
 func TestInitEventBus(t *testing.T) {
-	// 初始化事件总线
+	// Initialize event bus
 	InitEventBus()
 	
-	// 验证通道已创建
+	// Verify channels are created
 	if orderCreatedChan == nil {
-		t.Error("期望orderCreatedChan被初始化，实际为nil")
+		t.Error("Expected orderCreatedChan to be initialized, but it was nil")
 	}
 	
 	if botAddedChan == nil {
-		t.Error("期望botAddedChan被初始化，实际为nil")
+		t.Error("Expected botAddedChan to be initialized, but it was nil")
 	}
 }
 
 func TestPublishOrderCreated(t *testing.T) {
-	// 初始化事件总线
+	// Initialize event bus
 	InitEventBus()
 	ctx := context.Background()
 	
-	// 发布订单创建事件
+	// Publish order created event
 	orderID := int64(123)
 	go PublishOrderCreated(ctx, orderID)
 	
-	// 从通道接收事件
+	// Receive event from channel
 	select {
 	case receivedID := <-GetOrderCreatedChan(ctx):
 		if receivedID != orderID {
-			t.Errorf("期望接收到订单ID %d，实际接收到 %d", orderID, receivedID)
+			t.Errorf("Expected to receive order ID %d, but got %d", orderID, receivedID)
 		}
 	case <-time.After(100 * time.Millisecond):
-		t.Error("接收订单创建事件超时")
+		t.Error("Timeout receiving order created event")
 	}
 }
 
 func TestPublishBotAdded(t *testing.T) {
-	// 初始化事件总线
+	// Initialize event bus
 	InitEventBus()
 	ctx := context.Background()
 	
-	// 发布机器人添加事件
+	// Publish bot added event
 	botID := int64(456)
 	go PublishBotAdded(ctx, botID)
 	
-	// 从通道接收事件
+	// Receive event from channel
 	select {
 	case receivedID := <-GetBotAddedChan(ctx):
 		if receivedID != botID {
-			t.Errorf("期望接收到机器人ID %d，实际接收到 %d", botID, receivedID)
+			t.Errorf("Expected to receive bot ID %d, but got %d", botID, receivedID)
 		}
 	case <-time.After(100 * time.Millisecond):
-		t.Error("接收机器人添加事件超时")
+		t.Error("Timeout receiving bot added event")
 	}
 }
 
 func TestGetOrderCreatedChan(t *testing.T) {
-	// 初始化事件总线
+	// Initialize event bus
 	InitEventBus()
 	ctx := context.Background()
 	
-	// 获取订单创建通道
+	// Get order created channel
 	ch := GetOrderCreatedChan(ctx)
 	
-	// 验证通道不为nil
+	// Verify channel is not nil
 	if ch == nil {
-		t.Error("期望获取到非nil的订单创建通道，实际为nil")
+		t.Error("Expected to get non-nil order created channel, but got nil")
 	}
 	
-	// 验证通道是否是orderCreatedChan
+	// Verify channel is orderCreatedChan
 	if ch != orderCreatedChan {
-		t.Error("期望获取到orderCreatedChan，实际获取到不同的通道")
+		t.Error("Expected to get orderCreatedChan, but got a different channel")
 	}
 }
 
 func TestGetBotAddedChan(t *testing.T) {
-	// 初始化事件总线
+	// Initialize event bus
 	InitEventBus()
 	ctx := context.Background()
 	
-	// 获取机器人添加通道
+	// Get bot added channel
 	ch := GetBotAddedChan(ctx)
 	
-	// 验证通道不为nil
+	// Verify channel is not nil
 	if ch == nil {
-		t.Error("期望获取到非nil的机器人添加通道，实际为nil")
+		t.Error("Expected to get non-nil bot added channel, but got nil")
 	}
 	
-	// 验证通道是否是botAddedChan
+	// Verify channel is botAddedChan
 	if ch != botAddedChan {
-		t.Error("期望获取到botAddedChan，实际获取到不同的通道")
+		t.Error("Expected to get botAddedChan, but got a different channel")
 	}
 }
 
 func TestChannelCapacity(t *testing.T) {
-	// 初始化事件总线
+	// Initialize event bus
 	InitEventBus()
 	
-	// 验证订单创建通道容量
+	// Verify order created channel capacity
 	if cap(orderCreatedChan) != 1024 {
-		t.Errorf("期望订单创建通道容量为1024，实际为 %d", cap(orderCreatedChan))
+		t.Errorf("Expected order created channel capacity to be 1024, but got %d", cap(orderCreatedChan))
 	}
 	
-	// 验证机器人添加通道容量
+	// Verify bot added channel capacity
 	if cap(botAddedChan) != 64 {
-		t.Errorf("期望机器人添加通道容量为64，实际为 %d", cap(botAddedChan))
+		t.Errorf("Expected bot added channel capacity to be 64, but got %d", cap(botAddedChan))
 	}
 }
 
 func TestMultiplePublishOrderCreated(t *testing.T) {
-	// 初始化事件总线
+	// Initialize event bus
 	InitEventBus()
 	ctx := context.Background()
 	
-	// 发布多个订单创建事件
+	// Publish multiple order created events
 	orderIDs := []int64{1, 2, 3, 4, 5}
 	receivedIDs := make([]int64, 0, len(orderIDs))
 	
-	// 启动接收协程
+	// Start receiving goroutine
 	done := make(chan bool)
 	go func() {
 		for i := 0; i < len(orderIDs); i++ {
@@ -130,26 +130,26 @@ func TestMultiplePublishOrderCreated(t *testing.T) {
 			case id := <-GetOrderCreatedChan(ctx):
 				receivedIDs = append(receivedIDs, id)
 			case <-time.After(100 * time.Millisecond):
-				t.Error("接收订单创建事件超时")
+				t.Error("Timeout receiving order created event")
 			}
 		}
 		done <- true
 	}()
 	
-	// 发布事件
+	// Publish events
 	for _, id := range orderIDs {
 		PublishOrderCreated(ctx, id)
 	}
 	
-	// 等待接收完成
+	// Wait for receiving to complete
 	<-done
 	
-	// 验证接收到的ID数量
+	// Verify number of received IDs
 	if len(receivedIDs) != len(orderIDs) {
-		t.Errorf("期望接收到 %d 个订单ID，实际接收到 %d 个", len(orderIDs), len(receivedIDs))
+		t.Errorf("Expected to receive %d order IDs, but got %d", len(orderIDs), len(receivedIDs))
 	}
 	
-	// 验证接收到的ID是否正确（顺序可能不同）
+	// Verify received IDs are correct (order may differ)
 	for _, id := range orderIDs {
 		found := false
 		for _, receivedID := range receivedIDs {
@@ -159,21 +159,21 @@ func TestMultiplePublishOrderCreated(t *testing.T) {
 			}
 		}
 		if !found {
-			t.Errorf("未接收到订单ID %d", id)
+			t.Errorf("Did not receive order ID %d", id)
 		}
 	}
 }
 
 func TestMultiplePublishBotAdded(t *testing.T) {
-	// 初始化事件总线
+	// Initialize event bus
 	InitEventBus()
 	ctx := context.Background()
 	
-	// 发布多个机器人添加事件
+	// Publish multiple bot added events
 	botIDs := []int64{101, 102, 103}
 	receivedIDs := make([]int64, 0, len(botIDs))
 	
-	// 启动接收协程
+	// Start receiving goroutine
 	done := make(chan bool)
 	go func() {
 		for i := 0; i < len(botIDs); i++ {
@@ -181,26 +181,26 @@ func TestMultiplePublishBotAdded(t *testing.T) {
 			case id := <-GetBotAddedChan(ctx):
 				receivedIDs = append(receivedIDs, id)
 			case <-time.After(100 * time.Millisecond):
-				t.Error("接收机器人添加事件超时")
+				t.Error("Timeout receiving bot added event")
 			}
 		}
 		done <- true
 	}()
 	
-	// 发布事件
+	// Publish events
 	for _, id := range botIDs {
 		PublishBotAdded(ctx, id)
 	}
 	
-	// 等待接收完成
+	// Wait for receiving to complete
 	<-done
 	
-	// 验证接收到的ID数量
+	// Verify number of received IDs
 	if len(receivedIDs) != len(botIDs) {
-		t.Errorf("期望接收到 %d 个机器人ID，实际接收到 %d 个", len(botIDs), len(receivedIDs))
+		t.Errorf("Expected to receive %d bot IDs, but got %d", len(botIDs), len(receivedIDs))
 	}
 	
-	// 验证接收到的ID是否正确（顺序可能不同）
+	// Verify received IDs are correct (order may differ)
 	for _, id := range botIDs {
 		found := false
 		for _, receivedID := range receivedIDs {
@@ -210,7 +210,7 @@ func TestMultiplePublishBotAdded(t *testing.T) {
 			}
 		}
 		if !found {
-			t.Errorf("未接收到机器人ID %d", id)
+			t.Errorf("Did not receive bot ID %d", id)
 		}
 	}
 }

@@ -12,14 +12,14 @@ import (
 )
 
 func setupTest() {
-	// 初始化事件总线
+	// Initialize event bus
 	eventbus.InitEventBus()
 
-	// 初始化存储库
+	// Initialize repositories
 	repository.InitBotRepository()
 	repository.InitOrderRepository()
 
-	// 初始化服务
+	// Initialize services
 	service.InitBotService()
 	service.InitOrderService()
 }
@@ -28,50 +28,50 @@ func TestProcessOrderCreated(t *testing.T) {
 	setupTest()
 	ctx := context.Background()
 
-	// 创建一个机器人
+	// Create a bot
 	bot, err := repository.GetBotRepository().Create(ctx)
 	if err != nil {
-		t.Fatalf("创建机器人失败: %v", err)
+		t.Fatalf("Failed to create bot: %v", err)
 	}
 
-	// 创建一个普通订单
+	// Create a normal order
 	order, err := repository.GetOrderRepository().CreatePending(ctx, 1001, consts.OrderPriorityNormal)
 	if err != nil {
-		t.Fatalf("创建订单失败: %v", err)
+		t.Fatalf("Failed to create order: %v", err)
 	}
 
-	// 测试处理订单
+	// Test order processing
 	go processOrderCreated(ctx, bot)
 
-	// 等待一段时间让处理完成
+	// Wait for processing to complete
 	time.Sleep(100 * time.Millisecond)
 
-	// 验证订单状态已变为处理中
+	// Verify order status has changed to processing
 	updatedOrder, err := repository.GetOrderRepository().FindByID(ctx, order.ID)
 	if err != nil {
-		t.Fatalf("查找订单失败: %v", err)
+		t.Fatalf("Failed to find order: %v", err)
 	}
 
 	if updatedOrder.Status != consts.OrderStatusProcessing {
-		t.Errorf("期望订单状态为处理中(%d)，实际得到 %d", consts.OrderStatusProcessing, updatedOrder.Status)
+		t.Errorf("Expected order status to be processing(%d), but got %d", consts.OrderStatusProcessing, updatedOrder.Status)
 	}
 
 	if updatedOrder.BotID != bot.ID {
-		t.Errorf("期望订单机器人ID为 %d，实际得到 %d", bot.ID, updatedOrder.BotID)
+		t.Errorf("Expected order bot ID to be %d, but got %d", bot.ID, updatedOrder.BotID)
 	}
 
-	// 验证机器人状态已变为制餐中
+	// Verify bot status has changed to cooking
 	updatedBot, err := repository.GetBotRepository().FindByID(ctx, bot.ID)
 	if err != nil {
-		t.Fatalf("查找机器人失败: %v", err)
+		t.Fatalf("Failed to find bot: %v", err)
 	}
 
 	if updatedBot.Status != consts.BotStatusCooking {
-		t.Errorf("期望机器人状态为制餐中(%d)，实际得到 %d", consts.BotStatusCooking, updatedBot.Status)
+		t.Errorf("Expected bot status to be cooking(%d), but got %d", consts.BotStatusCooking, updatedBot.Status)
 	}
 
 	if updatedBot.OrderID != order.ID {
-		t.Errorf("期望机器人订单ID为 %d，实际得到 %d", order.ID, updatedBot.OrderID)
+		t.Errorf("Expected bot order ID to be %d, but got %d", order.ID, updatedBot.OrderID)
 	}
 }
 
@@ -80,49 +80,49 @@ func TestBotCookOrder(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	// 创建一个机器人
+	// Create a bot
 	bot, err := repository.GetBotRepository().Create(ctx)
 	if err != nil {
-		t.Fatalf("创建机器人失败: %v", err)
+		t.Fatalf("Failed to create bot: %v", err)
 	}
 
-	// 创建一个订单
+	// Create an order
 	order, err := repository.GetOrderRepository().CreatePending(ctx, 1001, consts.OrderPriorityNormal)
 	if err != nil {
-		t.Fatalf("创建订单失败: %v", err)
+		t.Fatalf("Failed to create order: %v", err)
 	}
 
-	// 测试制餐过程被取消
+	// Test cooking process cancellation
 	go func() {
-		// 等待一小段时间后取消订单
+		// Wait a short time then cancel the order
 		time.Sleep(500 * time.Millisecond)
 		order.CancelFunc()
 	}()
 
-	// 开始制餐
-	err = botCookOrder(ctx, bot, order)
+	// Start cooking
+	_, err = botCookOrder(ctx, bot, order)
 	if err != nil {
-		t.Fatalf("制餐过程失败: %v", err)
+		t.Fatalf("Cooking process failed: %v", err)
 	}
 
-	// 验证订单状态已重置为待处理
+	// Verify order status has been reset to pending
 	updatedOrder, err := repository.GetOrderRepository().FindByID(ctx, order.ID)
 	if err != nil {
-		t.Fatalf("查找订单失败: %v", err)
+		t.Fatalf("Failed to find order: %v", err)
 	}
 
 	if updatedOrder.Status != consts.OrderStatusPending {
-		t.Errorf("期望订单状态为待处理(%d)，实际得到 %d", consts.OrderStatusPending, updatedOrder.Status)
+		t.Errorf("Expected order status to be pending(%d), but got %d", consts.OrderStatusPending, updatedOrder.Status)
 	}
 
-	// 验证机器人状态已重置为空闲
+	// Verify bot status has been reset to idle
 	updatedBot, err := repository.GetBotRepository().FindByID(ctx, bot.ID)
 	if err != nil {
-		t.Fatalf("查找机器人失败: %v", err)
+		t.Fatalf("Failed to find bot: %v", err)
 	}
 
 	if updatedBot.Status != consts.BotStatusIdle {
-		t.Errorf("期望机器人状态为空闲(%d)，实际得到 %d", consts.BotStatusIdle, updatedBot.Status)
+		t.Errorf("Expected bot status to be idle(%d), but got %d", consts.BotStatusIdle, updatedBot.Status)
 	}
 }
 
@@ -130,45 +130,45 @@ func TestBotCookOrderComplete(t *testing.T) {
 	setupTest()
 	ctx := context.Background()
 
-	// 创建一个机器人
+	// Create a bot
 	bot, err := repository.GetBotRepository().Create(ctx)
 	if err != nil {
-		t.Fatalf("创建机器人失败: %v", err)
+		t.Fatalf("Failed to create bot: %v", err)
 	}
 
-	// 创建一个订单
+	// Create an order
 	order, err := repository.GetOrderRepository().CreatePending(ctx, 1001, consts.OrderPriorityNormal)
 	if err != nil {
-		t.Fatalf("创建订单失败: %v", err)
+		t.Fatalf("Failed to create order: %v", err)
 	}
 
 	go func() {
-		if err := botCookOrder(ctx, bot, order); err != nil {
-			t.Fatalf("制餐过程失败: %v", err)
+		if _, err := botCookOrder(ctx, bot, order); err != nil {
+			t.Fatalf("Cooking process failed: %v", err)
 		}
 	}()
 
-	// 等待足够的时间让处理完成
+	// Wait enough time for processing to complete
 	time.Sleep(consts.OrderCookTime * 2)
 
-	// 验证订单状态已变为已完成
+	// Verify order status has changed to completed
 	updatedOrder, err := repository.GetOrderRepository().FindByID(ctx, order.ID)
 	if err != nil {
-		t.Fatalf("查找订单失败: %v", err)
+		t.Fatalf("Failed to find order: %v", err)
 	}
 
 	if updatedOrder.Status != consts.OrderStatusCompleted {
-		t.Errorf("期望订单状态为已完成(%d)，实际得到 %d", consts.OrderStatusCompleted, updatedOrder.Status)
+		t.Errorf("Expected order status to be completed(%d), but got %d", consts.OrderStatusCompleted, updatedOrder.Status)
 	}
 
-	// 验证机器人状态已变为空闲
+	// Verify bot status has changed to idle
 	updatedBot, err := repository.GetBotRepository().FindByID(ctx, bot.ID)
 	if err != nil {
-		t.Fatalf("查找机器人失败: %v", err)
+		t.Fatalf("Failed to find bot: %v", err)
 	}
 
 	if updatedBot.Status != consts.BotStatusIdle {
-		t.Errorf("期望机器人状态为空闲(%d)，实际得到 %d", consts.BotStatusIdle, updatedBot.Status)
+		t.Errorf("Expected bot status to be idle(%d), but got %d", consts.BotStatusIdle, updatedBot.Status)
 	}
 
 }
@@ -177,42 +177,42 @@ func TestProcessOrderCreatedWithVipOrder(t *testing.T) {
 	setupTest()
 	ctx := context.Background()
 
-	// 创建一个机器人
+	// Create a bot
 	bot, err := repository.GetBotRepository().Create(ctx)
 	if err != nil {
-		t.Fatalf("创建机器人失败: %v", err)
+		t.Fatalf("Failed to create bot: %v", err)
 	}
 
-	// 创建一个普通订单
+	// Create a normal order
 	_, err = repository.GetOrderRepository().CreatePending(ctx, 1001, consts.OrderPriorityNormal)
 	if err != nil {
-		t.Fatalf("创建普通订单失败: %v", err)
+		t.Fatalf("Failed to create normal order: %v", err)
 	}
 
-	// 创建一个VIP订单
+	// Create a VIP order
 	vipOrder, err := repository.GetOrderRepository().CreatePending(ctx, 2001, consts.OrderPriorityVip)
 	if err != nil {
-		t.Fatalf("创建VIP订单失败: %v", err)
+		t.Fatalf("Failed to create VIP order: %v", err)
 	}
 
-	// 测试处理订单
+	// Test order processing
 	go processOrderCreated(ctx, bot)
 
-	// 等待一段时间让处理完成
+	// Wait for processing to complete
 	time.Sleep(100 * time.Millisecond)
 
-	// 验证VIP订单被优先处理
+	// Verify VIP order is processed first
 	updatedVipOrder, err := repository.GetOrderRepository().FindByID(ctx, vipOrder.ID)
 	if err != nil {
-		t.Fatalf("查找VIP订单失败: %v", err)
+		t.Fatalf("Failed to find VIP order: %v", err)
 	}
 
 	if updatedVipOrder.Status != consts.OrderStatusProcessing {
-		t.Errorf("期望VIP订单状态为处理中(%d)，实际得到 %d", consts.OrderStatusProcessing, updatedVipOrder.Status)
+		t.Errorf("Expected VIP order status to be processing(%d), but got %d", consts.OrderStatusProcessing, updatedVipOrder.Status)
 	}
 
 	if updatedVipOrder.BotID != bot.ID {
-		t.Errorf("期望VIP订单机器人ID为 %d，实际得到 %d", bot.ID, updatedVipOrder.BotID)
+		t.Errorf("Expected VIP order bot ID to be %d, but got %d", bot.ID, updatedVipOrder.BotID)
 	}
 }
 
@@ -220,16 +220,16 @@ func TestBotCookOrderWithNilBot(t *testing.T) {
 	setupTest()
 	ctx := context.Background()
 
-	// 创建一个订单
+	// Create an order
 	order, err := repository.GetOrderRepository().CreatePending(ctx, 1001, consts.OrderPriorityNormal)
 	if err != nil {
-		t.Fatalf("创建订单失败: %v", err)
+		t.Fatalf("Failed to create order: %v", err)
 	}
 
-	// 测试nil机器人
-	err = botCookOrder(ctx, nil, order)
+	// Test nil bot
+	_, err = botCookOrder(ctx, nil, order)
 	if err == nil {
-		t.Error("期望使用nil机器人时返回错误，实际没有错误")
+		t.Error("Expected error when using nil bot, but got none")
 	}
 }
 
@@ -237,15 +237,15 @@ func TestBotCookOrderWithNilOrder(t *testing.T) {
 	setupTest()
 	ctx := context.Background()
 
-	// 创建一个机器人
+	// Create a bot
 	bot, err := repository.GetBotRepository().Create(ctx)
 	if err != nil {
-		t.Fatalf("创建机器人失败: %v", err)
+		t.Fatalf("Failed to create bot: %v", err)
 	}
 
-	// 测试nil订单
-	err = botCookOrder(ctx, bot, nil)
+	// Test nil order
+	_, err = botCookOrder(ctx, bot, nil)
 	if err == nil {
-		t.Error("期望使用nil订单时返回错误，实际没有错误")
+		t.Error("Expected error when using nil order, but got none")
 	}
 }
