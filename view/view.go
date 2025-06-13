@@ -1,8 +1,8 @@
 package view
 
 type ScreenView struct {
-	Uncompleted []int64 `json:"uncompleted"`
-	Completed   []int64 `json:"completed"`
+	Uncompleted []int64 `json:"PENDING"`
+	Completed   []int64 `json:"COMPLETE"`
 }
 
 type CreateOrderView struct {
