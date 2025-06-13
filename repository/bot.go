@@ -14,8 +14,6 @@ import (
 var botStoragePtr BotStorage
 
 type BotStorage interface {
-	GenerateID(context.Context) int64
-
 	Create(context.Context) (*models.Bot, error)
 
 	LockAll(context.Context)
