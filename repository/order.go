@@ -15,8 +15,6 @@ import (
 var orderStoragePtr OrderStorage
 
 type OrderStorage interface {
-	GenerateID(context.Context) int64
-
 	CreatePending(context.Context, int64, consts.OrderPriority) (*models.Order, error)
 
 	FindByID(context.Context, int64) (*models.Order, error)
