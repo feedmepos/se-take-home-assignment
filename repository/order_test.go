@@ -324,6 +324,10 @@ func TestOrderPoolMemory_FetchUncompleted(t *testing.T) {
 		t.Errorf("期望有2个未完成订单，实际有 %d", len(uncompleted))
 	}
 
+	if uncompleted[0].Priority != consts.OrderPriorityVip {
+		t.Errorf("期望VIP订单优先，实际 Normal 订单被排在前面")
+	}
+
 	// 完成订单1
 	err = pool.ChangeStatusToCompleted(ctx, order1)
 	if err != nil {

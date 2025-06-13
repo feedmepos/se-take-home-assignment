@@ -140,8 +140,16 @@ func (p *OrderPoolMemory) FetchUncompleted(ctx context.Context) ([]*models.Order
 
 	var uncompletedOrders []*models.Order
 
+	// first vip order
 	for _, order := range p.AllOrders {
-		if order.Status != consts.OrderStatusCompleted {
+		if order.Status != consts.OrderStatusCompleted && order.Priority == consts.OrderPriorityVip {
+			uncompletedOrders = append(uncompletedOrders, order)
+		}
+	}
+
+	// second normal order
+	for _, order := range p.AllOrders {
+		if order.Status != consts.OrderStatusCompleted && order.Priority == consts.OrderPriorityNormal {
 			uncompletedOrders = append(uncompletedOrders, order)
 		}
 	}
