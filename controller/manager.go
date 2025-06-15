@@ -23,10 +23,7 @@ func DecrBot(ctx context.Context) error {
 
 		switch bot.Status {
 		case consts.BotStatusIdle:
-			// Delete directly if idle
-			if err := service.GetBotService().Delete(ctx, bot); err != nil {
-				log.Printf("Failed to delete bot: %s", err.Error())
-			}
+			bot.CancelFunc()
 			break
 		case consts.BotStatusCooking:
 			// If cooking, need to restore order status
@@ -37,6 +34,7 @@ func DecrBot(ctx context.Context) error {
 				order.CancelFunc()
 			}
 
+			bot.CancelFunc()
 			break
 		default:
 			break

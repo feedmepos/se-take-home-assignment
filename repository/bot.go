@@ -51,10 +51,15 @@ func (p *BotPoolMemory) GenerateID(ctx context.Context) int64 {
 func (p *BotPoolMemory) Create(ctx context.Context) (*models.Bot, error) {
 	id := p.GenerateID(ctx)
 
+	cancelCtx, cancelFunc := context.WithCancel(ctx)
+
 	bot := models.Bot{
 		ID:      id,
 		Status:  consts.BotStatusIdle,
 		OrderID: 0,
+
+		CancelCtx:  cancelCtx,
+		CancelFunc: cancelFunc,
 	}
 
 	p.LockAll(ctx)

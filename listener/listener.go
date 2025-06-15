@@ -42,6 +42,9 @@ LOOP:
 			if !processOrderCreated(ctx, bot) {
 				break LOOP
 			}
+		case <-bot.CancelCtx.Done():
+			log.Println("Bot need to cancel")
+			break LOOP
 		}
 	}
 
