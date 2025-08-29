@@ -6,7 +6,7 @@
     </ul>
   </div>
   <button @click="botStore.addBot">Add Bot</button>
-  <button @click="botStore.removeBot">Remove Bot</button>
+  <button :disabled="!bots.length" @click="botStore.removeBot">Remove Bot</button>
 </template>
 
 <script setup lang="ts">

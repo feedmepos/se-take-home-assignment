@@ -8,27 +8,16 @@ export const useOrderStore = defineStore('order', {
     nextOrderId: 1,
   }),
   actions: {
-    addNormalOrder() {
+    addOrder(type: string) {
       const botStore = useBotStore()
       const newOrder: Order = {
         id: this.nextOrderId++,
-        type: 'Normal',
+        type: type,
         status: 'PENDING',
-        isVIP: false,
+        isVIP: type === 'VIP',
       }
       this.orders.push(newOrder)
-      botStore.assignOrderToBot(newOrder.id) // Example: Assign to bot with ID 1
-    },
-    addVIPOrder() {
-      const botStore = useBotStore()
-      const newOrder: Order = {
-        id: this.nextOrderId++,
-        type: 'VIP',
-        status: 'PENDING',
-        isVIP: true,
-      }
-      this.orders.push(newOrder)
-      botStore.assignOrderToBot(newOrder.id) // Example: Assign to bot with ID 2
+      botStore.assignOrderToBots()
     },
   },
 })
