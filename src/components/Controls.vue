@@ -2,8 +2,8 @@
   <div class="flex flex-col gap-4">
     <Button @click="orderStore.addOrder('Normal')">Add Normal Order</Button>
     <Button @click="orderStore.addOrder('VIP')">Add VIP Order</Button>
-    <Button @click="botStore.addBot">Add Bot</Button>
-    <Button @click="botStore.removeBot" :disabled="!bots.length">Remove Bot</Button>
+    <Button @click="botStore.addBot">+ Bot</Button>
+    <Button @click="botStore.removeBot" :disabled="!bots.length">- Bot</Button>
   </div>
 </template>
 

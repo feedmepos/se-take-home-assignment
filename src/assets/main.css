@@ -1,13 +1,8 @@
 @import './base.css';
 @import 'tailwindcss';
-@import '@fontsource-variable/roboto';
-@import "tw-animate-css";
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
-
-body {
-  font-family: 'Roboto Variable', sans-serif;
-}
 
 @theme inline {
   --color-background: var(--background);
