@@ -32,9 +32,10 @@ export const useBotStore = defineStore('bot', {
     },
     assignOrderToBots() {
       const orderStore = useOrderStore()
-      const pendingOrders = orderStore.orders.filter((o) => o.status === 'PENDING')
+      const pendingOrders = orderStore.orders
+        .filter((o) => o.status === 'PENDING')
+        .sort((a, b) => (a.type === 'VIP' && b.type !== 'VIP' ? -1 : 1))
       const bot = this.bots.findLast((b) => b.status === 'IDLE')
-      // TODO: Improve assignment logic to consider VIP orders and bot availability
       if (bot && pendingOrders[0]) {
         bot.status = 'PROCESSING'
         bot.currentOrderId = pendingOrders[0].id
