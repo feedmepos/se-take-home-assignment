@@ -1,19 +1,17 @@
 <template>
-  <div>
-    <h2>Pending Orders</h2>
-    <ul>
-      <li v-for="order in pendingOrders" :key="order.id">
+  <div class="h-64 border rounded bg-white shadow-md grid grid-cols-2 gap-4 p-4">
+    <div>
+      <p class="text-black font-bold">Pending Orders</p>
+      <ul v-for="order in pendingOrders" :key="order.id">
         <OrderItem :id="order.id" :type="order.type" :status="order.status" />
-      </li>
-    </ul>
-    <h2>Completed Orders</h2>
-    <ul>
-      <li v-for="order in completedOrders" :key="order.id">
+      </ul>
+    </div>
+    <div>
+      <p class="text-black font-bold">Completed Orders</p>
+      <ul v-for="order in completedOrders" :key="order.id">
         <OrderItem :id="order.id" :type="order.type" :status="order.status" />
-      </li>
-    </ul>
-    <button @click="orderStore.addOrder('Normal')">Add Normal Order</button>
-    <button @click="orderStore.addOrder('VIP')">Add VIP Order</button>
+      </ul>
+    </div>
   </div>
 </template>
 

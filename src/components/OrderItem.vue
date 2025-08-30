@@ -1,5 +1,5 @@
 <template>
-  <li>Order #{{ id }} - {{ type }} - ${{ status }}</li>
+  <li class="text-black">Order #{{ id }} - {{ type }} - {{ status }}</li>
 </template>
 
 <script setup lang="ts">
