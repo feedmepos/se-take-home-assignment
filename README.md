@@ -1,7 +1,7 @@
 ## FeedMe Software Engineer Take Home Assignment
 Below is a take home assignment before the interview of the position. You are required to
 1. Understand the situation and use case. You may contact the interviewer for further clarification.
-2. Fork this repo and implement the requirement with your most familiar tools.
+2. Fork this repo and implement the requirement with your most familiar language and framework or **AI coding agent**.
 3. Complete the requirement and perform your own testing.
 4. Provide documentation for the any part that you think is needed.
 5. Commit into your own github and share your repo with the interviewer.
@@ -34,5 +34,5 @@ You may demostrate your final funtioning prototype with **one and only one** of 
 
 ### Tips on completing this task
 - Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.
-- Do not over engineering. Try to scope your working hour within 3 hours (1 hour per day). You may document all the optimization or technology concern that you think good to bring in the solution.
+- Treat this assignment as a vibe coding, don't over engineer it. Try to scope your working hour within 30 min. However, ensure you read and understand what your code doing.
 - Complete the implementation as clean as possible, clean code is a strong plus point, do not bring in all the fancy tech stuff.
