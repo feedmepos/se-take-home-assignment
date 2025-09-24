@@ -1,0 +1,155 @@
+McDonald's Order Controller - Starting Simulation
+================================================
+
+=== Simulation Start ===
+
+1. Creating normal orders...
+   Created Normal Order: Order #1 (NORMAL) - PENDING
+   Created Normal Order: Order #2 (NORMAL) - PENDING
+
+--- System Status ---
+PENDING Orders (2):
+  Order #1 (NORMAL) - PENDING
+  Order #2 (NORMAL) - PENDING
+
+COMPLETE Orders (0):
+  (none)
+
+Bots (0):
+  (none)
+--------------------
+
+2. Creating VIP orders...
+   Created VIP Order: Order #3 (VIP) - PENDING
+   Created VIP Order: Order #4 (VIP) - PENDING
+
+--- System Status ---
+PENDING Orders (4):
+  Order #3 (VIP) - PENDING
+  Order #4 (VIP) - PENDING
+  Order #1 (NORMAL) - PENDING
+  Order #2 (NORMAL) - PENDING
+
+COMPLETE Orders (0):
+  (none)
+
+Bots (0):
+  (none)
+--------------------
+
+3. Adding bots to process orders...
+   Added Bot: Bot #1 (PROCESSING) - Processing Order #3
+
+--- System Status ---
+PENDING Orders (3):
+  Order #4 (VIP) - PENDING
+  Order #1 (NORMAL) - PENDING
+  Order #2 (NORMAL) - PENDING
+
+COMPLETE Orders (0):
+  (none)
+
+Bots (1):
+  Bot #1 (PROCESSING) - Processing Order #3
+--------------------
+   Added Bot: Bot #2 (PROCESSING) - Processing Order #4
+
+4. Waiting for orders to complete...
+
+--- System Status ---
+PENDING Orders (0):
+  (none)
+
+COMPLETE Orders (2):
+  Order #3 (VIP) - COMPLETE
+  Order #4 (VIP) - COMPLETE
+
+Bots (2):
+  Bot #1 (PROCESSING) - Processing Order #1
+  Bot #2 (PROCESSING) - Processing Order #2
+--------------------
+
+5. Testing bot removal...
+   Created Normal Order: Order #5 (NORMAL) - PENDING
+
+--- System Status ---
+PENDING Orders (1):
+  Order #5 (NORMAL) - PENDING
+
+COMPLETE Orders (2):
+  Order #3 (VIP) - COMPLETE
+  Order #4 (VIP) - COMPLETE
+
+Bots (2):
+  Bot #1 (PROCESSING) - Processing Order #1
+  Bot #2 (PROCESSING) - Processing Order #2
+--------------------
+   Removed Bot: Bot #2 (PROCESSING) - Processing Order #2
+
+--- System Status ---
+PENDING Orders (2):
+  Order #5 (NORMAL) - PENDING
+  Order #2 (NORMAL) - PENDING
+
+COMPLETE Orders (2):
+  Order #3 (VIP) - COMPLETE
+  Order #4 (VIP) - COMPLETE
+
+Bots (1):
+  Bot #1 (PROCESSING) - Processing Order #1
+--------------------
+
+--- System Status ---
+PENDING Orders (1):
+  Order #2 (NORMAL) - PENDING
+
+COMPLETE Orders (3):
+  Order #3 (VIP) - COMPLETE
+  Order #4 (VIP) - COMPLETE
+  Order #1 (NORMAL) - COMPLETE
+
+Bots (1):
+  Bot #1 (PROCESSING) - Processing Order #5
+--------------------
+
+6. Testing idle state (no pending orders)...
+
+--- System Status ---
+PENDING Orders (1):
+  Order #2 (NORMAL) - PENDING
+
+COMPLETE Orders (3):
+  Order #3 (VIP) - COMPLETE
+  Order #4 (VIP) - COMPLETE
+  Order #1 (NORMAL) - COMPLETE
+
+Bots (1):
+  Bot #1 (PROCESSING) - Processing Order #5
+--------------------
+
+7. Testing complex queue behavior...
+
+--- System Status ---
+PENDING Orders (5):
+  Order #7 (VIP) - PENDING
+  Order #9 (VIP) - PENDING
+  Order #2 (NORMAL) - PENDING
+  Order #6 (NORMAL) - PENDING
+  Order #8 (NORMAL) - PENDING
+
+COMPLETE Orders (3):
+  Order #3 (VIP) - COMPLETE
+  Order #4 (VIP) - COMPLETE
+  Order #1 (NORMAL) - COMPLETE
+
+Bots (1):
+  Bot #1 (PROCESSING) - Processing Order #5
+--------------------
+
+=== Simulation Complete ===
+
+Final Statistics:
+- Total Orders Created: 9
+- Current Pending Orders: 5
+- Current Completed Orders: 3
+- Active Bots: 1
