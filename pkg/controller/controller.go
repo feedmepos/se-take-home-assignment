@@ -1,11 +1,16 @@
 package controller
-package controller
 
 import (
 	"fmt"
 	"sync"
 	"time"
 )
+
+// LogWithTimestamp prints a message with HH:MM:SS timestamp
+func (oc *OrderController) LogWithTimestamp(message string) {
+	timestamp := time.Now().Format("15:04:05")
+	fmt.Printf("[%s] %s\n", timestamp, message)
+}
 
 // OrderType represents the type of order (Normal or VIP)
 type OrderType int
@@ -102,6 +107,9 @@ func (oc *OrderController) CreateNormalOrder() *Order {
 	// Add to the end of pending queue (normal orders go after VIP orders)
 	oc.pendingQueue = append(oc.pendingQueue, order)
 	
+	// Log the order creation with timestamp
+	oc.LogWithTimestamp(fmt.Sprintf("Created Normal Order #%d - Status: PENDING", order.ID))
+	
 	// Try to assign to available bot
 	oc.tryAssignOrderToBot()
 	
@@ -137,6 +145,9 @@ func (oc *OrderController) CreateVIPOrder() *Order {
 	// Insert at calculated position
 	oc.pendingQueue = append(oc.pendingQueue[:insertIndex], append([]*Order{order}, oc.pendingQueue[insertIndex:]...)...)
 	
+	// Log the order creation with timestamp
+	oc.LogWithTimestamp(fmt.Sprintf("Created VIP Order #%d - Status: PENDING", order.ID))
+	
 	// Try to assign to available bot
 	oc.tryAssignOrderToBot()
 	
@@ -157,6 +168,9 @@ func (oc *OrderController) AddBot() *Bot {
 	
 	oc.nextBotID++
 	oc.bots = append(oc.bots, bot)
+	
+	// Log bot creation with timestamp
+	oc.LogWithTimestamp(fmt.Sprintf("Bot #%d created - Status: ACTIVE", bot.ID))
 	
 	// Try to assign pending order to this new bot
 	oc.tryAssignOrderToBot()
@@ -204,6 +218,9 @@ func (oc *OrderController) RemoveBot() *Bot {
 				oc.pendingQueue = append(oc.pendingQueue, bot.CurrentOrder)
 			}
 		}
+		oc.LogWithTimestamp(fmt.Sprintf("Bot #%d destroyed while PROCESSING", bot.ID))
+	} else {
+		oc.LogWithTimestamp(fmt.Sprintf("Bot #%d destroyed while IDLE", bot.ID))
 	}
 	
 	// Remove bot from slice
@@ -229,6 +246,13 @@ func (oc *OrderController) tryAssignOrderToBot() {
 			bot.Status = Processing
 			order.Status = "PROCESSING"
 			
+			// Log order pickup with timestamp
+			orderType := "Normal"
+			if order.Type == VIP {
+				orderType = "VIP"
+			}
+			oc.LogWithTimestamp(fmt.Sprintf("Bot #%d picked up %s Order #%d - Status: PROCESSING", bot.ID, orderType, order.ID))
+			
 			// Start processing in goroutine
 			go oc.processOrder(bot, order)
 			break
@@ -241,6 +265,8 @@ func (oc *OrderController) processOrder(bot *Bot, order *Order) {
 	bot.processingWg.Add(1)
 	defer bot.processingWg.Done()
 	
+	startTime := time.Now()
+	
 	// Process for 10 seconds or until stopped
 	select {
 	case <-time.After(10 * time.Second):
@@ -251,8 +277,23 @@ func (oc *OrderController) processOrder(bot *Bot, order *Order) {
 		bot.CurrentOrder = nil
 		bot.Status = Idle
 		
+		// Log order completion with timestamp and processing time
+		processingTime := time.Since(startTime)
+		orderType := "Normal"
+		if order.Type == VIP {
+			orderType = "VIP"
+		}
+		oc.LogWithTimestamp(fmt.Sprintf("Bot #%d completed %s Order #%d - Status: COMPLETE (Processing time: %ds)", 
+			bot.ID, orderType, order.ID, int(processingTime.Seconds())))
+		
 		// Try to assign next order to this bot
 		oc.tryAssignOrderToBot()
+		
+		// If no orders assigned, log idle state
+		if bot.Status == Idle && len(oc.pendingQueue) == 0 {
+			oc.LogWithTimestamp(fmt.Sprintf("Bot #%d is now IDLE - No pending orders", bot.ID))
+		}
+		
 		oc.mu.Unlock()
 		
 	case <-bot.stopChannel:
@@ -327,4 +368,28 @@ func (oc *OrderController) GetActiveBotCount() int {
 	oc.mu.RLock()
 	defer oc.mu.RUnlock()
 	return len(oc.bots)
+}
+
+// PrintFinalStatus prints the final simulation status with timestamps
+func (oc *OrderController) PrintFinalStatus() {
+	oc.mu.RLock()
+	defer oc.mu.RUnlock()
+	
+	fmt.Println("\nFinal Status:")
+	
+	vipCount := 0
+	normalCount := 0
+	for _, order := range oc.completedOrders {
+		if order.Type == VIP {
+			vipCount++
+		} else {
+			normalCount++
+		}
+	}
+	
+	fmt.Printf("- Total Orders Processed: %d (%d VIP, %d Normal)\n", 
+		len(oc.completedOrders), vipCount, normalCount)
+	fmt.Printf("- Orders Completed: %d\n", len(oc.completedOrders))
+	fmt.Printf("- Active Bots: %d\n", len(oc.bots))
+	fmt.Printf("- Pending Orders: %d\n", len(oc.pendingQueue))
 }
