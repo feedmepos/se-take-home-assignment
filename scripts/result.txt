@@ -1,0 +1,97 @@
+=== EXECUTION STARTED: 2025-09-24 13:05:00 ===
+
+=== McDonald's Order Management System Demo ===
+
+1. Adding initial bot
+Added Bot 1
+
+=== ORDER CONTROLLER STATUS ===
+Bots (1): Bot 1 [IDLE]
+Pending Orders (0): None
+Completed Orders (0): None
+===============================
+
+2. Adding normal orders
+Added Order #1 (NORMAL)
+[2025-09-24 05:05:01] Bot 1 started processing Order #1 (NORMAL)
+Added Order #2 (NORMAL)
+
+=== ORDER CONTROLLER STATUS ===
+Bots (1): Bot 1 [PROCESSING] (processing Order #1 (NORMAL))
+Pending Orders (1): Order #2 (NORMAL)
+Completed Orders (0): None
+===============================
+
+3. Adding VIP order (should go to front)
+Added Order #3 (VIP)
+
+=== ORDER CONTROLLER STATUS ===
+Bots (1): Bot 1 [PROCESSING] (processing Order #1 (NORMAL))
+Pending Orders (2): Order #3 (VIP), Order #2 (NORMAL)
+Completed Orders (0): None
+===============================
+
+4. Adding another VIP order (should go after first VIP)
+Added Order #4 (VIP)
+
+=== ORDER CONTROLLER STATUS ===
+Bots (1): Bot 1 [PROCESSING] (processing Order #1 (NORMAL))
+Pending Orders (3): Order #3 (VIP), Order #4 (VIP), Order #2 (NORMAL)
+Completed Orders (0): None
+===============================
+
+5. Adding more bots to handle orders faster
+Added Bot 2
+[2025-09-24 05:05:05] Bot 2 started processing Order #3 (VIP)
+Added Bot 3
+[2025-09-24 05:05:05] Bot 3 started processing Order #4 (VIP)
+
+=== ORDER CONTROLLER STATUS ===
+Bots (3): Bot 1 [PROCESSING] (processing Order #1 (NORMAL)), Bot 2 [PROCESSING] (processing Order #3 (VIP)), Bot 3 [PROCESSING] (processing Order #4 (VIP))
+Pending Orders (1): Order #2 (NORMAL)
+Completed Orders (0): None
+===============================
+
+6. Adding more orders while processing
+Added Order #5 (NORMAL)
+Added Order #6 (VIP)
+
+=== ORDER CONTROLLER STATUS ===
+Bots (3): Bot 1 [PROCESSING] (processing Order #1 (NORMAL)), Bot 2 [PROCESSING] (processing Order #3 (VIP)), Bot 3 [PROCESSING] (processing Order #4 (VIP))
+Pending Orders (3): Order #6 (VIP), Order #2 (NORMAL), Order #5 (NORMAL)
+Completed Orders (0): None
+===============================
+
+[2025-09-24 05:05:11] Bot 1 completed processing Order #1 (NORMAL)
+[2025-09-24 05:05:11] Bot 1 started processing Order #6 (VIP)
+7. Removing a bot (newest one)
+Bot 3 stopped processing Order #4 (VIP)
+Removed Bot 3
+
+=== ORDER CONTROLLER STATUS ===
+Bots (2): Bot 1 [PROCESSING] (processing Order #6 (VIP)), Bot 2 [PROCESSING] (processing Order #3 (VIP))
+Pending Orders (3): Order #4 (VIP), Order #2 (NORMAL), Order #5 (NORMAL)
+Completed Orders (1): Order #1 (NORMAL)
+===============================
+
+8. Waiting for all orders to complete...
+[2025-09-24 05:05:15] Bot 2 completed processing Order #3 (VIP)
+[2025-09-24 05:05:15] Bot 2 started processing Order #4 (VIP)
+[2025-09-24 05:05:21] Bot 1 completed processing Order #6 (VIP)
+[2025-09-24 05:05:21] Bot 1 started processing Order #2 (NORMAL)
+
+=== ORDER CONTROLLER STATUS ===
+Bots (2): Bot 1 [PROCESSING] (processing Order #2 (NORMAL)), Bot 2 [PROCESSING] (processing Order #4 (VIP))
+Pending Orders (1): Order #5 (NORMAL)
+Completed Orders (3): Order #1 (NORMAL), Order #3 (VIP), Order #6 (VIP)
+===============================
+
+Demo completed!
+
+FINAL STATUS: bots: [2], pending: [1], completed: [3]
+[2025-09-24 05:05:25] Bot 2 completed processing Order #4 (VIP)
+[2025-09-24 05:05:25] Bot 2 started processing Order #5 (NORMAL)
+[2025-09-24 05:05:31] Bot 1 completed processing Order #2 (NORMAL)
+[2025-09-24 05:05:35] Bot 2 completed processing Order #5 (NORMAL)
+
+=== EXECUTION COMPLETED: 2025-09-24 13:05:35 ===

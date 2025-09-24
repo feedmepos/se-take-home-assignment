@@ -11,6 +11,12 @@ class Order {
     }
 }
 
+// Helper function to get formatted timestamp
+function getTimestamp() {
+    const now = new Date();
+    return now.toISOString().replace('T', ' ').substring(0, 19);
+}
+
 class Bot {
     constructor(id) {
         this.id = id;
@@ -23,7 +29,7 @@ class Bot {
         this.status = 'PROCESSING';
         this.currentOrder = order;
         
-        console.log(`Bot ${this.id} started processing ${order.toString()}`);
+        console.log(`[${getTimestamp()}] Bot ${this.id} started processing ${order.toString()}`);
         
         // Simulate 10-second processing time
         this.processingTimer = setTimeout(() => {
@@ -34,7 +40,7 @@ class Bot {
 
     completeProcessing() {
         if (this.currentOrder) {
-            console.log(`Bot ${this.id} completed processing ${this.currentOrder.toString()}`);
+            console.log(`[${getTimestamp()}] Bot ${this.id} completed processing ${this.currentOrder.toString()}`);
             this.currentOrder.status = 'COMPLETE';
             this.currentOrder = null;
         }
