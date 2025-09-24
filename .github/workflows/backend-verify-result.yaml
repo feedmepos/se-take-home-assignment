@@ -2,6 +2,7 @@ name: backend-verify-result
 
 on:
   pull_request:
+    types: [ opened, synchronize, reopened, edited ]
     branches: [ main ]
 
 jobs:
@@ -55,6 +56,13 @@ jobs:
           exit 1
         fi
         
-        echo "SUCCESS: scripts/result.txt exists and is not empty"
+        # Verify that the result contains timestamps in HH:MM:SS format
+        if ! grep -E '[0-9]{2}:[0-9]{2}:[0-9]{2}' scripts/result.txt > /dev/null; then
+          echo "ERROR: scripts/result.txt must contain timestamps in HH:MM:SS format"
+          echo "No valid timestamp pattern found in the output"
+          exit 1
+        fi
+        
+        echo "SUCCESS: scripts/result.txt exists, is not empty, and contains valid timestamps"
         echo "Content of scripts/result.txt:"
         cat scripts/result.txt
