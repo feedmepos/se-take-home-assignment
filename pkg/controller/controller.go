@@ -46,11 +46,11 @@ const (
 
 // Bot represents a cooking bot
 type Bot struct {
-	ID            int
-	Status        BotStatus
-	CurrentOrder  *Order
-	stopChannel   chan bool
-	processingWg  *sync.WaitGroup
+	ID           int
+	Status       BotStatus
+	CurrentOrder *Order
+	stopChannel  chan bool
+	processingWg *sync.WaitGroup
 }
 
 func (b *Bot) String() string {
@@ -99,20 +99,20 @@ func (oc *OrderController) CreateNormalOrder() *Order {
 		Status:   "PENDING",
 		CreateAt: time.Now(),
 	}
-	
+
 	oc.nextOrderID++
 	oc.totalOrdersCreated++
 	oc.orders = append(oc.orders, order)
-	
+
 	// Add to the end of pending queue (normal orders go after VIP orders)
 	oc.pendingQueue = append(oc.pendingQueue, order)
-	
+
 	// Log the order creation with timestamp
 	oc.LogWithTimestamp(fmt.Sprintf("Created Normal Order #%d - Status: PENDING", order.ID))
-	
+
 	// Try to assign to available bot
 	oc.tryAssignOrderToBot()
-	
+
 	return order
 }
 
@@ -127,11 +127,11 @@ func (oc *OrderController) CreateVIPOrder() *Order {
 		Status:   "PENDING",
 		CreateAt: time.Now(),
 	}
-	
+
 	oc.nextOrderID++
 	oc.totalOrdersCreated++
 	oc.orders = append(oc.orders, order)
-	
+
 	// Insert VIP order at the correct position (after other VIP orders but before normal orders)
 	insertIndex := 0
 	for i, pendingOrder := range oc.pendingQueue {
@@ -141,16 +141,16 @@ func (oc *OrderController) CreateVIPOrder() *Order {
 		}
 		insertIndex = i + 1
 	}
-	
+
 	// Insert at calculated position
 	oc.pendingQueue = append(oc.pendingQueue[:insertIndex], append([]*Order{order}, oc.pendingQueue[insertIndex:]...)...)
-	
+
 	// Log the order creation with timestamp
 	oc.LogWithTimestamp(fmt.Sprintf("Created VIP Order #%d - Status: PENDING", order.ID))
-	
+
 	// Try to assign to available bot
 	oc.tryAssignOrderToBot()
-	
+
 	return order
 }
 
@@ -165,16 +165,16 @@ func (oc *OrderController) AddBot() *Bot {
 		stopChannel:  make(chan bool, 1),
 		processingWg: &sync.WaitGroup{},
 	}
-	
+
 	oc.nextBotID++
 	oc.bots = append(oc.bots, bot)
-	
+
 	// Log bot creation with timestamp
 	oc.LogWithTimestamp(fmt.Sprintf("Bot #%d created - Status: ACTIVE", bot.ID))
-	
+
 	// Try to assign pending order to this new bot
 	oc.tryAssignOrderToBot()
-	
+
 	return bot
 }
 
@@ -186,11 +186,11 @@ func (oc *OrderController) RemoveBot() *Bot {
 	if len(oc.bots) == 0 {
 		return nil
 	}
-	
+
 	// Remove the newest bot (last in slice)
 	botIndex := len(oc.bots) - 1
 	bot := oc.bots[botIndex]
-	
+
 	// Stop the bot if it's processing
 	if bot.Status == Processing {
 		// Signal bot to stop
@@ -198,7 +198,7 @@ func (oc *OrderController) RemoveBot() *Bot {
 		case bot.stopChannel <- true:
 		default:
 		}
-		
+
 		// Return the order to pending queue at the front (VIP priority maintained)
 		if bot.CurrentOrder != nil {
 			bot.CurrentOrder.Status = "PENDING"
@@ -222,10 +222,10 @@ func (oc *OrderController) RemoveBot() *Bot {
 	} else {
 		oc.LogWithTimestamp(fmt.Sprintf("Bot #%d destroyed while IDLE", bot.ID))
 	}
-	
+
 	// Remove bot from slice
 	oc.bots = oc.bots[:botIndex]
-	
+
 	return bot
 }
 
@@ -234,25 +234,25 @@ func (oc *OrderController) tryAssignOrderToBot() {
 	if len(oc.pendingQueue) == 0 {
 		return
 	}
-	
+
 	// Find an idle bot
 	for _, bot := range oc.bots {
 		if bot.Status == Idle {
 			// Assign first pending order to this bot
 			order := oc.pendingQueue[0]
 			oc.pendingQueue = oc.pendingQueue[1:]
-			
+
 			bot.CurrentOrder = order
 			bot.Status = Processing
 			order.Status = "PROCESSING"
-			
+
 			// Log order pickup with timestamp
 			orderType := "Normal"
 			if order.Type == VIP {
 				orderType = "VIP"
 			}
 			oc.LogWithTimestamp(fmt.Sprintf("Bot #%d picked up %s Order #%d - Status: PROCESSING", bot.ID, orderType, order.ID))
-			
+
 			// Start processing in goroutine
 			go oc.processOrder(bot, order)
 			break
@@ -264,9 +264,9 @@ func (oc *OrderController) tryAssignOrderToBot() {
 func (oc *OrderController) processOrder(bot *Bot, order *Order) {
 	bot.processingWg.Add(1)
 	defer bot.processingWg.Done()
-	
+
 	startTime := time.Now()
-	
+
 	// Process for 10 seconds or until stopped
 	select {
 	case <-time.After(10 * time.Second):
@@ -276,26 +276,26 @@ func (oc *OrderController) processOrder(bot *Bot, order *Order) {
 		oc.completedOrders = append(oc.completedOrders, order)
 		bot.CurrentOrder = nil
 		bot.Status = Idle
-		
+
 		// Log order completion with timestamp and processing time
 		processingTime := time.Since(startTime)
 		orderType := "Normal"
 		if order.Type == VIP {
 			orderType = "VIP"
 		}
-		oc.LogWithTimestamp(fmt.Sprintf("Bot #%d completed %s Order #%d - Status: COMPLETE (Processing time: %ds)", 
+		oc.LogWithTimestamp(fmt.Sprintf("Bot #%d completed %s Order #%d - Status: COMPLETE (Processing time: %ds)",
 			bot.ID, orderType, order.ID, int(processingTime.Seconds())))
-		
+
 		// Try to assign next order to this bot
 		oc.tryAssignOrderToBot()
-		
+
 		// If no orders assigned, log idle state
 		if bot.Status == Idle && len(oc.pendingQueue) == 0 {
 			oc.LogWithTimestamp(fmt.Sprintf("Bot #%d is now IDLE - No pending orders", bot.ID))
 		}
-		
+
 		oc.mu.Unlock()
-		
+
 	case <-bot.stopChannel:
 		// Bot was removed, order should already be back in pending queue
 		oc.mu.Lock()
@@ -310,9 +310,9 @@ func (oc *OrderController) processOrder(bot *Bot, order *Order) {
 func (oc *OrderController) PrintStatus() {
 	oc.mu.RLock()
 	defer oc.mu.RUnlock()
-	
+
 	fmt.Println("\n--- System Status ---")
-	
+
 	fmt.Printf("PENDING Orders (%d):\n", len(oc.pendingQueue))
 	if len(oc.pendingQueue) == 0 {
 		fmt.Println("  (none)")
@@ -321,7 +321,7 @@ func (oc *OrderController) PrintStatus() {
 			fmt.Printf("  %s\n", order.String())
 		}
 	}
-	
+
 	fmt.Printf("\nCOMPLETE Orders (%d):\n", len(oc.completedOrders))
 	if len(oc.completedOrders) == 0 {
 		fmt.Println("  (none)")
@@ -330,7 +330,7 @@ func (oc *OrderController) PrintStatus() {
 			fmt.Printf("  %s\n", order.String())
 		}
 	}
-	
+
 	fmt.Printf("\nBots (%d):\n", len(oc.bots))
 	if len(oc.bots) == 0 {
 		fmt.Println("  (none)")
@@ -374,9 +374,9 @@ func (oc *OrderController) GetActiveBotCount() int {
 func (oc *OrderController) PrintFinalStatus() {
 	oc.mu.RLock()
 	defer oc.mu.RUnlock()
-	
+
 	fmt.Println("\nFinal Status:")
-	
+
 	vipCount := 0
 	normalCount := 0
 	for _, order := range oc.completedOrders {
@@ -386,8 +386,8 @@ func (oc *OrderController) PrintFinalStatus() {
 			normalCount++
 		}
 	}
-	
-	fmt.Printf("- Total Orders Processed: %d (%d VIP, %d Normal)\n", 
+
+	fmt.Printf("- Total Orders Processed: %d (%d VIP, %d Normal)\n",
 		len(oc.completedOrders), vipCount, normalCount)
 	fmt.Printf("- Orders Completed: %d\n", len(oc.completedOrders))
 	fmt.Printf("- Active Bots: %d\n", len(oc.bots))

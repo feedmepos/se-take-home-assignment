@@ -23,7 +23,7 @@ func runSimulation(ctrl *controller.OrderController) {
 
 	// Requirement 1 & 2: Create orders
 	ctrl.CreateNormalOrder()
-	ctrl.CreateVIPOrder() 
+	ctrl.CreateVIPOrder()
 	ctrl.CreateNormalOrder()
 
 	// Wait a moment
