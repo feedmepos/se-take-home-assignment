@@ -42,6 +42,7 @@ You must implement **either** frontend or backend components as described below:
   - `build.sh`: Contains compilation steps for the CLI application
   - `run.sh`: Contains execution steps that run the CLI application
 - The CLI application result must be printed to `result.txt`
+- The `result.txt` output must include timestamps in `HH:MM:SS` format to track order completion times
 - Must follow **GitHub Flow**: Create a Pull Request with your changes to this repository
 - Ensure all GitHub Action checks pass successfully
 
@@ -52,6 +53,7 @@ You must implement **either** frontend or backend components as described below:
   - Follow GitHub Flow process with Pull Request submission
   - All tests in `test.sh` must pass
   - The `result.txt` file must contain meaningful output from your CLI application
+  - All output must include timestamps in `HH:MM:SS` format to track order completion times
   - Submit a Pull Request and ensure the `go-verify-result` workflow passes
 - Provide documentation for any part that you think is needed
 
