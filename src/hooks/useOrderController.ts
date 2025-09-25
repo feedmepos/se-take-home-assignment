@@ -28,12 +28,15 @@ export function useOrderController() {
     if (state.bots.length === 0) return;
 
     const botToRemove = state.bots[state.bots.length - 1];
-
+    
+    const affectedOrderIds: number[] = [];
     state.orders.forEach(order => {
       if (order.status === 'processing' && order.processingBotId === botToRemove.id) {
-        clearOrderTimeout(order.id);
+        affectedOrderIds.push(order.id);
       }
     });
+
+    affectedOrderIds.forEach(orderId => clearOrderTimeout(orderId));
 
     dispatch({ type: 'REMOVE_BOT' });
   };
@@ -60,7 +63,7 @@ export function useOrderController() {
           });
 
           clearOrderTimeout(orderToProcess.id);
-        }, 4000);
+        }, 10000);
 
         orderTimeouts.current.set(orderToProcess.id, timeoutId);
       }
