@@ -32,8 +32,8 @@ func TestNormalOrders(t *testing.T) {
 func TestVipPriority(t *testing.T) {
 	m := NewManager()
 	m.createOrder(false) // 普通
-	m.createOrder(true)  // VIP
 	m.createOrder(false) // 普通
+	m.createOrder(true)  // VIP
 	m.addBot()
 	m.addBot()
 	time.Sleep(15 * time.Second)
@@ -95,9 +95,4 @@ func TestRemoveBotDuringProcessing(t *testing.T) {
 		t.Fatalf("expected at least 1 completed order after reprocessing, got %d", m.complete.Len())
 	}
 
-	// 清理：移除剩余 bot(s)
-	for len(m.bots) > 0 {
-		m.removeBot()
-		time.Sleep(100 * time.Millisecond)
-	}
 }
