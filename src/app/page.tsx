@@ -40,7 +40,7 @@ export default function OrderController() {
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-red-600 mb-2">McDonald's Order Controller</h1>
+          <h1 className="text-4xl font-bold text-red-600 mb-2">McDonald&apos;s Order Controller</h1>
           <p className="text-muted-foreground">Automated Cooking Bot Management System</p>
         </div>
         <Card>
