@@ -1,4 +1,4 @@
-package main
+package controller
 
 import (
 	"container/list"
@@ -7,7 +7,6 @@ import (
 	"time"
 )
 
-// === Order ===
 type Order struct {
 	id  int
 	vip bool
@@ -20,7 +19,6 @@ func (o *Order) String() string {
 	return fmt.Sprintf("Order-%d", o.id)
 }
 
-// === Bot ===
 type Bot struct {
 	id      int
 	manager *Manager
@@ -42,7 +40,7 @@ func (b *Bot) getStatus() string {
 	return s
 }
 
-func logWithTime(format string, a ...interface{}) {
+func LogWithTime(format string, a ...interface{}) {
 	now := time.Now().Format("15:04:05")
 	msg := fmt.Sprintf(format, a...)
 	fmt.Printf("[%s] %s\n", now, msg)
@@ -80,7 +78,7 @@ func (b *Bot) run() {
 	}
 }
 
-// === Manager ===
+// Manager
 // 管理两个独立的待处理队列：vipPending 与 normalPending
 type Manager struct {
 	mu            sync.Mutex
@@ -103,8 +101,8 @@ func NewManager() *Manager {
 	return m
 }
 
-// createOrder：根据 vip 标志放入对应的队列尾部（FIFO）
-func (m *Manager) createOrder(vip bool) {
+// CreateOrder 根据 vip 标志放入对应的队列尾部（FIFO）
+func (m *Manager) CreateOrder(vip bool) {
 	m.mu.Lock()
 	m.orderSeq++
 	o := &Order{id: m.orderSeq, vip: vip}
@@ -113,7 +111,7 @@ func (m *Manager) createOrder(vip bool) {
 	} else {
 		m.normalPending.PushBack(o)
 	}
-	logWithTime("Created normal order #%s", o)
+	LogWithTime("Created normal order #%s", o)
 	m.mu.Unlock()
 	m.cond.Broadcast() // 唤醒等待的 bot
 }
@@ -159,7 +157,7 @@ func (m *Manager) requeueOrderFront(o *Order) {
 	} else {
 		m.normalPending.PushFront(o)
 	}
-	logWithTime("Requeued #%s to front", o)
+	LogWithTime("Requeued #%s to front", o)
 	m.cond.Broadcast()
 }
 
@@ -168,11 +166,11 @@ func (m *Manager) completeOrder(o *Order) {
 	m.mu.Lock()
 	m.complete.PushBack(o)
 	m.mu.Unlock()
-	logWithTime("Completed #%s", o)
+	LogWithTime("Completed #%s", o)
 }
 
-// addBot：创建并启动一个新 bot
-func (m *Manager) addBot() {
+// AddBot 创建并启动一个新 bot
+func (m *Manager) AddBot() {
 	m.mu.Lock()
 	id := len(m.bots) + 1
 	b := &Bot{
@@ -188,12 +186,12 @@ func (m *Manager) addBot() {
 	fmt.Printf("Added Bot-%d\n", id)
 }
 
-// removeBot：移除最新创建的 bot（LIFO）。如果该 bot 正在处理订单，会收到 stop 信号并把订单 requeue。
-func (m *Manager) removeBot() {
+// RemoveBot 移除最新创建的 bot（LIFO）。如果该 bot 正在处理订单，会收到 stop 信号并把订单 requeue。
+func (m *Manager) RemoveBot() {
 	m.mu.Lock()
 	if len(m.bots) == 0 {
 		m.mu.Unlock()
-		logWithTime("No bots to remove")
+		LogWithTime("No bots to remove")
 		return
 	}
 	// newest bot is last
@@ -208,9 +206,9 @@ func (m *Manager) removeBot() {
 	// 不阻塞等待 goroutine 退出（可以在需要时加入等待逻辑）
 }
 
-// printStatus：显示两个队列和 bot 状态
-func (m *Manager) printStatus() {
-	logWithTime("Current Status:")
+// PrintStatus 显示两个队列和 bot 状态
+func (m *Manager) PrintStatus() {
+	LogWithTime("Current Status:")
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	fmt.Printf("=== BOTS (%d) ===\n", len(m.bots))
@@ -228,37 +226,5 @@ func (m *Manager) printStatus() {
 	fmt.Printf("=== COMPLETE (%d) ===\n", m.complete.Len())
 	for e := m.complete.Front(); e != nil; e = e.Next() {
 		fmt.Printf("  %s\n", e.Value.(*Order))
-	}
-}
-
-// === main ===
-func main() {
-	m := NewManager()
-	var cmd string
-	logWithTime("Commands: normal | vip | + | - | status | quit")
-	for {
-		fmt.Print("> ")
-		_, err := fmt.Scanln(&cmd)
-		if err != nil {
-			// 可能是空输入，跳过
-			continue
-		}
-		switch cmd {
-		case "normal":
-			m.createOrder(false)
-		case "vip":
-			m.createOrder(true)
-		case "+":
-			m.addBot()
-		case "-":
-			m.removeBot()
-		case "status":
-			m.printStatus()
-		case "quit":
-			logWithTime("Exiting...")
-			return
-		default:
-			logWithTime("Unknown command")
-		}
 	}
 }

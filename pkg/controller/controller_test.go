@@ -1,4 +1,4 @@
-package main
+package controller
 
 import (
 	"testing"
@@ -7,75 +7,75 @@ import (
 
 func Test1(t *testing.T) {
 	m := NewManager()
-	m.createOrder(false)
-	m.createOrder(true)
-	m.addBot()
-	m.addBot()
-	m.createOrder(true)
-	m.createOrder(false)
-	m.createOrder(true)
+	m.CreateOrder(false)
+	m.CreateOrder(true)
+	m.AddBot()
+	m.AddBot()
+	m.CreateOrder(true)
+	m.CreateOrder(false)
+	m.CreateOrder(true)
 	time.Sleep(10 * time.Second)
-	m.printStatus()
+	m.PrintStatus()
 }
 
 // 基础测试：两个普通订单，一个机器人
 func TestNormalOrders(t *testing.T) {
 	m := NewManager()
-	m.createOrder(false)         // 普通
-	m.createOrder(false)         // 普通
-	m.addBot()                   // 1 个机器人
+	m.CreateOrder(false)         // 普通
+	m.CreateOrder(false)         // 普通
+	m.AddBot()                   // 1 个机器人
 	time.Sleep(12 * time.Second) // 等待机器人处理
-	m.printStatus()
+	m.PrintStatus()
 }
 
 // VIP 优先测试：普通 + VIP 混合，两个机器人
 func TestVipPriority(t *testing.T) {
 	m := NewManager()
-	m.createOrder(false) // 普通
-	m.createOrder(false) // 普通
-	m.createOrder(true)  // VIP
-	m.addBot()
-	m.addBot()
+	m.CreateOrder(false) // 普通
+	m.CreateOrder(false) // 普通
+	m.CreateOrder(true)  // VIP
+	m.AddBot()
+	m.AddBot()
 	time.Sleep(15 * time.Second)
-	m.printStatus()
+	m.PrintStatus()
 }
 
 // 多机器人竞争测试：多个订单，多个机器人
 func TestMultipleBots(t *testing.T) {
 	m := NewManager()
 	for i := 0; i < 3; i++ {
-		m.createOrder(false) // 普通
+		m.CreateOrder(false) // 普通
 	}
-	m.createOrder(true) // VIP
-	m.createOrder(true) // VIP
+	m.CreateOrder(true) // VIP
+	m.CreateOrder(true) // VIP
 	for i := 0; i < 3; i++ {
-		m.addBot()
+		m.AddBot()
 	}
 	time.Sleep(20 * time.Second)
-	m.printStatus()
+	m.PrintStatus()
 }
 
 // 空队列机器人测试：机器人先启动，订单后进入
 func TestIdleBots(t *testing.T) {
 	m := NewManager()
-	m.addBot()
-	m.addBot()
+	m.AddBot()
+	m.AddBot()
 	time.Sleep(3 * time.Second) // 先闲置一会
-	m.createOrder(true)
-	m.createOrder(false)
+	m.CreateOrder(true)
+	m.CreateOrder(false)
 	time.Sleep(12 * time.Second)
-	m.printStatus()
+	m.PrintStatus()
 }
 
 func TestRemoveBotDuringProcessing(t *testing.T) {
 	m := NewManager()
 
-	m.addBot()
-	m.createOrder(false)
+	m.AddBot()
+	m.CreateOrder(false)
 	time.Sleep(200 * time.Millisecond)
 
 	// 移除最新 bot（正在处理）
-	m.removeBot()
+	m.RemoveBot()
 
 	// 等待短时间，让被移除的 bot 将订单回队列并退出
 	time.Sleep(300 * time.Millisecond)
@@ -86,7 +86,7 @@ func TestRemoveBotDuringProcessing(t *testing.T) {
 	}
 
 	// 启动一个快速 bot 处理被回退的订单
-	m.addBot()
+	m.AddBot()
 	// 等待足够时间让它完成（process 1s）
 	time.Sleep(2000 * time.Millisecond)
 
