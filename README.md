@@ -1,39 +1,3 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
-
-## Getting Started
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 ## FeedMe Software Engineer Take Home Assignment
 Below is a take home assignment before the interview of the position. You are required to
 1. Understand the situation and use case. You may contact the interviewer for further clarification.
@@ -70,7 +34,30 @@ You must implement **either** frontend or backend components as described below:
 - Must provide a user interface that demonstrates all the requirements listed above
 - Should allow users to interact with the McDonald's order management system
 
+#### 2. Backend
+- You must use **either Go (Golang) or Node.js** for the backend implementation
+- The backend must be a CLI application that can be executed in GitHub Actions
+- Must implement the following scripts in the `script` directory:
+  - `test.sh`: Contains unit test execution steps
+  - `build.sh`: Contains compilation steps for the CLI application
+  - `run.sh`: Contains execution steps that run the CLI application
+- The CLI application result must be printed to `result.txt`
+- The `result.txt` output must include timestamps in `HH:MM:SS` format to track order completion times
+- Must follow **GitHub Flow**: Create a Pull Request with your changes to this repository
+- Ensure all GitHub Action checks pass successfully
 
 #### Submission Requirements
 - Fork this repository and implement your solution with either frontend or backend
 - **Frontend option**: Deploy to a publicly accessible URL using any technology stack
+- **Backend option**: Must be implemented in Go or Node.js and work within the GitHub Actions environment
+  - Follow GitHub Flow process with Pull Request submission
+  - All tests in `test.sh` must pass
+  - The `result.txt` file must contain meaningful output from your CLI application
+  - All output must include timestamps in `HH:MM:SS` format to track order completion times
+  - Submit a Pull Request and ensure the `go-verify-result` workflow passes
+- Provide documentation for any part that you think is needed
+
+### Tips on completing this task
+- Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.
+- Treat this assignment as a vibe coding, don't over engineer it. Try to scope your working hour within 30 min. However, ensure you read and understand what your code doing.
+- Complete the implementation as clean as possible, clean code is a strong plus point, do not bring in all the fancy tech stuff.
