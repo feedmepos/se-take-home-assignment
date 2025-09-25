@@ -1,0 +1,83 @@
+name: Deploy PR Preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  pull-requests: write
+
+concurrency:
+  group: "preview-${{ github.event.pull_request.number }}"
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: npm
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Build with Next.js
+        run: npm run build
+        
+      - name: Deploy to GitHub Pages (Preview)
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./out
+          destination_dir: preview/pr-${{ github.event.pull_request.number }}
+          
+      - name: Comment PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const previewUrl = `https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/preview/pr-${prNumber}/`;
+            
+            const comment = `🚀 **Preview Deployment**
+            
+            Your PR preview is ready! 
+            
+            📱 **Preview URL:** ${previewUrl}
+            
+            This preview will be updated automatically when you push new commits to this PR.`;
+            
+            // Check if preview comment already exists
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+            
+            const existingComment = comments.data.find(
+              comment => comment.body.includes('🚀 **Preview Deployment**')
+            );
+            
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: comment,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: comment,
+              });
+            }
