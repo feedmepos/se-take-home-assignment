@@ -1,0 +1,18 @@
+McDonald's Order Management System - Simulation Results
+
+[00:31:36] System initialized with 0 bots
+[00:31:36] Cooking bot #1 activated - Status: IDLE
+[00:31:36] New VIP Order #1001 received - Status: PENDING
+[00:31:38] Cooking bot #2 activated - Status: IDLE
+[00:31:39] New Normal Order #1002 received - Status: PENDING
+[00:31:40] New Normal Order #1003 received - Status: PENDING
+[00:31:40] Cooking bot #3 activated - Status: IDLE
+[00:31:41] New VIP Order #1004 received - Status: PENDING
+[00:31:50] Bot #3 deactivated while IDLE
+[00:31:51] New Normal Order #1005 received - Status: PENDING
+
+Final Status:
+- Total Orders Processed: 5 (2 VIP, 3 Normal)
+- Orders Completed: 5
+- Active Bots: 2
+- Pending Orders: 0
