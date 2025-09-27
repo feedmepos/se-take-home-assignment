@@ -1,14 +1,16 @@
 #!/bin/bash
 
-# Unit Test Script
-# This script should contain all unit test execution steps
+# Test script for McDonald's Order Management System
+echo "Running tests..."
 
+# Install dependencies if node_modules doesn't exist
+if [ ! -d "node_modules" ]; then
+    echo "Installing dependencies..."
+    npm install
+fi
+
+# Run unit tests
 echo "Running unit tests..."
+npm test
 
-# For Go projects:
-# go test ./... -v
-
-# For Node.js projects:
-# npm test
-
-echo "Unit tests completed"
+echo "Tests completed!"
