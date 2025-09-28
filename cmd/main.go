@@ -21,18 +21,15 @@ func main() {
 	botManager.AddBot()
 	botManager.AddBot()
 
-	time.Sleep(11 * time.Second)
+	time.Sleep(10 * time.Second)
 
-	orderController.CreateOrder(order.Normal)
+	orderController.CreateOrder(order.VIP)
 
-	time.Sleep(5 * time.Second)
+	time.Sleep(10 * time.Second)
 
 	botManager.RemoveBot()
 
-	orderController.CreateOrder(order.VIP)
-	orderController.CreateOrder(order.VIP)
-
-	time.Sleep(60 * time.Second)
+	time.Sleep(2 * time.Second)
 
 	logger.Info("Final Status:")
 	logger.Info("- Total Orders Processed: %d (%d VIP, %d Normal)", orderController.GetCompletedOrdersCount(), orderController.GetCompletedOrdersCount(order.VIP), orderController.GetCompletedOrdersCount(order.Normal))
