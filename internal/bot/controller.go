@@ -92,7 +92,7 @@ func (bm *BotController) runBot(ctx context.Context, bot *Bot) {
 		default:
 			nextOrder := bm.oc.GetNextPendingOrder()
 			if nextOrder == nil {
-				// To ensure we log "IDLE - No pending orders" only once per
+				// To ensure we log "IDLE - No pending orders" only once per idle
 				if !idleWithNoPendingOrders {
 					idleWithNoPendingOrders = true
 					logger.InfoWithTimeStamp("Bot #%d is now IDLE - No pending orders", bot.ID)
