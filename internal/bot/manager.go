@@ -40,8 +40,7 @@ func NewBotManager(orderController *order.OrderController) *BotManager {
 	}
 }
 
-// AddBot creates a new bot and starts its processing loop
-func (bm *BotManager) AddBot() *Bot {
+func (bm *BotManager) AddBot() {
 	bm.mu.Lock()
 	defer bm.mu.Unlock()
 
@@ -56,20 +55,18 @@ func (bm *BotManager) AddBot() *Bot {
 
 	bm.bots = append(bm.bots, bot)
 
-	logger.InfoWithTimeStamp("Bot #%d created - Status: %s", bot.ID, bot.Status)
-
 	go bm.runBot(ctx, bot)
 
-	return bot
+	logger.InfoWithTimeStamp("Bot #%d created - Status: %s", bot.ID, bot.Status)
 }
 
 // RemoveBot removes the newest bot and cancels any ongoing processing
-func (bm *BotManager) RemoveBot() *Bot {
+func (bm *BotManager) RemoveBot() {
 	bm.mu.Lock()
 	defer bm.mu.Unlock()
 
 	if len(bm.bots) == 0 {
-		return nil
+		return
 	}
 
 	// Remove the newest bot (last in slice)
@@ -77,21 +74,20 @@ func (bm *BotManager) RemoveBot() *Bot {
 	removedBot := bm.bots[botIndex]
 	bm.bots = bm.bots[:botIndex]
 
-	// Cancel the bot's processing
-	removedBot.cancel()
-
-	// If the bot was processing an order, requeue it
+	// If the bot was processing an order, capture the order
 	removedBot.mu.RLock()
 	currentOrder := removedBot.CurrentOrder
 	removedBot.mu.RUnlock()
 
+	// Cancel the bot's processing
+	removedBot.cancel()
+
+	// Requeue the order
 	if currentOrder != nil {
 		bm.orderController.RequeueOrder(currentOrder)
 	}
 
 	logger.InfoWithTimeStamp("Bot #%d destroyed while %s", removedBot.ID, removedBot.Status)
-
-	return removedBot
 }
 
 func (bm *BotManager) GetActiveBotsCount() int {
@@ -112,7 +108,7 @@ func (bm *BotManager) runBot(ctx context.Context, bot *Bot) {
 		default:
 			nextOrder := bm.orderController.GetNextPendingOrder()
 			if nextOrder == nil {
-				time.Sleep(1 * time.Second)
+				// To ensure we log "IDLE - No pending orders" only once per
 				if !idleWithNoPendingOrders {
 					idleWithNoPendingOrders = true
 					logger.InfoWithTimeStamp("Bot #%d is now IDLE - No pending orders", bot.ID)
@@ -132,8 +128,9 @@ func (bm *BotManager) processOrder(ctx context.Context, bot *Bot, order *order.O
 	bot.Status = Processing
 	bot.CurrentOrder = order
 	bot.StartTime = time.Now()
-	logger.InfoWithTimeStamp("Bot #%d picked up %s Order #%s - Status: %s", bot.ID, order.Type, order.ID, order.Status)
 	bot.mu.Unlock()
+
+	logger.InfoWithTimeStamp("Bot #%d picked up %s Order #%s - Status: %s", bot.ID, order.Type, order.ID, order.Status)
 
 	// Process for 10 seconds or until cancelled
 	timer := time.NewTimer(10 * time.Second)
@@ -141,19 +138,21 @@ func (bm *BotManager) processOrder(ctx context.Context, bot *Bot, order *order.O
 
 	select {
 	case <-ctx.Done():
-		bot.mu.Lock()
-		bot.Status = Idle
-		bot.CurrentOrder = nil
-		bot.mu.Unlock()
+		resetBotToIdle(bot)
 		return
 	case <-timer.C:
-		// Processing completed
 		bm.orderController.CompleteOrder(order)
 
-		bot.mu.Lock()
-		bot.Status = Idle
-		bot.CurrentOrder = nil
+		resetBotToIdle(bot)
+
 		logger.InfoWithTimeStamp("Bot #%d completed %s Order #%s - Status: COMPLETE (Processing time: 10s)", bot.ID, order.Type, order.ID)
-		bot.mu.Unlock()
 	}
+}
+
+func resetBotToIdle(bot *Bot) {
+	bot.mu.Lock()
+	defer bot.mu.Unlock()
+
+	bot.Status = Idle
+	bot.CurrentOrder = nil
 }
