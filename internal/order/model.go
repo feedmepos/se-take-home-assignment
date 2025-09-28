@@ -20,9 +20,9 @@ const (
 )
 
 type Order struct {
-	ID          string      `json:"id"`
-	Type        OrderType   `json:"type"`
-	Status      OrderStatus `json:"status"`
+	ID          int
+	Type        OrderType
+	Status      OrderStatus
 	CreatedAt   time.Time
 	CompletedAt time.Time
 }

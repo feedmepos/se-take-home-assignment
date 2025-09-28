@@ -2,7 +2,6 @@ package order
 
 import (
 	"main/internal/logger"
-	"strconv"
 	"sync"
 	"time"
 )
@@ -23,13 +22,13 @@ func NewOrderController() *OrderController {
 }
 
 // CreateOrder creates a new order with the specified type
-func (oc *OrderController) CreateOrder(orderType OrderType) *Order {
+func (oc *OrderController) CreateOrder(orderType OrderType) {
 	oc.mu.Lock()
 	defer oc.mu.Unlock()
 
 	oc.orderCounter++
 	order := &Order{
-		ID:        strconv.Itoa(oc.orderCounter),
+		ID:        oc.orderCounter,
 		Type:      orderType,
 		Status:    Pending,
 		CreatedAt: time.Now(),
@@ -37,8 +36,7 @@ func (oc *OrderController) CreateOrder(orderType OrderType) *Order {
 
 	oc.queueOrder(order)
 
-	logger.InfoWithTimeStamp("Created %s Order #%s - Status: %s", order.Type, order.ID, order.Status)
-	return order
+	logger.InfoWithTimeStamp("Created %s Order #%d - Status: %s", order.Type, order.ID, order.Status)
 }
 
 // GetNextPendingOrder returns and removes the next order to be processed
@@ -54,6 +52,13 @@ func (oc *OrderController) GetNextPendingOrder() *Order {
 	oc.pendingOrders = oc.pendingOrders[1:]
 	order.Status = Processing
 	return order
+}
+
+func (oc *OrderController) ProcessOrder(order *Order) {
+	oc.mu.Lock()
+	defer oc.mu.Unlock()
+
+	order.Status = Processing
 }
 
 // CompleteOrder moves an order from processing to completed
@@ -76,10 +81,6 @@ func (oc *OrderController) RequeueOrder(order *Order) {
 }
 
 func (oc *OrderController) queueOrder(order *Order) {
-	if order == nil {
-		return
-	}
-
 	if order.Type == VIP {
 		insertIndex := len(oc.pendingOrders)
 		for i, existingOrder := range oc.pendingOrders {

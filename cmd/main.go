@@ -12,7 +12,7 @@ func main() {
 	logger.Info("")
 
 	orderController := order.NewOrderController()
-	botManager := bot.NewBotManager(orderController)
+	botController := bot.NewBotController(orderController)
 
 	orderController.CreateOrder(order.Normal)
 	orderController.CreateOrder(order.VIP)
@@ -20,9 +20,9 @@ func main() {
 
 	time.Sleep(1 * time.Second)
 
-	botManager.AddBot()
+	botController.AddBot()
 	time.Sleep(1 * time.Second)
-	botManager.AddBot()
+	botController.AddBot()
 
 	time.Sleep(12 * time.Second)
 
@@ -31,12 +31,12 @@ func main() {
 
 	time.Sleep(12 * time.Second)
 
-	botManager.RemoveBot()
+	botController.RemoveBot()
 
 	logger.Info("")
 	logger.Info("Final Status:")
 	logger.Info("- Total Orders Processed: %d (%d VIP, %d Normal)", orderController.GetCompletedOrdersCount(), orderController.GetCompletedOrdersCount(order.VIP), orderController.GetCompletedOrdersCount(order.Normal))
 	logger.Info("- Orders Completed: %d", orderController.GetCompletedOrdersCount())
-	logger.Info("- Active Bots: %d", botManager.GetActiveBotsCount())
+	logger.Info("- Active Bots: %d", botController.GetActiveBotsCount())
 	logger.Info("- Pending Orders: %d", orderController.GetPendingOrdersCount())
 }

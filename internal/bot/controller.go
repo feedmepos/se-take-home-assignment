@@ -8,39 +8,23 @@ import (
 	"time"
 )
 
-type BotStatus string
-
-const (
-	Idle       BotStatus = "IDLE"
-	Processing BotStatus = "PROCESSING"
-)
-
-type Bot struct {
-	ID           int
-	Status       BotStatus
-	CurrentOrder *order.Order
-	StartTime    time.Time
-	cancel       context.CancelFunc
-	mu           sync.RWMutex
+type BotController struct {
+	mu         sync.RWMutex
+	bots       []*Bot
+	botCounter int
+	oc         *order.OrderController
 }
 
-type BotManager struct {
-	mu              sync.RWMutex
-	bots            []*Bot
-	botCounter      int
-	orderController *order.OrderController
-}
-
-func NewBotManager(orderController *order.OrderController) *BotManager {
+func NewBotController(oc *order.OrderController) *BotController {
 	logger.InfoWithTimeStamp("System initialized with 0 bots")
-	return &BotManager{
-		bots:            make([]*Bot, 0),
-		botCounter:      0,
-		orderController: orderController,
+	return &BotController{
+		bots:       make([]*Bot, 0),
+		botCounter: 0,
+		oc:         oc,
 	}
 }
 
-func (bm *BotManager) AddBot() {
+func (bm *BotController) AddBot() {
 	bm.mu.Lock()
 	defer bm.mu.Unlock()
 
@@ -61,7 +45,7 @@ func (bm *BotManager) AddBot() {
 }
 
 // RemoveBot removes the newest bot and cancels any ongoing processing
-func (bm *BotManager) RemoveBot() {
+func (bm *BotController) RemoveBot() {
 	bm.mu.Lock()
 	defer bm.mu.Unlock()
 
@@ -84,13 +68,13 @@ func (bm *BotManager) RemoveBot() {
 
 	// Requeue the order
 	if currentOrder != nil {
-		bm.orderController.RequeueOrder(currentOrder)
+		bm.oc.RequeueOrder(currentOrder)
 	}
 
 	logger.InfoWithTimeStamp("Bot #%d destroyed while %s", removedBot.ID, removedBot.Status)
 }
 
-func (bm *BotManager) GetActiveBotsCount() int {
+func (bm *BotController) GetActiveBotsCount() int {
 	bm.mu.RLock()
 	defer bm.mu.RUnlock()
 
@@ -98,7 +82,7 @@ func (bm *BotManager) GetActiveBotsCount() int {
 }
 
 // runBot is the main processing loop for a bot
-func (bm *BotManager) runBot(ctx context.Context, bot *Bot) {
+func (bm *BotController) runBot(ctx context.Context, bot *Bot) {
 	idleWithNoPendingOrders := false
 
 	for {
@@ -106,7 +90,7 @@ func (bm *BotManager) runBot(ctx context.Context, bot *Bot) {
 		case <-ctx.Done():
 			return
 		default:
-			nextOrder := bm.orderController.GetNextPendingOrder()
+			nextOrder := bm.oc.GetNextPendingOrder()
 			if nextOrder == nil {
 				// To ensure we log "IDLE - No pending orders" only once per
 				if !idleWithNoPendingOrders {
@@ -123,14 +107,15 @@ func (bm *BotManager) runBot(ctx context.Context, bot *Bot) {
 }
 
 // processOrder handles the 10-second processing of an order
-func (bm *BotManager) processOrder(ctx context.Context, bot *Bot, order *order.Order) {
+func (bm *BotController) processOrder(ctx context.Context, bot *Bot, order *order.Order) {
 	bot.mu.Lock()
 	bot.Status = Processing
 	bot.CurrentOrder = order
 	bot.StartTime = time.Now()
+	bm.oc.ProcessOrder(order)
 	bot.mu.Unlock()
 
-	logger.InfoWithTimeStamp("Bot #%d picked up %s Order #%s - Status: %s", bot.ID, order.Type, order.ID, order.Status)
+	logger.InfoWithTimeStamp("Bot #%d picked up %s Order #%d - Status: %s", bot.ID, order.Type, order.ID, order.Status)
 
 	// Process for 10 seconds or until cancelled
 	timer := time.NewTimer(10 * time.Second)
@@ -141,11 +126,11 @@ func (bm *BotManager) processOrder(ctx context.Context, bot *Bot, order *order.O
 		resetBotToIdle(bot)
 		return
 	case <-timer.C:
-		bm.orderController.CompleteOrder(order)
+		bm.oc.CompleteOrder(order)
 
 		resetBotToIdle(bot)
 
-		logger.InfoWithTimeStamp("Bot #%d completed %s Order #%s - Status: COMPLETE (Processing time: 10s)", bot.ID, order.Type, order.ID)
+		logger.InfoWithTimeStamp("Bot #%d completed %s Order #%d - Status: COMPLETE (Processing time: 10s)", bot.ID, order.Type, order.ID)
 	}
 }
 
