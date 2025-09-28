@@ -105,20 +105,24 @@ func (oc *OrderController) GetPendingOrdersCount() int {
 }
 
 // GetCompletedOrdersCount returns the number of completed orders
-func (oc *OrderController) GetCompletedOrdersCount(orderType ...OrderType) int {
+func (oc *OrderController) GetCompletedOrdersCount(orderTypes ...OrderType) int {
 	oc.mu.RLock()
 	defer oc.mu.RUnlock()
 
-	if len(orderType) == 0 {
+	if len(orderTypes) == 0 {
 		return len(oc.completedOrders)
 	}
 
 	count := 0
+
+	orderTypesMap := make(map[OrderType]struct{}, len(orderTypes))
+	for _, ot := range orderTypes {
+		orderTypesMap[ot] = struct{}{}
+	}
+
 	for _, order := range oc.completedOrders {
-		for _, t := range orderType {
-			if order.Type == t {
-				count++
-			}
+		if _, ok := orderTypesMap[order.Type]; ok {
+			count++
 		}
 	}
 
