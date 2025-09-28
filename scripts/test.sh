@@ -5,7 +5,6 @@
 
 echo "Running unit tests..."
 
-# For Go projects:
 go test ./... -v
 
 echo "Unit tests completed"

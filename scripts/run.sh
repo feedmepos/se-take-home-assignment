@@ -5,11 +5,6 @@
 
 echo "Running CLI application..."
 
-# For Go projects:
 ./order-controller > result.txt
-
-# For Node.js projects:
-# node index.js > result.txt
-# or npm start > result.txt
 
 echo "CLI application execution completed"
