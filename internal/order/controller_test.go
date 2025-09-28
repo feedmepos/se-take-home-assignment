@@ -40,7 +40,7 @@ func TestOrderController_CreateVIPOrder(t *testing.T) {
 	order := oc.pendingOrders[0]
 
 	assert.Equal(t, 1, order.ID, "Order ID should be 1")
-	assert.Equal(t, VIP, order.Type, "Order type should be VIPVIP")
+	assert.Equal(t, VIP, order.Type, "Order type should be VIP")
 	assert.NotEmpty(t, order.CreatedAt, "Order created at should not be empty")
 }
 
@@ -206,8 +206,8 @@ func TestOrderController_GetCompletedOrdersCount(t *testing.T) {
 	oc.CompleteOrder(oc.GetNextPendingOrder())
 	oc.CompleteOrder(oc.GetNextPendingOrder())
 
-	assert.Equal(t, 5, oc.GetCompletedOrdersCount(), "Completed orders count should be 4")
+	assert.Equal(t, 5, oc.GetCompletedOrdersCount(), "Completed orders count should be 5")
 	assert.Equal(t, 2, oc.GetCompletedOrdersCount(Normal), "Completed Normal orders count should be 2")
-	assert.Equal(t, 3, oc.GetCompletedOrdersCount(VIP), "Completed VIP orders count should be 2")
+	assert.Equal(t, 3, oc.GetCompletedOrdersCount(VIP), "Completed VIP orders count should be 3")
 
 }

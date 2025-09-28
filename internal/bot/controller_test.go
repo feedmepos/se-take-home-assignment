@@ -195,7 +195,7 @@ func TestBotController_ProcessOrder(t *testing.T) {
 			assert.Equal(c, Idle, targetBot.Status, "Bot should be idle after processing")
 			assert.Nil(c, targetBot.CurrentOrder, "Bot's current order should be nil after processing")
 			assert.Equal(c, order.Completed, targetOrder.Status, "Order status should be Completed")
-		}, 100*time.Second, 1*time.Second, "Order processing should complete")
+		}, 10*time.Second, 1*time.Second, "Order processing should complete")
 	case <-time.After(11 * time.Second):
 		assert.Fail(t, "processOrder did not complete after processing order")
 	}
@@ -234,7 +234,7 @@ func TestBotController_ProcessOrderCancel(t *testing.T) {
 		assert.EventuallyWithT(t, func(c *assert.CollectT) {
 			assert.Equal(c, Idle, targetBot.Status, "Bot should be idle after processing")
 			assert.Nil(c, targetBot.CurrentOrder, "Bot's current order should be nil after processing")
-		}, 100*time.Second, 1*time.Millisecond, "Order processing should complete")
+		}, 100*time.Millisecond, 1*time.Millisecond, "Order processing should complete")
 	case <-time.After(500 * time.Millisecond):
 		assert.Fail(t, "processOrder did not exit after context cancellation")
 	}
