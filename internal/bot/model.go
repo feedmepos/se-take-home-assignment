@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+const botProcessingTime = 10 * time.Second
+
 type BotStatus string
 
 const (

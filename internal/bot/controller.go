@@ -117,8 +117,7 @@ func (bm *BotController) processOrder(ctx context.Context, bot *Bot, order *orde
 
 	logger.InfoWithTimeStamp("Bot #%d picked up %s Order #%d - Status: %s", bot.ID, order.Type, order.ID, order.Status)
 
-	// Process for 10 seconds or until cancelled
-	timer := time.NewTimer(10 * time.Second)
+	timer := time.NewTimer(botProcessingTime)
 	defer timer.Stop()
 
 	select {
@@ -130,7 +129,7 @@ func (bm *BotController) processOrder(ctx context.Context, bot *Bot, order *orde
 
 		resetBotToIdle(bot)
 
-		logger.InfoWithTimeStamp("Bot #%d completed %s Order #%d - Status: COMPLETE (Processing time: 10s)", bot.ID, order.Type, order.ID)
+		logger.InfoWithTimeStamp("Bot #%d completed %s Order #%d - Status: COMPLETE (Processing time: %ds)", bot.ID, order.Type, order.ID, int(botProcessingTime.Seconds()))
 	}
 }
 

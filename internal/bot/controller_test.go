@@ -128,6 +128,7 @@ func TestBotController_RunBotWaitForOrderIndefinitelyUntilCancel(t *testing.T) {
 
 	select {
 	case <-done:
+		// Successfully demo an indefinite wait and exit on cancel
 	case <-time.After(500 * time.Millisecond):
 		assert.Fail(t, "runBot did not exit within timeout after context cancellation")
 	}
@@ -144,11 +145,7 @@ func TestBotController_RunBotProcessOrderAndCancel(t *testing.T) {
 		Status: Idle,
 	}
 
-	done := make(chan bool, 1)
-	go func() {
-		bm.runBot(ctx, targetBot)
-		done <- true
-	}()
+	go bm.runBot(ctx, targetBot)
 
 	// Use assert.Eventually to wait for bot to pick up the order
 	assert.Eventually(t, func() bool {
@@ -158,8 +155,10 @@ func TestBotController_RunBotProcessOrderAndCancel(t *testing.T) {
 	cancel()
 
 	select {
-	case <-done:
-		assert.Equal(t, Idle, targetBot.Status, "Bot should be idle after cancellation")
+	case <-ctx.Done():
+		assert.EventuallyWithT(t, func(c *assert.CollectT) {
+			assert.Equal(c, Idle, targetBot.Status, "Bot should be idle after processing")
+		}, 100*time.Millisecond, 1*time.Millisecond, "Order processing should complete")
 	case <-time.After(500 * time.Millisecond):
 		assert.Fail(t, "runBot did not exit within timeout after context cancellation")
 	}
@@ -177,7 +176,9 @@ func TestBotController_ProcessOrder(t *testing.T) {
 	}
 
 	done := make(chan bool, 1)
+	var timeStarted time.Time
 	go func() {
+		timeStarted = time.Now()
 		bm.processOrder(ctx, targetBot, targetOrder)
 		done <- true
 	}()
@@ -191,11 +192,10 @@ func TestBotController_ProcessOrder(t *testing.T) {
 
 	select {
 	case <-done:
-		assert.EventuallyWithT(t, func(c *assert.CollectT) {
-			assert.Equal(c, Idle, targetBot.Status, "Bot should be idle after processing")
-			assert.Nil(c, targetBot.CurrentOrder, "Bot's current order should be nil after processing")
-			assert.Equal(c, order.Completed, targetOrder.Status, "Order status should be Completed")
-		}, 10*time.Second, 1*time.Second, "Order processing should complete")
+		assert.InDelta(t, botProcessingTime.Seconds(), time.Since(timeStarted).Seconds(), 0.01, "Order processing should take approximately 10 seconds")
+		assert.Equal(t, Idle, targetBot.Status, "Bot should be idle after processing")
+		assert.Nil(t, targetBot.CurrentOrder, "Bot's current order should be nil after processing")
+		assert.Equal(t, order.Completed, targetOrder.Status, "Order status should be Completed")
 	case <-time.After(11 * time.Second):
 		assert.Fail(t, "processOrder did not complete after processing order")
 	}
@@ -212,11 +212,7 @@ func TestBotController_ProcessOrderCancel(t *testing.T) {
 		Status: Idle,
 	}
 
-	done := make(chan bool, 1)
-	go func() {
-		bm.processOrder(ctx, targetBot, targetOrder)
-		done <- true
-	}()
+	go bm.processOrder(ctx, targetBot, targetOrder)
 
 	// Wait for the order to start processing
 	assert.EventuallyWithT(t, func(c *assert.CollectT) {
@@ -225,12 +221,13 @@ func TestBotController_ProcessOrderCancel(t *testing.T) {
 		assert.Equal(c, order.Processing, targetOrder.Status, "Order status should be Processing")
 	}, 100*time.Millisecond, 1*time.Millisecond, "Bot should pick up order")
 
+	// Allow bot to process for order for 2 seconds
 	time.Sleep(2 * time.Second)
 
 	cancel()
 
 	select {
-	case <-done:
+	case <-ctx.Done():
 		assert.EventuallyWithT(t, func(c *assert.CollectT) {
 			assert.Equal(c, Idle, targetBot.Status, "Bot should be idle after processing")
 			assert.Nil(c, targetBot.CurrentOrder, "Bot's current order should be nil after processing")
