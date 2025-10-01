@@ -11,4 +11,7 @@ echo "Running unit tests..."
 # For Node.js projects:
 # npm test
 
+npm install
+npm run test
+
 echo "Unit tests completed"

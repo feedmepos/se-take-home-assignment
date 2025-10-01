@@ -12,4 +12,7 @@ echo "Building CLI application..."
 # npm install
 # npm run build (if needed)
 
+npm install
+npm run build
+
 echo "Build completed"

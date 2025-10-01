@@ -5,11 +5,15 @@
   "scripts": {
     "start": "node dist/index.js",
     "dev": "ts-node src/index.ts",
+    "test": "jest",
     "build": "tsc",
     "prebuild": "rm -rf dist"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.12",
     "@types/node": "^24.6.1",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   }
