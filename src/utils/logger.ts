@@ -1,5 +1,5 @@
+import { format } from 'date-fns'
 import { createWriteStream, existsSync, rmSync } from 'fs'
-import { hhmmss } from './time'
 
 const RESULT_FILE = './scripts/result.txt'
 
@@ -11,7 +11,10 @@ if (existsSync(RESULT_FILE)) {
 const stream = createWriteStream(RESULT_FILE, { flags: 'a' })
 
 export function logLine(message: string) {
-  const text = `[${hhmmss()}] ${message}`
+  const now = new Date()
+  const time = format(now, 'HH:mm:ss')
+
+  const text = `[${time}] ${message}`
   stream.write(`${text}\n`)
 }
 
