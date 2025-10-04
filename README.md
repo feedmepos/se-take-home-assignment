@@ -4,8 +4,8 @@
 | ------- | -------------------- |
 | normal  | Add new normal order |
 | vip     | Add new VIP order    |
-| add     | Add new bot          |
-| remove  | Remove last bot      |
+| +       | Add new bot          |
+| -       | Remove last bot      |
 | status  | Print system status  |
 | exit    | Quit the app         |
 

@@ -1,17 +1,17 @@
-[02:07:57] STATUS -- Order#1 (NORMAL) created.
-[02:07:57] STATUS -- Order#2 (VIP) created and prioritized before NORMAL orders.
-[02:07:57] STATUS -- Order#3 (NORMAL) created.
-[02:07:57] BOT    -- Bot#1 added.
-[02:07:57] BOT    -- Bot#1 started processing Order#2 (VIP).
-[02:07:57] BOT    -- Bot#2 added.
-[02:07:57] BOT    -- Bot#2 started processing Order#1 (NORMAL).
-[02:07:57] BOT    -- Bot#2 removed while processing Order#1. Returning order to pending.
-[02:07:57] BOT    -- Bot#1 completed Order#2.
-[02:07:57] BOT    -- Bot#1 started processing Order#1 (NORMAL).
-[02:07:57] BOT    -- Bot#2 stopped mid-way. Order#1 returned to pending.
-[02:07:57] BOT    -- Bot#1 completed Order#1.
-[02:07:57] BOT    -- Bot#1 started processing Order#1 (NORMAL).
-[02:07:57] BOT    -- Bot#1 completed Order#1.
-[02:07:57] BOT    -- Bot#1 started processing Order#3 (NORMAL).
-[02:07:57] BOT    -- Bot#1 completed Order#3.
-[02:07:57] BOT    -- Bot#1 is IDLE.
+[02:27:53] STATUS -- Order#1 (NORMAL) created.
+[02:27:53] STATUS -- Order#2 (VIP) created and prioritized before NORMAL orders.
+[02:27:53] STATUS -- Order#3 (NORMAL) created.
+[02:27:53] BOT    -- Bot#1 added.
+[02:27:53] BOT    -- Bot#1 started processing Order#2 (VIP).
+[02:27:53] BOT    -- Bot#2 added.
+[02:27:53] BOT    -- Bot#2 started processing Order#1 (NORMAL).
+[02:27:53] BOT    -- Bot#2 removed while processing Order#1. Returning order to pending.
+[02:27:53] BOT    -- Bot#1 completed Order#2.
+[02:27:53] BOT    -- Bot#1 started processing Order#1 (NORMAL).
+[02:27:53] BOT    -- Bot#2 stopped mid-way. Order#1 returned to pending.
+[02:27:53] BOT    -- Bot#1 completed Order#1.
+[02:27:53] BOT    -- Bot#1 started processing Order#1 (NORMAL).
+[02:27:53] BOT    -- Bot#1 completed Order#1.
+[02:27:53] BOT    -- Bot#1 started processing Order#3 (NORMAL).
+[02:27:53] BOT    -- Bot#1 completed Order#3.
+[02:27:53] BOT    -- Bot#1 is IDLE.

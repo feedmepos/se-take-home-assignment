@@ -21,8 +21,8 @@ Please enter below command to start:
 | ------- | -------------------- |
 | normal  | Add new normal order |
 | vip     | Add new VIP order    |
-| add     | Add new bot          |
-| remove  | Remove last bot      |
+| +       | Add new bot          |
+| -       | Remove last bot      |
 | bot     | Print bot count      |
 | status  | Print system status  |
 | exit    | Quit the app         |
@@ -40,10 +40,10 @@ rl.on("line", (input) => {
         (orderManager.createOrder("VIP"),
         botManager.bots.forEach((bot) => botManager.processNext(bot)));
       break;
-    case "add":
+    case "+":
       botManager.addBot();
       break;
-    case "remove":
+    case "-":
       botManager.removeBot();
       break;
     case "bot":
