@@ -11,4 +11,7 @@ echo "Running unit tests..."
 # For Node.js projects:
 # npm test
 
-echo "Unit tests completed"
+node tests/orderManager.test.js
+node tests/botManager.test.js
+
+echo -e "\n✅ Unit tests completed\n"
