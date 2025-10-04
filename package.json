@@ -1,0 +1,7 @@
+{
+  "scripts": {
+    "build": "bash scripts/build.sh",
+    "start": "bash scripts/run.sh",
+    "test": "bash scripts/test.sh"
+  }
+}
