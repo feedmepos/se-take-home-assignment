@@ -1,26 +1,53 @@
-McDonald's Order Management System - Simulation Results
-
-[14:32:01] System initialized with 0 bots
-[14:32:01] Created Normal Order #1001 - Status: PENDING
-[14:32:02] Created VIP Order #1002 - Status: PENDING
-[14:32:02] Created Normal Order #1003 - Status: PENDING
-[14:32:03] Bot #1 created - Status: ACTIVE
-[14:32:03] Bot #1 picked up VIP Order #1002 - Status: PROCESSING
-[14:32:04] Bot #2 created - Status: ACTIVE
-[14:32:04] Bot #2 picked up Normal Order #1001 - Status: PROCESSING
-[14:32:13] Bot #1 completed VIP Order #1002 - Status: COMPLETE (Processing time: 10s)
-[14:32:13] Bot #1 picked up Normal Order #1003 - Status: PROCESSING
-[14:32:14] Bot #2 completed Normal Order #1001 - Status: COMPLETE (Processing time: 10s)
-[14:32:14] Bot #2 is now IDLE - No pending orders
-[14:32:15] Created VIP Order #1004 - Status: PENDING
-[14:32:15] Bot #2 picked up VIP Order #1004 - Status: PROCESSING
-[14:32:23] Bot #1 completed Normal Order #1003 - Status: COMPLETE (Processing time: 10s)
-[14:32:25] Bot #2 completed VIP Order #1004 - Status: COMPLETE (Processing time: 10s)
-[14:32:25] Bot #2 destroyed while IDLE
-[14:32:26] Bot #1 is now IDLE - No pending orders
-
-Final Status:
-- Total Orders Processed: 4 (2 VIP, 2 Normal)
-- Orders Completed: 4
-- Active Bots: 1
+[20:52:50]: info: ----------------
+[20:52:50]: info: Bot added -> Bot#1
+[20:52:50]: info: Bot#1 picked Order#1 (VIP)
+[20:52:50]: info: Bot added -> Bot#2
+[20:52:50]: info: Bot#2 picked Order#3 (VIP)
+[20:52:50]: info: Bot added -> Bot#3
+[20:52:50]: info: Bot#3 picked Order#5 (VIP)
+[20:52:50]: info: Bot added -> Bot#4
+[20:52:50]: info: Bot#4 picked Order#7 (VIP)
+[20:52:50]: info: Bot added -> Bot#5
+[20:52:50]: info: Bot#5 picked Order#9 (VIP)
+[20:52:50]: info: Bot added -> Bot#6
+[20:52:50]: info: Bot#6 picked Order#0 (NORMAL)
+[20:52:50]: info: Bot added -> Bot#7
+[20:52:50]: info: Bot#7 picked Order#2 (NORMAL)
+[20:52:50]: info: Bot added -> Bot#8
+[20:52:50]: info: Bot#8 picked Order#4 (NORMAL)
+[20:52:50]: info: Bot added -> Bot#9
+[20:52:50]: info: Bot#9 picked Order#6 (NORMAL)
+[20:52:50]: info: Bot added -> Bot#10
+[20:52:50]: info: Bot#10 picked Order#8 (NORMAL)
+[20:52:55]: info: Bot#10 stopped while processing Order#8; returning to PENDING
+[20:52:55]: info: Bot removed -> Bot#10
+[20:52:55]: info: Bot#9 stopped while processing Order#6; returning to PENDING
+[20:52:55]: info: Bot removed -> Bot#9
+[20:52:55]: info: Bot#8 stopped while processing Order#4; returning to PENDING
+[20:52:55]: info: Bot removed -> Bot#8
+[20:52:55]: info: Bot#7 stopped while processing Order#2; returning to PENDING
+[20:52:55]: info: Bot removed -> Bot#7
+[20:52:55]: info: Bot#6 stopped while processing Order#0; returning to PENDING
+[20:52:55]: info: Bot removed -> Bot#6
+[20:53:00]: info: Bot#1 completed Order#1
+[20:53:00]: info: Bot#1 picked Order#0 (NORMAL)
+[20:53:00]: info: Bot#2 completed Order#3
+[20:53:00]: info: Bot#2 picked Order#2 (NORMAL)
+[20:53:00]: info: Bot#3 completed Order#5
+[20:53:00]: info: Bot#3 picked Order#4 (NORMAL)
+[20:53:00]: info: Bot#4 completed Order#7
+[20:53:00]: info: Bot#4 picked Order#6 (NORMAL)
+[20:53:00]: info: Bot#5 completed Order#9
+[20:53:00]: info: Bot#5 picked Order#8 (NORMAL)
+[20:53:10]: info: Bot#1 completed Order#0
+[20:53:10]: info: Bot#2 completed Order#2
+[20:53:10]: info: Bot#3 completed Order#4
+[20:53:10]: info: Bot#4 completed Order#6
+[20:53:10]: info: Bot#5 completed Order#8
+[20:53:10]: info: Final status:
+- Total orders Processed: 10 (5 VIP, 5 Normal)
+- Orders Completed: 10
+- Active Bots: 5
 - Pending Orders: 0
+
+
