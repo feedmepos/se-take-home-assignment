@@ -1,0 +1,11 @@
+Starting CLI simulation...
+[12:48:32] New NORMAL order created: #1
+[12:48:33] New VIP order created: #1
+[12:48:33] New NORMAL order created: #1
+[12:48:33] New VIP order created: #1
+[12:48:33] Bot added
+[12:48:33] Bot added
+[12:48:58] Bot removed
+[12:48:58] New NORMAL order created: #1
+[12:48:58] Bot added
+Simulation complete at 12:49:14
