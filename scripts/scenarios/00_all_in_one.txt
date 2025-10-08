@@ -1,0 +1,27 @@
+# Combined scenario: covers basic flow, VIP priority, scale, interrupt, and status reporting
+status
+# basic
+n
+add
+wait 20
+status
+# vip priority
+n
+v
+status
+add
+status
+wait 50
+status
+# interrupt
+add
+wait 10
+del
+status
+# scale out/in
+add
+add
+status
+wait 50
+del
+status
