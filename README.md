@@ -8,6 +8,16 @@
 
 `result.txt` 是最新一次运行的结果
 
+## Commands
+
+| cmd |Function |
+|- | -|
+|status| Show Status|
+|add| Add bot|
+|del| Remove bot|
+|n| New normal order|
+|v| New VIP order|
+|wait $1| Sleep $1 ms|
 ## Assignment
 
 Below is a take home assignment before the interview of the position. You are required to
