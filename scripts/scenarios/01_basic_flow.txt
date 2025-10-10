@@ -1,0 +1,7 @@
+# Basic flow: submit normal, add bot, complete
+status
+n
+add
+status
+wait 150
+status
