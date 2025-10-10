@@ -18,7 +18,7 @@ if [ ! -x bin/order-controller ]; then
 fi
 
 # Default processing time and output path
-PROCESSING_MS="${PROCESSING_MS:-50}"
+PROCESSING_MS="${PROCESSING_MS:-1000}"
 
 # Decide scenario
 SCENARIO_FILE="${SCENARIO_FILE:-}"

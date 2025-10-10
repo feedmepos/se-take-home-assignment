@@ -17,6 +17,7 @@ status
 add
 wait 10
 del
+wait 10
 status
 # scale out/in
 add

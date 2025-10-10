@@ -27,7 +27,7 @@ FAILED=0
 for scenario in "$SCENARIOS_DIR"/*.txt; do
 	echo "--- Running scenario: $scenario ---"
 	# Set fast processing to make tests quick
-	export PROCESSING_MS=${PROCESSING_MS:-50}
+	export PROCESSING_MS=${PROCESSING_MS:-1000}
 	export SCENARIO_FILE="$scenario"
 	# Run
 	./scripts/run.sh

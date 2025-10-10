@@ -1,10 +1,12 @@
 # Interrupt: ensure in-process order returns to its category FRONT when bot is removed
 status
 v
+v
 add
 status
 wait 10
 del
+wait 10
 status
 add
 status
