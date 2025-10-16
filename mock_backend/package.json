@@ -1,0 +1,15 @@
+{
+  "name": "mcdonalds-order-management",
+  "version": "1.0.0",
+  "description": "McDonald's Order Management System Mock Backend",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
