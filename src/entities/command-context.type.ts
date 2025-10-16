@@ -1,4 +1,4 @@
-import { BotController } from "../../bot/bot.controller";
+import { BotController } from "../bot/bot.controller";
 
 export type CommandContext = {
   controller: BotController;

@@ -1,8 +1,11 @@
-import { CommandContext, CommandHandler } from "./types";
-import { handleOrder } from "./order";
-import { handleAddBot, handleRemoveBot } from "./bots";
-import { handleState } from "./state";
-import { Constants } from "../../constants/commands";
+import {
+  CommandContext,
+  CommandHandler,
+} from "../entities/command-context.type";
+import { handleOrder } from "./order.commands";
+import { handleAddBot, handleRemoveBot } from "./bots.commands";
+import { handleState } from "./state.commands";
+import { Constants } from "../../constants/commands.constants";
 
 export const registry: Record<string, CommandHandler> = {
   [Constants.CMD_STATE]: handleState,

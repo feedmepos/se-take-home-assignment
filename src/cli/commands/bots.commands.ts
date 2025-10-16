@@ -1,4 +1,4 @@
-import { CommandHandler } from "./types";
+import { CommandHandler } from "../entities/command-context.type";
 
 export const handleAddBot: CommandHandler = (ctx) => {
   ctx.controller.addBot();

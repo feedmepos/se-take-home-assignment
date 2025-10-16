@@ -1,4 +1,4 @@
-import { CommandHandler } from "./types";
+import { CommandHandler } from "../entities/command-context.type";
 
 export const handleState: CommandHandler = (ctx) => {
   const s = ctx.controller.getState();
