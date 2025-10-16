@@ -1,7 +1,7 @@
 import {
   CommandContext,
   CommandHandler,
-} from "../entities/command-context.type";
+} from "../../entities/command-context.type";
 import { handleOrder } from "./order.commands";
 import { handleAddBot, handleRemoveBot } from "./bots.commands";
 import { handleState } from "./state.commands";
@@ -13,15 +13,15 @@ export const registry: Record<string, CommandHandler> = {
   [Constants.CMD_REMOVE_BOT]: handleRemoveBot,
   [Constants.CMD_NORMAL]: handleOrder,
   [Constants.CMD_VIP]: handleOrder,
-  add: (ctx, parts) => {
+  add: (ctx: CommandContext, parts: string[]) => {
     if (parts[1] === "bot") return handleAddBot(ctx, parts);
     ctx.log("Usage: add bot");
   },
-  remove: (ctx, parts) => {
+  remove: (ctx: CommandContext, parts: string[]) => {
     if (parts[1] === "bot") return handleRemoveBot(ctx, parts);
     ctx.log("Usage: remove bot");
   },
-  [Constants.CMD_HELP]: (ctx) => {
+  [Constants.CMD_HELP]: (ctx: CommandContext) => {
     ctx.log(Constants.HELP_TEXT);
   },
 };

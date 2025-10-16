@@ -1,4 +1,4 @@
-import { CommandHandler } from "../entities/command-context.type";
+import { CommandHandler } from "../../entities/command-context.type";
 import { Constants } from "../../constants/commands.constants";
 
 export const handleOrder: CommandHandler = (ctx, parts) => {

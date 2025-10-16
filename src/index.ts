@@ -15,7 +15,7 @@ const rl = readline.createInterface({
 
 function prompt() {
   rl.question("> ", (answer) => {
-    executeCommand({ controller, log: (m) => logger.info(m) }, answer);
+    executeCommand({ controller, log: (m: string) => logger.info(m) }, answer);
     prompt();
   });
 }
