@@ -1,4 +1,4 @@
-# McDonald Bot – Order Controller (CLI)
+# McDonald's Bot – Order Controller (CLI)
 
 A Node.js TypeScript CLI that simulates McDonald’s automated cooking bots during COVID-19, implementing VIP-first queueing, dynamic bot scaling, and timestamped logging.
 
