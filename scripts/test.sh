@@ -9,8 +9,7 @@ echo "Running E2E tests..."
 cd "$(dirname "$0")/../e2e_test" || exit 1
 
 # Run tests with verbose output
-# Use -short flag to skip time-consuming tests during quick validation
-go test -v -short ./...
+go test -v ./...
 
 TEST_EXIT_CODE=$?
 
