@@ -1,7 +1,0 @@
-[20:43:26] CLI started. Type 'help' for commands.
-[20:51:27] CLI started. Type 'help' for commands.
-[20:54:26] CLI started. Type 'help' for commands.
-[21:30:08] CLI started. Type 'help' for commands.
-[21:30:11] Added bot #1
-[21:30:13] Added bot #2
-[21:30:16] Removed bot #2
