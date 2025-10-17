@@ -1,19 +1,15 @@
 #!/bin/bash
 
 # Run Script
-# This script should execute your CLI application and output results to result.txt
+# This script starts the mock backend web service
 
-echo "Running CLI application..."
+echo "Starting mock backend web service..."
 
-# For Go projects:
-# ./order-controller > result.txt
+# Get the script directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+BACKEND_DIR="$PROJECT_ROOT/mock_backend"
 
-# For Node.js projects:
-# node index.js > result.txt
-# or npm start > result.txt
-
-# Temporary placeholder - remove this when you implement your CLI
-echo "Added 1 bot" > result.txt
-echo "status: bot: [1], order: []" >> result.txt
-
-echo "CLI application execution completed"
+# Start the Node.js application
+cd "$BACKEND_DIR"
+node app.js
