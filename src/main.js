@@ -8,6 +8,7 @@ const rl = readline.createInterface({
 });
 
 const controller = new OrderController();
+controller.addBot();
 
 console.log("=== McDonald's Order Controller CLI ===");
 console.log("Commands:");
