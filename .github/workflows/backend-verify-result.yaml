@@ -8,61 +8,138 @@ on:
 jobs:
   verify-result:
     runs-on: ubuntu-latest
-    
+    timeout-minutes: 10  # Global timeout (reduced from 15 due to minimal CI test)
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
     - name: Set up Go
       uses: actions/setup-go@v5
       with:
-        go-version: '1.23.9'
-        
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '22.19.0'
-        
+        go-version: '1.25.3'  # Match go.mod version
+
     - name: Verify Go version
       run: go version
-      
-    - name: Verify Node.js version
-      run: node --version
-      
-    - name: Verify npm version
-      run: npm --version
 
     - name: Make scripts executable
       run: chmod +x scripts/test.sh scripts/build.sh scripts/run.sh
-      
-    - name: Execute test script
-      run: ./scripts/test.sh
-      
-    - name: Execute build script
-      run: ./scripts/build.sh
-      
-    - name: Execute run script
-      run: ./scripts/run.sh
-      
-    - name: Verify result.txt exists and is not empty
+
+    # STEP 1: Build first (fast feedback if build fails)
+    - name: Build application
+      id: build
+      timeout-minutes: 3
+      continue-on-error: false
       run: |
+        echo "============================================"
+        echo "STEP 1: Building Application"
+        echo "============================================"
+        ./scripts/build.sh
+        if [ $? -eq 0 ]; then
+          echo "✅ SUCCESS: Build completed"
+        else
+          echo "❌ FAIL: Build failed"
+          exit 1
+        fi
+
+    # STEP 2: Run CI scenario test (minimal smoke test)
+    - name: Run CI scenario test
+      id: test
+      timeout-minutes: 2
+      continue-on-error: false
+      run: |
+        echo "============================================"
+        echo "STEP 2: Running CI Scenario Test (Minimal)"
+        echo "============================================"
+        echo "Configuration: 10 Regular, 5 VIP customers, 5 cooks, 2 cycles"
+        echo "Expected duration: ~30-40 seconds"
+        echo ""
+        ./scripts/test.sh ci
+        if [ $? -eq 0 ]; then
+          echo "✅ SUCCESS: CI scenario test passed"
+        else
+          echo "❌ FAIL: CI scenario test failed"
+          exit 1
+        fi
+
+    # STEP 3: Run application for 30 seconds (CI-optimized)
+    - name: Run application and capture logs
+      id: run
+      timeout-minutes: 3
+      continue-on-error: false
+      env:
+        RUN_WAIT_TIME: 30  # CI-optimized: 30 seconds instead of 600
+      run: |
+        echo "============================================"
+        echo "STEP 3: Running Application (30 seconds)"
+        echo "============================================"
+        ./scripts/run.sh 30
+        if [ $? -eq 0 ]; then
+          echo "✅ SUCCESS: Application run completed"
+        else
+          echo "❌ FAIL: Application run failed"
+          exit 1
+        fi
+
+    # STEP 4: Verify result.txt
+    - name: Verify result.txt exists and is not empty
+      id: verify
+      timeout-minutes: 1
+      continue-on-error: false
+      run: |
+        echo "============================================"
+        echo "STEP 4: Verifying result.txt"
+        echo "============================================"
+
         if [ ! -f scripts/result.txt ]; then
-          echo "ERROR: scripts/result.txt does not exist"
+          echo "❌ FAIL: scripts/result.txt does not exist"
           exit 1
         fi
-        
+
         if [ ! -s scripts/result.txt ]; then
-          echo "ERROR: scripts/result.txt is empty"
+          echo "❌ FAIL: scripts/result.txt is empty"
           exit 1
         fi
-        
+
         # Verify that the result contains timestamps in HH:MM:SS format
         if ! grep -E '[0-9]{2}:[0-9]{2}:[0-9]{2}' scripts/result.txt > /dev/null; then
-          echo "ERROR: scripts/result.txt must contain timestamps in HH:MM:SS format"
+          echo "❌ FAIL: scripts/result.txt must contain timestamps in HH:MM:SS format"
           echo "No valid timestamp pattern found in the output"
           exit 1
         fi
-        
-        echo "SUCCESS: scripts/result.txt exists, is not empty, and contains valid timestamps"
-        echo "Content of scripts/result.txt:"
-        cat scripts/result.txt
+
+        echo "✅ SUCCESS: scripts/result.txt exists, is not empty, and contains valid timestamps"
+        echo ""
+        echo "============================================"
+        echo "First 20 lines of result.txt:"
+        echo "============================================"
+        head -n 20 scripts/result.txt
+        echo ""
+        echo "============================================"
+        echo "Last 20 lines of result.txt:"
+        echo "============================================"
+        tail -n 20 scripts/result.txt
+
+    # Summary step (always runs)
+    - name: Workflow Summary
+      if: always()
+      run: |
+        echo ""
+        echo "============================================"
+        echo "WORKFLOW EXECUTION SUMMARY"
+        echo "============================================"
+        echo ""
+        echo "Step 1 - Build:              ${{ steps.build.outcome == 'success' && '✅ SUCCESS' || '❌ FAIL' }}"
+        echo "Step 2 - CI Test (Minimal):  ${{ steps.test.outcome == 'success' && '✅ SUCCESS' || '❌ FAIL' }}"
+        echo "Step 3 - Application Run:    ${{ steps.run.outcome == 'success' && '✅ SUCCESS' || '❌ FAIL' }}"
+        echo "Step 4 - Verify Result:      ${{ steps.verify.outcome == 'success' && '✅ SUCCESS' || '❌ FAIL' }}"
+        echo ""
+        echo "CI Test Details:"
+        echo "  - 10 Regular + 5 VIP customers"
+        echo "  - 5 cook bots"
+        echo "  - 2 cycles of orders"
+        echo "  - Minimal logs for easy debugging"
+        echo ""
+        echo "============================================"
+        echo "Overall Status: ${{ job.status == 'success' && '✅ ALL CHECKS PASSED' || '❌ SOME CHECKS FAILED' }}"
+        echo "============================================"

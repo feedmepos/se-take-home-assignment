@@ -1,0 +1,366 @@
+basePath: /
+definitions:
+  domain.Food:
+    properties:
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      id:
+        type: integer
+      modified_at:
+        type: string
+      name:
+        type: string
+      type:
+        $ref: '#/definitions/domain.FoodType'
+    required:
+    - name
+    - type
+    type: object
+  domain.FoodType:
+    enum:
+    - Food
+    - Drink
+    - Dessert
+    type: string
+    x-enum-varnames:
+    - FoodTypeFood
+    - FoodTypeDrink
+    - FoodTypeDessert
+  domain.Order:
+    properties:
+      assigned_cook_user:
+        description: Foreign key to User (Cook)
+        type: integer
+      cook_name:
+        type: string
+      created_at:
+        type: string
+      customer_name:
+        description: Additional fields for enriched responses (not in DB)
+        type: string
+      customer_role:
+        $ref: '#/definitions/domain.RoleType'
+      deleted_at:
+        type: string
+      foods:
+        items:
+          $ref: '#/definitions/domain.Food'
+        type: array
+      id:
+        type: integer
+      modified_at:
+        type: string
+      ordered_by:
+        description: Foreign key to User (Customer)
+        type: integer
+      status:
+        $ref: '#/definitions/domain.OrderStatus'
+    type: object
+  domain.OrderStatus:
+    enum:
+    - PENDING
+    - SERVING
+    - COMPLETE
+    type: string
+    x-enum-varnames:
+    - OrderStatusPending
+    - OrderStatusServing
+    - OrderStatusComplete
+  domain.RoleType:
+    enum:
+    - Regular Customer
+    - VIP Customer
+    - Cook
+    type: string
+    x-enum-varnames:
+    - RoleRegularCustomer
+    - RoleVIPCustomer
+    - RoleCook
+  domain.User:
+    properties:
+      created_at:
+        type: string
+      deleted_at:
+        description: Soft delete support
+        type: string
+      id:
+        type: integer
+      modified_at:
+        type: string
+      name:
+        type: string
+      role:
+        $ref: '#/definitions/domain.RoleType'
+    required:
+    - name
+    - role
+    type: object
+  handler.CreateCookRequest:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  handler.CreateOrderRequest:
+    properties:
+      customer_id:
+        type: integer
+      food_ids:
+        items:
+          type: integer
+        minItems: 1
+        type: array
+    required:
+    - customer_id
+    - food_ids
+    type: object
+  handler.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  handler.OrderStatsResponse:
+    properties:
+      completed:
+        type: integer
+      incomplete:
+        type: integer
+      queue_size:
+        type: integer
+    type: object
+  handler.SuccessResponse:
+    properties:
+      message:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@mcmocknald.com
+    name: API Support
+  description: |-
+    API for McMocknald Order Kiosk System - A priority queue based order management system
+    Supports VIP and Regular customers with automated cook bot assignment
+  title: McMocknald Order Kiosk API
+  version: "1.0"
+paths:
+  /api/cooks:
+    get:
+      description: Get all cook bots (optionally including deleted ones)
+      parameters:
+      - description: Include deleted cooks
+        in: query
+        name: include_deleted
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.User'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Get all cook bots
+      tags:
+      - cooks
+    post:
+      consumes:
+      - application/json
+      description: Create a new cook bot to process orders
+      parameters:
+      - description: Cook creation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.CreateCookRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Create a new cook bot
+      tags:
+      - cooks
+  /api/cooks/{id}:
+    delete:
+      description: Soft delete a cook bot and return their order to queue
+      parameters:
+      - description: Cook ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Remove a cook bot
+      tags:
+      - cooks
+  /api/cooks/{id}/accept:
+    post:
+      description: Cook accepts the next order from the queue
+      parameters:
+      - description: Cook ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Order'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Accept an order
+      tags:
+      - cooks
+  /api/cooks/{id}/reinstate:
+    post:
+      description: Reinstate a soft-deleted cook bot
+      parameters:
+      - description: Cook ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Reinstate a cook bot
+      tags:
+      - cooks
+  /api/orders:
+    post:
+      consumes:
+      - application/json
+      description: Create a new order for a customer (Regular or VIP)
+      parameters:
+      - description: Order creation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.CreateOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Order'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Create a new order
+      tags:
+      - orders
+  /api/orders/{id}:
+    get:
+      description: Get an order by its ID
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Order'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Get an order by ID
+      tags:
+      - orders
+  /api/orders/stats:
+    get:
+      description: Get completed and incomplete order counts
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.OrderStatsResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Get order statistics
+      tags:
+      - orders
+schemes:
+- http
+- https
+swagger: "2.0"
+tags:
+- description: Order management endpoints
+  name: orders
+- description: Cook management endpoints
+  name: cooks
