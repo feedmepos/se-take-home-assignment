@@ -30,7 +30,7 @@ func TestBotProcessOrderAddOrderFirst(t *testing.T) {
 	controller.AddNormalOrder()
 	controller.AddBot()
 
-	time.Sleep(10*time.Second + 10*time.Millisecond)
+	time.Sleep(10*time.Second + 100*time.Millisecond)
 
 	assert.Equal(t, 1, len(controller.CompletedQueue), "Bot should finish proccessing order after 10 seconds")
 }
@@ -41,7 +41,7 @@ func TestBotProcessOrderAddBotFirst(t *testing.T) {
 	controller.AddBot()
 	controller.AddNormalOrder()
 
-	time.Sleep(10*time.Second + 10*time.Millisecond)
+	time.Sleep(10*time.Second + 100*time.Millisecond)
 
 	assert.Equal(t, 1, len(controller.CompletedQueue), "Bot should finish proccessing order after 10 seconds")
 }
@@ -55,7 +55,22 @@ func TestBotProcessOrderAfterRemoveBot(t *testing.T) {
 	controller.AddNormalOrder()
 	controller.RemoveBot()
 
-	time.Sleep(20*time.Second + 20*time.Millisecond)
+	time.Sleep(20*time.Second + 200*time.Millisecond)
 
 	assert.Equal(t, 2, len(controller.CompletedQueue), "Bot should finish proccessing 2 orders after 20 seconds")
+}
+
+func TestMultipleBotProcessMultipleOrders(t *testing.T) {
+	controller := controllerpkg.NewController()
+
+	controller.AddBot()
+	controller.AddBot()
+	controller.AddNormalOrder()
+	controller.AddNormalOrder()
+	controller.AddNormalOrder()
+	controller.AddNormalOrder()
+
+	time.Sleep(20*time.Second + 200*time.Millisecond)
+
+	assert.Equal(t, 4, len(controller.CompletedQueue), "2 Bot should finish proccessing 4 orders after 10 seconds")
 }

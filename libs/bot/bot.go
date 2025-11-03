@@ -2,9 +2,11 @@
 package bot
 
 import (
+	"fmt"
 	"time"
 
 	ord "github.com/jason0w0/se-take-home-assignment/libs/order"
+	"github.com/jason0w0/se-take-home-assignment/libs/utils"
 )
 
 type Manager interface {
@@ -20,22 +22,30 @@ const (
 	BUSY = "busy"
 )
 
+var id = 0
+
 type Bot struct {
 	manager      Manager
 	StopChannel  chan bool
 	ReadyChannel chan bool
 	OrderChannel chan struct{}
 	Status       Status
+	ID           int
 }
 
 func NewBot(manager Manager) *Bot {
-	return &Bot{
+	bot := &Bot{
 		manager:      manager,
 		StopChannel:  make(chan bool, 1),
 		ReadyChannel: make(chan bool, 1),
 		OrderChannel: make(chan struct{}, 1),
 		Status:       IDLE,
+		ID:           id,
 	}
+
+	id++
+
+	return bot
 }
 
 func (bot *Bot) Run() {
@@ -56,6 +66,7 @@ func (bot *Bot) Run() {
 				}
 			}
 
+			utils.WriteToLog(fmt.Sprintf("bot %d received order %d", bot.ID, order.ID))
 			bot.processOrder(order.ID)
 		}
 	}

@@ -11,12 +11,16 @@ func main() {
 
 	controller.AddNormalOrder()
 	controller.AddVipOrder()
+	controller.AddNormalOrder()
+	controller.AddVipOrder()
+	controller.AddBot()
 	controller.AddBot()
 
 	time.Sleep(11 * time.Second)
-
 	controller.RemoveBot()
+
+	controller.AddVipOrder()
 	controller.AddBot()
 
-	time.Sleep(11 * time.Second)
+	controller.WaitAllOrderToComplete()
 }
