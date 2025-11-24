@@ -1,0 +1,120 @@
+[22:03:40] McDonald's Order Management System Started
+[22:03:40] 
+--- Scenario 1: Normal Orders ---
+[22:03:40] New NORMAL Order #1 added to PENDING
+[22:03:40] New NORMAL Order #2 added to PENDING
+[22:03:41] === Restaurant Status ===
+[22:03:41] Active Bots: 0
+[22:03:41] PENDING Orders: 2
+[22:03:41]   Order #1 (NORMAL)
+[22:03:41]   Order #2 (NORMAL)
+[22:03:41] COMPLETE Orders: 0
+[22:03:41] 
+--- Scenario 2: Add Bot ---
+[22:03:41] Bot #1 created
+[22:03:41] Bot #1 processing Order #1 (NORMAL)
+[22:03:41] === Restaurant Status ===
+[22:03:41] Active Bots: 1
+[22:03:41]   Bot #1: Processing Order #1
+[22:03:41] PENDING Orders: 1
+[22:03:41]   Order #2 (NORMAL)
+[22:03:41] COMPLETE Orders: 0
+[22:03:41] 
+--- Scenario 3: Add VIP Order ---
+[22:03:41] New VIP Order #3 added to PENDING
+[22:03:41] New NORMAL Order #4 added to PENDING
+[22:03:42] === Restaurant Status ===
+[22:03:42] Active Bots: 1
+[22:03:42]   Bot #1: Processing Order #1
+[22:03:42] PENDING Orders: 3
+[22:03:42]   Order #3 (VIP)
+[22:03:42]   Order #2 (NORMAL)
+[22:03:42]   Order #4 (NORMAL)
+[22:03:42] COMPLETE Orders: 0
+[22:03:42] 
+--- Scenario 4: Add More Bots ---
+[22:03:42] Bot #2 created
+[22:03:42] Bot #3 created
+[22:03:42] Bot #2 processing Order #2 (NORMAL)
+[22:03:42] Bot #3 processing Order #3 (VIP)
+[22:03:42] === Restaurant Status ===
+[22:03:42] Active Bots: 3
+[22:03:42]   Bot #1: Processing Order #1
+[22:03:42]   Bot #2: Processing Order #2
+[22:03:42]   Bot #3: Processing Order #3
+[22:03:42] PENDING Orders: 1
+[22:03:42]   Order #4 (NORMAL)
+[22:03:42] COMPLETE Orders: 0
+[22:03:42] 
+--- Waiting for orders to complete ---
+[22:03:51] Bot #1 completed Order #1 (NORMAL) - moved to COMPLETE
+[22:03:51] Bot #1 processing Order #4 (NORMAL)
+[22:03:52] Bot #3 completed Order #3 (VIP) - moved to COMPLETE
+[22:03:52] Bot #2 completed Order #2 (NORMAL) - moved to COMPLETE
+[22:03:54] === Restaurant Status ===
+[22:03:54] Active Bots: 3
+[22:03:54]   Bot #1: Processing Order #4
+[22:03:54]   Bot #2: IDLE
+[22:03:54]   Bot #3: IDLE
+[22:03:54] PENDING Orders: 0
+[22:03:54] COMPLETE Orders: 3
+[22:03:54]   Order #1 (NORMAL)
+[22:03:54]   Order #3 (VIP)
+[22:03:54]   Order #2 (NORMAL)
+[22:03:54] 
+--- Scenario 5: Add Mixed Orders ---
+[22:03:54] New VIP Order #5 added to PENDING
+[22:03:54] New NORMAL Order #6 added to PENDING
+[22:03:54] New VIP Order #7 added to PENDING
+[22:03:54] New NORMAL Order #8 added to PENDING
+[22:03:54] Bot #2 processing Order #5 (VIP)
+[22:03:54] Bot #3 processing Order #7 (VIP)
+[22:03:55] === Restaurant Status ===
+[22:03:55] Active Bots: 3
+[22:03:55]   Bot #1: Processing Order #4
+[22:03:55]   Bot #2: Processing Order #5
+[22:03:55]   Bot #3: Processing Order #7
+[22:03:55] PENDING Orders: 2
+[22:03:55]   Order #6 (NORMAL)
+[22:03:55]   Order #8 (NORMAL)
+[22:03:55] COMPLETE Orders: 3
+[22:03:55]   Order #1 (NORMAL)
+[22:03:55]   Order #3 (VIP)
+[22:03:55]   Order #2 (NORMAL)
+[22:03:55] 
+--- Scenario 6: Remove Bot ---
+[22:03:57] Bot #3 removed, Order #7 returned to PENDING
+[22:03:57] === Restaurant Status ===
+[22:03:57] Active Bots: 2
+[22:03:57]   Bot #1: Processing Order #4
+[22:03:57]   Bot #2: Processing Order #5
+[22:03:57] PENDING Orders: 3
+[22:03:57]   Order #7 (VIP)
+[22:03:57]   Order #6 (NORMAL)
+[22:03:57]   Order #8 (NORMAL)
+[22:03:57] COMPLETE Orders: 3
+[22:03:57]   Order #1 (NORMAL)
+[22:03:57]   Order #3 (VIP)
+[22:03:57]   Order #2 (NORMAL)
+[22:03:57] 
+--- Final Wait ---
+[22:04:01] Bot #1 completed Order #4 (NORMAL) - moved to COMPLETE
+[22:04:01] Bot #1 processing Order #7 (VIP)
+[22:04:04] Bot #2 completed Order #5 (VIP) - moved to COMPLETE
+[22:04:04] Bot #2 processing Order #6 (NORMAL)
+[22:04:11] Bot #1 completed Order #7 (VIP) - moved to COMPLETE
+[22:04:11] Bot #1 processing Order #8 (NORMAL)
+[22:04:12] === Restaurant Status ===
+[22:04:12] Active Bots: 2
+[22:04:12]   Bot #1: Processing Order #8
+[22:04:12]   Bot #2: Processing Order #6
+[22:04:12] PENDING Orders: 0
+[22:04:12] COMPLETE Orders: 6
+[22:04:12]   Order #1 (NORMAL)
+[22:04:12]   Order #3 (VIP)
+[22:04:12]   Order #2 (NORMAL)
+[22:04:12]   Order #4 (NORMAL)
+[22:04:12]   Order #5 (VIP)
+[22:04:12]   Order #7 (VIP)
+[22:04:12] 
+=== Simulation Complete ===

@@ -2,13 +2,12 @@
 
 # Unit Test Script
 # This script should contain all unit test execution steps
-
+set -e
 echo "Running unit tests..."
 
-# For Go projects:
-# go test ./... -v
+go test ./... -v -cover
 
-# For Node.js projects:
-# npm test
+echo ""
+echo "All tests passed!"
 
 echo "Unit tests completed"

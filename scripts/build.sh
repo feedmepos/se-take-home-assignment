@@ -5,11 +5,12 @@
 
 echo "Building CLI application..."
 
-# For Go projects:
-# go build -o order-controller ./cmd/main.go
+set -e
 
-# For Node.js projects:
-# npm install
-# npm run build (if needed)
+echo "Building McDonald's Order Management System..."
+go build -o order-controller ./cmd/main.go
+
+echo "Build completed successfully!"
+echo "Binary created: order-controller"
 
 echo "Build completed"
