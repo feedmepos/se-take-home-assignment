@@ -6,11 +6,11 @@ WORKDIR /app
 RUN apk add --no-cache libc6-compat
 
 # Install deps (use npm ci when lockfile present)
-COPY package.json package-lock.json* ./
+COPY ../package.json ../package-lock.json* ./
 RUN npm ci || npm i --legacy-peer-deps
 
 # Build
-COPY . .
+COPY ../ .
 RUN npm run build
 
 # Runtime stage: serve built assets with serve
