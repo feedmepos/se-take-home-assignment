@@ -1,218 +1,435 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { Order, OrderType, Bot } from './types'
-import { Button } from './components/Button'
-import { Card } from './components/Card'
-import { BotCard } from './components/BotCard'
-import { formatTime } from './utils/time'
-import { PendingList } from './components/PendingList'
-import { CompletedList } from './components/CompletedList'
-import { Header } from './components/Header'
+// App.tsx
+import React, { useEffect, useRef, useState } from "react";
+import "./App.css";
 
-const PROCESS_MS = 10000; // time a bot spends actively processing an order
+type CustomerType = "NORMAL" | "VIP";
+type OrderStatus = "PENDING" | "PROCESSING" | "COMPLETE";
+type BotStatus = "IDLE" | "PROCESSING";
 
-// Debug: Verify the constant is loaded correctly
-console.log('🔧 App loaded - PROCESS_MS constant:', PROCESS_MS);
+const PROCESSING_TIME_MS = 10_000;
 
-export default function App() {
-  const [nextOrderId, setNextOrderId] = useState<number>(1)
-  const [pending, setPending] = useState<Order[]>([])
-  const [complete, setComplete] = useState<Order[]>([])
-  const [bots, setBots] = useState<Bot[]>([])
-  const [clock, setClock] = useState<number>(Date.now())
-  const nextBotId = useRef(1)
+interface Order {
+  id: number;
+  customerType: CustomerType;
+  status: OrderStatus;
+  createdAt: number;
+  startedAt?: number;
+}
 
-  const enqueueOrder = (type: OrderType) => {
-    console.log(`[${formatTime()}] Creating new ${type} order #${nextOrderId}`)
-    setPending((prev: Order[]) => {
-      const newOrder: Order = { id: nextOrderId, type, createdAt: Date.now() }
-      setNextOrderId((id: number) => id + 1)
-      const vip = prev.filter((o: Order) => o.type === 'VIP')
-      const normal = prev.filter((o: Order) => o.type === 'Normal')
-      const newPendingList = type === 'VIP' ? [...vip, newOrder, ...normal] : [...vip, ...normal, newOrder]
-      console.log(`[${formatTime()}] Order queue updated. Total pending: ${newPendingList.length}`)
-      return newPendingList
-    })
-  }
+interface Bot {
+  id: number;
+  status: BotStatus;
+  currentOrderId?: number;
+  timeoutId?: number;
+}
 
-  const pickNextOrder = () => {
-    let next: Order | undefined
-    setPending((prev: Order[]) => {
-      if (prev.length === 0) return prev
-      next = prev[0]
-      return prev.slice(1)
-    })
-    return next
-  }
+const App: React.FC = () => {
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [bots, setBots] = useState<Bot[]>([]);
+  const [pendingQueue, setPendingQueue] = useState<number[]>([]); // queue of order IDs
 
-  const startBotWork = (botId: number) => {
-    console.log(`[${formatTime()}] startBotWork called for Bot ${botId}`)
-    
-    // Clear any existing timer for this bot first
-    setBots((prev: Bot[]) => prev.map((b: Bot) => {
-      if (b.id === botId && b.timer) {
-        console.log(`[${formatTime()}] Clearing existing timer ${b.timer} for Bot ${botId}`)
-        clearTimeout(b.timer)
-        return { ...b, status: 'IDLE', currentOrder: undefined, timer: undefined }
-      }
-      return b.id === botId ? { ...b, status: 'IDLE', currentOrder: undefined } : b
-    }))
-    
-    const order = pickNextOrder()
-    if (!order) {
-      console.log(`[${formatTime()}] Bot ${botId} IDLE (no pending orders)`)
-      setBots((prev: Bot[]) => prev.map((b: Bot) => (b.id === botId ? { ...b, status: 'IDLE', currentOrder: undefined } : b)))
-      return
-    }
-    order.startedAt = Date.now()
-    console.log(`[${formatTime()}] Bot ${botId} START order #${order.id} (${order.type}) - will take ${PROCESS_MS}ms`)
-    const workStartTime = Date.now()
-    
-    // Debug: Verify PROCESS_MS value
-    console.log(`[${formatTime()}] PROCESS_MS constant value: ${PROCESS_MS}ms`)
-    
-    const timer = setTimeout(() => {
-      const now = Date.now()
-      const actualWorkTime = now - workStartTime
-      order.completedAt = now
-      const completedClone: Order = { ...order }
-      setComplete((prev: Order[]) => [...prev, completedClone])
-      console.log(`[${formatTime()}] Bot ${botId} COMPLETE order #${order.id} - actual work time: ${actualWorkTime}ms (expected: ${PROCESS_MS}ms)`)
-      
-      // Check if this is being called too early
-      if (actualWorkTime < PROCESS_MS - 100) {
-        console.error(`⚠️ TIMING ERROR: Bot ${botId} completed after ${actualWorkTime}ms but expected ${PROCESS_MS}ms`)
-        console.error(`⚠️ Timer was set for: ${PROCESS_MS}ms`)
-        console.error(`⚠️ Work started at: ${workStartTime}`)
-        console.error(`⚠️ Work ended at: ${now}`)
-      }
-      
-      // move bot to IDLE and start next work after a brief pause
-      setBots((prev: Bot[]) => prev.map((b: Bot) => (b.id === botId ? { ...b, status: 'IDLE', currentOrder: undefined, timer: undefined } : b)))
-      
-      console.log(`[${formatTime()}] Bot ${botId} transitioning to IDLE, will check for next order in 1 second`)
-      // Small pause between orders so you can see the transition
-      setTimeout(() => {
-        console.log(`[${formatTime()}] Bot ${botId} ready for next order`)
-        startBotWork(botId)
-      }, 1000)
-    }, PROCESS_MS)
-    
-    console.log(`[${formatTime()}] setTimeout created with timer ID: ${timer}, delay: ${PROCESS_MS}ms`)
-    setBots((prev: Bot[]) => prev.map((b: Bot) => (b.id === botId ? { ...b, status: 'WORKING', currentOrder: order, timer } : b)))
-  }
+  const nextOrderIdRef = useRef(1);
+  const nextBotIdRef = useRef(1);
 
-  const addBot = () => {
-    let newId = 1
-    setBots((prev: Bot[]) => {
-      newId = prev.length ? Math.max(...prev.map((b: Bot) => b.id)) + 1 : 1
-      return [...prev, { id: newId, status: 'IDLE' }]
-    })
-    
-    // Test setTimeout first
-    console.log('🧪 Testing setTimeout with 10000ms delay...')
-    const testStart = Date.now()
-    setTimeout(() => {
-      const testEnd = Date.now()
-      const testDuration = testEnd - testStart
-      console.log(`🧪 Test setTimeout completed after ${testDuration}ms (expected ~10000ms)`)
-    }, 10000)
-    
-    setTimeout(() => startBotWork(newId), 100) // Small delay to avoid race conditions
-  }
-
-  const removeBot = () => {
-    setBots((prev: Bot[]) => {
-      if (prev.length === 0) return prev
-      const newest = prev[prev.length - 1]
-      if (newest.status === 'WORKING' && newest.currentOrder) {
-        if (newest.timer) clearTimeout(newest.timer)
-        // return the order to pending front preserving VIP priority
-        const pendingOrder = { ...newest.currentOrder }
-        delete pendingOrder.startedAt
-        delete pendingOrder.completedAt
-        setPending((p: Order[]) => {
-          const vip = p.filter((o: Order) => o.type === 'VIP')
-          const normal = p.filter((o: Order) => o.type === 'Normal')
-          return pendingOrder.type === 'VIP' ? [pendingOrder, ...vip, ...normal] : [...vip, pendingOrder, ...normal]
-        })
-      }
-      // If we are removing the last bot, reset ID sequence
-      if (prev.length === 1) {
-        nextBotId.current = 1
-        return []
-      }
-      return prev.slice(0, -1)
-    })
-  }
+  // Refs to hold latest data for use in setTimeout callbacks / scheduler
+  const ordersRef = useRef<Order[]>(orders);
+  const botsRef = useRef<Bot[]>(bots);
+  const pendingQueueRef = useRef<number[]>(pendingQueue);
 
   useEffect(() => {
-    console.log(`[${formatTime()}] useEffect triggered - pending orders: ${pending.length}, bots: ${bots.length}`)
-    if (pending.length === 0) return
-    bots.forEach((b: Bot) => {
-      console.log(`[${formatTime()}] Checking Bot ${b.id} - status: ${b.status}`)
-      if (b.status === 'IDLE') {
-        console.log(`[${formatTime()}] Bot ${b.id} is IDLE, starting work`)
-        startBotWork(b.id)
-      } else {
-        console.log(`[${formatTime()}] Bot ${b.id} is ${b.status}, not starting work`)
-      }
-    })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pending])
+    ordersRef.current = orders;
+  }, [orders]);
 
   useEffect(() => {
-    // live update while any bot is working
-    if (bots.some(b => b.status === 'WORKING')) {
-      const interval = setInterval(() => setClock(Date.now()), 200)
-      return () => clearInterval(interval)
-    }
-  }, [bots])
+    botsRef.current = bots;
+  }, [bots]);
 
-  const pendingVip = useMemo(() => pending.filter((o: Order) => o.type === 'VIP'), [pending])
-  const pendingNormal = useMemo(() => pending.filter((o: Order) => o.type === 'Normal'), [pending])
+  useEffect(() => {
+    pendingQueueRef.current = pendingQueue;
+  }, [pendingQueue]);
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      botsRef.current.forEach((b) => {
+        if (b.timeoutId != null) {
+          window.clearTimeout(b.timeoutId);
+        }
+      });
+    };
+  }, []);
+
+  const getOrderById = (id: number, list?: Order[]) => {
+    const arr = list ?? ordersRef.current;
+    return arr.find((o) => o.id === id);
+  };
+
+  const insertIntoPendingQueue = (orderId: number, type: CustomerType) => {
+    const queue = [...pendingQueueRef.current];
+
+    if (type === "NORMAL") {
+      queue.push(orderId);
+    } else {
+      // VIP: insert after all existing VIP orders but before NORMAL orders
+      const currentOrders = ordersRef.current;
+      let lastVipIndex = -1;
+
+      queue.forEach((id, idx) => {
+        const o = currentOrders.find((ord) => ord.id === id);
+        if (o?.customerType === "VIP") {
+          lastVipIndex = idx;
+        }
+      });
+
+      const insertAt = lastVipIndex + 1;
+      queue.splice(insertAt, 0, orderId);
+    }
+
+    pendingQueueRef.current = queue;
+    setPendingQueue(queue);
+  };
+
+  const scheduleWork = () => {
+    const botsCopy = botsRef.current.map((b) => ({ ...b }));
+    const ordersCopy = [...ordersRef.current];
+    const queueCopy = [...pendingQueueRef.current];
+
+    let changed = false;
+
+    for (const bot of botsCopy) {
+      if (bot.status === "IDLE" && queueCopy.length > 0) {
+        const orderId = queueCopy.shift()!;
+        const orderIdx = ordersCopy.findIndex((o) => o.id === orderId);
+        if (orderIdx === -1) continue;
+
+        const updatedOrder: Order = {
+          ...ordersCopy[orderIdx],
+          status: "PROCESSING",
+          startedAt: Date.now(),
+        };
+        ordersCopy[orderIdx] = updatedOrder;
+
+        bot.status = "PROCESSING";
+        bot.currentOrderId = orderId;
+
+        const timeoutId = window.setTimeout(() => {
+          completeOrder(bot.id, orderId);
+        }, PROCESSING_TIME_MS);
+        bot.timeoutId = timeoutId;
+
+        changed = true;
+      }
+    }
+
+    if (changed) {
+      botsRef.current = botsCopy;
+      ordersRef.current = ordersCopy;
+      pendingQueueRef.current = queueCopy;
+
+      setBots(botsCopy);
+      setOrders(ordersCopy);
+      setPendingQueue(queueCopy);
+    }
+  };
+
+  const completeOrder = (botId: number, orderId: number) => {
+    const botsCopy = botsRef.current.map((b) => ({ ...b }));
+    const ordersCopy = [...ordersRef.current];
+
+    const bot = botsCopy.find((b) => b.id === botId);
+    if (!bot) return;
+
+    // If bot is no longer processing this order (e.g. bot removed), ignore
+    if (bot.currentOrderId !== orderId) return;
+
+    const orderIdx = ordersCopy.findIndex((o) => o.id === orderId);
+    if (orderIdx === -1) return;
+
+    ordersCopy[orderIdx] = {
+      ...ordersCopy[orderIdx],
+      status: "COMPLETE",
+    };
+
+    bot.status = "IDLE";
+    bot.currentOrderId = undefined;
+    if (bot.timeoutId != null) {
+      window.clearTimeout(bot.timeoutId);
+    }
+    bot.timeoutId = undefined;
+
+    botsRef.current = botsCopy;
+    ordersRef.current = ordersCopy;
+
+    setBots(botsCopy);
+    setOrders(ordersCopy);
+
+    // Try to process another order if available
+    scheduleWork();
+  };
+
+  const createOrder = (type: CustomerType) => {
+    const id = nextOrderIdRef.current++;
+    const newOrder: Order = {
+      id,
+      customerType: type,
+      status: "PENDING",
+      createdAt: Date.now(),
+    };
+
+    const newOrders = [...ordersRef.current, newOrder];
+    ordersRef.current = newOrders;
+    setOrders(newOrders);
+
+    insertIntoPendingQueue(id, type);
+
+    // See if any idle bot can pick this up
+    scheduleWork();
+  };
+
+  const handleAddNormalOrder = () => {
+    createOrder("NORMAL");
+  };
+
+  const handleAddVipOrder = () => {
+    createOrder("VIP");
+  };
+
+  const handleAddBot = () => {
+    const id = nextBotIdRef.current++;
+    const newBot: Bot = {
+      id,
+      status: "IDLE",
+    };
+
+    const newBots = [...botsRef.current, newBot];
+    botsRef.current = newBots;
+    setBots(newBots);
+
+    // Immediately try to process any pending order
+    scheduleWork();
+  };
+
+  const handleRemoveBot = () => {
+    if (botsRef.current.length === 0) return;
+
+    const botsCopy = [...botsRef.current];
+    const removedBot = botsCopy.pop()!;
+
+    // Stop timer if any
+    if (removedBot.timeoutId != null) {
+      window.clearTimeout(removedBot.timeoutId);
+    }
+
+    let ordersCopy = [...ordersRef.current];
+    let queueCopy = [...pendingQueueRef.current];
+
+    if (removedBot.currentOrderId != null) {
+      const orderIdx = ordersCopy.findIndex(
+        (o) => o.id === removedBot.currentOrderId
+      );
+      if (orderIdx !== -1) {
+        const currentOrder = ordersCopy[orderIdx];
+        if (currentOrder.status === "PROCESSING") {
+          const reverted: Order = {
+            ...currentOrder,
+            status: "PENDING",
+            startedAt: undefined,
+          };
+          ordersCopy[orderIdx] = reverted;
+
+          // Put it back into queue respecting VIP rules
+          ordersRef.current = ordersCopy;
+          setOrders(ordersCopy);
+
+          pendingQueueRef.current = queueCopy;
+          setPendingQueue(queueCopy);
+
+          insertIntoPendingQueue(reverted.id, reverted.customerType);
+
+          // refresh local copies after insert
+          ordersCopy = ordersRef.current;
+          queueCopy = pendingQueueRef.current;
+        }
+      }
+    }
+
+    botsRef.current = botsCopy;
+    setBots(botsCopy);
+
+    // Let remaining bots pick up work, if any
+    scheduleWork();
+  };
+
+  const pendingOrders = orders.filter((o) => o.status === "PENDING");
+  const completeOrders = orders.filter((o) => o.status === "COMPLETE");
+
+  const formatCustomerLabel = (type: CustomerType) =>
+    type === "VIP" ? "VIP" : "Normal";
+
+  const formatTime = (ts?: number) => {
+    if (!ts) return "-";
+    const d = new Date(ts);
+    return d.toLocaleTimeString();
+  };
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, padding: 24 }}>
-      <Header style={{ gridColumn: '1 / -1' }} title="McD Automated Cooking Bots" subtitle="Real-time order orchestration • VIP prioritization • Bot lifecycle simulation" />
-      <section className="toolbar" style={{ gridColumn: '1 / -1' }}>
-        <Button variant="normal" onClick={() => enqueueOrder('Normal')} icon={<span>🍔</span>}>
-          New Normal Order
-        </Button>
-        <Button variant="vip" onClick={() => enqueueOrder('VIP')} icon={<span>⭐</span>}>
-          New VIP Order
-        </Button>
-        <Button variant="add" onClick={addBot} icon={<span>🤖</span>}>
-          + Bot
-        </Button>
-        <Button variant="remove" onClick={removeBot} disabled={bots.length === 0} icon={<span>🗑️</span>}>
-          - Bot
-        </Button>
+    <div className="app-root">
+      <header className="app-header">
+        <h1>McDonald&apos;s Cooking Bot Simulator</h1>
+        <p className="subtitle">
+          Simulate orders and cooking bots based on the FeedMe SE take-home
+          assignment.
+        </p>
+      </header>
+
+      <section className="controls">
+        <div className="control-group">
+          <h2>New Order</h2>
+          <div className="button-row">
+            <button onClick={handleAddNormalOrder}>New Normal Order</button>
+            <button className="vip" onClick={handleAddVipOrder}>
+              New VIP Order
+            </button>
+          </div>
+        </div>
+
+        <div className="control-group">
+          <h2>Cooking Bots</h2>
+          <div className="button-row">
+            <button onClick={handleAddBot}>+ Bot</button>
+            <button
+              onClick={handleRemoveBot}
+              disabled={bots.length === 0}
+              className="danger"
+            >
+              - Bot
+            </button>
+          </div>
+          <p className="bots-summary">
+            Active bots: <strong>{bots.length}</strong>
+          </p>
+        </div>
       </section>
 
-      <Card title="PENDING">
-        <PendingList orders={pending} />
-      </Card>
-
-      <Card title="COMPLETE">
-        <CompletedList orders={complete} />
-      </Card>
-
-      <Card title="Bots" style={{ gridColumn: '1 / -1' }}>
-        <div className="bot-list">
-          {bots.map(b => {
-            let progress = 0
-            if (b.status === 'WORKING' && b.currentOrder?.startedAt) {
-              progress = Math.min(100, ((clock - b.currentOrder.startedAt) / PROCESS_MS) * 100)
-            }
-            return <BotCard key={b.id} bot={b} progress={progress} />
-          })}
-          {bots.length === 0 && <div className="no-bots">No bots. Add one with + Bot.</div>}
+      <section className="main-layout">
+        <div className="column">
+          <h2>PENDING</h2>
+          <p className="hint">
+            New VIP orders appear before all normal orders (but behind earlier
+            VIPs).
+          </p>
+          <div className="card-list">
+            {pendingQueue.map((orderId) => {
+              const order = getOrderById(orderId);
+              if (!order) return null;
+              return (
+                <div
+                  key={order.id}
+                  className={`order-card ${
+                    order.customerType === "VIP" ? "vip" : "normal"
+                  }`}
+                >
+                  <div className="order-header">
+                    <span className="order-id">Order #{order.id}</span>
+                    <span className="badge">
+                      {formatCustomerLabel(order.customerType)}
+                    </span>
+                  </div>
+                  <div className="order-body">
+                    <div>Created: {formatTime(order.createdAt)}</div>
+                    <div>Status: {order.status}</div>
+                  </div>
+                </div>
+              );
+            })}
+            {pendingQueue.length === 0 && (
+              <div className="empty-state">No pending orders.</div>
+            )}
+          </div>
         </div>
-      </Card>
 
-      <footer style={{ gridColumn: '1 / -1', textAlign: 'center', color: '#666' }}>
-        <small>Time now: {formatTime()}</small>
-      </footer>
+        <div className="column">
+          <h2>COMPLETE</h2>
+          <div className="card-list">
+            {completeOrders.map((order) => (
+              <div
+                key={order.id}
+                className={`order-card complete ${
+                  order.customerType === "VIP" ? "vip" : "normal"
+                }`}
+              >
+                <div className="order-header">
+                  <span className="order-id">Order #{order.id}</span>
+                  <span className="badge">
+                    {formatCustomerLabel(order.customerType)}
+                  </span>
+                </div>
+                <div className="order-body">
+                  <div>Created: {formatTime(order.createdAt)}</div>
+                  <div>Completed at: {formatTime(order.startedAt)}</div>
+                  <div>Status: {order.status}</div>
+                </div>
+              </div>
+            ))}
+            {completeOrders.length === 0 && (
+              <div className="empty-state">No completed orders yet.</div>
+            )}
+          </div>
+        </div>
+
+        <div className="column">
+          <h2>Bot Status</h2>
+          <div className="card-list">
+            {bots.map((bot) => {
+              const currentOrder =
+                bot.currentOrderId != null
+                  ? getOrderById(bot.currentOrderId)
+                  : undefined;
+              return (
+                <div key={bot.id} className="bot-card">
+                  <div className="order-header">
+                    <span className="order-id">Bot #{bot.id}</span>
+                    <span
+                      className={`badge ${
+                        bot.status === "IDLE" ? "idle" : "processing"
+                      }`}
+                    >
+                      {bot.status}
+                    </span>
+                  </div>
+                  <div className="order-body">
+                    {bot.status === "PROCESSING" && currentOrder ? (
+                      <>
+                        <div>
+                          Processing:{" "}
+                          <strong>Order #{currentOrder.id}</strong> (
+                          {formatCustomerLabel(currentOrder.customerType)})
+                        </div>
+                        <div>
+                          Started:{" "}
+                          {currentOrder.startedAt
+                            ? formatTime(currentOrder.startedAt)
+                            : "-"}
+                        </div>
+                        <div>Time per order: 10s</div>
+                      </>
+                    ) : (
+                      <div>Bot is idle and waiting for orders.</div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+            {bots.length === 0 && (
+              <div className="empty-state">
+                No bots yet. Click &quot;+ Bot&quot; to start processing.
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
     </div>
-  )
-}
+  );
+};
+
+export default App;
