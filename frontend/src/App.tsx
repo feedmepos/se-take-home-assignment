@@ -1,26 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-
-type OrderType = 'VIP' | 'Normal'
-// Extend Order with processing timestamps
-interface Order {
-  id: number
-  type: OrderType
-  createdAt: number
-  startedAt?: number
-  completedAt?: number
-}
-
-interface Bot {
-  id: number
-  status: 'IDLE' | 'WORKING'
-  currentOrder?: Order
-  timer?: ReturnType<typeof setTimeout>
-}
-
-function formatTime(date = new Date()) {
-  const pad = (n: number) => n.toString().padStart(2, '0')
-  return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
-}
+import { Order, OrderType, Bot } from './types'
+import { Button } from './components/Button'
+import { Card } from './components/Card'
+import { BotCard } from './components/BotCard'
+import { formatTime } from './utils/time'
+import { PendingList } from './components/PendingList'
+import { CompletedList } from './components/CompletedList'
+import { Header } from './components/Header'
 
 export default function App() {
   const [nextOrderId, setNextOrderId] = useState<number>(1)
@@ -77,9 +63,12 @@ export default function App() {
   }
 
   const addBot = () => {
-    const id = nextBotId.current++
-    setBots((prev: Bot[]) => [...prev, { id, status: 'IDLE' }])
-    setTimeout(() => startBotWork(id), 0)
+    let newId = 1
+    setBots((prev: Bot[]) => {
+      newId = prev.length ? Math.max(...prev.map((b: Bot) => b.id)) + 1 : 1
+      return [...prev, { id: newId, status: 'IDLE' }]
+    })
+    setTimeout(() => startBotWork(newId), 0)
   }
 
   const removeBot = () => {
@@ -98,6 +87,11 @@ export default function App() {
           return pendingOrder.type === 'VIP' ? [pendingOrder, ...vip, ...normal] : [...vip, pendingOrder, ...normal]
         })
       }
+      // If we are removing the last bot, reset ID sequence
+      if (prev.length === 1) {
+        nextBotId.current = 1
+        return []
+      }
       return prev.slice(0, -1)
     })
   }
@@ -115,87 +109,42 @@ export default function App() {
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, padding: 24 }}>
-      <header style={{ gridColumn: '1 / -1' }}>
-        <h1 className="app-title">McD Automated Cooking Bots</h1>
-        <p className="app-subtitle">Real-time order orchestration • VIP prioritization • Bot lifecycle simulation</p>
-      </header>
+      <Header style={{ gridColumn: '1 / -1' }} title="McD Automated Cooking Bots" subtitle="Real-time order orchestration • VIP prioritization • Bot lifecycle simulation" />
       <section className="toolbar" style={{ gridColumn: '1 / -1' }}>
-        <button className="btn btn-normal" onClick={() => enqueueOrder('Normal')}>
-          <span className="icon">🍔</span>
+        <Button variant="normal" onClick={() => enqueueOrder('Normal')} icon={<span>🍔</span>}>
           New Normal Order
-        </button>
-        <button className="btn btn-vip" onClick={() => enqueueOrder('VIP')}>
-          <span className="icon">⭐</span>
+        </Button>
+        <Button variant="vip" onClick={() => enqueueOrder('VIP')} icon={<span>⭐</span>}>
           New VIP Order
-        </button>
-        <button className="btn btn-add" onClick={addBot}>
-          <span className="icon">🤖</span>
+        </Button>
+        <Button variant="add" onClick={addBot} icon={<span>🤖</span>}>
           + Bot
-        </button>
-        <button className="btn btn-remove" onClick={removeBot} disabled={bots.length === 0}>
-          <span className="icon">🗑️</span>
+        </Button>
+        <Button variant="remove" onClick={removeBot} disabled={bots.length === 0} icon={<span>🗑️</span>}>
           - Bot
-        </button>
+        </Button>
       </section>
 
-      <section style={{ background: '#fff', borderRadius: 8, padding: 16, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-        <h2>PENDING</h2>
-        {pending.length > 0 ? (
-          <ul>
-            {pending.map(o => (
-              <li key={o.id}>
-                <span className={`badge ${o.type === 'VIP' ? 'badge-vip' : 'badge-normal'}`}>{o.type}</span>
-                {' '}#{o.id}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="empty">No pending orders</p>
-        )}
-      </section>
+      <Card title="PENDING">
+        <PendingList orders={pending} />
+      </Card>
 
-      <section style={{ background: '#fff', borderRadius: 8, padding: 16, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-        <h2>COMPLETE</h2>
-        {complete.length > 0 ? (
-          <ul>
-            {complete.map(o => (
-              <li key={o.id}>#{o.id} {o.type} - {o.completedAt ? formatTime(new Date(o.completedAt)) : formatTime()}</li>
-            ))}
-          </ul>
-        ) : (
-          <p className="empty">No completed orders yet</p>
-        )}
-      </section>
+      <Card title="COMPLETE">
+        <CompletedList orders={complete} />
+      </Card>
 
-      <section style={{ gridColumn: '1 / -1', background: '#fff', borderRadius: 8, padding: 16, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-        <h2>Bots</h2>
+      <Card title="Bots">
         <div className="bot-list">
           {bots.map(b => {
             const started = b.currentOrder?.startedAt ?? 0
             const progress = b.status === 'WORKING' && started
               ? Math.min(100, ((Date.now() - started) / 10_000) * 100)
               : 0
-            return (
-              <div key={b.id} className={`bot-card ${b.status === 'WORKING' ? 'working' : ''}`}>
-                <div className="top-row">
-                  <div className="bot-id">🤖 Bot #{b.id}</div>
-                  <span className={`chip ${b.status === 'WORKING' ? 'chip-working' : 'chip-idle'}`}>{b.status}</span>
-                </div>
-                <div className="order-line">Order: {b.currentOrder ? `#${b.currentOrder.id}` : '-'}</div>
-                <div className="progress" aria-hidden={b.status !== 'WORKING'}>
-                  <div className="bar" style={{ width: `${progress}%` }} />
-                </div>
-                {b.currentOrder && (
-                  <div style={{ fontSize: 12, opacity: .8, marginTop: 6 }}>
-                    Elapsed: {((Date.now() - (b.currentOrder.startedAt || Date.now())) / 1000).toFixed(1)}s / 10s
-                  </div>
-                )}
-              </div>
-            )
+            return <BotCard key={b.id} bot={b} progress={progress} />
           })}
           {bots.length === 0 && <div className="no-bots">No bots. Add one with + Bot.</div>}
         </div>
-      </section>
+      </Card>
 
       <footer style={{ gridColumn: '1 / -1', textAlign: 'center', color: '#666' }}>
         <small>Time now: {formatTime()}</small>
