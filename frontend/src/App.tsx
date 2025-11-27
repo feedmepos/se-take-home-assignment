@@ -10,6 +10,9 @@ import { Header } from './components/Header'
 
 const PROCESS_MS = 10000; // time a bot spends actively processing an order
 
+// Debug: Verify the constant is loaded correctly
+console.log('🔧 App loaded - PROCESS_MS constant:', PROCESS_MS);
+
 export default function App() {
   const [nextOrderId, setNextOrderId] = useState<number>(1)
   const [pending, setPending] = useState<Order[]>([])
@@ -39,7 +42,18 @@ export default function App() {
   }
 
   const startBotWork = (botId: number) => {
-    setBots((prev: Bot[]) => prev.map((b: Bot) => (b.id === botId ? { ...b, status: 'IDLE', currentOrder: undefined } : b)))
+    console.log(`[${formatTime()}] startBotWork called for Bot ${botId}`)
+    
+    // Clear any existing timer for this bot first
+    setBots((prev: Bot[]) => prev.map((b: Bot) => {
+      if (b.id === botId && b.timer) {
+        console.log(`[${formatTime()}] Clearing existing timer ${b.timer} for Bot ${botId}`)
+        clearTimeout(b.timer)
+        return { ...b, status: 'IDLE', currentOrder: undefined, timer: undefined }
+      }
+      return b.id === botId ? { ...b, status: 'IDLE', currentOrder: undefined } : b
+    }))
+    
     const order = pickNextOrder()
     if (!order) {
       console.log(`[${formatTime()}] Bot ${botId} IDLE (no pending orders)`)
@@ -49,6 +63,10 @@ export default function App() {
     order.startedAt = Date.now()
     console.log(`[${formatTime()}] Bot ${botId} START order #${order.id} (${order.type}) - will take ${PROCESS_MS}ms`)
     const workStartTime = Date.now()
+    
+    // Debug: Verify PROCESS_MS value
+    console.log(`[${formatTime()}] PROCESS_MS constant value: ${PROCESS_MS}ms`)
+    
     const timer = setTimeout(() => {
       const now = Date.now()
       const actualWorkTime = now - workStartTime
@@ -56,11 +74,23 @@ export default function App() {
       const completedClone: Order = { ...order }
       setComplete((prev: Order[]) => [...prev, completedClone])
       console.log(`[${formatTime()}] Bot ${botId} COMPLETE order #${order.id} - actual work time: ${actualWorkTime}ms (expected: ${PROCESS_MS}ms)`)
+      
+      // Check if this is being called too early
+      if (actualWorkTime < PROCESS_MS - 100) {
+        console.error(`⚠️ TIMING ERROR: Bot ${botId} completed after ${actualWorkTime}ms but expected ${PROCESS_MS}ms`)
+        console.error(`⚠️ Timer was set for: ${PROCESS_MS}ms`)
+        console.error(`⚠️ Work started at: ${workStartTime}`)
+        console.error(`⚠️ Work ended at: ${now}`)
+      }
+      
       // move bot to IDLE and immediately start next work
       setBots((prev: Bot[]) => prev.map((b: Bot) => (b.id === botId ? { ...b, status: 'IDLE', currentOrder: undefined, timer: undefined } : b)))
-      startBotWork(botId)
+      
+      // Small delay to avoid rapid state updates
+      setTimeout(() => startBotWork(botId), 10)
     }, PROCESS_MS)
-
+    
+    console.log(`[${formatTime()}] setTimeout created with timer ID: ${timer}, delay: ${PROCESS_MS}ms`)
     setBots((prev: Bot[]) => prev.map((b: Bot) => (b.id === botId ? { ...b, status: 'WORKING', currentOrder: order, timer } : b)))
   }
 
@@ -70,7 +100,17 @@ export default function App() {
       newId = prev.length ? Math.max(...prev.map((b: Bot) => b.id)) + 1 : 1
       return [...prev, { id: newId, status: 'IDLE' }]
     })
-    setTimeout(() => startBotWork(newId), 0)
+    
+    // Test setTimeout first
+    console.log('🧪 Testing setTimeout with 10000ms delay...')
+    const testStart = Date.now()
+    setTimeout(() => {
+      const testEnd = Date.now()
+      const testDuration = testEnd - testStart
+      console.log(`🧪 Test setTimeout completed after ${testDuration}ms (expected ~10000ms)`)
+    }, 10000)
+    
+    setTimeout(() => startBotWork(newId), 100) // Small delay to avoid race conditions
   }
 
   const removeBot = () => {
