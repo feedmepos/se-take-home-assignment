@@ -169,20 +169,31 @@ export default function App() {
 
       <section style={{ gridColumn: '1 / -1', background: '#fff', borderRadius: 8, padding: 16, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
         <h2>Bots</h2>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          {bots.map(b => (
-            <div key={b.id} className={b.status === 'WORKING' ? 'bot-working' : ''} style={{ border: '1px solid #ddd', borderRadius: 8, padding: 12, minWidth: 190, background: '#fafafa' }}>
-              <div style={{ fontWeight: 600 }}>Bot #{b.id}</div>
-              <div>Status: {b.status}</div>
-              <div>Order: {b.currentOrder ? `#${b.currentOrder.id}` : '-'}</div>
-              {b.currentOrder && (
-                <div style={{ fontSize: 12, opacity: .8 }}>
-                  Elapsed: {((Date.now() - (b.currentOrder.startedAt || Date.now())) / 1000).toFixed(1)}s / 10s
+        <div className="bot-list">
+          {bots.map(b => {
+            const started = b.currentOrder?.startedAt ?? 0
+            const progress = b.status === 'WORKING' && started
+              ? Math.min(100, ((Date.now() - started) / 10_000) * 100)
+              : 0
+            return (
+              <div key={b.id} className={`bot-card ${b.status === 'WORKING' ? 'working' : ''}`}>
+                <div className="top-row">
+                  <div className="bot-id">🤖 Bot #{b.id}</div>
+                  <span className={`chip ${b.status === 'WORKING' ? 'chip-working' : 'chip-idle'}`}>{b.status}</span>
                 </div>
-              )}
-            </div>
-          ))}
-          {bots.length === 0 && <div>No bots. Add one with + Bot.</div>}
+                <div className="order-line">Order: {b.currentOrder ? `#${b.currentOrder.id}` : '-'}</div>
+                <div className="progress" aria-hidden={b.status !== 'WORKING'}>
+                  <div className="bar" style={{ width: `${progress}%` }} />
+                </div>
+                {b.currentOrder && (
+                  <div style={{ fontSize: 12, opacity: .8, marginTop: 6 }}>
+                    Elapsed: {((Date.now() - (b.currentOrder.startedAt || Date.now())) / 1000).toFixed(1)}s / 10s
+                  </div>
+                )}
+              </div>
+            )
+          })}
+          {bots.length === 0 && <div className="no-bots">No bots. Add one with + Bot.</div>}
         </div>
       </section>
 
