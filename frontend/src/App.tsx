@@ -368,6 +368,9 @@ const App: React.FC = () => {
           </div>
         </div>
       </section>
+      <footer className="site-footer">
+        <span>© 2025 FeedMe Simulation. Developed by <a href="https://www.linkedin.com/in/omar-mukhtar/" target="_blank">Omar</a>.</span>
+      </footer>
     </div>
   );
 };

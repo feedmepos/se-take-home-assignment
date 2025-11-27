@@ -10,6 +10,9 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 24px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .app-header h1 {
@@ -98,7 +101,8 @@ button.danger:hover:not(:disabled) {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 20px;
-  margin-top: 4px;
+  margin-top: 24px;
+  flex: 1;
 }
 
 .column h2 {
@@ -260,3 +264,20 @@ button.danger:hover:not(:disabled) {
 .order-card.collapsed .order-body { display: none; }
 .order-card.expanded { box-shadow: 0 2px 6px rgba(15,23,42,0.12); }
 .order-card.expanded .order-header { border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; margin-bottom: 4px; }
+
+.site-footer {
+  position: absolute;
+  bottom: -24px;
+  left: 0;
+  right: 0;
+  margin-top: 24px;
+  padding: 12px 0;
+  font-size: 0.7rem;
+  text-align: center;
+  color: #6b7280;
+  border-top: 1px solid #e5e7eb;
+}
+
+.site-footer span {
+  letter-spacing: .5px;
+}
