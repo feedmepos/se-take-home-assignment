@@ -8,11 +8,14 @@ import { PendingList } from './components/PendingList'
 import { CompletedList } from './components/CompletedList'
 import { Header } from './components/Header'
 
+const PROCESS_MS = 10000; // time a bot spends actively processing an order
+
 export default function App() {
   const [nextOrderId, setNextOrderId] = useState<number>(1)
   const [pending, setPending] = useState<Order[]>([])
   const [complete, setComplete] = useState<Order[]>([])
   const [bots, setBots] = useState<Bot[]>([])
+  const [clock, setClock] = useState<number>(Date.now())
   const nextBotId = useRef(1)
 
   const enqueueOrder = (type: OrderType) => {
@@ -39,25 +42,24 @@ export default function App() {
     setBots((prev: Bot[]) => prev.map((b: Bot) => (b.id === botId ? { ...b, status: 'IDLE', currentOrder: undefined } : b)))
     const order = pickNextOrder()
     if (!order) {
+      console.log(`[${formatTime()}] Bot ${botId} IDLE (no pending orders)`)
       setBots((prev: Bot[]) => prev.map((b: Bot) => (b.id === botId ? { ...b, status: 'IDLE', currentOrder: undefined } : b)))
       return
     }
-    // mark start time
     order.startedAt = Date.now()
+    console.log(`[${formatTime()}] Bot ${botId} START order #${order.id} (${order.type}) - will take ${PROCESS_MS}ms`)
+    const workStartTime = Date.now()
     const timer = setTimeout(() => {
-      // only complete if at least 10s elapsed (safeguard)
       const now = Date.now()
-      if (order.startedAt && now - order.startedAt >= 10_000) {
-        order.completedAt = now
-      } else {
-        // enforce exactly 10s
-        order.completedAt = (order.startedAt || now) + 10_000
-      }
+      const actualWorkTime = now - workStartTime
+      order.completedAt = now
       const completedClone: Order = { ...order }
       setComplete((prev: Order[]) => [...prev, completedClone])
+      console.log(`[${formatTime()}] Bot ${botId} COMPLETE order #${order.id} - actual work time: ${actualWorkTime}ms (expected: ${PROCESS_MS}ms)`)
+      // move bot to IDLE and immediately start next work
       setBots((prev: Bot[]) => prev.map((b: Bot) => (b.id === botId ? { ...b, status: 'IDLE', currentOrder: undefined, timer: undefined } : b)))
       startBotWork(botId)
-    }, 10_000)
+    }, PROCESS_MS)
 
     setBots((prev: Bot[]) => prev.map((b: Bot) => (b.id === botId ? { ...b, status: 'WORKING', currentOrder: order, timer } : b)))
   }
@@ -104,6 +106,14 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pending])
 
+  useEffect(() => {
+    // live update while any bot is working
+    if (bots.some(b => b.status === 'WORKING')) {
+      const interval = setInterval(() => setClock(Date.now()), 200)
+      return () => clearInterval(interval)
+    }
+  }, [bots])
+
   const pendingVip = useMemo(() => pending.filter((o: Order) => o.type === 'VIP'), [pending])
   const pendingNormal = useMemo(() => pending.filter((o: Order) => o.type === 'Normal'), [pending])
 
@@ -133,13 +143,13 @@ export default function App() {
         <CompletedList orders={complete} />
       </Card>
 
-      <Card title="Bots">
+      <Card title="Bots" style={{ gridColumn: '1 / -1' }}>
         <div className="bot-list">
           {bots.map(b => {
-            const started = b.currentOrder?.startedAt ?? 0
-            const progress = b.status === 'WORKING' && started
-              ? Math.min(100, ((Date.now() - started) / 10_000) * 100)
-              : 0
+            let progress = 0
+            if (b.status === 'WORKING' && b.currentOrder?.startedAt) {
+              progress = Math.min(100, ((clock - b.currentOrder.startedAt) / PROCESS_MS) * 100)
+            }
             return <BotCard key={b.id} bot={b} progress={progress} />
           })}
           {bots.length === 0 && <div className="no-bots">No bots. Add one with + Bot.</div>}

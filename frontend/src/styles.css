@@ -76,10 +76,32 @@ body { background: var(--color-bg); }
   animation: pulse 1.8s infinite ease-in-out;
   pointer-events: none;
 }
+
+/* Paused bot styling */
+.bot-paused {
+  opacity: 0.85;
+  position: relative;
+}
+.bot-paused::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  box-shadow: 0 0 0 0 rgba(255,165,0,.6);
+  animation: pausePulse 2.5s infinite ease-in-out;
+  pointer-events: none;
+}
+
 @keyframes pulse {
   0% { box-shadow: 0 0 0 0 rgba(80,160,255,.55); }
   70% { box-shadow: 0 0 0 12px rgba(80,160,255,0); }
   100% { box-shadow: 0 0 0 0 rgba(80,160,255,0); }
+}
+
+@keyframes pausePulse {
+  0% { box-shadow: 0 0 0 0 rgba(255,165,0,.45); }
+  70% { box-shadow: 0 0 0 8px rgba(255,165,0,0); }
+  100% { box-shadow: 0 0 0 0 rgba(255,165,0,0); }
 }
 
 .app-title {
@@ -169,6 +191,7 @@ li > .badge { margin-right: 6px; }
 }
 .chip-working { background: linear-gradient(135deg,#34d399,#059669); }
 .chip-idle { background: linear-gradient(135deg,#9aa0a6,#667085); }
+.chip-paused { background: linear-gradient(135deg,#f59e0b,#d97706); }
 
 .order-line { font-size: 13px; margin-bottom: 8px; }
 
