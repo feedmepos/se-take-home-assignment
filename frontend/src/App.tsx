@@ -22,12 +22,15 @@ export default function App() {
   const nextBotId = useRef(1)
 
   const enqueueOrder = (type: OrderType) => {
+    console.log(`[${formatTime()}] Creating new ${type} order #${nextOrderId}`)
     setPending((prev: Order[]) => {
       const newOrder: Order = { id: nextOrderId, type, createdAt: Date.now() }
       setNextOrderId((id: number) => id + 1)
       const vip = prev.filter((o: Order) => o.type === 'VIP')
       const normal = prev.filter((o: Order) => o.type === 'Normal')
-      return type === 'VIP' ? [...vip, newOrder, ...normal] : [...vip, ...normal, newOrder]
+      const newPendingList = type === 'VIP' ? [...vip, newOrder, ...normal] : [...vip, ...normal, newOrder]
+      console.log(`[${formatTime()}] Order queue updated. Total pending: ${newPendingList.length}`)
+      return newPendingList
     })
   }
 
@@ -83,11 +86,15 @@ export default function App() {
         console.error(`⚠️ Work ended at: ${now}`)
       }
       
-      // move bot to IDLE and immediately start next work
+      // move bot to IDLE and start next work after a brief pause
       setBots((prev: Bot[]) => prev.map((b: Bot) => (b.id === botId ? { ...b, status: 'IDLE', currentOrder: undefined, timer: undefined } : b)))
       
-      // Small delay to avoid rapid state updates
-      setTimeout(() => startBotWork(botId), 10)
+      console.log(`[${formatTime()}] Bot ${botId} transitioning to IDLE, will check for next order in 1 second`)
+      // Small pause between orders so you can see the transition
+      setTimeout(() => {
+        console.log(`[${formatTime()}] Bot ${botId} ready for next order`)
+        startBotWork(botId)
+      }, 1000)
     }, PROCESS_MS)
     
     console.log(`[${formatTime()}] setTimeout created with timer ID: ${timer}, delay: ${PROCESS_MS}ms`)
@@ -139,9 +146,16 @@ export default function App() {
   }
 
   useEffect(() => {
+    console.log(`[${formatTime()}] useEffect triggered - pending orders: ${pending.length}, bots: ${bots.length}`)
     if (pending.length === 0) return
     bots.forEach((b: Bot) => {
-      if (b.status === 'IDLE') startBotWork(b.id)
+      console.log(`[${formatTime()}] Checking Bot ${b.id} - status: ${b.status}`)
+      if (b.status === 'IDLE') {
+        console.log(`[${formatTime()}] Bot ${b.id} is IDLE, starting work`)
+        startBotWork(b.id)
+      } else {
+        console.log(`[${formatTime()}] Bot ${b.id} is ${b.status}, not starting work`)
+      }
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pending])
