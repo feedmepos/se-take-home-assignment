@@ -208,6 +208,47 @@ button.danger:hover:not(:disabled) {
   transition: width .2s linear;
 }
 
+.menu-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 10px 14px;
+  box-shadow: 0 1px 3px rgba(15,23,42,0.08);
+  flex-wrap: wrap;
+}
+.menu-bar .divider {
+  width: 1px;
+  height: 24px;
+  background: #e5e7eb;
+  margin: 0 4px;
+}
+.menu-bar .seconds-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #374151;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+.menu-bar .seconds-field input {
+  width: 70px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: .8rem;
+}
+.menu-bar .status {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: #4b5563;
+}
+@media (max-width: 640px) {
+  .menu-bar .status { order: 100; width: 100%; text-align: right; }
+}
 @media (max-width: 960px) {
   .main-layout {
     grid-template-columns: 1fr;
