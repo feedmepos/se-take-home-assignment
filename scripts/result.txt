@@ -12,36 +12,36 @@
 > ts-node src/server.ts
 
 📡 Feed Me Service started successfully { port: '8080' }
-[2025-11-27T20:11:08.530Z] Created crew 1 with idle status 
-[2025-11-27T20:11:10.596Z] Created crew 2 with idle status 
-[2025-11-27T20:11:12.502Z] Created crew 3 with idle status 
-[2025-11-27T20:11:24.208Z] Created normal order 1b8a5a43-6e6a-404f-8e8d-9100d14b6840 (Queue no #1 - pending) 
-[2025-11-27T20:11:27.184Z] Created normal order 0c4e89c4-5ef7-4c96-b633-cf05318edcf2 (Queue no #2 - pending) 
-[2025-11-27T20:11:30.213Z] Created vip order 08396fc0-ad2f-4ff7-bd07-518a3e651484 (Queue no #1 - pending) 
-[2025-11-27T20:11:36.906Z] Created normal order 9077a7d6-c902-4c49-8355-bbefef1317b2 (Queue no #4 - pending) 
-[2025-11-27T20:11:41.298Z] Created vip order 029d0f3a-7e18-4783-92a6-83a925a5280c (Queue no #2 - pending) 
-[2025-11-27T20:11:45.577Z] Crew 3 start picked up vip order 08396fc0-ad2f-4ff7-bd07-518a3e651484 
-[2025-11-27T20:11:46.842Z] Crew 2 start picked up vip order 029d0f3a-7e18-4783-92a6-83a925a5280c 
-[2025-11-27T20:11:47.804Z] Crew 1 start picked up normal order 1b8a5a43-6e6a-404f-8e8d-9100d14b6840 
-[2025-11-27T20:11:50.580Z] Successfully process order for 08396fc0-ad2f-4ff7-bd07-518a3e651484 with status complete 
-[2025-11-27T20:11:50.580Z] Set crew 3 to inactive 
-[2025-11-27T20:11:51.845Z] Successfully process order for 029d0f3a-7e18-4783-92a6-83a925a5280c with status complete 
-[2025-11-27T20:11:51.846Z] Set crew 2 to inactive 
-[2025-11-27T20:11:52.805Z] Successfully process order for 1b8a5a43-6e6a-404f-8e8d-9100d14b6840 with status complete 
-[2025-11-27T20:11:52.805Z] Set crew 1 to inactive 
-[2025-11-27T20:11:55.580Z] Task 08396fc0-ad2f-4ff7-bd07-518a3e651484 successfully completed 
-[2025-11-27T20:11:56.847Z] Task 029d0f3a-7e18-4783-92a6-83a925a5280c successfully completed 
-[2025-11-27T20:11:57.805Z] Task 1b8a5a43-6e6a-404f-8e8d-9100d14b6840 successfully completed 
-[2025-11-27T20:12:00.128Z] None of the crew are available 
-[2025-11-27T20:12:05.190Z] Created crew 4 with idle status 
-[2025-11-27T20:12:06.441Z] Created crew 5 with idle status 
-[2025-11-27T20:12:10.850Z] Created crew 6 with idle status 
-[2025-11-27T20:12:14.246Z] Crew 6 start picked up normal order 0c4e89c4-5ef7-4c96-b633-cf05318edcf2 
-[2025-11-27T20:12:15.148Z] Crew 5 start picked up normal order 9077a7d6-c902-4c49-8355-bbefef1317b2 
-[2025-11-27T20:12:19.248Z] Successfully process order for 0c4e89c4-5ef7-4c96-b633-cf05318edcf2 with status complete 
-[2025-11-27T20:12:19.248Z] Set crew 6 to inactive 
-[2025-11-27T20:12:20.150Z] Successfully process order for 9077a7d6-c902-4c49-8355-bbefef1317b2 with status complete 
-[2025-11-27T20:12:20.150Z] Set crew 5 to inactive 
-[2025-11-27T20:12:24.249Z] Task 0c4e89c4-5ef7-4c96-b633-cf05318edcf2 successfully completed 
-[2025-11-27T20:12:25.151Z] Task 9077a7d6-c902-4c49-8355-bbefef1317b2 successfully completed 
-[2025-11-27T20:12:29.053Z] No pending order found 
+[20:11:08] Created crew 1 with idle status 
+[20:11:10] Created crew 2 with idle status 
+[20:11:12] Created crew 3 with idle status 
+[20:11:24] Created normal order 1b8a5a43-6e6a-404f-8e8d-9100d14b6840 (Queue no #1 - pending) 
+[20:11:27] Created normal order 0c4e89c4-5ef7-4c96-b633-cf05318edcf2 (Queue no #2 - pending) 
+[20:11:30] Created vip order 08396fc0-ad2f-4ff7-bd07-518a3e651484 (Queue no #1 - pending) 
+[20:11:36] Created normal order 9077a7d6-c902-4c49-8355-bbefef1317b2 (Queue no #4 - pending) 
+[20:11:41] Created vip order 029d0f3a-7e18-4783-92a6-83a925a5280c (Queue no #2 - pending) 
+[20:11:45] Crew 3 start picked up vip order 08396fc0-ad2f-4ff7-bd07-518a3e651484 
+[20:11:46] Crew 2 start picked up vip order 029d0f3a-7e18-4783-92a6-83a925a5280c 
+[20:11:47] Crew 1 start picked up normal order 1b8a5a43-6e6a-404f-8e8d-9100d14b6840 
+[20:11:50] Successfully process order for 08396fc0-ad2f-4ff7-bd07-518a3e651484 with status complete 
+[20:11:50] Set crew 3 to inactive 
+[20:11:51] Successfully process order for 029d0f3a-7e18-4783-92a6-83a925a5280c with status complete 
+[20:11:51] Set crew 2 to inactive 
+[20:11:52] Successfully process order for 1b8a5a43-6e6a-404f-8e8d-9100d14b6840 with status complete 
+[20:11:52] Set crew 1 to inactive 
+[20:11:55] Task 08396fc0-ad2f-4ff7-bd07-518a3e651484 successfully completed 
+[20:11:56] Task 029d0f3a-7e18-4783-92a6-83a925a5280c successfully completed 
+[20:11:57] Task 1b8a5a43-6e6a-404f-8e8d-9100d14b6840 successfully completed 
+[20:12:00] None of the crew are available 
+[20:12:05] Created crew 4 with idle status 
+[20:12:06] Created crew 5 with idle status 
+[20:12:10] Created crew 6 with idle status 
+[20:12:14] Crew 6 start picked up normal order 0c4e89c4-5ef7-4c96-b633-cf05318edcf2 
+[20:12:15] Crew 5 start picked up normal order 9077a7d6-c902-4c49-8355-bbefef1317b2 
+[20:12:19] Successfully process order for 0c4e89c4-5ef7-4c96-b633-cf05318edcf2 with status complete 
+[20:12:19] Set crew 6 to inactive 
+[20:12:20] Successfully process order for 9077a7d6-c902-4c49-8355-bbefef1317b2 with status complete 
+[20:12:20] Set crew 5 to inactive 
+[20:12:24] Task 0c4e89c4-5ef7-4c96-b633-cf05318edcf2 successfully completed 
+[20:12:25] Task 9077a7d6-c902-4c49-8355-bbefef1317b2 successfully completed 
+[20:12:29] No pending order found 
