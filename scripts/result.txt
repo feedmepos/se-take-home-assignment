@@ -1,2 +1,4 @@
+McDonald's Order Management System - Simulation Results
+
 [01:37:26]: Created Normal Order #1 - Status: PENDING
 [01:37:26]: Created Normal Order #2 - Status: PENDING
