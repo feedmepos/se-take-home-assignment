@@ -9,8 +9,6 @@ type CustomerType = "NORMAL" | "VIP";
 type OrderStatus = "PENDING" | "PROCESSING" | "COMPLETE";
 type BotStatus = "IDLE" | "PROCESSING";
 
-const PROCESSING_TIME_MS = 10_000;
-
 interface Order {
   id: number;
   customerType: CustomerType;
@@ -31,6 +29,8 @@ const App: React.FC = () => {
   const [bots, setBots] = useState<Bot[]>([]);
   const [pendingQueue, setPendingQueue] = useState<number[]>([]); // queue of order IDs
   const [now, setNow] = useState<number>(Date.now());
+  const [processingSeconds, setProcessingSeconds] = useState<number>(10); // default 10s
+  const processingMs = processingSeconds * 1000;
 
   const nextOrderIdRef = useRef(1);
   const nextBotIdRef = useRef(1);
@@ -126,7 +126,7 @@ const App: React.FC = () => {
 
         const timeoutId = window.setTimeout(() => {
           completeOrder(bot.id, orderId);
-        }, PROCESSING_TIME_MS);
+        }, processingMs);
         bot.timeoutId = timeoutId;
 
         changed = true;
@@ -300,6 +300,8 @@ const App: React.FC = () => {
         onAddBot={handleAddBot}
         onRemoveBot={handleRemoveBot}
         botCount={bots.length}
+        processingSeconds={processingSeconds}
+        onChangeProcessingSeconds={setProcessingSeconds}
       />
 
       <section className="main-layout">
@@ -356,7 +358,7 @@ const App: React.FC = () => {
                 getOrderById={(id) => getOrderById(id)}
                 formatCustomerLabel={formatCustomerLabel}
                 formatTime={formatTime}
-                processingMs={PROCESSING_TIME_MS}
+                processingMs={processingMs}
                 now={now}
               />
             ))}
