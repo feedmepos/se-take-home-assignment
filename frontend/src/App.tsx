@@ -4,6 +4,8 @@ import "./App.css";
 import { Controls } from "./components/Controls";
 import { OrderCard } from "./components/OrderCard";
 import { BotStatusCard } from "./components/BotStatusCard";
+import { AppHeader } from './components/AppHeader'
+import { PendingSection, CompleteSection, BotsSection } from './components/Sections'
 
 type CustomerType = "NORMAL" | "VIP";
 type OrderStatus = "PENDING" | "PROCESSING" | "COMPLETE";
@@ -286,13 +288,7 @@ const App: React.FC = () => {
 
   return (
     <div className="app-root">
-      <header className="app-header">
-        <h1>McDonald&apos;s Cooking Bot Simulator</h1>
-        <p className="subtitle">
-          Simulate orders and cooking bots based on the FeedMe SE take-home
-          assignment.
-        </p>
-      </header>
+      <AppHeader />
 
       <Controls
         onAddNormal={handleAddNormalOrder}
@@ -303,70 +299,25 @@ const App: React.FC = () => {
       />
 
       <section className="main-layout">
-        <div className="column">
-          <h2>PENDING</h2>
-          <p className="hint">
-            New VIP orders appear before all normal orders (but behind earlier
-            VIPs).
-          </p>
-          <div className="card-list">
-            {pendingQueue.map((orderId) => {
-              const order = getOrderById(orderId);
-              if (!order) return null;
-              return (
-                <OrderCard
-                  key={order.id}
-                  order={order}
-                  formatCustomerLabel={formatCustomerLabel}
-                  formatTime={formatTime}
-                />
-              );
-            })}
-            {pendingQueue.length === 0 && (
-              <div className="empty-state">No pending orders.</div>
-            )}
-          </div>
-        </div>
-
-        <div className="column">
-          <h2>COMPLETE</h2>
-          <div className="card-list">
-            {completeOrders.map((order) => (
-              <OrderCard
-                key={order.id}
-                order={order}
-                variant="complete"
-                formatCustomerLabel={formatCustomerLabel}
-                formatTime={formatTime}
-              />
-            ))}
-            {completeOrders.length === 0 && (
-              <div className="empty-state">No completed orders yet.</div>
-            )}
-          </div>
-        </div>
-
-        <div className="column">
-          <h2>Bot Status</h2>
-          <div className="card-list">
-            {bots.map((bot) => (
-              <BotStatusCard
-                key={bot.id}
-                bot={bot}
-                getOrderById={(id) => getOrderById(id)}
-                formatCustomerLabel={formatCustomerLabel}
-                formatTime={formatTime}
-                processingMs={PROCESSING_MS}
-                now={now}
-              />
-            ))}
-            {bots.length === 0 && (
-              <div className="empty-state">
-                No bots yet. Click "+ Bot" to start processing.
-              </div>
-            )}
-          </div>
-        </div>
+        <PendingSection
+          pendingQueue={pendingQueue}
+          getOrderById={(id) => getOrderById(id)}
+          formatCustomerLabel={formatCustomerLabel}
+          formatTime={formatTime}
+        />
+        <CompleteSection
+          completeOrders={completeOrders}
+          formatCustomerLabel={formatCustomerLabel}
+          formatTime={formatTime}
+        />
+        <BotsSection
+          bots={bots}
+          getOrderById={(id) => getOrderById(id)}
+          formatCustomerLabel={formatCustomerLabel}
+          formatTime={formatTime}
+          processingMs={PROCESSING_MS}
+          now={now}
+        />
       </section>
       <footer className="site-footer">
         <span>© 2025 FeedMe Simulation. Developed by <a href="https://www.linkedin.com/in/omar-mukhtar/" target="_blank">Omar</a>.</span>
