@@ -1,6 +1,9 @@
 // App.tsx
 import React, { useEffect, useRef, useState } from "react";
 import "./App.css";
+import { Controls } from "./components/Controls";
+import { OrderCard } from "./components/OrderCard";
+import { BotStatusCard } from "./components/BotStatusCard";
 
 type CustomerType = "NORMAL" | "VIP";
 type OrderStatus = "PENDING" | "PROCESSING" | "COMPLETE";
@@ -27,6 +30,7 @@ const App: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [bots, setBots] = useState<Bot[]>([]);
   const [pendingQueue, setPendingQueue] = useState<number[]>([]); // queue of order IDs
+  const [now, setNow] = useState<number>(Date.now());
 
   const nextOrderIdRef = useRef(1);
   const nextBotIdRef = useRef(1);
@@ -47,6 +51,14 @@ const App: React.FC = () => {
   useEffect(() => {
     pendingQueueRef.current = pendingQueue;
   }, [pendingQueue]);
+
+  // Update "now" state every 250ms if any bot is processing
+  useEffect(() => {
+    if (bots.some((b) => b.status === "PROCESSING")) {
+      const id = setInterval(() => setNow(Date.now()), 250);
+      return () => clearInterval(id);
+    }
+  }, [bots]);
 
   // Cleanup timers on unmount
   useEffect(() => {
@@ -282,34 +294,13 @@ const App: React.FC = () => {
         </p>
       </header>
 
-      <section className="controls">
-        <div className="control-group">
-          <h2>New Order</h2>
-          <div className="button-row">
-            <button onClick={handleAddNormalOrder}>New Normal Order</button>
-            <button className="vip" onClick={handleAddVipOrder}>
-              New VIP Order
-            </button>
-          </div>
-        </div>
-
-        <div className="control-group">
-          <h2>Cooking Bots</h2>
-          <div className="button-row">
-            <button onClick={handleAddBot}>+ Bot</button>
-            <button
-              onClick={handleRemoveBot}
-              disabled={bots.length === 0}
-              className="danger"
-            >
-              - Bot
-            </button>
-          </div>
-          <p className="bots-summary">
-            Active bots: <strong>{bots.length}</strong>
-          </p>
-        </div>
-      </section>
+      <Controls
+        onAddNormal={handleAddNormalOrder}
+        onAddVip={handleAddVipOrder}
+        onAddBot={handleAddBot}
+        onRemoveBot={handleRemoveBot}
+        botCount={bots.length}
+      />
 
       <section className="main-layout">
         <div className="column">
@@ -323,23 +314,12 @@ const App: React.FC = () => {
               const order = getOrderById(orderId);
               if (!order) return null;
               return (
-                <div
+                <OrderCard
                   key={order.id}
-                  className={`order-card ${
-                    order.customerType === "VIP" ? "vip" : "normal"
-                  }`}
-                >
-                  <div className="order-header">
-                    <span className="order-id">Order #{order.id}</span>
-                    <span className="badge">
-                      {formatCustomerLabel(order.customerType)}
-                    </span>
-                  </div>
-                  <div className="order-body">
-                    <div>Created: {formatTime(order.createdAt)}</div>
-                    <div>Status: {order.status}</div>
-                  </div>
-                </div>
+                  order={order}
+                  formatCustomerLabel={formatCustomerLabel}
+                  formatTime={formatTime}
+                />
               );
             })}
             {pendingQueue.length === 0 && (
@@ -352,24 +332,13 @@ const App: React.FC = () => {
           <h2>COMPLETE</h2>
           <div className="card-list">
             {completeOrders.map((order) => (
-              <div
+              <OrderCard
                 key={order.id}
-                className={`order-card complete ${
-                  order.customerType === "VIP" ? "vip" : "normal"
-                }`}
-              >
-                <div className="order-header">
-                  <span className="order-id">Order #{order.id}</span>
-                  <span className="badge">
-                    {formatCustomerLabel(order.customerType)}
-                  </span>
-                </div>
-                <div className="order-body">
-                  <div>Created: {formatTime(order.createdAt)}</div>
-                  <div>Completed at: {formatTime(order.startedAt)}</div>
-                  <div>Status: {order.status}</div>
-                </div>
-              </div>
+                order={order}
+                variant="complete"
+                formatCustomerLabel={formatCustomerLabel}
+                formatTime={formatTime}
+              />
             ))}
             {completeOrders.length === 0 && (
               <div className="empty-state">No completed orders yet.</div>
@@ -380,49 +349,20 @@ const App: React.FC = () => {
         <div className="column">
           <h2>Bot Status</h2>
           <div className="card-list">
-            {bots.map((bot) => {
-              const currentOrder =
-                bot.currentOrderId != null
-                  ? getOrderById(bot.currentOrderId)
-                  : undefined;
-              return (
-                <div key={bot.id} className="bot-card">
-                  <div className="order-header">
-                    <span className="order-id">Bot #{bot.id}</span>
-                    <span
-                      className={`badge ${
-                        bot.status === "IDLE" ? "idle" : "processing"
-                      }`}
-                    >
-                      {bot.status}
-                    </span>
-                  </div>
-                  <div className="order-body">
-                    {bot.status === "PROCESSING" && currentOrder ? (
-                      <>
-                        <div>
-                          Processing:{" "}
-                          <strong>Order #{currentOrder.id}</strong> (
-                          {formatCustomerLabel(currentOrder.customerType)})
-                        </div>
-                        <div>
-                          Started:{" "}
-                          {currentOrder.startedAt
-                            ? formatTime(currentOrder.startedAt)
-                            : "-"}
-                        </div>
-                        <div>Time per order: 10s</div>
-                      </>
-                    ) : (
-                      <div>Bot is idle and waiting for orders.</div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+            {bots.map((bot) => (
+              <BotStatusCard
+                key={bot.id}
+                bot={bot}
+                getOrderById={(id) => getOrderById(id)}
+                formatCustomerLabel={formatCustomerLabel}
+                formatTime={formatTime}
+                processingMs={PROCESSING_TIME_MS}
+                now={now}
+              />
+            ))}
             {bots.length === 0 && (
               <div className="empty-state">
-                No bots yet. Click &quot;+ Bot&quot; to start processing.
+                No bots yet. Click "+ Bot" to start processing.
               </div>
             )}
           </div>

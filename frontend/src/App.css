@@ -193,6 +193,21 @@ button.danger:hover:not(:disabled) {
   background: #f9fafb;
 }
 
+.bot-card .progress-wrapper {
+  margin-top: 4px;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.bot-card .progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg,#3b82f6,#10b981);
+  width: 0%;
+  transition: width .2s linear;
+}
+
 @media (max-width: 960px) {
   .main-layout {
     grid-template-columns: 1fr;
