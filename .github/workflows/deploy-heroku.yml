@@ -35,7 +35,7 @@ jobs:
         env:
           HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
         run: |
-          docker build -f frontend/docker/Dockerfile -t registry.heroku.com/$HEROKU_APP_NAME/web .
+          docker build -f frontend/docker/Dockerfile -t registry.heroku.com/$HEROKU_APP_NAME/web frontend
           docker push registry.heroku.com/$HEROKU_APP_NAME/web
 
       - name: Release frontend app on Heroku
