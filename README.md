@@ -6,6 +6,10 @@ Below is a take home assignment before the interview of the position. You are re
 4. Provide documentation for the any part that you think is needed.
 5. Bring the source code and functioning prototype to the interview session.
 
+### Frontend Implementation Reference
+A completed frontend implementation and usage instructions are documented in `frontend/README.md`.
+Live demo: https://omar-mcd-bot-simulator-560af312bca7.herokuapp.com/
+
 ### Situation
 McDonald is transforming their business during COVID-19. They wish to build the automated cooking bots to reduce workforce and increase their efficiency. As one of the software engineer in the project. You task is to create an order controller which handle the order control flow. 
 
