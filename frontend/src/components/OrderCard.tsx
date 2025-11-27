@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 
 export type CustomerType = 'NORMAL' | 'VIP'
 export type OrderStatus = 'PENDING' | 'PROCESSING' | 'COMPLETE'
@@ -19,25 +19,36 @@ interface OrderCardProps {
 }
 
 export const OrderCard: React.FC<OrderCardProps> = ({ order, variant, formatCustomerLabel, formatTime }) => {
+  const [expanded, setExpanded] = useState(false)
   const typeClass = order.customerType === 'VIP' ? 'vip' : 'normal'
   const completeClass = variant === 'complete' ? 'complete' : ''
   return (
-    <div className={`order-card ${typeClass} ${completeClass}`.trim()}>
+    <div
+      className={`order-card ${typeClass} ${completeClass} ${expanded ? 'expanded' : 'collapsed'} toggle`.trim()}
+      onClick={() => setExpanded(e => !e)}
+      role="button"
+      aria-expanded={expanded}
+      tabIndex={0}
+      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpanded(x => !x) }}}
+    >
       <div className="order-header">
         <span className="order-id">Order #{order.id}</span>
         <span className="badge">{formatCustomerLabel(order.customerType)}</span>
+        <span className="caret" aria-hidden="true" style={{ fontSize: 12, opacity: .6 }}>{expanded ? '▾' : '▸'}</span>
       </div>
-      <div className="order-body">
-        <div>Created: {formatTime(order.createdAt)}</div>
-        {variant === 'complete' ? (
-          <>
-            <div>Started: {formatTime(order.startedAt)}</div>
+      {expanded && (
+        <div className="order-body">
+          <div>Created: {formatTime(order.createdAt)}</div>
+          {variant === 'complete' ? (
+            <>
+              <div>Started: {formatTime(order.startedAt)}</div>
+              <div>Status: {order.status}</div>
+            </>
+          ) : (
             <div>Status: {order.status}</div>
-          </>
-        ) : (
-          <div>Status: {order.status}</div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

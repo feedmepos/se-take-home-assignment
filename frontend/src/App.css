@@ -254,3 +254,9 @@ button.danger:hover:not(:disabled) {
     grid-template-columns: 1fr;
   }
 }
+
+.order-card.toggle { cursor: pointer; }
+.order-card .caret { margin-left: 6px; }
+.order-card.collapsed .order-body { display: none; }
+.order-card.expanded { box-shadow: 0 2px 6px rgba(15,23,42,0.12); }
+.order-card.expanded .order-header { border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; margin-bottom: 4px; }
