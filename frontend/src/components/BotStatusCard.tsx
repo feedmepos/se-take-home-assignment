@@ -23,13 +23,18 @@ export const BotStatusCard: React.FC<BotStatusCardProps> = ({ bot, getOrderById,
     <div className="bot-card">
       <div className="order-header">
         <span className="order-id">Bot #{bot.id}</span>
+        {bot.status === 'PROCESSING' && currentOrder && (
+          <span className={currentOrder.customerType === 'VIP' ? 'badge vip' : 'badge'}>
+            {formatCustomerLabel(currentOrder.customerType)}
+          </span>
+        )}
         <span className={`badge ${bot.status === 'IDLE' ? 'idle' : 'processing'}`}>{bot.status}</span>
       </div>
       <div className="order-body">
         {bot.status === 'PROCESSING' && currentOrder ? (
           <>
             <div>
-              Processing: <strong>Order #{currentOrder.id}</strong> ({formatCustomerLabel(currentOrder.customerType)})
+              Processing: <strong>Order #{currentOrder.id}</strong>
             </div>
             <div>Started: {currentOrder.startedAt ? formatTime(currentOrder.startedAt) : '-'}</div>
             <div className="progress-wrapper">

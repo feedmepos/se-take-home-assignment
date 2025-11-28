@@ -2,8 +2,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./App.css";
 import { Controls } from "./components/Controls";
-import { OrderCard } from "./components/OrderCard";
-import { BotStatusCard } from "./components/BotStatusCard";
 import { AppHeader } from './components/AppHeader'
 import { PendingSection, CompleteSection, BotsSection } from './components/Sections'
 
@@ -274,7 +272,6 @@ const App: React.FC = () => {
     scheduleWork();
   };
 
-  const pendingOrders = orders.filter((o) => o.status === "PENDING");
   const completeOrders = orders.filter((o) => o.status === "COMPLETE");
 
   const formatCustomerLabel = (type: CustomerType) =>

@@ -2,12 +2,14 @@ import React from 'react'
 import { OrderCard } from './OrderCard'
 import { BotStatusCard } from './BotStatusCard'
 
+interface Order { id: number; customerType: 'NORMAL' | 'VIP'; status: 'PENDING' | 'PROCESSING' | 'COMPLETE'; createdAt: number; startedAt?: number }
+
 export interface SectionsProps {
   pendingQueue: number[]
-  getOrderById: (id: number) => any
+  getOrderById: (id: number) => Order | undefined
   formatCustomerLabel: (type: 'NORMAL' | 'VIP') => string
   formatTime: (ts?: number) => string
-  completeOrders: any[]
+  completeOrders: Order[]
   bots: any[]
   processingMs: number
   now: number

@@ -22,6 +22,9 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, variant, formatCust
   const [expanded, setExpanded] = useState(false)
   const typeClass = order.customerType === 'VIP' ? 'vip' : 'normal'
   const completeClass = variant === 'complete' ? 'complete' : ''
+  const badgeClass = order.customerType === 'VIP'
+    ? 'badge vip'
+    : (order.status === 'PROCESSING' ? 'badge processing-normal' : 'badge')
   return (
     <div
       className={`order-card ${typeClass} ${completeClass} ${expanded ? 'expanded' : 'collapsed'} toggle`.trim()}
@@ -33,7 +36,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, variant, formatCust
     >
       <div className="order-header">
         <span className="order-id">Order #{order.id}</span>
-        <span className="badge">{formatCustomerLabel(order.customerType)}</span>
+        <span className={badgeClass}>{formatCustomerLabel(order.customerType)}</span>
         <span className="caret" aria-hidden="true" style={{ fontSize: 12, opacity: .6 }}>{expanded ? '▾' : '▸'}</span>
       </div>
       {expanded && (
