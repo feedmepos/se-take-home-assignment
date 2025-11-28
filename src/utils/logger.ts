@@ -1,8 +1,8 @@
-import { currentTimestamp } from "./dates";
+// import { currentTimestamp } from "./dates";
 
 const log = (log: string, sublog?: string): void => {
   console.log(
-    `[${currentTimestamp().toISOString()}]`,
+    // `[${currentTimestamp().toISOString()}]`,
     log,
     sublog ?? '',
   )
