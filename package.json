@@ -1,0 +1,12 @@
+{
+  "name": "feedme-order-controller",
+  "version": "1.0.0",
+  "description": "McDonald's order controller CLI simulation for FeedMe SE take-home assignment",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node --test",
+    "build": "echo \"No build step required\""
+  },
+  "license": "MIT"
+}
