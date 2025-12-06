@@ -5,11 +5,7 @@
 
 echo "Building CLI application..."
 
-# For Go projects:
-# go build -o order-controller ./cmd/main.go
-
 # For Node.js projects:
-# npm install
-# npm run build (if needed)
+npm install
 
 echo "Build completed"
