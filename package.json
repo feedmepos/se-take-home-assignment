@@ -1,0 +1,11 @@
+{
+  "name": "se-take-home-assignment-node",
+  "version": "1.0.0",
+  "description": "Node.js CLI solution for FeedMe SE take-home assignment",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js",
+    "start": "node index.js"
+  },
+  "license": "Apache-2.0"
+}

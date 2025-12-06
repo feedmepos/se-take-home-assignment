@@ -1,14 +1,14 @@
 #!/bin/bash
-
 # Unit Test Script
-# This script should contain all unit test execution steps
+set -e
 
 echo "Running unit tests..."
 
-# For Go projects:
-# go test ./... -v
-
-# For Node.js projects:
-# npm test
+if [ -f package.json ]; then
+  npm install
+  npm test
+else
+  echo "No package.json found, skipping tests."
+fi
 
 echo "Unit tests completed"
