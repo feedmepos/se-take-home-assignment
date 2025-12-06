@@ -6,6 +6,6 @@
 echo "Running CLI application..."
 
 # For Node.js projects:
-node index.js > scripts/result.txt
+node src/index.js > scripts/result.txt
 
 echo "CLI application execution completed"
