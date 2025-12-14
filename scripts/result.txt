@@ -1,26 +1,38 @@
-McDonald's Order Management System - Simulation Results
 
-[14:32:01] System initialized with 0 bots
-[14:32:01] Created Normal Order #1001 - Status: PENDING
-[14:32:02] Created VIP Order #1002 - Status: PENDING
-[14:32:02] Created Normal Order #1003 - Status: PENDING
-[14:32:03] Bot #1 created - Status: ACTIVE
-[14:32:03] Bot #1 picked up VIP Order #1002 - Status: PROCESSING
-[14:32:04] Bot #2 created - Status: ACTIVE
-[14:32:04] Bot #2 picked up Normal Order #1001 - Status: PROCESSING
-[14:32:13] Bot #1 completed VIP Order #1002 - Status: COMPLETE (Processing time: 10s)
-[14:32:13] Bot #1 picked up Normal Order #1003 - Status: PROCESSING
-[14:32:14] Bot #2 completed Normal Order #1001 - Status: COMPLETE (Processing time: 10s)
-[14:32:14] Bot #2 is now IDLE - No pending orders
-[14:32:15] Created VIP Order #1004 - Status: PENDING
-[14:32:15] Bot #2 picked up VIP Order #1004 - Status: PROCESSING
-[14:32:23] Bot #1 completed Normal Order #1003 - Status: COMPLETE (Processing time: 10s)
-[14:32:25] Bot #2 completed VIP Order #1004 - Status: COMPLETE (Processing time: 10s)
-[14:32:25] Bot #2 destroyed while IDLE
-[14:32:26] Bot #1 is now IDLE - No pending orders
+> se-take-home-assignment@1.0.0 start
+> node app.js
+
+[08:38:45] System initialized with 0 bots
+event queued {"delay":0,"eventType":"ORDER_CREATE","options":{"orderType":"Normal","orderProcessTime":10}}
+event queued {"delay":1,"eventType":"ORDER_CREATE","options":{"orderType":"VIP","orderProcessTime":10}}
+event queued {"delay":1,"eventType":"ORDER_CREATE","options":{"orderType":"Normal","orderProcessTime":10}}
+event queued {"delay":14,"eventType":"ORDER_CREATE","options":{"orderType":"VIP","orderProcessTime":10}}
+event queued {"delay":2,"eventType":"BOT_CREATE"}
+event queued {"delay":3,"eventType":"BOT_CREATE"}
+event queued {"delay":24,"eventType":"BOT_KILL","options":{"id":"2"}}
+[08:38:45] Created Normal Order #0001 - Status: PENDING
+[08:38:46] Created VIP Order #0002 - Status: PENDING
+[08:38:46] Created Normal Order #0003 - Status: PENDING
+[08:38:47] Bot #1 created - Status: IDLE
+[08:38:47] Bot #1 picked up VIP Order #0002 - Status: PROCESSING
+[08:38:48] Bot #2 created - Status: IDLE
+[08:38:48] Bot #2 picked up Normal Order #0001 - Status: PROCESSING
+[08:38:57] Bot #1 completed VIP Order #0002 - Status: COMPLETE (Processing time: 10s)
+[08:38:57] Bot #1 picked up Normal Order #0003 - Status: PROCESSING
+[08:38:58] Bot #2 completed Normal Order #0001 - Status: COMPLETE (Processing time: 10s)
+[08:38:58] Bot #2 is now IDLE - No pending orders
+[08:38:59] Created VIP Order #0004 - Status: PENDING
+[08:38:59] Bot #2 picked up VIP Order #0004 - Status: PROCESSING
+[08:39:07] Bot #1 completed Normal Order #0003 - Status: COMPLETE (Processing time: 10s)
+[08:39:07] Bot #1 is now IDLE - No pending orders
+killBot 2
+[08:39:09] Bot #2 destroyed while ACTIVE
+[08:39:09] Re-queue VIP Order #0004 - Status: PENDING
+[08:39:09] Bot #1 picked up VIP Order #0004 - Status: PROCESSING
+[08:39:19] Bot #1 completed VIP Order #0004 - Status: COMPLETE (Processing time: 10s)
+[08:39:19] Bot #1 is now IDLE - No pending orders
 
 Final Status:
 - Total Orders Processed: 4 (2 VIP, 2 Normal)
 - Orders Completed: 4
 - Active Bots: 1
-- Pending Orders: 0
