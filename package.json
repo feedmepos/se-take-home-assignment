@@ -1,0 +1,12 @@
+{
+  "name": "feedme-bot-simulator",
+  "version": "1.0.0",
+  "description": "Order processing bot simulation",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node test/index.js"
+  },
+  "author": "",
+  "license": "MIT"
+}
