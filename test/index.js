@@ -14,7 +14,8 @@ const {
 //--------------------
 // Prepare result.txt
 //--------------------
-const RESULT_FILE = path.join(__dirname, '../result.txt');
+// const RESULT_FILE = path.join(__dirname, '../result.txt');
+const RESULT_FILE = path.join(__dirname, '../scripts/result.txt');
 fs.writeFileSync(RESULT_FILE, "");
 
 function wait(ms) {
