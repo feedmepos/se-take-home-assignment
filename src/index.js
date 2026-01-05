@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Result log file
-const RESULT_FILE = path.join(__dirname, '../result.txt');
+const RESULT_FILE = path.join(__dirname, '../scripts/result.txt');
 
 //------------------
 // Global variables
