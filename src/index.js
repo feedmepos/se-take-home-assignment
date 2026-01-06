@@ -3,15 +3,16 @@ const path = require('path');
 
 // Result log file
 const RESULT_FILE = path.join(__dirname, '../scripts/result.txt');
+fs.writeFileSync(RESULT_FILE, ''); // reset log on each run
 
 //------------------
 // Global variables
 //------------------
 let orderId = 1;
-let vipQueue = [];             // pending VIP orders
-let normalQueue = [];          // pending Normal orders
+let vipQueue = [];
+let normalQueue = [];
 let completedOrders = [];
-let bots = [];                 // all active bots
+let bots = [];
 
 //-------------
 // Data Models
@@ -20,17 +21,20 @@ let bots = [];                 // all active bots
 function createOrder(type) {
   return {
     id: orderId++,
-    type, // 'VIP' or 'normal'
-    status: 'PENDING'
+    type,               // 'VIP' or 'NORMAL'
+    status: 'PENDING',
+    createdAt: Date.now(),
+    startedAt: null,
+    completedAt: null
   };
 }
 
-// Creates a new bot object
 function createBot(id) {
   return {
     id,
-    currentOrder: null, // order currently being processed
-    timer: null         // processing timer
+    currentOrder: null,
+    timer: null,
+    status: 'IDLE'
   };
 }
 
@@ -38,28 +42,34 @@ function createBot(id) {
 // Helper Functions
 //------------------
 // Logs message to result.txt with timestamp
-function log(message) {
-  const time = new Date().toLocaleTimeString('en-GB'); // HH:MM:SS
-  const line = `${time} ${message}`;
+function log(message, withTimestamp = true) {
+  let line;
+
+  if (withTimestamp) {
+    const time = new Date().toLocaleTimeString('en-GB'); // HH:MM:SS
+    line = `[${time}] ${message}`;
+  } else {
+    line = message;
+  }
+
   console.log(line);
-  fs.appendFileSync(RESULT_FILE, line + "\n");
+  fs.appendFileSync(RESULT_FILE, line + '\n');
 }
 
-// Picks the next order: VIP first, then Normal
+//------------------
+// Order Functions
+//------------------
 function getNextOrder() {
   if (vipQueue.length > 0) return vipQueue.shift();
   if (normalQueue.length > 0) return normalQueue.shift();
   return null;
 }
 
-//---------------
-// Core Functions
-//---------------
 // Add a new Normal order
 function newNormalOrder() {
   const order = createOrder('NORMAL');
   normalQueue.push(order);
-  log(`New NORMAL Order#${order.id} added to PENDING`);
+  log(`Created Normal Order #${order.id} - Status: PENDING`);
   return order;
 }
 
@@ -67,65 +77,76 @@ function newNormalOrder() {
 function newVIPOrder() {
   const order = createOrder('VIP');
   vipQueue.push(order);
-  log(`New VIP Order#${order.id} added to PENDING`);
+  log(`Created VIP Order #${order.id} - Status: PENDING`);
   return order;
 }
 
-// Print current queues (useful for debugging/testing)
+// Print current queues
 function printQueues() {
   console.log(
     `VIP Queue: [${vipQueue.map(o => o.id).join(', ')}], Normal Queue: [${normalQueue.map(o => o.id).join(', ')}]`
   );
 }
 
+//----------------
+// Bot Functions
+//----------------
 // Start processing next order for a bot
 function startBot(bot) {
-  console.log(`Bot#${bot.id} is checking for orders...`);
   const order = getNextOrder();
 
   if (!order) {
-    log(`No pending orders found. Bot#${bot.id} is idle.`);
+    bot.status = 'IDLE';
+    log(`Bot #${bot.id} is now IDLE - No pending orders`);
     return;
   }
 
-  // Mark order status as processing
   order.status = 'PROCESSING';
+  order.startedAt = Date.now();
   bot.currentOrder = order;
-  log(`Bot#${bot.id} picked ${order.type} Order#${order.id}`);
+  bot.status = 'ACTIVE';
 
-  // Simulate 10-second processing
+  log(
+    `Bot #${bot.id} picked up ${order.type} Order #${order.id} - Status: PROCESSING`
+  );
+
   bot.timer = setTimeout(() => {
     order.status = 'COMPLETE';
+    order.completedAt = Date.now();
     completedOrders.push(order);
-    log(`Bot#${bot.id} completed Order#${order.id}`);
+
+    const processingTime = Math.round(
+      (order.completedAt - order.startedAt) / 1000
+    );
+
+    log(
+      `Bot #${bot.id} completed ${order.type} Order #${order.id} - Status: COMPLETE (Processing time: ${processingTime}s)`
+    );
 
     bot.currentOrder = null;
     bot.timer = null;
-
-    console.log(`Completed Orders: [${completedOrders.map(o => o.id).join(', ')}]`);
 
     // Automatically pick next order after completing current one
     startBot(bot);
   }, 10000);
 }
 
-// Add a new bot and start processing immediately
 function addBot() {
   const bot = createBot(bots.length + 1);
   bots.push(bot);
 
-  log(`+ Bot#${bot.id} created`);
+  log(`Bot #${bot.id} created - Status: ACTIVE`);
   startBot(bot);
 
   return bot;
 }
 
-// Remove the newest bot
 function removeBot() {
+  // Remove the newest bot
   const bot = bots.pop();
 
   if (!bot) {
-    log(`No bots to remove`);
+    log(`No bots available to remove`);
     return;
   }
 
@@ -133,33 +154,60 @@ function removeBot() {
   if (bot.timer) {
     clearTimeout(bot.timer);
     const order = bot.currentOrder;
+
     order.status = 'PENDING';
+    order.startedAt = null;
 
     if (order.type === 'VIP') vipQueue.unshift(order);
     else normalQueue.unshift(order);
 
-    log(`- Bot#${bot.id} removed. Order#${order.id} returned to PENDING`);
+    log(
+      `Bot #${bot.id} destroyed while PROCESSING - Order #${order.id} returned to PENDING`
+    );
   } else {
-    log(`- Bot#${bot.id} removed (was idle)`);
+    log(`Bot #${bot.id} destroyed while IDLE`);
   }
 }
 
 function isSystemIdle() {
   const noPendingOrders = vipQueue.length === 0 && normalQueue.length === 0;
   const allBotsIdle = bots.every(bot => bot.currentOrder === null);
-
   return noPendingOrders && allBotsIdle;
 }
 
-//---------------------------
-// Exports (for testing / CI)
-//---------------------------
+function printTitle() {
+  log('McDonald’s Order Management System - Simulation Results', false);
+  log('--------------------------------------------------------', false);
+}
+
+function initSystem() {
+  log(`System initialized with ${bots.length} bots`);
+}
+
+function printFinalSummary() {
+  log('===== Final Summary =====', false);
+  log(`Total Orders Processed: ${completedOrders.length}`, false);
+  log(
+    `VIP Orders: ${completedOrders.filter(o => o.type === 'VIP').length}, ` +
+    `Normal Orders: ${completedOrders.filter(o => o.type === 'NORMAL').length}`
+  , false);
+  log(`Active Bots: ${bots.filter(b => b.status === 'ACTIVE').length}`, false);
+  log(`Idle Bots: ${bots.filter(b => b.status === 'IDLE').length}`, false);
+  log(`Pending Orders: ${vipQueue.length + normalQueue.length}`, false);
+}
+
+//---------
+// Exports
+//---------
 module.exports = {
+  printTitle,
+  initSystem,
   newNormalOrder,
   newVIPOrder,
   addBot,
   removeBot,
   printQueues,
   log,
-  isSystemIdle
+  isSystemIdle,
+  printFinalSummary
 };
