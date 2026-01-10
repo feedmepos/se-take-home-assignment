@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Build Script
 # This script should contain all compilation steps for your CLI application
@@ -9,7 +9,9 @@ echo "Building CLI application..."
 # go build -o order-controller ./cmd/main.go
 
 # For Node.js projects:
-# npm install
-# npm run build (if needed)
+set -euo pipefail
+npm ci
+npm run build
+EOF
 
 echo "Build completed"
