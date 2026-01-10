@@ -73,9 +73,29 @@ You must implement **either** frontend or backend components as described below:
 - Treat this assignment as a vibe coding, don't over engineer it. Try to scope your working hour within 30 min. However, ensure you read and understand what your code doing.
 - Complete the implementation as clean as possible, clean code is a strong plus point, do not bring in all the fancy tech stuff.
 
+---
+
 ## FeedMe Take Home - Backend (Node.js + TypeScript CLI)
 
-### How to run
+This repository contains my backend (CLI) solution for the FeedMe Software Engineer take-home assignment.
+
+The CLI simulates McDonald's order management system with:
+
+- VIP priority queueing (VIP orders always processed before Normal; FIFO within VIP/Normal)
+- Dynamic bot scaling (+Bot / -Bot)
+- 1 order per bot at a time with 10s processing time
+- Timestamped logs written to `result.txt` (HH:MM:SS format)
+
+---
+
+### Quick Start
+
+#### Requirements
+
+- Node.js (v18+ recommended)
+- npm
+
+Run the following commands to verify and execute the CLI simulation:
 
 ```bash
 ./scripts/test.sh
@@ -84,7 +104,67 @@ You must implement **either** frontend or backend components as described below:
 cat result.txt
 ```
 
-#### Notes
+The simulation output will be written to:
 
-- No persistence; everything runs in-memory.
-- Output includes HH:MM:SS timestamps for traceability.
+```bash
+result.txt
+```
+
+---
+
+### Output
+
+All log entries are timestamped in HH:MM:SS format.
+
+The simulation includes a readable timeline and a final summary section (processed orders, completed orders, active bots, pending orders).
+
+#### Example format:
+
+```bash
+McDonald's Order Management System - Simulation Results
+
+[15:51:18] System initialized with 0 bots
+...
+Final Status:
+- Total Orders Processed: 4 (1 VIP, 3 Normal)
+- Orders Completed: 4
+- Active Bots: 1
+- Pending Orders: 0
+```
+
+---
+
+### How It Works (High-Level)
+
+- Orders are placed into an in-memory queue
+- VIP orders are always processed before normal orders
+- Bots pick up orders asynchronously and process them for 10 seconds
+- The core engine emits domain events (e.g. order picked up, completed)
+- The CLI layer listens to these events and renders human-readable logs
+
+This design allows the engine logic to remain independent from
+presentation (CLI output), making it easy to extend to other interfaces
+(e.g. HTTP API or Go implementation).
+
+---
+
+### Notes
+
+- In-memory only (no persistence), as required.
+
+- Event-driven design: the core engine emits domain events; the CLI scenario layer renders those events into human-readable logs.
+
+- Tests use a deterministic/fake clock to avoid flaky timing behavior.
+
+---
+
+### Testing
+
+Unit tests cover:
+
+- VIP queue priority and FIFO ordering
+- Scaling down bots during processing (order returns to PENDING)
+
+```bash
+./scripts/test.sh
+```
