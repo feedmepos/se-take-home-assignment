@@ -12,6 +12,5 @@ echo "Building CLI application..."
 set -euo pipefail
 npm ci
 npm run build
-EOF
 
 echo "Build completed"
