@@ -168,3 +168,11 @@ Unit tests cover:
 ```bash
 ./scripts/test.sh
 ```
+
+## Bonus: Golang Proof of Concept
+
+In addition to the Node.js CLI implementation required by the assignment, this repository includes a small **Golang proof of concept** under `golang/poc`.
+
+The Go version explores how the same **event-driven order controller** and **bot worker model** can be implemented using goroutines, channels, and contexts, while preserving the same priority and lifecycle behavior (VIP-first, FIFO within each group).
+
+This Golang implementation is **not part of the required submission** and **does not affect GitHub Actions or CI**. It is provided purely as a bonus exploration, especially relevant to potential backend migration scenarios.
