@@ -1,61 +1,166 @@
-## FeedMe Software Engineer Take Home Assignment
-Below is a take home assignment before the interview of the position. You are required to
-1. Understand the situation and use case. You may contact the interviewer for further clarification.
-2. implement the requirement with **either frontend or backend components**.
-3. Complete the requirement with **AI** if possible, but perform your own testing.
-4. Provide documentation for the any part that you think is needed.
-5. Bring the source code and functioning prototype to the interview session.
+## Setup and Run Guide
 
-### Situation
-McDonald is transforming their business during COVID-19. They wish to build the automated cooking bots to reduce workforce and increase their efficiency. As one of the software engineer in the project. You task is to create an order controller which handle the order control flow. 
+This guide will help you set up and run the backend CLI application.
 
-### User Story
-As below is part of the user story:
-1. As McDonald's normal customer, after I submitted my order, I wish to see my order flow into "PENDING" area. After the cooking bot process my order, I want to see it flow into to "COMPLETE" area.
-2. As McDonald's VIP member, after I submitted my order, I want my order being process first before all order by normal customer.  However if there's existing order from VIP member, my order should queue behind his/her order.
-3. As McDonald's manager, I want to increase or decrease number of cooking bot available in my restaurant. When I increase a bot, it should immediately process any pending order. When I decrease a bot, the processing order should remain un-process.
-4. As McDonald bot, it can only pickup and process 1 order at a time, each order required 10 seconds to complete process.
+### Prerequisites
 
-### Requirements
-1. When "New Normal Order" clicked, a new order should show up "PENDING" Area.
-2. When "New VIP Order" clicked, a new order should show up in "PENDING" Area. It should place in-front of all existing "Normal" order but behind of all existing "VIP" order.
-3. The order number should be unique and increasing.
-4. When "+ Bot" clicked, a bot should be created and start processing the order inside "PENDING" area. after 10 seconds picking up the order, the order should move to "COMPLETE" area. Then the bot should start processing another order if there is any left in "PENDING" area.
-5. If there is no more order in the "PENDING" area, the bot should become IDLE until a new order come in.
-6. When "- Bot" clicked, the newest bot should be destroyed. If the bot is processing an order, it should also stop the process. The order now back to "PENDING" and ready to process by other bot.
-7. No data persistance is needed for this prototype, you may perform all the process inside memory.
+- **Node.js**: Version 18 or higher
+- **Package Manager**: Yarn (recommended) or npm
+- **Operating System**: macOS, Linux, or Windows (with WSL/Git Bash)
 
-### Functioning Prototype
-You must implement **either** frontend or backend components as described below:
+### Quick Start
 
-#### 1. Frontend
-- You are free to use **any framework and programming language** of your choice
-- The UI application must be compiled, deployed and hosted on any publicly accessible web platform
-- Must provide a user interface that demonstrates all the requirements listed above
-- Should allow users to interact with the McDonald's order management system
+1. **Clone or navigate to the repository**
+   ```bash
+   cd se-take-home-assignment
+   ```
 
-#### 2. Backend
-- You must use **either Go (Golang) or Node.js** for the backend implementation
-- The backend must be a CLI application that can be executed in GitHub Actions
-- Must implement the following scripts in the `script` directory:
-  - `test.sh`: Contains unit test execution steps
-  - `build.sh`: Contains compilation steps for the CLI application
-  - `run.sh`: Contains execution steps that run the CLI application
-- The CLI application result must be printed to `result.txt`
-- The `result.txt` output must include timestamps in `HH:MM:SS` format to track order completion times
-- Must follow **GitHub Flow**: Create a Pull Request with your changes to this repository
-- Ensure all GitHub Action checks pass successfully
+2. **Set up environment variables** (optional, has defaults)
+   ```bash
+   # Run the setup script
+   ./setup-env.sh
+   
+   # Or manually copy the example files
+   cp feedme-backend/.env.example feedme-backend/.env
+   ```
 
-#### Submission Requirements
-- Fork this repository and implement your solution with either frontend or backend
-- **Frontend option**: Deploy to a publicly accessible URL using any technology stack
-- **Backend option**: Must be implemented in Go or Node.js and work within the GitHub Actions environment
-  - Follow GitHub Flow process with Pull Request submission
-  - All tests in `test.sh` must pass
-  - The `result.txt` file must contain meaningful output from your CLI application
-  - All output must include timestamps in `HH:MM:SS` format to track order completion times
-  - Submit a Pull Request and ensure the `go-verify-result` workflow passes
-- Provide documentation for any part that you think is needed
+3. **Install dependencies**
+   ```bash
+   cd feedme-backend
+   yarn install
+   # or: npm install
+   ```
+
+4. **Build the application**
+   ```bash
+   # From project root
+   bash scripts/build.sh
+   
+   # Or from feedme-backend directory
+   cd feedme-backend
+   yarn build
+   ```
+
+5. **Run tests** (optional)
+   ```bash
+   # From project root
+   bash scripts/test.sh
+   
+   # Or from feedme-backend directory
+   cd feedme-backend
+   yarn build
+   node --test dist/services/OrderController.test.js
+   ```
+
+6. **Run the CLI application**
+   ```bash
+   # From project root (recommended)
+   bash scripts/run.sh
+   
+   # Or from feedme-backend directory
+   cd feedme-backend
+   node dist/cli.js > ../scripts/result.txt
+   ```
+
+7. **View the results**
+   ```bash
+   cat scripts/result.txt
+   ```
+
+### Scripts Overview
+
+The project includes three main scripts in the `scripts/` directory:
+
+#### `scripts/build.sh`
+- Installs dependencies (yarn or npm)
+- Compiles TypeScript to JavaScript
+- Verifies build output exists
+- **Usage**: `bash scripts/build.sh`
+
+#### `scripts/test.sh`
+- Builds the project if needed
+- Runs unit tests using Node.js built-in test runner
+- **Usage**: `bash scripts/test.sh`
+
+#### `scripts/run.sh`
+- Ensures project is built
+- Runs the compiled CLI application
+- Outputs to `scripts/result.txt`
+- **Usage**: `bash scripts/run.sh`
+
+### Expected Output
+
+After running `scripts/run.sh`, you should see `scripts/result.txt` with content like:
+
+```
+McDonald's Order Management System - Simulation Results
+
+[15:45:17] System initialized with 0 bots
+[15:45:18] Created NORMAL Order #1001 - Status: PENDING
+[15:45:19] Created VIP Order #1002 - Status: PENDING
+[15:45:21] Bot #1 created - Status: ACTIVE
+[15:45:21] Bot #1 picked up VIP Order #1002 - Status: PROCESSING
+...
+[15:45:50] Final Status:
+[15:45:50] - Total Orders Processed: 4 (2 VIP, 2 Normal)
+[15:45:50] - Orders Completed: 4
+[15:45:50] - Active Bots: 0
+[15:45:50] - Pending Orders: 0
+```
+
+### Running the API Server (Optional)
+
+If you want to run the REST API server instead of the CLI:
+
+```bash
+cd feedme-backend
+
+# Development mode (with hot reload)
+yarn dev:api
+
+# Production mode
+yarn build
+yarn start:api
+```
+
+The API server will run on `http://localhost:3000` (or the port specified in `.env`).
+
+### Environment Variables
+
+The backend uses the following environment variables (all optional with defaults):
+
+- `PORT`: Server port (default: `3000`)
+- `JWT_SECRET`: Secret key for JWT tokens (default: `your-secret-key-change-in-production`)
+
+See `ENV_SETUP.md` for detailed environment variable documentation.
+
+### Troubleshooting
+
+**Issue: Scripts are not executable**
+```bash
+chmod +x scripts/*.sh
+```
+
+**Issue: Build fails**
+- Ensure Node.js 18+ is installed: `node --version`
+- Clear node_modules and reinstall: `rm -rf node_modules && yarn install`
+
+**Issue: Tests fail**
+- Ensure the project is built: `bash scripts/build.sh`
+- Check that test files exist: `ls feedme-backend/dist/services/*.test.js`
+
+**Issue: result.txt is empty**
+- Check that the build completed successfully
+- Verify `dist/cli.js` exists: `ls feedme-backend/dist/cli.js`
+- Run manually to see errors: `cd feedme-backend && node dist/cli.js`
+
+### GitHub Actions
+
+The project is configured to run in GitHub Actions. The workflow (`.github/workflows/backend-verify-result.yaml`) will:
+1. Set up Node.js environment
+2. Make scripts executable
+3. Run `test.sh`, `build.sh`, and `run.sh`
+4. Verify `result.txt` exists, is not empty, and contains timestamps in `HH:MM:SS` format
 
 ### Tips on completing this task
 - Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.

@@ -1,0 +1,55 @@
+name: CI - Backend CLI
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+    
+    - name: Install Yarn
+      run: npm install -g yarn
+    
+    - name: Run tests
+      run: bash scripts/test.sh
+    
+    - name: Build application
+      run: bash scripts/build.sh
+    
+    - name: Run CLI application
+      run: bash scripts/run.sh
+    
+    - name: Verify result.txt
+      run: |
+        if [ ! -f scripts/result.txt ]; then
+          echo "Error: result.txt not found"
+          exit 1
+        fi
+        
+        # Check that result.txt contains timestamps in HH:MM:SS format
+        if ! grep -qE '\[[0-9]{2}:[0-9]{2}:[0-9]{2}\]' scripts/result.txt; then
+          echo "Error: result.txt does not contain timestamps in HH:MM:SS format"
+          exit 1
+        fi
+        
+        # Check that result.txt has meaningful content
+        if [ ! -s scripts/result.txt ]; then
+          echo "Error: result.txt is empty"
+          exit 1
+        fi
+        
+        echo "✓ result.txt verification passed"
+        echo "--- result.txt content ---"
+        cat scripts/result.txt
+

@@ -3,17 +3,23 @@
 # Run Script
 # This script should execute your CLI application and output results to result.txt
 
+set -e  # Exit on error
+
 echo "Running CLI application..."
 
-# For Go projects:
-# ./order-controller > result.txt
+cd feedme-backend
 
-# For Node.js projects:
-# node index.js > result.txt
-# or npm start > result.txt
+# Ensure the project is built
+if [ ! -d "dist" ] || [ ! -f "dist/cli.js" ]; then
+    echo "Building application first..."
+    if command -v yarn &> /dev/null; then
+        yarn build
+    else
+        npm run build
+    fi
+fi
 
-# Temporary placeholder - remove this when you implement your CLI
-echo "Added 1 bot" > result.txt
-echo "status: bot: [1], order: []" >> result.txt
+# Run the compiled CLI application
+node dist/cli.js > ../scripts/result.txt 2>&1
 
 echo "CLI application execution completed"
