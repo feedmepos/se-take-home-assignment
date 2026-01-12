@@ -22,15 +22,22 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '22.19.0'
-        
+        # Cache dependencies using yarn.lock from feedme-backend directory
+        cache: 'yarn'
+        cache-dependency-path: feedme-backend/yarn.lock
+      continue-on-error: true  # Continue even if cache fails (cache is optional)
+    
+    - name: Install Yarn
+      run: npm install -g yarn
+      
     - name: Verify Go version
       run: go version
       
     - name: Verify Node.js version
       run: node --version
       
-    - name: Verify npm version
-      run: npm --version
+    - name: Verify Yarn version
+      run: yarn --version
 
     - name: Make scripts executable
       run: chmod +x scripts/test.sh scripts/build.sh scripts/run.sh
