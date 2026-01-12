@@ -56,6 +56,22 @@ Explanation:
 - Idle Bot: If no pending orders exist, bot remains IDLE.
 - COMPLETE: Order finishes processing; timestamps recorded; bot becomes available for the next order.
 
+Running the CLI Application
+
+The CLI interface (src/cli.js) is the entry point for interacting with the order system.
+##Install dependencies
+npm install
+##Run the CLI interactive menu
+npm start
+
+Interactive Menu Options:
+1. New Normal Order
+2. New VIP Order
+3. (+) Bot
+4. (-) Bot
+5. View Orders Status
+6. Exit
+
 Future Improvements
 - Data Storage: Save orders and bot states in a database.
 - Multiple Order Types & Priorities: Extend the system to handle more priority levels or special orders.
