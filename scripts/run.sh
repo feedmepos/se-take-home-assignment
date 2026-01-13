@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Make sure Node modules are installed
+# Install dependencies
 npm install
 
-# Run the simulation script that generates result.txt
-node test/index.js
+# Run the CLI interactive
+npm start

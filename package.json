@@ -4,7 +4,7 @@
   "description": "Order processing bot simulation",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js",
+    "start": "node src/cli.js",
     "test": "node test/index.js"
   },
   "author": "",

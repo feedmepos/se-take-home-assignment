@@ -70,6 +70,12 @@ function newNormalOrder() {
   const order = createOrder('NORMAL');
   normalQueue.push(order);
   log(`Created Normal Order #${order.id} - Status: PENDING`);
+
+  // Wake up idle bots
+  bots.forEach(bot => {
+    if (bot.status === 'IDLE') startBot(bot);
+  });
+
   return order;
 }
 
@@ -78,6 +84,12 @@ function newVIPOrder() {
   const order = createOrder('VIP');
   vipQueue.push(order);
   log(`Created VIP Order #${order.id} - Status: PENDING`);
+
+  // Wake up idle bots
+  bots.forEach(bot => {
+    if (bot.status === 'IDLE') startBot(bot);
+  });
+
   return order;
 }
 
@@ -176,8 +188,8 @@ function isSystemIdle() {
 }
 
 function printTitle() {
-  log('McDonald’s Order Management System - Simulation Results', false);
-  log('--------------------------------------------------------', false);
+  log("McDonald's Order Management System - Simulation", false);
+  log('-------------------------------------------------', false);
 }
 
 function initSystem() {
@@ -196,6 +208,63 @@ function printFinalSummary() {
   log(`Pending Orders: ${vipQueue.length + normalQueue.length}`, false);
 }
 
+function showOrderStatus() {
+  log('================================================', false);
+  log('                  ORDER STATUS                  ', false);
+  log('================================================', false);
+
+  // ---------- BOTS SUMMARY ----------
+  log('\n BOTS', false);
+  log('--------------', false);
+
+  const activeBots = bots.filter(b => b.status === 'ACTIVE').length;
+  const idleBots = bots.filter(b => b.status === 'IDLE').length;
+
+  log(`Active Bots : ${activeBots}`, false);
+  log(`Idle Bots   : ${idleBots}`, false);
+
+  // ---------- PENDING ----------
+  log('\n PENDING', false);
+  log('--------------', false);
+
+  const pendingVIP = vipQueue.map(o => `#${o.id}`).join(', ') || '-';
+  const pendingNormal = normalQueue.map(o => `#${o.id}`).join(', ') || '-';
+
+  log(`VIP Orders    : ${pendingVIP}`, false);
+  log(`Normal Orders : ${pendingNormal}`, false);
+
+  // ---------- PROCESSING ----------
+  log('\n PROCESSING', false);
+  log('--------------', false);
+
+  const processingBots = bots.filter(b => b.currentOrder);
+
+  if (processingBots.length === 0) {
+    log('-', false);
+  } else {
+    processingBots.forEach(bot => {
+      log(
+        `Bot #${bot.id} → Order #${bot.currentOrder.id} (${bot.currentOrder.type})`,
+        false
+      );
+    });
+  }
+
+  // ---------- COMPLETE ----------
+  log('\n COMPLETE', false);
+  log('--------------', false);
+
+  const completed = [...completedOrders]
+    .reverse()
+    .map(o => `#${o.id}`)
+    .join(', ') || '-';
+
+  log(completed, false);
+
+  log('================================================', false);
+}
+
+
 //---------
 // Exports
 //---------
@@ -209,5 +278,6 @@ module.exports = {
   printQueues,
   log,
   isSystemIdle,
-  printFinalSummary
+  printFinalSummary,
+  showOrderStatus
 };
