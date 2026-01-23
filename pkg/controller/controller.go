@@ -151,13 +151,12 @@ func (c *Controller) PrintStatus() {
 	fmt.Println("\nFinal Status:")
 
 	vipCount, normalCount := 0, 0
-	for _, order := range c.Completes {
-		switch order.orderType {
-		case vip:
+	for _, o := range c.Completes {
+		if o.orderType == vip {
 			vipCount++
-		case normal:
-			normalCount++
+			continue
 		}
+		normalCount++
 	}
 
 	fmt.Printf("- Total Orders Processed: %d (%d VIP, %d Normal)\n",
