@@ -22,20 +22,20 @@ func (c *Controller) AddVipOrder() *Order {
 	defer c.mu.Unlock()
 
 	o := &Order{
-		ID:        c.nextOrderId,
-		Type:      VIP,
-		Status:    Pending,
-		CreatedAt: time.Now(),
+		id:        c.nextOrderId,
+		orderType: vip,
+		status:    pending,
+		createdAt: time.Now(),
 	}
 	c.nextOrderId++
 
 	var i = 0
-	for i < len(c.Pendings) && c.Pendings[i].Type == VIP {
+	for i < len(c.Pendings) && c.Pendings[i].orderType == vip {
 		i++
 	}
 	c.wg.Add(1)
 	c.Pendings = slices.Insert(c.Pendings, i, o)
-	Log(fmt.Sprintf("Created %s Order #%d - Status: %s", o.Type, o.ID, o.Status))
+	Log(fmt.Sprintf("Created %s Order #%d - Status: %s", o.orderType, o.id, o.status))
 	c.processNext()
 	return o
 }
@@ -45,16 +45,16 @@ func (c *Controller) AddNormalOrder() *Order {
 	defer c.mu.Unlock()
 
 	o := &Order{
-		ID:        c.nextOrderId,
-		Type:      Normal,
-		Status:    Pending,
-		CreatedAt: time.Now(),
+		id:        c.nextOrderId,
+		orderType: normal,
+		status:    pending,
+		createdAt: time.Now(),
 	}
 
 	c.nextOrderId++
 	c.wg.Add(1)
 	c.Pendings = append(c.Pendings, o)
-	Log(fmt.Sprintf("Created %s Order #%d - Status: %s", o.Type, o.ID, o.Status))
+	Log(fmt.Sprintf("Created %s Order #%d - Status: %s", o.orderType, o.id, o.status))
 	c.processNext()
 	return o
 }
@@ -64,15 +64,15 @@ func (c *Controller) AddBot() *Bot {
 	defer c.mu.Unlock()
 
 	b := &Bot{
-		ID:           c.nextBotId,
-		Status:       Idle,
-		CurrentOrder: nil,
+		id:           c.nextBotId,
+		status:       idle,
+		currentOrder: nil,
 		onCompleted:  make(chan *Order, 1),
 	}
 	c.nextBotId++
 	c.Bots = append(c.Bots, b)
 	go c.handleCompletedOrder(b)
-	Log(fmt.Sprintf("Bot #%d created - Status: ACTIVE", b.ID))
+	Log(fmt.Sprintf("Bot #%d created - Status: ACTIVE", b.id))
 	c.processNext()
 	return b
 }
@@ -89,18 +89,18 @@ func (c *Controller) RemoveBot() {
 
 	b := c.Bots[nBot-1]
 	c.Bots = c.Bots[:nBot-1]
-	o := b.StopProcessing()
+	o := b.stopProcessing()
 	close(b.onCompleted)
 
-	Log(fmt.Sprintf("Bot #%d destroyed while %s", b.ID, b.Status))
+	Log(fmt.Sprintf("Bot #%d destroyed while %s", b.id, b.status))
 	if o == nil {
 		return
 	}
 
-	Log(fmt.Sprintf("Recreated %s Order #%d - Status: %s", o.Type, o.ID, o.Status))
-	if o.Type == VIP {
+	Log(fmt.Sprintf("Recreated %s Order #%d - Status: %s", o.orderType, o.id, o.status))
+	if o.orderType == vip {
 		var i = 0
-		for i < len(c.Pendings) && c.Pendings[i].Type == VIP {
+		for i < len(c.Pendings) && c.Pendings[i].orderType == vip {
 			i++
 		}
 		c.Pendings = slices.Insert(c.Pendings, i, o)
@@ -114,7 +114,7 @@ func (c *Controller) handleCompletedOrder(b *Bot) {
 	for o := range b.onCompleted {
 		c.mu.Lock()
 		c.Completes = append(c.Completes, o)
-		Log(fmt.Sprintf("Bot #%d completed %s Order #%d - Status: %s (Processing time: %s)", b.ID, o.Type, o.ID, o.Status, processTime))
+		Log(fmt.Sprintf("Bot #%d completed %s Order #%d - Status: %s (Processing time: %s)", b.id, o.orderType, o.id, b.status, processTime))
 		c.processNext()
 		c.mu.Unlock()
 		c.wg.Done()
@@ -123,7 +123,7 @@ func (c *Controller) handleCompletedOrder(b *Bot) {
 
 func (c *Controller) processNext() {
 	for _, b := range c.Bots {
-		if b.Status != Idle {
+		if b.status != idle {
 			continue
 		}
 
@@ -134,9 +134,9 @@ func (c *Controller) processNext() {
 		o := c.Pendings[0]
 		c.Pendings = c.Pendings[1:]
 
-		Log(fmt.Sprintf("Bot #%d picked up %s Order #%d - Status: %s", b.ID, o.Type, o.ID, o.Status))
+		Log(fmt.Sprintf("Bot #%d picked up %s Order #%d - Status: %s", b.id, o.orderType, o.id, o.status))
 
-		b.StartProcessing(o)
+		b.startProcessing(o)
 	}
 }
 

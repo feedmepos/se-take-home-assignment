@@ -11,15 +11,15 @@ var processTime = n * time.Second
 type BotStatus int
 
 const (
-	Idle BotStatus = iota
-	Processing
+	idle BotStatus = iota
+	processing
 )
 
 func (bs BotStatus) String() string {
 	switch bs {
-	case Idle:
+	case idle:
 		return "IDLE"
-	case Processing:
+	case processing:
 		return "PROCESSING"
 	default:
 		return "Unknown"
@@ -27,18 +27,18 @@ func (bs BotStatus) String() string {
 }
 
 type Bot struct {
-	ID           int
-	Status       BotStatus
-	CurrentOrder *Order
+	id           int
+	status       BotStatus
+	currentOrder *Order
 	onCompleted  chan *Order
 	timer        *time.Timer
 }
 
-func (b *Bot) StartProcessing(order *Order) {
+func (b *Bot) startProcessing(order *Order) {
 	b.resetTimer()
 
-	b.Status = Processing
-	b.CurrentOrder = order
+	b.status = processing
+	b.currentOrder = order
 
 	b.timer = time.AfterFunc(processTime, func() {
 		b.completeProcessing()
@@ -47,25 +47,25 @@ func (b *Bot) StartProcessing(order *Order) {
 }
 
 func (b *Bot) completeProcessing() {
-	o := b.CurrentOrder
+	o := b.currentOrder
 	if o != nil {
-		o.Status = Completed
+		o.status = completed
 	}
 
-	b.Status = Idle
-	b.CurrentOrder = nil
+	b.status = idle
+	b.currentOrder = nil
 }
 
-func (b *Bot) StopProcessing() *Order {
+func (b *Bot) stopProcessing() *Order {
 	b.resetTimer()
 
-	o := b.CurrentOrder
+	o := b.currentOrder
 	if o != nil {
-		o.Status = Pending
+		o.status = pending
 	}
 
-	b.Status = Idle
-	b.CurrentOrder = nil
+	b.status = idle
+	b.currentOrder = nil
 
 	return o
 }

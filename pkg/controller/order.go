@@ -7,15 +7,15 @@ import (
 type OrderType int
 
 const (
-	Normal OrderType = iota
-	VIP
+	normal OrderType = iota
+	vip
 )
 
 func (ot OrderType) String() string {
 	switch ot {
-	case Normal:
+	case normal:
 		return "Normal"
-	case VIP:
+	case vip:
 		return "VIP"
 	default:
 		return "Unknown"
@@ -25,24 +25,24 @@ func (ot OrderType) String() string {
 type OrderStatus int
 
 const (
-	Pending OrderStatus = iota
-	Completed
+	pending OrderStatus = iota
+	completed
 )
 
 func (os OrderStatus) String() string {
 	switch os {
-	case Pending:
-		return "Pending"
-	case Completed:
-		return "Completed"
+	case pending:
+		return "PENDING"
+	case completed:
+		return "COMPLETED"
 	default:
-		return "Unknown"
+		return "UNKNOWN"
 	}
 }
 
 type Order struct {
-	ID        int
-	Type      OrderType
-	Status    OrderStatus
-	CreatedAt time.Time
+	id        int
+	orderType OrderType
+	status    OrderStatus
+	createdAt time.Time
 }

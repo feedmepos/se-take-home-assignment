@@ -10,8 +10,8 @@ func TestBotStatusString(t *testing.T) {
 		status   BotStatus
 		expected string
 	}{
-		{Idle, "IDLE"},
-		{Processing, "PROCESSING"},
+		{idle, "IDLE"},
+		{processing, "PROCESSING"},
 		{BotStatus(999), "Unknown"},
 	}
 
@@ -23,54 +23,54 @@ func TestBotStatusString(t *testing.T) {
 }
 
 func TestStartProcessing(t *testing.T) {
-	bot := &Bot{ID: 1, Status: Idle, onCompleted: make(chan *Order, 1)}
-	order := &Order{ID: 1, Status: Pending}
+	bot := &Bot{id: 1, status: idle, onCompleted: make(chan *Order, 1)}
+	order := &Order{id: 1, status: pending}
 
-	bot.StartProcessing(order)
+	bot.startProcessing(order)
 
-	if bot.Status != Processing {
-		t.Errorf("Expected status Processing, got %v", bot.Status)
+	if bot.status != processing {
+		t.Errorf("Expected status Processing, got %v", bot.status)
 	}
-	if bot.CurrentOrder != order {
+	if bot.currentOrder != order {
 		t.Errorf("Expected CurrentOrder to be set")
 	}
 }
 
 func TestStopProcessing(t *testing.T) {
-	bot := &Bot{ID: 1, Status: Processing, onCompleted: make(chan *Order, 1)}
-	order := &Order{ID: 1, Status: Pending}
-	bot.CurrentOrder = order
+	bot := &Bot{id: 1, status: processing, onCompleted: make(chan *Order, 1)}
+	order := &Order{id: 1, status: pending}
+	bot.currentOrder = order
 
-	returned := bot.StopProcessing()
+	returned := bot.stopProcessing()
 
-	if bot.Status != Idle {
-		t.Errorf("Expected status Idle, got %v", bot.Status)
+	if bot.status != idle {
+		t.Errorf("Expected status Idle, got %v", bot.status)
 	}
-	if bot.CurrentOrder != nil {
+	if bot.currentOrder != nil {
 		t.Errorf("Expected CurrentOrder to be nil")
 	}
 	if returned != order {
 		t.Errorf("Expected returned order to match")
 	}
-	if order.Status != Pending {
-		t.Errorf("Expected order status Pending, got %v", order.Status)
+	if order.status != pending {
+		t.Errorf("Expected order status Pending, got %v", order.status)
 	}
 }
 
 func TestCompleteProcessing(t *testing.T) {
-	bot := &Bot{ID: 1, Status: Processing}
-	order := &Order{ID: 1, Status: Pending}
-	bot.CurrentOrder = order
+	bot := &Bot{id: 1, status: processing}
+	order := &Order{id: 1, status: pending}
+	bot.currentOrder = order
 
 	bot.completeProcessing()
 
-	if bot.Status != Idle {
-		t.Errorf("Expected status Idle, got %v", bot.Status)
+	if bot.status != idle {
+		t.Errorf("Expected status Idle, got %v", bot.status)
 	}
-	if order.Status != Completed {
-		t.Errorf("Expected order status Completed, got %v", order.Status)
+	if order.status != completed {
+		t.Errorf("Expected order status Completed, got %v", order.status)
 	}
-	if bot.CurrentOrder != nil {
+	if bot.currentOrder != nil {
 		t.Errorf("Expected CurrentOrder to be nil")
 	}
 }
@@ -82,22 +82,22 @@ func TestProcessingTimeout(t *testing.T) {
 		processTime = oriProcessTime
 	}()
 
-	bot := &Bot{ID: 1, Status: Idle, onCompleted: make(chan *Order, 1)}
-	order := &Order{ID: 1, Status: Pending}
+	bot := &Bot{id: 1, status: idle, onCompleted: make(chan *Order, 1)}
+	order := &Order{id: 1, status: pending}
 
-	bot.StartProcessing(order)
+	bot.startProcessing(order)
 	<-bot.onCompleted
 
-	if order.Status != Completed {
+	if order.status != completed {
 		t.Errorf("Expected order status Completed after timeout")
 	}
-	if bot.Status != Idle {
+	if bot.status != idle {
 		t.Errorf("Expected bot status Idle after timeout")
 	}
 }
 
 func TestResetTimer(t *testing.T) {
-	bot := &Bot{ID: 1, timer: time.AfterFunc(100*time.Millisecond, func() {})}
+	bot := &Bot{id: 1, timer: time.AfterFunc(100*time.Millisecond, func() {})}
 
 	bot.resetTimer()
 

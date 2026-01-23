@@ -8,7 +8,7 @@ import (
 func TestAddVipOrder(t *testing.T) {
 	c := &Controller{}
 	c.AddVipOrder()
-	if len(c.Pendings) != 1 || c.Pendings[0].Type != VIP {
+	if len(c.Pendings) != 1 || c.Pendings[0].orderType != vip {
 		t.Error("VIP order not added correctly")
 	}
 	if c.nextOrderId != 1 {
@@ -19,7 +19,7 @@ func TestAddVipOrder(t *testing.T) {
 func TestAddNormalOrder(t *testing.T) {
 	c := &Controller{}
 	c.AddNormalOrder()
-	if len(c.Pendings) != 1 || c.Pendings[0].Type != Normal {
+	if len(c.Pendings) != 1 || c.Pendings[0].orderType != normal {
 		t.Error("Normal order not added correctly")
 	}
 	if c.nextOrderId != 1 {
@@ -35,7 +35,7 @@ func TestVIPOrderPriority(t *testing.T) {
 	if len(c.Pendings) != 3 {
 		t.Error("Orders not added correctly")
 	}
-	if c.Pendings[0].Type != VIP {
+	if c.Pendings[0].orderType != vip {
 		t.Error("VIP order should be prioritized")
 	}
 }
@@ -43,7 +43,7 @@ func TestVIPOrderPriority(t *testing.T) {
 func TestAddBot(t *testing.T) {
 	c := &Controller{}
 	c.AddBot()
-	if len(c.Bots) != 1 || c.Bots[0].Status != Idle {
+	if len(c.Bots) != 1 || c.Bots[0].status != idle {
 		t.Error("Bot not added correctly")
 	}
 	if c.nextBotId != 1 {
@@ -104,7 +104,7 @@ func TestHandleCompletedOrder(t *testing.T) {
 	if len(c.Completes) != 1 {
 		t.Error("Order should be moved to Completes")
 	}
-	if c.Completes[0].Type != Normal {
+	if c.Completes[0].orderType != normal {
 		t.Error("Completed order type mismatch")
 	}
 }
@@ -128,7 +128,7 @@ func TestMultipleOrders(t *testing.T) {
 	if len(c.Completes) != 3 {
 		t.Error("All orders should be in Completes")
 	}
-	if c.Bots[0].Status != Idle {
+	if c.Bots[0].status != idle {
 		t.Error("Bot should be idle after processing all orders")
 	}
 }
@@ -149,7 +149,7 @@ func TestProcessNextWithMultipleBots(t *testing.T) {
 	if len(c.Pendings) != 0 && len(c.Completes) != 2 {
 		t.Error("Both orders should be completed")
 	}
-	if c.Bots[0].Status != Idle || c.Bots[1].Status != Idle {
+	if c.Bots[0].status != idle || c.Bots[1].status != idle {
 		t.Error("Both bots should be idle after processing")
 	}
 }
@@ -182,11 +182,11 @@ func TestRemoveBotVIPOrderDuringProcessing(t *testing.T) {
 		t.Errorf("Expected 4 pending orders, got %d", len(c.Pendings))
 	}
 
-	if c.Pendings[0].Type != VIP || c.Pendings[1].Type != VIP {
+	if c.Pendings[0].orderType != vip || c.Pendings[1].orderType != vip {
 		t.Error("VIP orders should be prioritized in pending list")
 	}
 
-	if c.Pendings[0].ID != o4.ID || c.Pendings[1].ID != o3.ID {
+	if c.Pendings[0].id != o4.id || c.Pendings[1].id != o3.id {
 		t.Error("VIP orders IDs should be 2 and 3")
 	}
 }

@@ -11,8 +11,8 @@ func TestOrderTypeString(t *testing.T) {
 		orderType OrderType
 		expected  string
 	}{
-		{"Normal", Normal, "Normal"},
-		{"VIP", VIP, "VIP"},
+		{"Normal", normal, "Normal"},
+		{"VIP", vip, "VIP"},
 		{"Unknown", OrderType(99), "Unknown"},
 	}
 
@@ -31,9 +31,9 @@ func TestOrderStatusString(t *testing.T) {
 		orderStatus OrderStatus
 		expected    string
 	}{
-		{"Pending", Pending, "Pending"},
-		{"Completed", Completed, "Completed"},
-		{"Unknown", OrderStatus(99), "Unknown"},
+		{"Pending", pending, "PENDING"},
+		{"Completed", completed, "COMPLETED"},
+		{"Unknown", OrderStatus(99), "UNKNOWN"},
 	}
 
 	for _, tt := range tests {
@@ -48,22 +48,22 @@ func TestOrderStatusString(t *testing.T) {
 func TestOrderCreation(t *testing.T) {
 	now := time.Now()
 	order := Order{
-		ID:        1,
-		Type:      VIP,
-		Status:    Pending,
-		CreatedAt: now,
+		id:        1,
+		orderType: vip,
+		status:    pending,
+		createdAt: now,
 	}
 
-	if order.ID != 1 {
-		t.Errorf("Order.ID = %v, want 1", order.ID)
+	if order.id != 1 {
+		t.Errorf("Order.ID = %v, want 1", order.id)
 	}
-	if order.Type != VIP {
-		t.Errorf("Order.Type = %v, want VIP", order.Type)
+	if order.orderType != vip {
+		t.Errorf("Order.Type = %v, want VIP", order.orderType)
 	}
-	if order.Status != Pending {
-		t.Errorf("Order.Status = %v, want Pending", order.Status)
+	if order.status != pending {
+		t.Errorf("Order.Status = %v, want Pending", order.status)
 	}
-	if order.CreatedAt != now {
-		t.Errorf("Order.CreatedAt = %v, want %v", order.CreatedAt, now)
+	if order.createdAt != now {
+		t.Errorf("Order.CreatedAt = %v, want %v", order.createdAt, now)
 	}
 }
