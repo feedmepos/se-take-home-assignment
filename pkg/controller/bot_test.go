@@ -76,6 +76,12 @@ func TestCompleteProcessing(t *testing.T) {
 }
 
 func TestProcessingTimeout(t *testing.T) {
+	oriProcessTime := processTime
+	processTime = 100 * time.Millisecond
+	defer func() {
+		processTime = oriProcessTime
+	}()
+
 	bot := &Bot{ID: 1, Status: Idle, onCompleted: make(chan *Order, 1)}
 	order := &Order{ID: 1, Status: Pending}
 

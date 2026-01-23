@@ -4,6 +4,10 @@ import (
 	"time"
 )
 
+const n = 10
+
+var processTime = n * time.Second
+
 type BotStatus int
 
 const (
@@ -36,7 +40,7 @@ func (b *Bot) StartProcessing(order *Order) {
 	b.Status = Processing
 	b.CurrentOrder = order
 
-	b.timer = time.AfterFunc(10*time.Second, func() {
+	b.timer = time.AfterFunc(processTime, func() {
 		b.completeProcessing()
 		b.onCompleted <- order
 	})
