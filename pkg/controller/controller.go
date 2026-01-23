@@ -14,9 +14,13 @@ type Controller struct {
 	nextOrderId int
 	nextBotId   int
 	wg          sync.WaitGroup
+	mu          sync.Mutex
 }
 
 func (c *Controller) AddVipOrder() *Order {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
 	o := &Order{
 		ID:        c.nextOrderId,
 		Type:      VIP,
@@ -37,6 +41,9 @@ func (c *Controller) AddVipOrder() *Order {
 }
 
 func (c *Controller) AddNormalOrder() *Order {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
 	o := &Order{
 		ID:        c.nextOrderId,
 		Type:      Normal,
@@ -53,6 +60,9 @@ func (c *Controller) AddNormalOrder() *Order {
 }
 
 func (c *Controller) AddBot() *Bot {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
 	b := &Bot{
 		ID:           c.nextBotId,
 		Status:       Idle,
@@ -68,6 +78,9 @@ func (c *Controller) AddBot() *Bot {
 }
 
 func (c *Controller) RemoveBot() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
 	nBot := len(c.Bots)
 
 	if nBot == 0 {
@@ -99,10 +112,12 @@ func (c *Controller) RemoveBot() {
 
 func (c *Controller) handleCompletedOrder(b *Bot) {
 	for o := range b.onCompleted {
+		c.mu.Lock()
 		c.Completes = append(c.Completes, o)
 		Log(fmt.Sprintf("Bot #%d completed %s Order #%d - Status: %s (Processing time: %s)", b.ID, o.Type, o.ID, o.Status, processTime))
-		c.wg.Done()
 		c.processNext()
+		c.mu.Unlock()
+		c.wg.Done()
 	}
 }
 
