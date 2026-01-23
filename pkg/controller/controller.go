@@ -143,3 +143,26 @@ func (c *Controller) processNext() {
 func (c *Controller) WaitUntilDone() {
 	c.wg.Wait()
 }
+
+func (c *Controller) PrintStatus() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	fmt.Println("\nFinal Status:")
+
+	vipCount, normalCount := 0, 0
+	for _, order := range c.Completes {
+		switch order.orderType {
+		case vip:
+			vipCount++
+		case normal:
+			normalCount++
+		}
+	}
+
+	fmt.Printf("- Total Orders Processed: %d (%d VIP, %d Normal)\n",
+		len(c.Completes), vipCount, normalCount)
+	fmt.Printf("- Orders Completed: %d\n", len(c.Completes))
+	fmt.Printf("- Active Bots: %d\n", len(c.Bots))
+	fmt.Printf("- Pending Orders: %d\n", len(c.Pendings))
+}

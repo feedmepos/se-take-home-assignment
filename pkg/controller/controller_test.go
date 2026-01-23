@@ -3,6 +3,8 @@ package controller
 import (
 	"testing"
 	"time"
+
+	"example.com/order-controller/pkg/testutil"
 )
 
 func TestAddVipOrder(t *testing.T) {
@@ -205,5 +207,34 @@ func TestWaitUntilDoneWithMultipleOrders(t *testing.T) {
 	c.WaitUntilDone()
 	if len(c.Completes) != 2 {
 		t.Error("All orders should be completed before WaitUntilDone returns")
+	}
+}
+
+func TestPrintStatus(t *testing.T) {
+	oriProcessTime := processTime
+	processTime = 100 * time.Millisecond
+	defer func() {
+		processTime = oriProcessTime
+	}()
+
+	c := &Controller{}
+	c.AddBot()
+	c.Completes = append(c.Completes, &Order{orderType: vip}, &Order{orderType: normal})
+	c.Pendings = append(c.Pendings, &Order{orderType: normal})
+	old := testutil.CaptureOutput()
+	c.PrintStatus()
+	output := old()
+
+	if !testutil.Contains(output, "Total Orders Processed: 2 (1 VIP, 1 Normal)") {
+		t.Error("PrintStatus should show correct processed orders")
+	}
+	if !testutil.Contains(output, "Orders Completed: 2") {
+		t.Error("PrintStatus should show correct completed orders")
+	}
+	if !testutil.Contains(output, "Active Bots: 1") {
+		t.Error("PrintStatus should show correct active bots")
+	}
+	if !testutil.Contains(output, "Pending Orders: 1") {
+		t.Error("PrintStatus should show correct pending orders")
 	}
 }
