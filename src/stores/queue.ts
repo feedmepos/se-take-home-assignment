@@ -12,7 +12,6 @@ export const useStoreQueue = creator<{
 			time_process: Date
 			time_create: Date
 			type: 'regular' | 'vip'
-			status: 'pause' | 'processing'
 			time_remaining: number
 		}
 	>
@@ -67,7 +66,6 @@ export const useStoreQueue = creator<{
 				state.processing[id_robot] = {
 					...state.pending[type][0],
 					time_process: new Date(),
-					status: 'processing',
 					time_remaining,
 					type,
 					id_process,

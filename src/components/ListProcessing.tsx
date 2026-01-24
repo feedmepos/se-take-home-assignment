@@ -1,7 +1,6 @@
 import { useStoreQueue } from '@/stores'
 import { SimpleGrid, Paper, Text, Flex, Loader } from '@mantine/core'
 import { useState, useEffect } from 'react'
-import { IconPlayerPause } from '@tabler/icons-react'
 
 export const ListProcessing = () => {
 	const processing = useStoreQueue((state) => state.processing)
@@ -16,10 +15,7 @@ export const ListProcessing = () => {
 	return (
 		<SimpleGrid cols={{ base: 2, md: 4 }} mt="xl">
 			{Object.entries(processing).map(
-				([
-					id_robot,
-					{ id_order, status, time_process, time_remaining, type },
-				]) => {
+				([id_robot, { id_order, time_process, time_remaining, type }]) => {
 					return (
 						<Paper key={id_order} w={180} p="md">
 							{[
@@ -29,9 +25,8 @@ export const ListProcessing = () => {
 								{
 									label: 'time left',
 									value: `${Math.ceil(
-										(status === 'processing'
-											? time_remaining - (Date.now() - time_process.getTime())
-											: time_remaining) / 1000,
+										(time_remaining - (Date.now() - time_process.getTime())) /
+											1000,
 									)} s`,
 								},
 							].map(({ label, value }) => (
@@ -44,16 +39,9 @@ export const ListProcessing = () => {
 									</Flex>
 								</Flex>
 							))}
-							{status === 'processing' && (
-								<Flex justify="center" mt="md">
-									<Loader color="orange" />
-								</Flex>
-							)}
-							{status === 'pause' && (
-								<Flex justify="center" mt="md">
-									<IconPlayerPause stroke={2} />
-								</Flex>
-							)}
+							<Flex justify="center" mt="md">
+								<Loader color="orange" />
+							</Flex>
 						</Paper>
 					)
 				},
