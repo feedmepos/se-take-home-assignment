@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"sync"
 	"time"
 )
 
@@ -22,7 +23,7 @@ func (bs BotStatus) String() string {
 	case processing:
 		return "PROCESSING"
 	default:
-		return "Unknown"
+		return "UNKNOWN"
 	}
 }
 
@@ -32,13 +33,27 @@ type Bot struct {
 	currentOrder *Order
 	onCompleted  chan *Order
 	timer        *time.Timer
+	mu           sync.Mutex
 }
 
-func (b *Bot) startProcessing(order *Order) {
-	b.resetTimer()
+func (b *Bot) getIsIdle() bool {
+	b.mu.Lock()
+	defer b.mu.Unlock()
 
-	b.status = processing
+	return b.status == idle && b.currentOrder == nil
+}
+
+func (b *Bot) getStatus() BotStatus {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	return b.status
+}
+
+func (b *Bot) processOrder(order *Order) {
+	b.mu.Lock()
 	b.currentOrder = order
+	b.status = processing
+	b.mu.Unlock()
 
 	b.timer = time.AfterFunc(processTime, func() {
 		b.completeProcessing()
@@ -46,31 +61,35 @@ func (b *Bot) startProcessing(order *Order) {
 	})
 }
 
-func (b *Bot) completeProcessing() {
+func (b *Bot) completeProcessing() *Order {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
 	o := b.currentOrder
 	if o != nil {
 		o.status = completed
 	}
+	b.resetToIdle()
 
-	b.status = idle
-	b.currentOrder = nil
+	return o
 }
 
 func (b *Bot) stopProcessing() *Order {
-	b.resetTimer()
+	b.mu.Lock()
+	defer b.mu.Unlock()
 
 	o := b.currentOrder
 	if o != nil {
 		o.status = pending
 	}
-
-	b.status = idle
-	b.currentOrder = nil
+	b.resetToIdle()
 
 	return o
 }
 
-func (b *Bot) resetTimer() {
+func (b *Bot) resetToIdle() {
+	b.status = idle
+	b.currentOrder = nil
 	if b.timer != nil {
 		b.timer.Stop()
 		b.timer = nil
