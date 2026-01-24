@@ -8,29 +8,29 @@ import (
 )
 
 func TestAddVipOrder(t *testing.T) {
-	c := &Controller{}
+	c := NewController()
 	c.AddVipOrder()
 	if len(c.Pendings) != 1 || c.Pendings[0].orderType != vip {
 		t.Error("VIP order not added correctly")
 	}
-	if c.nextOrderId != 1 {
+	if c.nextOrderId != 2 {
 		t.Error("nextOrderId not incremented")
 	}
 }
 
 func TestAddNormalOrder(t *testing.T) {
-	c := &Controller{}
+	c := NewController()
 	c.AddNormalOrder()
 	if len(c.Pendings) != 1 || c.Pendings[0].orderType != normal {
 		t.Error("Normal order not added correctly")
 	}
-	if c.nextOrderId != 1 {
+	if c.nextOrderId != 2 {
 		t.Error("nextOrderId not incremented")
 	}
 }
 
 func TestVIPOrderPriority(t *testing.T) {
-	c := &Controller{}
+	c := NewController()
 	c.AddNormalOrder()
 	c.AddNormalOrder()
 	c.AddVipOrder()
@@ -43,19 +43,19 @@ func TestVIPOrderPriority(t *testing.T) {
 }
 
 func TestAddBot(t *testing.T) {
-	c := &Controller{}
+	c := NewController()
 	c.AddBot()
 	if len(c.Bots) != 1 || c.Bots[0].status != idle {
 		t.Error("Bot not added correctly")
 	}
-	if c.nextBotId != 1 {
+	if c.nextBotId != 2 {
 		t.Error("nextBotId not incremented")
 	}
 }
 
 // --- IGNORE ---
 func TestRemoveEmptyBot(t *testing.T) {
-	c := &Controller{}
+	c := NewController()
 	c.RemoveBot()
 	if len(c.Bots) != 0 {
 		t.Error("Should handle empty bots list")
@@ -63,7 +63,7 @@ func TestRemoveEmptyBot(t *testing.T) {
 }
 
 func TestRemoveBot(t *testing.T) {
-	c := &Controller{}
+	c := NewController()
 	c.AddBot()
 	c.RemoveBot()
 	if len(c.Bots) != 0 {
@@ -72,7 +72,7 @@ func TestRemoveBot(t *testing.T) {
 }
 
 func TestRemoveBotWithOrder(t *testing.T) {
-	c := &Controller{}
+	c := NewController()
 	c.AddBot()
 	c.AddNormalOrder()
 	time.Sleep(100 * time.Millisecond)
@@ -83,7 +83,7 @@ func TestRemoveBotWithOrder(t *testing.T) {
 }
 
 func TestProcessNext(t *testing.T) {
-	c := &Controller{}
+	c := NewController()
 	c.AddBot()
 	c.AddNormalOrder()
 	time.Sleep(100 * time.Millisecond)
@@ -99,7 +99,7 @@ func TestHandleCompletedOrder(t *testing.T) {
 		processTime = oriProcessTime
 	}()
 
-	c := &Controller{}
+	c := NewController()
 	c.AddBot()
 	c.AddNormalOrder()
 	time.Sleep(processTime * 2)
@@ -118,7 +118,7 @@ func TestMultipleOrders(t *testing.T) {
 		processTime = oriProcessTime
 	}()
 
-	c := &Controller{}
+	c := NewController()
 	c.AddBot()
 	c.AddNormalOrder()
 	c.AddVipOrder()
@@ -142,13 +142,13 @@ func TestProcessNextWithMultipleBots(t *testing.T) {
 		processTime = oriProcessTime
 	}()
 
-	c := &Controller{}
+	c := NewController()
 	c.AddBot()
 	c.AddBot()
 	c.AddNormalOrder()
 	c.AddNormalOrder()
 	time.Sleep(processTime * 4)
-	if len(c.Pendings) != 0 && len(c.Completes) != 2 {
+	if len(c.Pendings) != 0 || len(c.Completes) != 2 {
 		t.Error("Both orders should be completed")
 	}
 	if c.Bots[0].status != idle || c.Bots[1].status != idle {
@@ -157,7 +157,7 @@ func TestProcessNextWithMultipleBots(t *testing.T) {
 }
 
 func TestRemoveBotDuringProcessing(t *testing.T) {
-	c := &Controller{}
+	c := NewController()
 	c.AddBot()
 	c.AddNormalOrder()
 	time.Sleep(50 * time.Millisecond)
@@ -171,7 +171,7 @@ func TestRemoveBotDuringProcessing(t *testing.T) {
 }
 
 func TestRemoveBotVIPOrderDuringProcessing(t *testing.T) {
-	c := &Controller{}
+	c := NewController()
 	c.AddNormalOrder()
 	c.AddNormalOrder()
 	o3 := c.AddVipOrder()
@@ -200,7 +200,7 @@ func TestWaitUntilDoneWithMultipleOrders(t *testing.T) {
 		processTime = oriProcessTime
 	}()
 
-	c := &Controller{}
+	c := NewController()
 	c.AddBot()
 	c.AddVipOrder()
 	c.AddNormalOrder()
@@ -217,11 +217,11 @@ func TestPrintStatus(t *testing.T) {
 		processTime = oriProcessTime
 	}()
 
-	c := &Controller{}
+	old := testutil.CaptureOutput()
+	c := NewController()
 	c.AddBot()
 	c.Completes = append(c.Completes, &Order{orderType: vip}, &Order{orderType: normal})
 	c.Pendings = append(c.Pendings, &Order{orderType: normal})
-	old := testutil.CaptureOutput()
 	c.PrintStatus()
 	output := old()
 
