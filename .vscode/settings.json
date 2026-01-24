@@ -1,0 +1,23 @@
+{
+	"explorer.fileNesting.enabled": true,
+	"explorer.fileNesting.patterns": {
+		"package.json": "package-lock.json",
+		"*.ts": "$(capture).*.ts",
+		"tsconfig.json": "tsconfig.*.json",
+		"README.md": "LICENSE",
+		".gitignore": ".npmignore",
+		"eslint.config.js": ".prettierrc.cjs"
+	},
+	"typescript.tsdk": "./node_modules/typescript/lib",
+	"editor.formatOnSave": true,
+	"editor.defaultFormatter": "biomejs.biome",
+	"[typescript]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[jsonc]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[typescriptreact]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	}
+}
