@@ -2,6 +2,10 @@
 
 A Vue 3 demo application simulating WcDonald's kitchen order management with cooking bots.
 
+## Live URL:
+
+[shabil-ai-feedme-se-take-home.vercel.app](https://shabil-ai-feedme-se-take-home-assignment.vercel.app/)
+
 ## Features
 
 - **Order Management**: Create Normal and VIP orders
