@@ -11,27 +11,27 @@
 </script>
 
 <template>
-  <div class="min-h-screen bg-mcd-dark">
+  <div class="min-h-screen bg-wcd-dark">
     <!-- Header -->
-    <header class="bg-mcd-red py-4 px-4 shadow-lg sticky top-0 z-50">
+    <header class="bg-wcd-red py-4 px-4 shadow-lg sticky top-0 z-50">
       <div class="max-w-6xl mx-auto flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 bg-mcd-yellow rounded-full flex items-center justify-center">
-            <span class="text-mcd-red font-black text-xl">M</span>
+          <div class="w-10 h-10 bg-wcd-yellow rounded-full flex items-center justify-center">
+            <span class="text-wcd-red font-black text-xl">W</span>
           </div>
           <h1 class="text-xl md:text-2xl font-black text-white tracking-tight">
-            McDonald's Kitchen
+            WcDonald's Kitchen
           </h1>
         </div>
-        <div class="text-mcd-yellow text-sm font-semibold">Order Management</div>
+        <div class="text-wcd-yellow text-sm font-semibold">Order Management</div>
       </div>
     </header>
 
     <main class="max-w-6xl mx-auto p-4 space-y-6">
       <!-- Control Panel -->
-      <section class="bg-mcd-surface rounded-2xl p-4 md:p-6 shadow-xl border border-mcd-border">
+      <section class="bg-wcd-surface rounded-2xl p-4 md:p-6 shadow-xl border border-wcd-border">
         <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-          <span class="w-2 h-2 bg-mcd-yellow rounded-full"></span>
+          <span class="w-2 h-2 bg-wcd-yellow rounded-full"></span>
           Control Panel
         </h2>
 
@@ -82,9 +82,9 @@
       </section>
 
       <!-- Bot Status -->
-      <section class="bg-mcd-surface rounded-2xl p-4 md:p-6 shadow-xl border border-mcd-border">
+      <section class="bg-wcd-surface rounded-2xl p-4 md:p-6 shadow-xl border border-wcd-border">
         <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-          <CpuChipIcon class="w-5 h-5 text-mcd-yellow" />
+          <CpuChipIcon class="w-5 h-5 text-wcd-yellow" />
           Cooking Bots
           <span class="ml-auto text-sm font-normal text-gray-400">
             {{ store.bots.length }} active
@@ -100,24 +100,24 @@
           <div
             v-for="bot in store.bots"
             :key="bot.id"
-            class="relative bg-mcd-dark rounded-xl p-3 border transition-all duration-300"
+            class="relative bg-wcd-dark rounded-xl p-3 border transition-all duration-300"
             :class="
               bot.status === 'processing'
-                ? 'border-mcd-yellow shadow-lg shadow-mcd-yellow/20'
-                : 'border-mcd-border'
+                ? 'border-wcd-yellow shadow-lg shadow-wcd-yellow/20'
+                : 'border-wcd-border'
             "
           >
             <div class="flex flex-col items-center gap-2">
               <CpuChipIcon
                 class="w-8 h-8 transition-colors"
-                :class="bot.status === 'processing' ? 'text-mcd-yellow' : 'text-gray-500'"
+                :class="bot.status === 'processing' ? 'text-wcd-yellow' : 'text-gray-500'"
               />
               <span class="text-xs font-semibold text-gray-300">Bot #{{ bot.id }}</span>
               <span
                 class="text-[10px] px-2 py-0.5 rounded-full font-semibold uppercase"
                 :class="
                   bot.status === 'processing'
-                    ? 'bg-mcd-yellow/20 text-mcd-yellow'
+                    ? 'bg-wcd-yellow/20 text-wcd-yellow'
                     : 'bg-gray-700 text-gray-400'
                 "
               >
@@ -131,7 +131,7 @@
             <!-- Processing animation -->
             <div
               v-if="bot.status === 'processing'"
-              class="absolute inset-0 rounded-xl border-2 border-mcd-yellow animate-pulse pointer-events-none"
+              class="absolute inset-0 rounded-xl border-2 border-wcd-yellow animate-pulse pointer-events-none"
             ></div>
           </div>
         </div>
@@ -140,7 +140,7 @@
       <!-- Order Boards -->
       <div class="grid md:grid-cols-2 gap-4 md:gap-6">
         <!-- Pending Orders -->
-        <section class="bg-mcd-surface rounded-2xl p-4 md:p-6 shadow-xl border border-mcd-border">
+        <section class="bg-wcd-surface rounded-2xl p-4 md:p-6 shadow-xl border border-wcd-border">
           <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
             <span class="w-3 h-3 bg-orange-500 rounded-full animate-pulse"></span>
             PENDING
@@ -170,7 +170,7 @@
                           VIP
                         </span>
                       </div>
-                      <div class="text-xs text-mcd-yellow flex items-center gap-1 mt-0.5">
+                      <div class="text-xs text-wcd-yellow flex items-center gap-1 mt-0.5">
                         <CpuChipIcon class="w-3 h-3" />
                         Processing by Bot #{{ getProcessingBot(order.id)?.id }}
                       </div>
@@ -221,7 +221,7 @@
         </section>
 
         <!-- Completed Orders -->
-        <section class="bg-mcd-surface rounded-2xl p-4 md:p-6 shadow-xl border border-mcd-border">
+        <section class="bg-wcd-surface rounded-2xl p-4 md:p-6 shadow-xl border border-wcd-border">
           <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
             <span class="w-3 h-3 bg-emerald-500 rounded-full"></span>
             COMPLETE
@@ -274,7 +274,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="text-center py-6 text-gray-600 text-sm">McDonald's Order Management Demo</footer>
+    <footer class="text-center py-6 text-gray-600 text-sm">WcDonald's Order Management Demo</footer>
   </div>
 </template>
 
@@ -287,11 +287,11 @@
   }
 
   .order-card.pending {
-    @apply bg-mcd-dark border border-mcd-border;
+    @apply bg-wcd-dark border border-wcd-border;
   }
 
   .order-card.processing {
-    @apply bg-gradient-to-r from-mcd-yellow/10 to-orange-500/10 border border-mcd-yellow/30;
+    @apply bg-gradient-to-r from-wcd-yellow/10 to-orange-500/10 border border-wcd-yellow/30;
   }
 
   .order-card.completed {
@@ -299,7 +299,7 @@
   }
 
   .order-number {
-    @apply w-10 h-10 rounded-full bg-mcd-dark border border-mcd-border flex items-center justify-center text-sm font-bold text-gray-300;
+    @apply w-10 h-10 rounded-full bg-wcd-dark border border-wcd-border flex items-center justify-center text-sm font-bold text-gray-300;
   }
 
   .order-number.completed {
@@ -307,16 +307,16 @@
   }
 
   .vip-badge {
-    @apply flex items-center gap-1 bg-mcd-yellow/20 text-mcd-yellow text-[10px] px-2 py-0.5 rounded-full font-bold uppercase;
+    @apply flex items-center gap-1 bg-wcd-yellow/20 text-wcd-yellow text-[10px] px-2 py-0.5 rounded-full font-bold uppercase;
   }
 
   /* Processing progress bar */
   .progress-bar {
-    @apply absolute bottom-0 left-0 right-0 h-1 bg-mcd-dark/50 rounded-b-xl overflow-hidden;
+    @apply absolute bottom-0 left-0 right-0 h-1 bg-wcd-dark/50 rounded-b-xl overflow-hidden;
   }
 
   .progress-fill {
-    @apply h-full bg-mcd-yellow rounded-full;
+    @apply h-full bg-wcd-yellow rounded-full;
     animation: progress 10s linear forwards;
   }
 
@@ -335,7 +335,7 @@
   }
 
   .cooking-dot {
-    @apply w-2 h-2 bg-mcd-yellow rounded-full;
+    @apply w-2 h-2 bg-wcd-yellow rounded-full;
     animation: cooking 1.4s ease-in-out infinite;
   }
 

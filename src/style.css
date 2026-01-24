@@ -1,16 +1,16 @@
 @import 'tailwindcss';
 
 @theme {
-  /* McDonald's brand colors */
-  --color-mcd-red: #da291c;
-  --color-mcd-red-dark: #b5211a;
-  --color-mcd-yellow: #ffc72c;
-  --color-mcd-yellow-light: #ffd55f;
+  /* WcDonald's brand colors */
+  --color-wcd-red: #da291c;
+  --color-wcd-red-dark: #b5211a;
+  --color-wcd-yellow: #ffc72c;
+  --color-wcd-yellow-light: #ffd55f;
 
   /* Dark theme */
-  --color-mcd-dark: #1a1a1a;
-  --color-mcd-surface: #242424;
-  --color-mcd-border: #333333;
+  --color-wcd-dark: #1a1a1a;
+  --color-wcd-surface: #242424;
+  --color-wcd-border: #333333;
 
   /* Text colors */
   --color-text-primary: #ffffff;

@@ -1,4 +1,4 @@
-McDonald's Order Management System - Simulation Results
+WcDonald's Order Management System - Simulation Results
 
 [14:32:01] System initialized with 0 bots
 [14:32:01] Created Normal Order #1001 - Status: PENDING

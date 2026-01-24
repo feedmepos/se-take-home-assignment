@@ -1,6 +1,6 @@
-# McDonald's Kitchen - Order Management Demo
+# WcDonald's Kitchen - Order Management Demo
 
-A Vue 3 demo application simulating McDonald's kitchen order management with cooking bots.
+A Vue 3 demo application simulating WcDonald's kitchen order management with cooking bots.
 
 ## Features
 
