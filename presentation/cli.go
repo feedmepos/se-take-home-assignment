@@ -134,35 +134,23 @@ func (cli *CLI) ProcessPendingOrders() {
 			break
 		}
 
-		status := cli.getStatusUC.Execute()
-		if len(status.PendingOrders) == 0 {
-			break
-		}
-		nextOrder := status.PendingOrders[0]
-
-		var idleBotID int
-		for _, bot := range status.Bots {
-			if !bot.IsProcessing {
-				idleBotID = bot.ID
-				break
-			}
-		}
-		if idleBotID == 0 {
+		assigned := cli.processOrdersUC.AssignOrdersToIdleBots()
+		if len(assigned) == 0 {
 			break
 		}
 
-		cli.output.WriteLine(fmt.Sprintf("[%s] Bot #%d picked up %s Order #%d - Status: PROCESSING",
-			cli.timestamp(), idleBotID, orderTypeString(nextOrder.Type), nextOrder.ID))
-
-		result := cli.processOrdersUC.ProcessNextOrder()
-		if result == nil {
-			break
+		for _, r := range assigned {
+			cli.output.WriteLine(fmt.Sprintf("[%s] Bot #%d picked up %s Order #%d - Status: PROCESSING",
+				cli.timestamp(), r.BotID, orderTypeString(r.Order.Type), r.Order.ID))
 		}
 
 		cli.advanceTime(10)
 
-		cli.output.WriteLine(fmt.Sprintf("[%s] Bot #%d completed %s Order #%d - Status: COMPLETE (Processing time: 10s)",
-			cli.timestamp(), result.BotID, orderTypeString(result.Order.Type), result.Order.ID))
+		completed := cli.processOrdersUC.CompleteProcessing(assigned)
+		for _, r := range completed {
+			cli.output.WriteLine(fmt.Sprintf("[%s] Bot #%d completed %s Order #%d - Status: COMPLETE (Processing time: 10s)",
+				cli.timestamp(), r.BotID, orderTypeString(r.Order.Type), r.Order.ID))
+		}
 	}
 
 	status := cli.getStatusUC.Execute()

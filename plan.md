@@ -36,7 +36,7 @@ McDonald's needs an automated order processing system that:
 │   ├── entities/               # Order, Bot
 │   ├── interfaces/             # Repository & handler interfaces
 │   └── usecases/               # CreateOrder, AddBot, RemoveBot, ProcessOrders, GetStatus
-├── presentation/cli.go         # CLI, implements EventHandler
+├── presentation/cli.go         # CLI, implements SimulationController
 ├── simulation/workflow.go      # Demo workflows
 ├── utils/output_writer.go      # File output
 ├── scripts/                     # test.sh, build.sh, run.sh
@@ -86,10 +86,12 @@ BotRepository:
     GetIdleBots() -> Bot[]
     UpdateBotStatus(botID, isProcessing, orderID)
 
-OrderProcessingEventHandler:
-    OnOrderPickedUp(botID, order)
-    OnOrderCompleted(botID, order)
-    OnOrderInterrupted(orderID)
+SimulationController:
+    CreateNormalOrder() -> error
+    CreateVIPOrder() -> error
+    AddBot() -> error
+    RemoveBot() -> error
+    ProcessPendingOrders()
 ```
 
 ---
@@ -106,19 +108,9 @@ Create new bot, return bot + pending count.
 Remove newest bot. If processing, set order back to PENDING first.
 
 ### ProcessOrdersUseCase
-1. Get idle bots
-2. For each: claim next pending order, start async process
-3. Async process: wait 10s, then complete order or handle interruption
-
-**Race Condition Fix**: When bot removed mid-processing, check if another bot claimed the order before firing interrupted event:
-```
-handleInterruptedOrder(orderID):
-    FOR each bot IN getAllBots():
-        IF bot.IsProcessing AND bot.CurrentOrderID == orderID:
-            RETURN  // Another bot has it, do nothing
-    
-    FIRE OnOrderInterrupted(orderID)
-```
+1. Assign pending orders to all idle bots (parallel)
+2. Complete all assigned orders after simulated 10s
+3. Repeat until no idle bots or no pending orders
 
 ### GetStatusUseCase
 Get all orders/bots, categorize orders by status.

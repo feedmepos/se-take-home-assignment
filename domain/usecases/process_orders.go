@@ -22,26 +22,38 @@ func NewProcessOrdersUseCase(botRepo interfaces.BotRepository, orderRepo interfa
 	}
 }
 
-func (uc *ProcessOrdersUseCase) ProcessNextOrder() *ProcessResult {
+func (uc *ProcessOrdersUseCase) AssignOrdersToIdleBots() []*ProcessResult {
 	idleBots := uc.botRepo.GetIdleBots()
-	if len(idleBots) == 0 {
-		return nil
+	var results []*ProcessResult
+
+	for _, bot := range idleBots {
+		nextOrder := uc.orderRepo.ClaimNextPendingOrder()
+		if nextOrder == nil {
+			break
+		}
+		uc.botRepo.UpdateBotStatus(bot.ID, true, nextOrder.ID)
+		results = append(results, &ProcessResult{
+			BotID: bot.ID,
+			Order: nextOrder,
+		})
 	}
 
-	nextOrder := uc.orderRepo.ClaimNextPendingOrder()
-	if nextOrder == nil {
-		return nil
+	return results
+}
+
+func (uc *ProcessOrdersUseCase) CompleteProcessing(results []*ProcessResult) []*ProcessResult {
+	var completed []*ProcessResult
+
+	for _, r := range results {
+		uc.orderRepo.UpdateOrderStatus(r.Order.ID, entities.OrderStatusComplete)
+		uc.botRepo.UpdateBotStatus(r.BotID, false, 0)
+		completed = append(completed, &ProcessResult{
+			BotID: r.BotID,
+			Order: uc.orderRepo.GetOrderByID(r.Order.ID),
+		})
 	}
 
-	bot := idleBots[0]
-	uc.botRepo.UpdateBotStatus(bot.ID, true, nextOrder.ID)
-	uc.orderRepo.UpdateOrderStatus(nextOrder.ID, entities.OrderStatusComplete)
-	uc.botRepo.UpdateBotStatus(bot.ID, false, 0)
-
-	return &ProcessResult{
-		BotID: bot.ID,
-		Order: uc.orderRepo.GetOrderByID(nextOrder.ID),
-	}
+	return completed
 }
 
 func (uc *ProcessOrdersUseCase) HasIdleBot() bool {
