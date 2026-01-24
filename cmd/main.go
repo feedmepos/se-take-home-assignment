@@ -10,9 +10,8 @@ import (
 func main() {
 	fmt.Println("McDonald's Order Management System - Simulation Results")
 	fmt.Println("")
-	c := controller.Controller{}
+	c := controller.NewController()
 	controller.Log("System initialized with 0 bots")
-	// start simulation
 	c.AddNormalOrder()
 	c.AddVipOrder()
 	c.AddNormalOrder()
@@ -20,10 +19,9 @@ func main() {
 	c.AddBot()
 	time.Sleep(1 * time.Second)
 	c.AddBot()
-	time.Sleep(12 * time.Second)
+	time.Sleep(10 * time.Second)
 	c.AddVipOrder()
-	time.Sleep(1 * time.Second)
-	time.Sleep(12 * time.Second)
+	time.Sleep(5 * time.Second)
 	c.RemoveBot()
 	c.WaitUntilDone()
 	c.PrintStatus()
