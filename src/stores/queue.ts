@@ -78,13 +78,12 @@ export const useStoreQueue = creator<{
 				state.count_robot = count
 			})
 			Object.entries(get().processing).forEach(
-				([id_robot, { type, id_order, id_process }]) => {
-					const numericRobotId = Number(id_robot)
-					if (numericRobotId > count) {
+				([id_robot, { type, id_order, id_process }], i) => {
+					if (i + 1 > count) {
 						clearTimeout(id_process)
 						set((state) => {
 							state.pending[type].push({ id_order, time_create: new Date() })
-							delete state.processing[numericRobotId]
+							delete state.processing[Number(id_robot)]
 						})
 					}
 				},
