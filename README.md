@@ -3,9 +3,7 @@ Due to time constraints, I will only do the front end
 
 For Nodejs backend, we can use object proxy to simulate non-blocking queue, which I think is better than while loop + promise approach
 
-core logic is in `src/stores/queue.ts` under 100 lines
-
-no pooling, no unnecessary delay, no queue library
+core logic is in `src/stores/queue.ts` under 100 lines, no pooling, no unnecessary delay, no queue library
 
 `src/stores/__creator` is a utility function to create stores, safe to ignore
 
