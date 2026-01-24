@@ -34,10 +34,10 @@ McDonald's needs an automated order processing system that:
 │   └── repositories/           # InMemoryOrderRepository, InMemoryBotRepository
 ├── domain/
 │   ├── entities/               # Order, Bot
-│   ├── interfaces/             # Repository & handler interfaces
+│   ├── interfaces/             # Repository interfaces
 │   └── usecases/               # CreateOrder, AddBot, RemoveBot, ProcessOrders, GetStatus
-├── presentation/cli.go         # CLI, implements SimulationController
-├── simulation/workflow.go      # Demo workflows
+├── presentation/cli.go         # CLI, implements SimulationController, owns OutputWriter interface
+├── simulation/workflow.go      # Demo workflows, owns SimulationController interface
 ├── utils/output_writer.go      # File output
 ├── scripts/                     # test.sh, build.sh, run.sh
 └── main.go
