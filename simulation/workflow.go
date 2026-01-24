@@ -1,30 +1,43 @@
 package simulation
 
-import (
-	"feedme-takehome/domain/interfaces"
-)
+// SimulationController defines the contract for business operations
+// that can be orchestrated by simulation workflows.
+// This interface is presentation-agnostic - it only exposes business operations,
+// not display/formatting concerns.
+type SimulationController interface {
+	// Order operations
+	CreateNormalOrder() error
+	CreateVIPOrder() error
 
-func BasicOrderFlow(ctrl interfaces.SimulationController) {
+	// Bot operations
+	AddBot() error
+	RemoveBot() error
+
+	// Processing operations
+	ProcessPendingOrders()
+}
+
+func BasicOrderFlow(ctrl SimulationController) {
 	ctrl.CreateNormalOrder()
 	ctrl.AddBot()
 	ctrl.ProcessPendingOrders()
 }
 
-func VIPPriority(ctrl interfaces.SimulationController) {
+func VIPPriority(ctrl SimulationController) {
 	ctrl.CreateNormalOrder()
 	ctrl.CreateNormalOrder()
 	ctrl.CreateVIPOrder()
 	ctrl.ProcessPendingOrders()
 }
 
-func BotRemovalMidProcessing(ctrl interfaces.SimulationController) {
+func BotRemovalMidProcessing(ctrl SimulationController) {
 	ctrl.CreateNormalOrder()
 	ctrl.CreateNormalOrder()
 	ctrl.AddBot()
 	ctrl.RemoveBot()
 }
 
-func MultipleVIPOrdering(ctrl interfaces.SimulationController) {
+func MultipleVIPOrdering(ctrl SimulationController) {
 	ctrl.CreateNormalOrder()
 	ctrl.CreateVIPOrder()
 	ctrl.CreateNormalOrder()
@@ -33,7 +46,7 @@ func MultipleVIPOrdering(ctrl interfaces.SimulationController) {
 	ctrl.ProcessPendingOrders()
 }
 
-func BotIdleBehavior(ctrl interfaces.SimulationController) {
+func BotIdleBehavior(ctrl SimulationController) {
 	ctrl.AddBot()
 	ctrl.CreateNormalOrder()
 	ctrl.ProcessPendingOrders()

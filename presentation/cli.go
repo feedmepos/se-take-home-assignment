@@ -1,13 +1,29 @@
 package presentation
 
 import (
-	"feedme-takehome/config"
 	"feedme-takehome/domain/entities"
-	"feedme-takehome/domain/interfaces"
 	"feedme-takehome/domain/usecases"
 	"fmt"
 	"time"
 )
+
+// OutputWriter defines the contract for writing simulation output.
+// This interface is owned by the presentation layer since it's a presentation concern.
+type OutputWriter interface {
+	WriteLine(line string) error
+	Flush() error
+}
+
+// CLIDependencies contains all dependencies needed by CLI.
+// This struct is owned by the presentation layer.
+type CLIDependencies struct {
+	CreateOrderUC   *usecases.CreateOrderUseCase
+	AddBotUC        *usecases.AddBotUseCase
+	RemoveBotUC     *usecases.RemoveBotUseCase
+	ProcessOrdersUC *usecases.ProcessOrdersUseCase
+	GetStatusUC     *usecases.GetStatusUseCase
+	Output          OutputWriter
+}
 
 type CLI struct {
 	createOrderUC   *usecases.CreateOrderUseCase
@@ -15,27 +31,23 @@ type CLI struct {
 	removeBotUC     *usecases.RemoveBotUseCase
 	processOrdersUC *usecases.ProcessOrdersUseCase
 	getStatusUC     *usecases.GetStatusUseCase
-	output          interfaces.OutputWriter
+	output          OutputWriter
 	simTime         time.Time
 }
 
-func NewCLI(deps *config.Dependencies) *CLI {
+func NewCLI(deps *CLIDependencies) *CLI {
 	cli := &CLI{
 		simTime: time.Now(),
 	}
 	if deps != nil {
-		cli.SetDependencies(deps)
+		cli.createOrderUC = deps.CreateOrderUC
+		cli.addBotUC = deps.AddBotUC
+		cli.removeBotUC = deps.RemoveBotUC
+		cli.processOrdersUC = deps.ProcessOrdersUC
+		cli.getStatusUC = deps.GetStatusUC
+		cli.output = deps.Output
 	}
 	return cli
-}
-
-func (cli *CLI) SetDependencies(deps *config.Dependencies) {
-	cli.createOrderUC = deps.CreateOrderUC
-	cli.addBotUC = deps.AddBotUC
-	cli.removeBotUC = deps.RemoveBotUC
-	cli.processOrdersUC = deps.ProcessOrdersUC
-	cli.getStatusUC = deps.GetStatusUC
-	cli.output = deps.Output
 }
 
 func (cli *CLI) timestamp() string {

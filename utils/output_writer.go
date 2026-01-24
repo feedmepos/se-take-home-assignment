@@ -1,13 +1,9 @@
 package utils
 
 import (
-	"feedme-takehome/domain/interfaces"
 	"os"
 	"sync"
 )
-
-// Ensure FileOutputWriter implements OutputWriter interface
-var _ interfaces.OutputWriter = (*FileOutputWriter)(nil)
 
 type FileOutputWriter struct {
 	file *os.File
