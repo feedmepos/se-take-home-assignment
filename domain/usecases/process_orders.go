@@ -3,109 +3,51 @@ package usecases
 import (
 	"feedme-takehome/domain/entities"
 	"feedme-takehome/domain/interfaces"
-	"time"
 )
 
+type ProcessResult struct {
+	BotID int
+	Order *entities.Order
+}
+
 type ProcessOrdersUseCase struct {
-	botRepo      interfaces.BotRepository
-	orderRepo    interfaces.OrderRepository
-	eventHandler interfaces.OrderProcessingEventHandler
+	botRepo   interfaces.BotRepository
+	orderRepo interfaces.OrderRepository
 }
 
-func NewProcessOrdersUseCase(botRepo interfaces.BotRepository, orderRepo interfaces.OrderRepository, eventHandler interfaces.OrderProcessingEventHandler) *ProcessOrdersUseCase {
+func NewProcessOrdersUseCase(botRepo interfaces.BotRepository, orderRepo interfaces.OrderRepository) *ProcessOrdersUseCase {
 	return &ProcessOrdersUseCase{
-		botRepo:      botRepo,
-		orderRepo:    orderRepo,
-		eventHandler: eventHandler,
+		botRepo:   botRepo,
+		orderRepo: orderRepo,
 	}
 }
 
-func (uc *ProcessOrdersUseCase) StartProcessing() {
+func (uc *ProcessOrdersUseCase) ProcessNextOrder() *ProcessResult {
 	idleBots := uc.botRepo.GetIdleBots()
-
-	if !hasWorkToDo(idleBots, uc.orderRepo) {
-		return
+	if len(idleBots) == 0 {
+		return nil
 	}
 
-	uc.assignOrdersToIdleBots(idleBots)
-}
-
-func hasWorkToDo(idleBots []*entities.Bot, orderRepo interfaces.OrderRepository) bool {
-	if len(idleBots) > 0 {
-		pendingCount := len(orderRepo.GetPendingOrders())
-		if pendingCount == 0 {
-			return false
-		}
+	nextOrder := uc.orderRepo.ClaimNextPendingOrder()
+	if nextOrder == nil {
+		return nil
 	}
-	return true
-}
 
-func (uc *ProcessOrdersUseCase) assignOrdersToIdleBots(idleBots []*entities.Bot) {
-	for _, bot := range idleBots {
-		nextOrder := uc.orderRepo.ClaimNextPendingOrder()
-		if nextOrder != nil {
-			uc.assignOrderToBot(bot.ID, nextOrder)
-			go uc.processOrder(bot.ID, nextOrder.ID)
-		} else {
-			break
-		}
+	bot := idleBots[0]
+	uc.botRepo.UpdateBotStatus(bot.ID, true, nextOrder.ID)
+	uc.orderRepo.UpdateOrderStatus(nextOrder.ID, entities.OrderStatusComplete)
+	uc.botRepo.UpdateBotStatus(bot.ID, false, 0)
+
+	return &ProcessResult{
+		BotID: bot.ID,
+		Order: uc.orderRepo.GetOrderByID(nextOrder.ID),
 	}
 }
 
-func (uc *ProcessOrdersUseCase) assignOrderToBot(botID int, order *entities.Order) {
-	uc.botRepo.UpdateBotStatus(botID, true, order.ID)
-
-	if uc.eventHandler != nil {
-		uc.eventHandler.OnOrderPickedUp(botID, order)
-	}
+func (uc *ProcessOrdersUseCase) HasIdleBot() bool {
+	return len(uc.botRepo.GetIdleBots()) > 0
 }
 
-func (uc *ProcessOrdersUseCase) processOrder(botID int, orderID int) {
-	time.Sleep(10 * time.Second)
-
-	bots := uc.botRepo.GetAllBots()
-	botStillAssigned := isBotStillAssignedToOrder(bots, botID, orderID)
-
-	if botStillAssigned {
-		uc.completeOrder(botID, orderID)
-		uc.StartProcessing()
-	} else {
-		uc.handleInterruptedOrder(orderID)
-	}
-}
-
-func isBotStillAssignedToOrder(bots []*entities.Bot, botID int, orderID int) bool {
-	for _, bot := range bots {
-		if bot.ID == botID && bot.IsProcessing && bot.CurrentOrderID == orderID {
-			return true
-		}
-	}
-	return false
-}
-
-func (uc *ProcessOrdersUseCase) completeOrder(botID int, orderID int) {
-	uc.orderRepo.UpdateOrderStatus(orderID, entities.OrderStatusComplete)
-	uc.botRepo.UpdateBotStatus(botID, false, 0)
-
-	if uc.eventHandler != nil {
-		order := uc.orderRepo.GetOrderByID(orderID)
-		uc.eventHandler.OnOrderCompleted(botID, order)
-	}
-}
-
-func (uc *ProcessOrdersUseCase) handleInterruptedOrder(orderID int) {
-	// Bot was removed, order status was already set to PENDING by RemoveBotUseCase
-	// Check if another bot has already claimed this order
-	bots := uc.botRepo.GetAllBots()
-	for _, bot := range bots {
-		if bot.IsProcessing && bot.CurrentOrderID == orderID {
-			// Another bot has already claimed this order, nothing to do
-			return
-		}
-	}
-
-	// Only fire the interrupted event if no other bot has claimed the order
-	if uc.eventHandler != nil {
-		uc.eventHandler.OnOrderInterrupted(orderID)
-	}
+func (uc *ProcessOrdersUseCase) HasPendingOrders() bool {
+	return len(uc.orderRepo.GetPendingOrders()) > 0
 }

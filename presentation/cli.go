@@ -10,61 +10,18 @@ import (
 )
 
 type CLI struct {
-	createOrderUC    *usecases.CreateOrderUseCase
-	addBotUC         *usecases.AddBotUseCase
-	removeBotUC      *usecases.RemoveBotUseCase
-	processOrdersUC  *usecases.ProcessOrdersUseCase
-	getStatusUC      *usecases.GetStatusUseCase
-	output           interfaces.OutputWriter
-	processingTicker *time.Ticker
-	done             chan bool
-}
-
-// Compile-time interface check
-var _ interfaces.OrderProcessingEventHandler = (*CLI)(nil)
-
-func (cli *CLI) OnOrderPickedUp(botID int, order *entities.Order) {
-	timestamp := time.Now().Format("15:04:05")
-	orderType := "Normal"
-	if order.Type == entities.OrderTypeVIP {
-		orderType = "VIP"
-	}
-	cli.output.WriteLine(fmt.Sprintf("[%s] Bot #%d picked up %s Order #%d - Status: PROCESSING",
-		timestamp, botID, orderType, order.ID))
-}
-
-func (cli *CLI) OnOrderCompleted(botID int, order *entities.Order) {
-	timestamp := time.Now().Format("15:04:05")
-	orderType := "Normal"
-	if order.Type == entities.OrderTypeVIP {
-		orderType = "VIP"
-	}
-
-	processingTime := "10s"
-	if order.ProcessingStartedAt != nil && order.CompletedAt != nil {
-		duration := order.CompletedAt.Sub(*order.ProcessingStartedAt)
-		processingTime = fmt.Sprintf("%ds", int(duration.Seconds()))
-	}
-
-	cli.output.WriteLine(fmt.Sprintf("[%s] Bot #%d completed %s Order #%d - Status: COMPLETE (Processing time: %s)",
-		timestamp, botID, orderType, order.ID, processingTime))
-
-	// Check if bot is now idle
-	pendingCount := len(cli.getStatusUC.Execute().PendingOrders)
-	if pendingCount == 0 {
-		cli.output.WriteLine(fmt.Sprintf("[%s] Bot #%d is now IDLE - No pending orders", timestamp, botID))
-	}
-}
-
-func (cli *CLI) OnOrderInterrupted(orderID int) {
-	timestamp := time.Now().Format("15:04:05")
-	cli.output.WriteLine(fmt.Sprintf("[%s] Order #%d processing was interrupted - returned to PENDING",
-		timestamp, orderID))
+	createOrderUC   *usecases.CreateOrderUseCase
+	addBotUC        *usecases.AddBotUseCase
+	removeBotUC     *usecases.RemoveBotUseCase
+	processOrdersUC *usecases.ProcessOrdersUseCase
+	getStatusUC     *usecases.GetStatusUseCase
+	output          interfaces.OutputWriter
+	simTime         time.Time
 }
 
 func NewCLI(deps *config.Dependencies) *CLI {
 	cli := &CLI{
-		done: make(chan bool),
+		simTime: time.Now(),
 	}
 	if deps != nil {
 		cli.SetDependencies(deps)
@@ -81,94 +38,147 @@ func (cli *CLI) SetDependencies(deps *config.Dependencies) {
 	cli.output = deps.Output
 }
 
-func (cli *CLI) Start() {
-	cli.processingTicker = time.NewTicker(1 * time.Second)
-	go func() {
-		for {
-			select {
-			case <-cli.processingTicker.C:
-				cli.processOrdersUC.StartProcessing()
-			case <-cli.done:
-				return
-			}
-		}
-	}()
+func (cli *CLI) timestamp() string {
+	return cli.simTime.Format("15:04:05")
 }
 
-func (cli *CLI) Stop() {
-	if cli.processingTicker != nil {
-		cli.processingTicker.Stop()
+func (cli *CLI) advanceTime(seconds int) {
+	cli.simTime = cli.simTime.Add(time.Duration(seconds) * time.Second)
+}
+
+func orderTypeString(orderType entities.OrderType) string {
+	if orderType == entities.OrderTypeVIP {
+		return "VIP"
 	}
-	close(cli.done)
+	return "Normal"
+}
+
+func (cli *CLI) PrintHeader() {
+	cli.output.WriteLine("McDonald's Order Management System - Simulation Results")
+	cli.output.WriteLine("")
+	cli.output.WriteLine(fmt.Sprintf("[%s] System initialized with 0 bots", cli.timestamp()))
+}
+
+func (cli *CLI) PrintFooter() {
+	cli.PrintStatus()
+}
+
+func (cli *CLI) PrintSection(title string) {
+	cli.output.WriteLine("")
+	cli.output.WriteLine(fmt.Sprintf("--- %s ---", title))
+}
+
+func (cli *CLI) PrintSeparator() {
+	cli.output.WriteLine("")
+	cli.output.WriteLine("----------------------------------------")
+}
+
+func (cli *CLI) Flush() {
 	cli.output.Flush()
 }
 
-func (cli *CLI) NewNormalOrder() {
+func (cli *CLI) CreateNormalOrder() error {
 	result, err := cli.createOrderUC.Execute(entities.OrderTypeNormal)
 	if err != nil {
-		cli.output.WriteLine(fmt.Sprintf("[ERROR] Error creating order: %v", err))
-		return
+		cli.output.WriteLine(fmt.Sprintf("[ERROR] %v", err))
+		return err
 	}
-
-	timestamp := time.Now().Format("15:04:05")
 	cli.output.WriteLine(fmt.Sprintf("[%s] Created Normal Order #%d - Status: PENDING",
-		timestamp, result.Order.ID))
-
-	cli.processOrdersUC.StartProcessing()
+		cli.timestamp(), result.Order.ID))
+	return nil
 }
 
-func (cli *CLI) NewVIPOrder() {
+func (cli *CLI) CreateVIPOrder() error {
 	result, err := cli.createOrderUC.Execute(entities.OrderTypeVIP)
 	if err != nil {
-		cli.output.WriteLine(fmt.Sprintf("[ERROR] Error creating order: %v", err))
-		return
+		cli.output.WriteLine(fmt.Sprintf("[ERROR] %v", err))
+		return err
 	}
-
-	timestamp := time.Now().Format("15:04:05")
 	cli.output.WriteLine(fmt.Sprintf("[%s] Created VIP Order #%d - Status: PENDING",
-		timestamp, result.Order.ID))
-
-	cli.processOrdersUC.StartProcessing()
+		cli.timestamp(), result.Order.ID))
+	return nil
 }
 
-func (cli *CLI) AddBot() {
+func (cli *CLI) AddBot() error {
 	bot, _, err := cli.addBotUC.Execute()
 	if err != nil {
-		cli.output.WriteLine(fmt.Sprintf("[ERROR] Error adding bot: %v", err))
-		return
+		cli.output.WriteLine(fmt.Sprintf("[ERROR] %v", err))
+		return err
 	}
-
-	timestamp := time.Now().Format("15:04:05")
-	cli.output.WriteLine(fmt.Sprintf("[%s] Bot #%d created - Status: ACTIVE", timestamp, bot.ID))
-
-	cli.processOrdersUC.StartProcessing()
+	cli.output.WriteLine(fmt.Sprintf("[%s] Bot #%d created - Status: ACTIVE", cli.timestamp(), bot.ID))
+	return nil
 }
 
-func (cli *CLI) RemoveBot() {
+func (cli *CLI) RemoveBot() error {
 	result, err := cli.removeBotUC.Execute()
 	if err != nil {
-		cli.output.WriteLine(fmt.Sprintf("[ERROR] Error removing bot: %v", err))
-		return
+		cli.output.WriteLine(fmt.Sprintf("[ERROR] %v", err))
+		return err
 	}
-
 	if result == nil {
-		return // No bots to remove
+		return nil
 	}
-
-	timestamp := time.Now().Format("15:04:05")
 
 	if result.WasProcessing {
-		cli.output.WriteLine(fmt.Sprintf("[%s] Bot #%d destroyed while PROCESSING Order #%d", timestamp, result.BotID, result.OrderID))
-		cli.output.WriteLine(fmt.Sprintf("[%s] Order #%d returned to PENDING queue", timestamp, result.OrderID))
+		cli.output.WriteLine(fmt.Sprintf("[%s] Bot #%d destroyed while PROCESSING Order #%d", cli.timestamp(), result.BotID, result.OrderID))
+		cli.output.WriteLine(fmt.Sprintf("[%s] Order #%d returned to PENDING queue", cli.timestamp(), result.OrderID))
 	} else {
-		cli.output.WriteLine(fmt.Sprintf("[%s] Bot #%d destroyed while IDLE", timestamp, result.BotID))
+		cli.output.WriteLine(fmt.Sprintf("[%s] Bot #%d destroyed while IDLE", cli.timestamp(), result.BotID))
+	}
+	return nil
+}
+
+func (cli *CLI) ProcessPendingOrders() {
+	for {
+		if !cli.processOrdersUC.HasIdleBot() || !cli.processOrdersUC.HasPendingOrders() {
+			break
+		}
+
+		status := cli.getStatusUC.Execute()
+		if len(status.PendingOrders) == 0 {
+			break
+		}
+		nextOrder := status.PendingOrders[0]
+
+		var idleBotID int
+		for _, bot := range status.Bots {
+			if !bot.IsProcessing {
+				idleBotID = bot.ID
+				break
+			}
+		}
+		if idleBotID == 0 {
+			break
+		}
+
+		cli.output.WriteLine(fmt.Sprintf("[%s] Bot #%d picked up %s Order #%d - Status: PROCESSING",
+			cli.timestamp(), idleBotID, orderTypeString(nextOrder.Type), nextOrder.ID))
+
+		result := cli.processOrdersUC.ProcessNextOrder()
+		if result == nil {
+			break
+		}
+
+		cli.advanceTime(10)
+
+		cli.output.WriteLine(fmt.Sprintf("[%s] Bot #%d completed %s Order #%d - Status: COMPLETE (Processing time: 10s)",
+			cli.timestamp(), result.BotID, orderTypeString(result.Order.Type), result.Order.ID))
+	}
+
+	status := cli.getStatusUC.Execute()
+	if len(status.PendingOrders) == 0 {
+		for _, bot := range status.Bots {
+			if !bot.IsProcessing {
+				cli.output.WriteLine(fmt.Sprintf("[%s] Bot #%d is now IDLE - No pending orders", cli.timestamp(), bot.ID))
+				break
+			}
+		}
 	}
 }
 
 func (cli *CLI) PrintStatus() {
 	status := cli.getStatusUC.Execute()
 
-	// Count VIP and Normal orders
 	vipCount := 0
 	normalCount := 0
 	for _, order := range status.CompleteOrders {
@@ -188,29 +198,17 @@ func (cli *CLI) PrintStatus() {
 	cli.output.WriteLine(fmt.Sprintf("- Pending Orders: %d", len(status.PendingOrders)))
 }
 
-// WaitForCompletion blocks until all bots are idle and no further orders can be processed.
-// It returns when:
-// - All bots are idle (not processing any orders) AND no pending orders remain, OR
-// - There are pending orders but no bots exist to process them
-func (cli *CLI) WaitForCompletion() {
-	for {
-		status := cli.getStatusUC.Execute()
+func (cli *CLI) PrintPendingQueue() {
+	status := cli.getStatusUC.Execute()
 
-		allBotsIdle := len(status.ProcessingOrders) == 0
-		hasPendingOrders := len(status.PendingOrders) > 0
-		hasBots := len(status.Bots) > 0
-
-		// Exit conditions:
-		// 1. All bots are idle and no pending orders
-		// 2. There are pending orders but no bots to process them
-		if allBotsIdle && !hasPendingOrders {
-			return
+	cli.output.WriteLine("")
+	cli.output.WriteLine("Current Pending Queue:")
+	if len(status.PendingOrders) == 0 {
+		cli.output.WriteLine("  (empty)")
+	} else {
+		for i, order := range status.PendingOrders {
+			cli.output.WriteLine(fmt.Sprintf("  %d. %s Order #%d", i+1, orderTypeString(order.Type), order.ID))
 		}
-		if hasPendingOrders && !hasBots {
-			return
-		}
-
-		// Still work in progress, wait and check again
-		time.Sleep(500 * time.Millisecond)
 	}
+	cli.output.WriteLine("")
 }

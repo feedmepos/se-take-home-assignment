@@ -6,8 +6,6 @@ import (
 	"feedme-takehome/presentation"
 	"feedme-takehome/simulation"
 	"feedme-takehome/utils"
-	"fmt"
-	"time"
 )
 
 func main() {
@@ -18,33 +16,35 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	defer output.Flush()
 
-	cli := presentation.NewCLI(nil)
+	deps := config.InitializeDependencies(orderRepo, botRepo, output)
+	cli := presentation.NewCLI(deps)
 
-	deps := config.InitializeDependencies(orderRepo, botRepo, output, cli)
+	cli.PrintHeader()
 
-	cli.SetDependencies(deps)
+	cli.PrintSection("Test 1: Basic Order Flow")
+	simulation.BasicOrderFlow(cli)
+	cli.PrintStatus()
+	cli.PrintSeparator()
 
-	// Print header
-	output.WriteLine("McDonald's Order Management System - Simulation Results")
-	output.WriteLine("")
+	cli.PrintSection("Test 2: VIP Priority")
+	simulation.VIPPriority(cli)
+	cli.PrintStatus()
+	cli.PrintSeparator()
 
-	// Print initialization message
-	timestamp := time.Now().Format("15:04:05")
-	output.WriteLine(fmt.Sprintf("[%s] System initialized with 0 bots", timestamp))
+	cli.PrintSection("Test 3: Bot Removal")
+	simulation.BotRemovalMidProcessing(cli)
+	cli.PrintStatus()
+	cli.PrintSeparator()
 
-	cli.Start()
-	defer cli.Stop()
+	cli.PrintSection("Test 4: Multiple VIP Orders Queue Correctly")
+	cli.PrintPendingQueue()
+	simulation.MultipleVIPOrdering(cli)
+	cli.PrintStatus()
+	cli.PrintSeparator()
 
-	simulation.BasicOrderFlow(cli, output)
-	simulation.VIPPriority(cli, output)
-	simulation.BotRemovalMidProcessing(cli, output)
-	simulation.MultipleVIPOrdering(cli, output)
-	simulation.BotIdleBehavior(cli, output)
-
-	// Wait for all bots to finish processing before exiting
-	// Program exits only when: all bots are idle AND no pending orders,
-	// OR there are pending orders but no bots to process them
-	cli.WaitForCompletion()
+	cli.PrintSection("Test 5: Bot Idle Behavior")
+	simulation.BotIdleBehavior(cli)
 	cli.PrintStatus()
 }
