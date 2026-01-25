@@ -1,12 +1,13 @@
-package repositories
+package repositories_test
 
 import (
+	"feedme-takehome/data/repositories"
 	"feedme-takehome/domain/entities"
 	"testing"
 )
 
-func TestInMemoryOrderRepository_CreateOrder(t *testing.T) {
-	repo := NewInMemoryOrderRepository()
+func TestCreateOrder(t *testing.T) {
+	repo := repositories.NewInMemoryOrderRepository()
 
 	order, err := repo.CreateOrder(entities.OrderTypeNormal)
 	if err != nil {
@@ -18,10 +19,9 @@ func TestInMemoryOrderRepository_CreateOrder(t *testing.T) {
 	}
 }
 
-func TestInMemoryOrderRepository_GetPendingOrders(t *testing.T) {
-	repo := NewInMemoryOrderRepository()
+func TestGetPendingOrders(t *testing.T) {
+	repo := repositories.NewInMemoryOrderRepository()
 
-	// Create orders
 	repo.CreateOrder(entities.OrderTypeNormal)
 	repo.CreateOrder(entities.OrderTypeVIP)
 	repo.CreateOrder(entities.OrderTypeNormal)
@@ -32,19 +32,17 @@ func TestInMemoryOrderRepository_GetPendingOrders(t *testing.T) {
 		t.Errorf("Expected 3 pending orders, got %d", len(pending))
 	}
 
-	// Check VIP order is first
 	if pending[0].Type != entities.OrderTypeVIP {
 		t.Errorf("Expected first order to be VIP, got %s", pending[0].Type)
 	}
 
-	// Check normal orders come after VIP
 	if pending[1].Type != entities.OrderTypeNormal {
 		t.Errorf("Expected second order to be NORMAL, got %s", pending[1].Type)
 	}
 }
 
-func TestInMemoryOrderRepository_UpdateOrderStatus(t *testing.T) {
-	repo := NewInMemoryOrderRepository()
+func TestUpdateOrderStatus(t *testing.T) {
+	repo := repositories.NewInMemoryOrderRepository()
 
 	order, _ := repo.CreateOrder(entities.OrderTypeNormal)
 

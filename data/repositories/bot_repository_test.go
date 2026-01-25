@@ -1,11 +1,12 @@
-package repositories
+package repositories_test
 
 import (
+	"feedme-takehome/data/repositories"
 	"testing"
 )
 
-func TestInMemoryBotRepository_AddBot(t *testing.T) {
-	repo := NewInMemoryBotRepository()
+func TestAddBot(t *testing.T) {
+	repo := repositories.NewInMemoryBotRepository()
 
 	bot, err := repo.AddBot()
 	if err != nil {
@@ -21,8 +22,8 @@ func TestInMemoryBotRepository_AddBot(t *testing.T) {
 	}
 }
 
-func TestInMemoryBotRepository_GetIdleBots(t *testing.T) {
-	repo := NewInMemoryBotRepository()
+func TestGetIdleBots(t *testing.T) {
+	repo := repositories.NewInMemoryBotRepository()
 
 	repo.AddBot()
 	repo.AddBot()
@@ -32,7 +33,6 @@ func TestInMemoryBotRepository_GetIdleBots(t *testing.T) {
 		t.Errorf("Expected 2 idle bots, got %d", len(idle))
 	}
 
-	// Set one bot to processing
 	repo.UpdateBotStatus(1, true, 1)
 
 	idle = repo.GetIdleBots()
@@ -41,8 +41,8 @@ func TestInMemoryBotRepository_GetIdleBots(t *testing.T) {
 	}
 }
 
-func TestInMemoryBotRepository_RemoveBot(t *testing.T) {
-	repo := NewInMemoryBotRepository()
+func TestRemoveBot(t *testing.T) {
+	repo := repositories.NewInMemoryBotRepository()
 
 	repo.AddBot()
 	repo.AddBot()
@@ -63,7 +63,6 @@ func TestInMemoryBotRepository_RemoveBot(t *testing.T) {
 		t.Errorf("Expected 2 bots after removal, got %d", len(bots))
 	}
 
-	// Verify the newest bot (ID 3) was removed
 	for _, bot := range bots {
 		if bot.ID == 3 {
 			t.Error("Expected bot with ID 3 to be removed")

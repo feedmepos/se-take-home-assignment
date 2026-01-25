@@ -1,16 +1,17 @@
-package usecases
+package usecases_test
 
 import (
 	"feedme-takehome/data/repositories"
 	"feedme-takehome/domain/entities"
+	"feedme-takehome/domain/usecases"
 	"testing"
 )
 
-func TestCreateOrderUseCase_Execute(t *testing.T) {
+func TestCreateOrderUseCase(t *testing.T) {
 	orderRepo := repositories.NewInMemoryOrderRepository()
-	uc := NewCreateOrderUseCase(orderRepo)
+	uc := usecases.NewCreateOrderUseCase(orderRepo)
 
-	result, err := uc.Execute(entities.OrderTypeNormal)
+	result, err := uc.Execute(usecases.CreateOrderArgs{OrderType: entities.OrderTypeNormal})
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
 	}
@@ -43,7 +44,7 @@ func TestCreateOrderUseCase_Execute(t *testing.T) {
 		t.Errorf("Expected normal pending count to be 1, got %d", result.NormalPendingCount)
 	}
 
-	vipResult, err := uc.Execute(entities.OrderTypeVIP)
+	vipResult, err := uc.Execute(usecases.CreateOrderArgs{OrderType: entities.OrderTypeVIP})
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
 	}

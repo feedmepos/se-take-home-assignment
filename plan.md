@@ -35,6 +35,7 @@ McDonald's needs an automated order processing system that:
 ├── domain/
 │   ├── entities/               # Order, Bot
 │   ├── interfaces/             # Repository interfaces
+│   ├── mocks/                  # MockOrderRepository, MockBotRepository
 │   └── usecases/               # CreateOrder, AddBot, RemoveBot, ProcessOrders, GetStatus
 ├── presentation/cli.go         # CLI, implements SimulationController, owns OutputWriter interface
 ├── simulation/workflow.go      # Demo workflows, owns SimulationController interface
