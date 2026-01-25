@@ -6,11 +6,12 @@ import (
 )
 
 type Dependencies struct {
-	CreateOrderUC   *usecases.CreateOrderUseCase
-	AddBotUC        *usecases.AddBotUseCase
-	RemoveBotUC     *usecases.RemoveBotUseCase
-	ProcessOrdersUC *usecases.ProcessOrdersUseCase
-	GetStatusUC     *usecases.GetStatusUseCase
+	CreateOrderUC    *usecases.CreateOrderUseCase
+	AddBotUC         *usecases.AddBotUseCase
+	RemoveBotUC      *usecases.RemoveBotUseCase
+	AssignOrdersUC   *usecases.AssignOrdersUseCase
+	CompleteOrdersUC *usecases.CompleteOrdersUseCase
+	GetStatusUC      *usecases.GetStatusUseCase
 }
 
 func InitializeDependencies(
@@ -18,10 +19,11 @@ func InitializeDependencies(
 	botRepo interfaces.BotRepository,
 ) *Dependencies {
 	return &Dependencies{
-		CreateOrderUC:   usecases.NewCreateOrderUseCase(orderRepo),
-		AddBotUC:        usecases.NewAddBotUseCase(botRepo, orderRepo),
-		RemoveBotUC:     usecases.NewRemoveBotUseCase(botRepo, orderRepo),
-		ProcessOrdersUC: usecases.NewProcessOrdersUseCase(botRepo, orderRepo),
-		GetStatusUC:     usecases.NewGetStatusUseCase(orderRepo, botRepo),
+		CreateOrderUC:    usecases.NewCreateOrderUseCase(orderRepo),
+		AddBotUC:         usecases.NewAddBotUseCase(botRepo, orderRepo),
+		RemoveBotUC:      usecases.NewRemoveBotUseCase(botRepo, orderRepo),
+		AssignOrdersUC:   usecases.NewAssignOrdersUseCase(botRepo, orderRepo),
+		CompleteOrdersUC: usecases.NewCompleteOrdersUseCase(botRepo, orderRepo),
+		GetStatusUC:      usecases.NewGetStatusUseCase(orderRepo, botRepo),
 	}
 }

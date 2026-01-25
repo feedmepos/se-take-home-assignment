@@ -5,36 +5,36 @@ import (
 	"feedme-takehome/domain/interfaces"
 )
 
-type CreateOrderResult struct {
+type CreateOrderUseCase struct {
+	orderRepo interfaces.OrderRepository
+}
+
+type CreateOrderArgs struct {
+	OrderType entities.OrderType
+}
+
+type CreateOrderRes struct {
 	Order              *entities.Order
 	PendingCount       int
 	NormalPendingCount int
 }
 
-type CreateOrderUseCase struct {
-	orderRepo interfaces.OrderRepository
-}
-
-func NewCreateOrderUseCase(orderRepo interfaces.OrderRepository) *CreateOrderUseCase {
-	return &CreateOrderUseCase{
-		orderRepo: orderRepo,
-	}
-}
-
-func (uc *CreateOrderUseCase) Execute(orderType entities.OrderType) (*CreateOrderResult, error) {
-	order, err := uc.orderRepo.CreateOrder(orderType)
+func (uc *CreateOrderUseCase) Execute(args CreateOrderArgs) (res *CreateOrderRes, err error) {
+	order, err := uc.orderRepo.CreateOrder(args.OrderType)
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	pendingOrders := uc.orderRepo.GetPendingOrders()
 	normalCount := countNormalOrders(pendingOrders)
 
-	return &CreateOrderResult{
+	res = &CreateOrderRes{
 		Order:              order,
 		PendingCount:       len(pendingOrders),
 		NormalPendingCount: normalCount,
-	}, nil
+	}
+
+	return
 }
 
 func countNormalOrders(orders []*entities.Order) int {
@@ -45,4 +45,10 @@ func countNormalOrders(orders []*entities.Order) int {
 		}
 	}
 	return count
+}
+
+func NewCreateOrderUseCase(orderRepo interfaces.OrderRepository) *CreateOrderUseCase {
+	return &CreateOrderUseCase{
+		orderRepo: orderRepo,
+	}
 }

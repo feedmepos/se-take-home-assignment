@@ -17,22 +17,24 @@ type OutputWriter interface {
 // CLIDependencies contains all dependencies needed by CLI.
 // This struct is owned by the presentation layer.
 type CLIDependencies struct {
-	CreateOrderUC   *usecases.CreateOrderUseCase
-	AddBotUC        *usecases.AddBotUseCase
-	RemoveBotUC     *usecases.RemoveBotUseCase
-	ProcessOrdersUC *usecases.ProcessOrdersUseCase
-	GetStatusUC     *usecases.GetStatusUseCase
-	Output          OutputWriter
+	CreateOrderUC    *usecases.CreateOrderUseCase
+	AddBotUC         *usecases.AddBotUseCase
+	RemoveBotUC      *usecases.RemoveBotUseCase
+	AssignOrdersUC   *usecases.AssignOrdersUseCase
+	CompleteOrdersUC *usecases.CompleteOrdersUseCase
+	GetStatusUC      *usecases.GetStatusUseCase
+	Output           OutputWriter
 }
 
 type CLI struct {
-	createOrderUC   *usecases.CreateOrderUseCase
-	addBotUC        *usecases.AddBotUseCase
-	removeBotUC     *usecases.RemoveBotUseCase
-	processOrdersUC *usecases.ProcessOrdersUseCase
-	getStatusUC     *usecases.GetStatusUseCase
-	output          OutputWriter
-	simTime         time.Time
+	createOrderUC    *usecases.CreateOrderUseCase
+	addBotUC         *usecases.AddBotUseCase
+	removeBotUC      *usecases.RemoveBotUseCase
+	assignOrdersUC   *usecases.AssignOrdersUseCase
+	completeOrdersUC *usecases.CompleteOrdersUseCase
+	getStatusUC      *usecases.GetStatusUseCase
+	output           OutputWriter
+	simTime          time.Time
 }
 
 func NewCLI(deps *CLIDependencies) *CLI {
@@ -43,7 +45,8 @@ func NewCLI(deps *CLIDependencies) *CLI {
 		cli.createOrderUC = deps.CreateOrderUC
 		cli.addBotUC = deps.AddBotUC
 		cli.removeBotUC = deps.RemoveBotUC
-		cli.processOrdersUC = deps.ProcessOrdersUC
+		cli.assignOrdersUC = deps.AssignOrdersUC
+		cli.completeOrdersUC = deps.CompleteOrdersUC
 		cli.getStatusUC = deps.GetStatusUC
 		cli.output = deps.Output
 	}
@@ -90,7 +93,9 @@ func (cli *CLI) Flush() {
 }
 
 func (cli *CLI) CreateNormalOrder() error {
-	result, err := cli.createOrderUC.Execute(entities.OrderTypeNormal)
+	result, err := cli.createOrderUC.Execute(usecases.CreateOrderArgs{
+		OrderType: entities.OrderTypeNormal,
+	})
 	if err != nil {
 		cli.output.WriteLine(fmt.Sprintf("[ERROR] %v", err))
 		return err
@@ -101,7 +106,9 @@ func (cli *CLI) CreateNormalOrder() error {
 }
 
 func (cli *CLI) CreateVIPOrder() error {
-	result, err := cli.createOrderUC.Execute(entities.OrderTypeVIP)
+	result, err := cli.createOrderUC.Execute(usecases.CreateOrderArgs{
+		OrderType: entities.OrderTypeVIP,
+	})
 	if err != nil {
 		cli.output.WriteLine(fmt.Sprintf("[ERROR] %v", err))
 		return err
@@ -112,12 +119,12 @@ func (cli *CLI) CreateVIPOrder() error {
 }
 
 func (cli *CLI) AddBot() error {
-	bot, _, err := cli.addBotUC.Execute()
+	res, err := cli.addBotUC.Execute()
 	if err != nil {
 		cli.output.WriteLine(fmt.Sprintf("[ERROR] %v", err))
 		return err
 	}
-	cli.output.WriteLine(fmt.Sprintf("[%s] Bot #%d created - Status: ACTIVE", cli.timestamp(), bot.ID))
+	cli.output.WriteLine(fmt.Sprintf("[%s] Bot #%d created - Status: ACTIVE", cli.timestamp(), res.Bot.ID))
 	return nil
 }
 
@@ -140,13 +147,27 @@ func (cli *CLI) RemoveBot() error {
 	return nil
 }
 
+func (cli *CLI) hasIdleBot(status *usecases.GetStatusRes) bool {
+	for _, bot := range status.Bots {
+		if !bot.IsProcessing {
+			return true
+		}
+	}
+	return false
+}
+
 func (cli *CLI) ProcessPendingOrders() {
 	for {
-		if !cli.processOrdersUC.HasIdleBot() || !cli.processOrdersUC.HasPendingOrders() {
+		status := cli.getStatusUC.Execute()
+		if !cli.hasIdleBot(status) || len(status.PendingOrders) == 0 {
 			break
 		}
 
-		assigned := cli.processOrdersUC.AssignOrdersToIdleBots()
+		assigned, err := cli.assignOrdersUC.Execute()
+		if err != nil {
+			cli.output.WriteLine(fmt.Sprintf("[ERROR] %v", err))
+			return
+		}
 		if len(assigned) == 0 {
 			break
 		}
@@ -158,7 +179,11 @@ func (cli *CLI) ProcessPendingOrders() {
 
 		cli.advanceTime(10)
 
-		completed := cli.processOrdersUC.CompleteProcessing(assigned)
+		completed, err := cli.completeOrdersUC.Execute(usecases.CompleteOrdersArgs{Assignments: assigned})
+		if err != nil {
+			cli.output.WriteLine(fmt.Sprintf("[ERROR] %v", err))
+			return
+		}
 		for _, r := range completed {
 			cli.output.WriteLine(fmt.Sprintf("[%s] Bot #%d completed %s Order #%d - Status: COMPLETE (Processing time: 10s)",
 				cli.timestamp(), r.BotID, orderTypeString(r.Order.Type), r.Order.ID))

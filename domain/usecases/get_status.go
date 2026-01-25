@@ -6,12 +6,9 @@ import (
 	"sort"
 )
 
-type StatusResult struct {
-	PendingOrders    []*entities.Order
-	ProcessingOrders []*ProcessingOrderInfo
-	CompleteOrders   []*entities.Order
-	Bots             []*BotInfo
-	IdleBotCount     int
+type GetStatusUseCase struct {
+	orderRepo interfaces.OrderRepository
+	botRepo   interfaces.BotRepository
 }
 
 type ProcessingOrderInfo struct {
@@ -25,19 +22,17 @@ type BotInfo struct {
 	CurrentOrderID int
 }
 
-type GetStatusUseCase struct {
-	orderRepo interfaces.OrderRepository
-	botRepo   interfaces.BotRepository
+type GetStatusArgs struct{}
+
+type GetStatusRes struct {
+	PendingOrders    []*entities.Order
+	ProcessingOrders []*ProcessingOrderInfo
+	CompleteOrders   []*entities.Order
+	Bots             []*BotInfo
+	IdleBotCount     int
 }
 
-func NewGetStatusUseCase(orderRepo interfaces.OrderRepository, botRepo interfaces.BotRepository) *GetStatusUseCase {
-	return &GetStatusUseCase{
-		orderRepo: orderRepo,
-		botRepo:   botRepo,
-	}
-}
-
-func (uc *GetStatusUseCase) Execute() *StatusResult {
+func (uc *GetStatusUseCase) Execute() (res *GetStatusRes) {
 	orders := uc.orderRepo.GetAllOrders()
 	bots := uc.botRepo.GetAllBots()
 
@@ -45,28 +40,34 @@ func (uc *GetStatusUseCase) Execute() *StatusResult {
 	botInfos, idleCount, processingOrderIDs := buildBotInfoAndMetrics(bots, orderMap)
 	pendingOrders, processingOrders, completeOrders := categorizeOrders(orders, processingOrderIDs)
 
-	return &StatusResult{
+	res = &GetStatusRes{
 		PendingOrders:    pendingOrders,
 		ProcessingOrders: processingOrders,
 		CompleteOrders:   completeOrders,
 		Bots:             botInfos,
 		IdleBotCount:     idleCount,
 	}
+
+	return
 }
 
-func buildOrderMap(orders []*entities.Order) map[int]*entities.Order {
-	orderMap := make(map[int]*entities.Order)
+func buildOrderMap(orders []*entities.Order) (orderMap map[int]*entities.Order) {
+	orderMap = make(map[int]*entities.Order)
 	for _, order := range orders {
 		orderMap[order.ID] = order
 	}
 	return orderMap
 }
 
-func buildBotInfoAndMetrics(bots []*entities.Bot, orderMap map[int]*entities.Order) ([]*BotInfo, int, map[int]int) {
-	botInfos := make([]*BotInfo, 0, len(bots))
-	idleCount := 0
-	processingOrderIDs := make(map[int]int) // orderID -> botID
-	
+func buildBotInfoAndMetrics(bots []*entities.Bot, orderMap map[int]*entities.Order) (
+	botInfos []*BotInfo,
+	idleCount int,
+	processingOrderIDs map[int]int,
+) {
+	botInfos = make([]*BotInfo, 0, len(bots))
+	idleCount = 0
+	processingOrderIDs = make(map[int]int)
+
 	for _, bot := range bots {
 		botInfos = append(botInfos, &BotInfo{
 			ID:             bot.ID,
@@ -85,10 +86,14 @@ func buildBotInfoAndMetrics(bots []*entities.Bot, orderMap map[int]*entities.Ord
 	return botInfos, idleCount, processingOrderIDs
 }
 
-func categorizeOrders(orders []*entities.Order, processingOrderIDs map[int]int) ([]*entities.Order, []*ProcessingOrderInfo, []*entities.Order) {
-	pendingOrders := make([]*entities.Order, 0)
-	completeOrders := make([]*entities.Order, 0)
-	processingOrders := make([]*ProcessingOrderInfo, 0)
+func categorizeOrders(orders []*entities.Order, processingOrderIDs map[int]int) (
+	pendingOrders []*entities.Order,
+	processingOrders []*ProcessingOrderInfo,
+	completeOrders []*entities.Order,
+) {
+	pendingOrders = make([]*entities.Order, 0)
+	completeOrders = make([]*entities.Order, 0)
+	processingOrders = make([]*ProcessingOrderInfo, 0)
 
 	for _, order := range orders {
 		switch order.Status {
@@ -129,4 +134,11 @@ func categorizeOrders(orders []*entities.Order, processingOrderIDs map[int]int) 
 	})
 
 	return pendingOrders, processingOrders, completeOrders
+}
+
+func NewGetStatusUseCase(orderRepo interfaces.OrderRepository, botRepo interfaces.BotRepository) *GetStatusUseCase {
+	return &GetStatusUseCase{
+		orderRepo: orderRepo,
+		botRepo:   botRepo,
+	}
 }

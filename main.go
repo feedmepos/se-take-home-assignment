@@ -23,12 +23,13 @@ func main() {
 
 	// Presentation layer - CLI with its dependencies
 	cli := presentation.NewCLI(&presentation.CLIDependencies{
-		CreateOrderUC:   deps.CreateOrderUC,
-		AddBotUC:        deps.AddBotUC,
-		RemoveBotUC:     deps.RemoveBotUC,
-		ProcessOrdersUC: deps.ProcessOrdersUC,
-		GetStatusUC:     deps.GetStatusUC,
-		Output:          output,
+		CreateOrderUC:    deps.CreateOrderUC,
+		AddBotUC:         deps.AddBotUC,
+		RemoveBotUC:      deps.RemoveBotUC,
+		AssignOrdersUC:   deps.AssignOrdersUC,
+		CompleteOrdersUC: deps.CompleteOrdersUC,
+		GetStatusUC:      deps.GetStatusUC,
+		Output:           output,
 	})
 
 	cli.PrintHeader()

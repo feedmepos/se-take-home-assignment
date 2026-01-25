@@ -5,15 +5,69 @@ import (
 	"feedme-takehome/domain/interfaces"
 )
 
-type RemoveBotResult struct {
+type RemoveBotUseCase struct {
+	botRepo   interfaces.BotRepository
+	orderRepo interfaces.OrderRepository
+}
+
+type RemoveBotArgs struct{}
+
+type RemoveBotRes struct {
 	BotID         int
 	OrderID       int
 	WasProcessing bool
 }
 
-type RemoveBotUseCase struct {
-	botRepo   interfaces.BotRepository
-	orderRepo interfaces.OrderRepository
+func (uc *RemoveBotUseCase) Execute() (res *RemoveBotRes, err error) {
+	bots := uc.botRepo.GetAllBots()
+	if len(bots) == 0 {
+		return nil, nil
+	}
+
+	newestBot := findNewestBot(bots)
+	res = buildRemoveBotResult(newestBot)
+
+	if newestBot.IsProcessing {
+		err = uc.releaseProcessingOrder(newestBot, res)
+		if err != nil {
+			return
+		}
+	}
+
+	err = uc.botRepo.RemoveBot()
+
+	return
+}
+
+func findNewestBot(bots []*entities.Bot) (newestBot *entities.Bot) {
+	newestBot = bots[0]
+	for _, bot := range bots {
+		if bot.ID > newestBot.ID {
+			newestBot = bot
+		}
+	}
+
+	return
+}
+
+func buildRemoveBotResult(bot *entities.Bot) (res *RemoveBotRes) {
+	res = &RemoveBotRes{
+		BotID:         bot.ID,
+		WasProcessing: bot.IsProcessing,
+	}
+
+	return
+}
+
+func (uc *RemoveBotUseCase) releaseProcessingOrder(bot *entities.Bot, res *RemoveBotRes) (err error) {
+	res.OrderID = bot.CurrentOrderID
+	err = uc.orderRepo.UpdateOrderStatus(res.OrderID, entities.OrderStatusPending)
+	if err != nil {
+		return
+	}
+	err = uc.botRepo.UpdateBotStatus(bot.ID, false, 0)
+
+	return
 }
 
 func NewRemoveBotUseCase(botRepo interfaces.BotRepository, orderRepo interfaces.OrderRepository) *RemoveBotUseCase {
@@ -21,44 +75,4 @@ func NewRemoveBotUseCase(botRepo interfaces.BotRepository, orderRepo interfaces.
 		botRepo:   botRepo,
 		orderRepo: orderRepo,
 	}
-}
-
-func (uc *RemoveBotUseCase) Execute() (*RemoveBotResult, error) {
-	bots := uc.botRepo.GetAllBots()
-	if len(bots) == 0 {
-		return nil, nil
-	}
-
-	newestBot := findNewestBot(bots)
-	result := buildRemoveBotResult(newestBot)
-	
-	if newestBot.IsProcessing {
-		uc.releaseProcessingOrder(newestBot, result)
-	}
-
-	err := uc.botRepo.RemoveBot()
-	return result, err
-}
-
-func findNewestBot(bots []*entities.Bot) *entities.Bot {
-	newestBot := bots[0]
-	for _, bot := range bots {
-		if bot.ID > newestBot.ID {
-			newestBot = bot
-		}
-	}
-	return newestBot
-}
-
-func buildRemoveBotResult(bot *entities.Bot) *RemoveBotResult {
-	return &RemoveBotResult{
-		BotID:         bot.ID,
-		WasProcessing: bot.IsProcessing,
-	}
-}
-
-func (uc *RemoveBotUseCase) releaseProcessingOrder(bot *entities.Bot, result *RemoveBotResult) {
-	result.OrderID = bot.CurrentOrderID
-	uc.orderRepo.UpdateOrderStatus(result.OrderID, entities.OrderStatusPending)
-	uc.botRepo.UpdateBotStatus(bot.ID, false, 0)
 }
