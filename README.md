@@ -1,5 +1,5 @@
 
-Due to time constraints, I will only do the front end
+Due to time constraints, I completed only the front end
 
 For Nodejs backend, we can use object proxy to simulate non-blocking queue, which I think is better than while loop + promise approach
 
@@ -27,4 +27,4 @@ This repository is coded without AI assistance.
 
 ## Video Demo
 
-[![video demo](https://img.youtube.com/vi/NK8LyLGiD54/maxresdefault.jpg)](https://youtu.be/NK8LyLGiD54)
+[![video demo](https://img.youtube.com/vi/ORCfP3-Seeo/maxresdefault.jpg)](https://youtu.be/ORCfP3-Seeo)
