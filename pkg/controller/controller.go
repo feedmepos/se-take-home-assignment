@@ -181,7 +181,7 @@ func (c *Controller) handleCompletedOrder(b *Bot) {
 	}
 }
 
-func (c *Controller) WaitUntilDone() {
+func (c *Controller) WaitUntilDoneOrTimeout() {
 	c.mu.Lock()
 	hasBots := len(c.Bots) > 0
 	c.mu.Unlock()
