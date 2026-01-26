@@ -27,7 +27,7 @@ export const FormOrder = () => {
 				bg="orange"
 				w="fit-content"
 				onClick={() => {
-					useStoreQueue.getState().modifyRoboCount(number)
+					useStoreQueue.getState().modify_robot_count(number)
 				}}
 			>
 				Update

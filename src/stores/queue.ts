@@ -23,7 +23,7 @@ export const useStoreQueue = creator<{
 		type: 'regular' | 'vip'
 		id_robot: number
 	}[]
-	modifyRoboCount: (count: number) => void
+	modify_robot_count: (count: number) => void
 	enqueue_pending: (type: 'regular' | 'vip') => void
 	enqueue_processing: () => void
 }>((set, get) => {
@@ -73,21 +73,19 @@ export const useStoreQueue = creator<{
 				state.pending[type].shift()
 			})
 		},
-		modifyRoboCount: (count) => {
+		modify_robot_count: (count) => {
 			set((state) => {
 				state.count_robot = count
-			})
-			Object.entries(get().processing).forEach(
-				([id_robot, { type, id_order, id_process }], i) => {
-					if (i + 1 > count) {
-						clearTimeout(id_process)
-						set((state) => {
+				Object.entries(get().processing).forEach(
+					([id_robot, { type, id_order, id_process }], i) => {
+						if (i + 1 > count) {
+							clearTimeout(id_process)
 							state.pending[type].push({ id_order, time_create: new Date() })
 							delete state.processing[Number(id_robot)]
-						})
-					}
-				},
-			)
+						}
+					},
+				)
+			})
 		},
 	}
 })
