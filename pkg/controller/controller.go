@@ -130,39 +130,28 @@ func (c *Controller) RemoveBot() {
 }
 
 func (c *Controller) processNext() {
-
 	c.mu.Lock()
+	defer c.mu.Unlock()
 
 	if len(c.Pendings) == 0 {
-		c.mu.Unlock()
 		return
 	}
 
-	var b *Bot
-	for _, bot := range c.Bots {
-		if bot.getIsIdle() {
-			b = bot
+	for _, b := range c.Bots {
+		if b.isIdle() {
+			b.reserve()
 			Log(fmt.Sprintf("Bot #%d is now IDLE - %d pending orders", b.id, len(c.Pendings)))
+			o := c.Pendings[0]
+			c.Pendings = c.Pendings[1:]
+
+			Log(fmt.Sprintf(
+				"Bot #%d picked up %s Order #%d - Status: %s",
+				b.id, o.orderType, o.id, processing,
+			))
+			go b.processOrder(o)
 			break
 		}
 	}
-
-	if b == nil {
-		c.mu.Unlock()
-		return
-	}
-
-	o := c.Pendings[0]
-	c.Pendings = c.Pendings[1:]
-
-	Log(fmt.Sprintf(
-		"Bot #%d picked up %s Order #%d - Status: %s",
-		b.id, o.orderType, o.id, processing,
-	))
-
-	c.mu.Unlock()
-
-	go b.processOrder(o)
 }
 
 func (c *Controller) handleCompletedOrder(b *Bot) {

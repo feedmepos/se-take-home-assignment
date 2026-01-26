@@ -36,11 +36,18 @@ type Bot struct {
 	mu           sync.Mutex
 }
 
-func (b *Bot) getIsIdle() bool {
+func (b *Bot) isIdle() bool {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
 	return b.status == idle && b.currentOrder == nil
+}
+
+func (b *Bot) reserve() {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
+	b.status = processing
 }
 
 func (b *Bot) processOrder(order *Order) {
