@@ -11,19 +11,19 @@ export const useStoreQueue = creator<{
 			id_process: number
 			time_process: Date
 			time_create: Date
-			type: 'regular' | 'vip'
 			time_remaining: number
+			type: 'regular' | 'vip'
 		}
 	>
 	completed: {
 		id_order: number
+		id_robot: number
 		time_process: Date
 		time_complete: Date
 		time_create: Date
 		type: 'regular' | 'vip'
-		id_robot: number
 	}[]
-	modify_robot_count: (count: number) => void
+	modify_count_robot: (count: number) => void
 	enqueue_pending: (type: 'regular' | 'vip') => void
 	enqueue_processing: () => void
 }>((set, get) => ({
@@ -74,7 +74,7 @@ export const useStoreQueue = creator<{
 			state.pending[type].shift()
 		})
 	},
-	modify_robot_count: (count) => {
+	modify_count_robot: (count) => {
 		set((state) => {
 			state.count_robot = count
 			Object.entries(get().processing).forEach(
