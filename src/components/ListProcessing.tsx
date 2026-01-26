@@ -7,9 +7,13 @@ export const ListProcessing = () => {
 	const [, setBreathing] = useState([])
 
 	useEffect(() => {
-		setInterval(() => {
+		const id = setInterval(() => {
 			setBreathing([])
 		}, 500)
+
+		return () => {
+			clearInterval(id)
+		}
 	}, [])
 
 	return (
