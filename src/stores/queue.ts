@@ -34,9 +34,11 @@ export const useStoreQueue = creator<{
 	completed: [],
 	enqueue_pending: (type) => {
 		set((state) => {
-			const newId = state.id_order_latest + 1
-			state.id_order_latest = newId
-			state.pending[type].push({ id_order: newId, time_create: new Date() })
+			state.id_order_latest++
+			state.pending[type].push({
+				id_order: state.id_order_latest,
+				time_create: new Date(),
+			})
 		})
 	},
 	enqueue_processing: () => {
@@ -44,9 +46,9 @@ export const useStoreQueue = creator<{
 		if (Object.keys(processing).length >= get().count_robot) return
 		if (!get().pending.vip[0] && !get().pending.regular[0]) return
 		const id_robot =
-			[...Array(get().count_robot)].findIndex((_, index) => {
-				return !processing[index + 1]
-			}) + 1
+			[...Array(get().count_robot)].findIndex(
+				(_, index) => !processing[index + 1],
+			) + 1
 
 		const time_remaining = 1e4
 		const id_process = setTimeout(() => {
