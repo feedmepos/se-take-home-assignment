@@ -13,9 +13,11 @@ function App() {
 	const completed = useStoreQueue((state) => state.completed)
 	const count_robot = useStoreQueue((state) => state.count_robot)
 
-	useEffect(() => {
-		useStoreQueue.getState().enqueue_processing()
-	}, [pending, completed, count_robot])
+	useEffect(useStoreQueue.getState().enqueue_processing, [
+		pending,
+		completed,
+		count_robot,
+	])
 
 	return (
 		<Container bg="#ffd580" p="xl">
