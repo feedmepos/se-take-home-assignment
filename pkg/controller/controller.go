@@ -173,6 +173,7 @@ func (c *Controller) handleCompletedOrder(b *Bot) {
 func (c *Controller) WaitUntilDoneOrTimeout() {
 	c.mu.Lock()
 	hasBots := len(c.Bots) > 0
+	hasOrders := len(c.Pendings) > 0
 	c.mu.Unlock()
 
 	done := make(chan struct{})
@@ -181,7 +182,7 @@ func (c *Controller) WaitUntilDoneOrTimeout() {
 		close(done)
 	}()
 
-	if hasBots {
+	if hasBots && hasOrders {
 		<-done
 		return
 	}

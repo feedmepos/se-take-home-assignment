@@ -193,7 +193,7 @@ func TestRemoveBotVIPOrderDuringProcessing(t *testing.T) {
 	}
 }
 
-func TestWaitUntilDoneOrTimeoutWithBotsProcessingOrders(t *testing.T) {
+func TestWaitUntilDoneOrTimeoutWithBotsAndOrders(t *testing.T) {
 	oriProcessTime := processTime
 	processTime = 100 * time.Millisecond
 	oriTimeoutSeconds := timeoutSeconds
@@ -230,6 +230,43 @@ func TestWaitUntilTimeoutNoBot(t *testing.T) {
 
 	if len(c.Completes) != 0 {
 		t.Error("No orders should be completed due to timeout")
+	}
+}
+
+func TestWaitUntilTimeoutNoOrders(t *testing.T) {
+	oriProcessTime := processTime
+	processTime = 100 * time.Millisecond
+	oriTimeoutSeconds := timeoutSeconds
+	timeoutSeconds = 1
+	defer func() {
+		processTime = oriProcessTime
+		timeoutSeconds = oriTimeoutSeconds
+	}()
+
+	c := NewController()
+	c.AddBot()
+	c.WaitUntilDoneOrTimeout()
+
+	if len(c.Completes) != 0 {
+		t.Error("No bots should process orders due to timeout")
+	}
+}
+
+func TestWaitUntilTimeoutNoBotAndNoOrder(t *testing.T) {
+	oriProcessTime := processTime
+	processTime = 100 * time.Millisecond
+	oriTimeoutSeconds := timeoutSeconds
+	timeoutSeconds = 1
+	defer func() {
+		processTime = oriProcessTime
+		timeoutSeconds = oriTimeoutSeconds
+	}()
+
+	c := NewController()
+	c.WaitUntilDoneOrTimeout()
+
+	if len(c.Completes) != 0 {
+		t.Error("No bots or orders should be processed due to timeout")
 	}
 }
 

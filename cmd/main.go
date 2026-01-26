@@ -26,6 +26,6 @@ func main() {
 	c.AddVipOrder()
 	time.Sleep(5 * time.Second)
 	c.RemoveBot()
-	c.WaitUntilDoneOrTimeout() // if no bot is present, will timeout after predefined seconds
+	c.WaitUntilDoneOrTimeout()
 	c.PrintStatus()
 }
