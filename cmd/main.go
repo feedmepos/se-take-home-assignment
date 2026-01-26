@@ -18,11 +18,14 @@ func main() {
 	time.Sleep(1 * time.Second)
 	c.AddBot()
 	time.Sleep(1 * time.Second)
+	c.RemoveBot()
 	c.AddBot()
 	time.Sleep(10 * time.Second)
+	c.RemoveBot()
+	c.AddNormalOrder()
 	c.AddVipOrder()
 	time.Sleep(5 * time.Second)
 	c.RemoveBot()
-	c.WaitUntilDone()
+	c.WaitUntilDoneOrTimeout() // if no bot is present, will timeout after predefined seconds
 	c.PrintStatus()
 }
