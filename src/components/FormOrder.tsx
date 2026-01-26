@@ -8,7 +8,7 @@ export const FormOrder = () => {
 	return (
 		<Paper
 			px="md"
-			style={{ flexGrow: 1, flexDirection: 'column' }}
+			style={{ flexGrow: 1, flexDirection: 'column', alignItems: 'center' }}
 			display="flex"
 		>
 			<Text ta="center" tt="uppercase" td="underline" fz="lg" fw={700} w="100%">
@@ -20,12 +20,13 @@ export const FormOrder = () => {
 				onChange={v => setNumber(Number(v))}
 				min={1}
 				max={100}
+				w="12rem"
 				allowDecimal={false}
 			/>
 			<Button
 				mt="xs"
 				bg="orange"
-				w="fit-content"
+				w="12rem"
 				onClick={() => {
 					useStoreQueue.getState().modify_count_robot(number)
 				}}
