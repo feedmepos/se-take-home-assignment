@@ -44,7 +44,7 @@ export const FormOrder = () => {
 						useStoreQueue.getState().enqueue_pending('regular')
 					}}
 				>
-					Regular Oder
+					Regular Order
 				</Button>
 				<Button
 					w="8rem"
@@ -53,7 +53,7 @@ export const FormOrder = () => {
 						useStoreQueue.getState().enqueue_pending('vip')
 					}}
 				>
-					Vip Oder
+					Vip Order
 				</Button>
 			</Flex>
 		</Paper>
