@@ -44,3 +44,24 @@ func (w *FileOutputWriter) Flush() error {
 
 	return w.file.Close()
 }
+
+// ConsoleOutputWriter writes output only to the console (stdout)
+type ConsoleOutputWriter struct {
+	mu sync.Mutex
+}
+
+func NewConsoleOutputWriter() *ConsoleOutputWriter {
+	return &ConsoleOutputWriter{}
+}
+
+func (w *ConsoleOutputWriter) WriteLine(line string) error {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+
+	_, err := os.Stdout.WriteString(line + "\n")
+	return err
+}
+
+func (w *ConsoleOutputWriter) Flush() error {
+	return nil
+}
