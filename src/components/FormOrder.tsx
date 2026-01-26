@@ -3,7 +3,7 @@ import { NumberInput, Paper, Button, Flex, Text } from '@mantine/core'
 import { useState } from 'react'
 
 export const FormOrder = () => {
-	const number_initial = useStoreQueue((state) => state.count_robot)
+	const number_initial = useStoreQueue(state => state.count_robot)
 	const [number, setNumber] = useState(number_initial)
 	return (
 		<Paper
@@ -17,7 +17,7 @@ export const FormOrder = () => {
 			<NumberInput
 				label="Number of Robots (1-100)"
 				value={number}
-				onChange={(v) => setNumber(Number(v))}
+				onChange={v => setNumber(Number(v))}
 				min={1}
 				max={100}
 				allowDecimal={false}

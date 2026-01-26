@@ -3,7 +3,7 @@ import { SimpleGrid, Paper, Text, Flex, Loader } from '@mantine/core'
 import { useState, useEffect } from 'react'
 
 export const ListProcessing = () => {
-	const processing = useStoreQueue((state) => state.processing)
+	const processing = useStoreQueue(state => state.processing)
 	const [, setBreathing] = useState([])
 
 	useEffect(() => {

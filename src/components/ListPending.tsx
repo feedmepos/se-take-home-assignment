@@ -1,11 +1,11 @@
 import { useStoreQueue } from '@/stores'
 import { ScrollArea, Paper, Text, Stack } from '@mantine/core'
 export const ListPending = () => {
-	const pending = useStoreQueue((state) => state.pending)
+	const pending = useStoreQueue(state => state.pending)
 
 	return (
 		<Paper display="flex">
-			{(['regular', 'vip'] as const).map((type) => {
+			{(['regular', 'vip'] as const).map(type => {
 				return (
 					<Stack key={type} align="center">
 						<Text ta="center" tt="uppercase" td="underline" fz="lg" fw={700}>

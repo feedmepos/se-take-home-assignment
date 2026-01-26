@@ -9,9 +9,9 @@ import {
 import { Container, Flex } from '@mantine/core'
 
 function App() {
-	const pending = useStoreQueue((state) => state.pending)
-	const completed = useStoreQueue((state) => state.completed)
-	const count_robot = useStoreQueue((state) => state.count_robot)
+	const pending = useStoreQueue(state => state.pending)
+	const completed = useStoreQueue(state => state.completed)
+	const count_robot = useStoreQueue(state => state.count_robot)
 
 	useEffect(useStoreQueue.getState().enqueue_processing, [
 		pending,

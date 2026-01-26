@@ -2,7 +2,7 @@ import { useStoreQueue } from '@/stores'
 import { ScrollArea, Paper, Text } from '@mantine/core'
 
 export const ListCompleted = () => {
-	const completed = useStoreQueue((state) => state.completed)
+	const completed = useStoreQueue(state => state.completed)
 
 	return (
 		<Paper display="flex" style={{ flexDirection: 'column' }}>
