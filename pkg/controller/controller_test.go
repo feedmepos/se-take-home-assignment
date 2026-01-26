@@ -196,17 +196,40 @@ func TestRemoveBotVIPOrderDuringProcessing(t *testing.T) {
 func TestWaitUntilDoneWithMultipleOrders(t *testing.T) {
 	oriProcessTime := processTime
 	processTime = 100 * time.Millisecond
+	oriTimeoutSeconds := timeoutSeconds
+	timeoutSeconds = 1
 	defer func() {
 		processTime = oriProcessTime
+		timeoutSeconds = oriTimeoutSeconds
 	}()
 
 	c := NewController()
 	c.AddBot()
 	c.AddVipOrder()
+	c.AddBot()
 	c.AddNormalOrder()
 	c.WaitUntilDone()
 	if len(c.Completes) != 2 {
 		t.Error("All orders should be completed before WaitUntilDone returns")
+	}
+}
+
+func TestWaitUntilTimeoutNoBot(t *testing.T) {
+	oriProcessTime := processTime
+	processTime = 100 * time.Millisecond
+	oriTimeoutSeconds := timeoutSeconds
+	timeoutSeconds = 1
+	defer func() {
+		processTime = oriProcessTime
+		timeoutSeconds = oriTimeoutSeconds
+	}()
+
+	c := NewController()
+	c.AddVipOrder()
+	c.WaitUntilDone()
+
+	if len(c.Completes) != 0 {
+		t.Error("No orders should be completed due to timeout")
 	}
 }
 

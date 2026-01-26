@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+var timeoutSeconds = 10
+
 type Controller struct {
 	Pendings    []*Order
 	Completes   []*Order
@@ -183,7 +185,25 @@ func (c *Controller) handleCompletedOrder(b *Bot) {
 }
 
 func (c *Controller) WaitUntilDone() {
-	c.wg.Wait()
+	c.mu.Lock()
+	hasBots := len(c.Bots) > 0
+	c.mu.Unlock()
+
+	done := make(chan struct{})
+	go func() {
+		c.wg.Wait()
+		close(done)
+	}()
+
+	if hasBots {
+		<-done
+		return
+	}
+
+	timer := time.NewTimer(time.Duration(timeoutSeconds) * time.Second)
+	defer timer.Stop()
+
+	<-timer.C
 }
 
 func (c *Controller) PrintStatus() {
