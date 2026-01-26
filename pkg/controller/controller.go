@@ -103,13 +103,11 @@ func (c *Controller) RemoveBot() {
 	b := c.Bots[n-1]
 	c.Bots = c.Bots[:n-1]
 
-	status := b.getStatus()
-	Log(fmt.Sprintf("Bot #%d destroyed while %s", b.id, status))
-
 	o := b.stopProcessing()
 	close(b.onCompleted)
 
 	if o != nil {
+		Log(fmt.Sprintf("Bot #%d destroyed while %s", b.id, processing))
 		Log(fmt.Sprintf("Recreated %s Order #%d - Status: %s", o.orderType, o.id, o.status))
 		if o.orderType == vip {
 			i := 0
@@ -120,6 +118,8 @@ func (c *Controller) RemoveBot() {
 		} else {
 			c.Pendings = append(c.Pendings, o)
 		}
+	} else {
+		Log(fmt.Sprintf("Bot #%d destroyed while %s", b.id, idle))
 	}
 
 	c.mu.Unlock()
@@ -130,10 +130,6 @@ func (c *Controller) RemoveBot() {
 }
 
 func (c *Controller) processNext() {
-	var (
-		b *Bot
-		o *Order
-	)
 
 	c.mu.Lock()
 
@@ -142,6 +138,7 @@ func (c *Controller) processNext() {
 		return
 	}
 
+	var b *Bot
 	for _, bot := range c.Bots {
 		if bot.getIsIdle() {
 			b = bot
@@ -155,7 +152,7 @@ func (c *Controller) processNext() {
 		return
 	}
 
-	o = c.Pendings[0]
+	o := c.Pendings[0]
 	c.Pendings = c.Pendings[1:]
 
 	Log(fmt.Sprintf(

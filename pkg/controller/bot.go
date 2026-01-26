@@ -43,12 +43,6 @@ func (b *Bot) getIsIdle() bool {
 	return b.status == idle && b.currentOrder == nil
 }
 
-func (b *Bot) getStatus() BotStatus {
-	b.mu.Lock()
-	defer b.mu.Unlock()
-	return b.status
-}
-
 func (b *Bot) processOrder(order *Order) {
 	b.mu.Lock()
 	b.currentOrder = order
