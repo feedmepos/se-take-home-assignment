@@ -11,7 +11,7 @@ no pooling, no unnecessary delay, no queue library, no external services, clean,
 
 the rest are UI components
 
-public url: https://symphonious-seahorse-30d6d3.netlify.app/
+public url: https://dulcet-cassata-e95ba1.netlify.app/
 
 to install:
 
