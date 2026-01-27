@@ -1,5 +1,6 @@
 import { useStoreQueue } from '@/stores'
 import { ScrollArea, Paper, Text, Stack } from '@mantine/core'
+
 export const ListPending = () => {
 	const pending = useStoreQueue(state => state.pending)
 
