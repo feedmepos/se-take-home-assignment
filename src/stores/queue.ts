@@ -77,7 +77,7 @@ export const useStoreQueue = creator<{
 	modify_count_robot: count => {
 		set(state => {
 			state.count_robot = count
-			Object.entries(get().processing).forEach(
+			Object.entries(state.processing).forEach(
 				([id_robot, { type, id_order, id_process }], i) => {
 					if (i < count) return
 					clearTimeout(id_process)
