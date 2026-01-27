@@ -15,10 +15,10 @@ export const FormOrder = () => {
 				settings
 			</Text>
 			<NumberInput
-				label="Number of Robots (1-100)"
+				label="Number of Robots (0-100)"
 				value={number}
 				onChange={v => setNumber(Number(v))}
-				min={1}
+				min={0}
 				max={100}
 				w="12rem"
 				allowDecimal={false}

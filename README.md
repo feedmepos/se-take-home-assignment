@@ -1,7 +1,7 @@
 
 Due to time constraints, I completed only the front end
 
-~~For Nodejs backend, we can use object proxy to simulate non-blocking queue, which I think is better than while loop + promise approach~~ I overthink this one, should be possible without object proxy or while + promise, but object proxy can make the solution more elegant
+~~For Nodejs backend, we can use object proxy to simulate non-blocking queue, which I think is better than while loop + promise approach~~ I overthink this one, should be possible without object proxy or while + promise, ~~but object proxy can make the solution more elegant~~ I guess i am overthinking this part too
 
 core logic is in `src/stores/queue.ts` under 90 lines(60 lines if we infer the type instead but there is a type problem that is difficult to debug)
 
