@@ -1,63 +1,124 @@
-## FeedMe Software Engineer Take Home Assignment
-Below is a take home assignment before the interview of the position. You are required to
-1. Understand the situation and use case. You may contact the interviewer for further clarification.
-2. implement the requirement with **either frontend or backend components**.
-3. Complete the requirement with **AI** if possible, but perform your own testing.
-4. Provide documentation for the any part that you think is needed.
-5. Bring the source code and functioning prototype to the interview session.
+# 🍔 McDonald's Order Management System
 
-### Situation
-McDonald is transforming their business during COVID-19. They wish to build the automated cooking bots to reduce workforce and increase their efficiency. As one of the software engineer in the project. You task is to create an order controller which handle the order control flow. 
+This repository contains a **technical take-home assignment** that simulates a McDonald’s order management system with **VIP priority**, **FIFO scheduling**, and **bot-based order processing**.
 
-### User Story
-As below is part of the user story:
-1. As McDonald's normal customer, after I submitted my order, I wish to see my order flow into "PENDING" area. After the cooking bot process my order, I want to see it flow into to "COMPLETE" area.
-2. As McDonald's VIP member, after I submitted my order, I want my order being process first before all order by normal customer.  However if there's existing order from VIP member, my order should queue behind his/her order.
-3. As McDonald's manager, I want to increase or decrease number of cooking bot available in my restaurant. When I increase a bot, it should immediately process any pending order. When I decrease a bot, the processing order should remain un-process.
-4. As McDonald bot, it can only pickup and process 1 order at a time, each order required 10 seconds to complete process.
+The solution is implemented in **NestJS (TypeScript)** and demonstrates all required behaviors using a **deterministic CLI simulation**.
 
-### Requirements
-1. When "New Normal Order" clicked, a new order should show up "PENDING" Area.
-2. When "New VIP Order" clicked, a new order should show up in "PENDING" Area. It should place in-front of all existing "Normal" order but behind of all existing "VIP" order.
-3. The order number should be unique and increasing.
-4. When "+ Bot" clicked, a bot should be created and start processing the order inside "PENDING" area. after 10 seconds picking up the order, the order should move to "COMPLETE" area. Then the bot should start processing another order if there is any left in "PENDING" area.
-5. If there is no more order in the "PENDING" area, the bot should become IDLE until a new order come in.
-6. When "- Bot" clicked, the newest bot should be destroyed. If the bot is processing an order, it should also stop the process. The order now back to "PENDING" and ready to process by other bot.
-7. No data persistance is needed for this prototype, you may perform all the process inside memory.
+---
 
-### Functioning Prototype
-You must implement **either** frontend or backend components as described below:
+## ✨ Features
 
-#### 1. Frontend
-- You are free to use **any framework and programming language** of your choice
-- The UI application must be compiled, deployed and hosted on any publicly accessible web platform
-- Must provide a user interface that demonstrates all the requirements listed above
-- Should allow users to interact with the McDonald's order management system
+### 🧾 Orders
+- Types: `VIP`, `NORMAL`
+- Status flow: `PENDING → PROCESSING → COMPLETE`
+- Orders are processed fairly using FIFO (`createdAt`) rules
 
-#### 2. Backend
-- You must use **either Go (Golang) or Node.js** for the backend implementation
-- The backend must be a CLI application that can be executed in GitHub Actions
-- Must implement the following scripts in the `script` directory:
-  - `test.sh`: Contains unit test execution steps
-  - `build.sh`: Contains compilation steps for the CLI application
-  - `run.sh`: Contains execution steps that run the CLI application
-- The CLI application result must be printed to `result.txt`
-- The `result.txt` output must include timestamps in `HH:MM:SS` format to track order completion times
-- Must follow **GitHub Flow**: Create a Pull Request with your changes to this repository
-- Ensure all GitHub Action checks pass successfully
+### 🤖 Bots
+- Each bot processes **one order at a time**
+- Orders take **10 seconds** to complete
+- Bots can be added or removed dynamically
+- Removing a bot safely stops processing and re-queues the order
 
-#### Submission Requirements
-- Fork this repository and implement your solution with either frontend or backend
-- **Frontend option**: Deploy to a publicly accessible URL using any technology stack
-- **Backend option**: Must be implemented in Go or Node.js and work within the GitHub Actions environment
-  - Follow GitHub Flow process with Pull Request submission
-  - All tests in `test.sh` must pass
-  - The `result.txt` file must contain meaningful output from your CLI application
-  - All output must include timestamps in `HH:MM:SS` format to track order completion times
-  - Submit a Pull Request and ensure the `go-verify-result` workflow passes
-- Provide documentation for any part that you think is needed
+### ⚡ Scheduling Rules
+- VIP orders always have priority over NORMAL orders
+- FIFO ordering is preserved within the same priority
+- Interrupted orders resume based on original creation time
 
-### Tips on completing this task
-- Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.
-- Treat this assignment as a vibe coding, don't over engineer it. Try to scope your working hour within 30 min. However, ensure you read and understand what your code doing.
-- Complete the implementation as clean as possible, clean code is a strong plus point, do not bring in all the fancy tech stuff.
+---
+
+## ✅ Assignment Requirements Coverage
+
+This implementation explicitly demonstrates:
+
+- VIP priority over NORMAL orders
+- Concurrent bot processing
+- Bot removal during processing
+- Safe order re-queuing
+- Deterministic and reproducible behavior
+
+---
+
+## 🧪 CLI Simulation
+
+A deterministic CLI simulation (`SimulationService`) is used to validate all behaviors.
+
+### Example Output (Aligned with Provided `result.txt`)
+```
+McDonald's Order Management System - Simulation Results
+
+[14:32:01] System initialized with 0 bots
+[14:32:01] Created NORMAL Order #1 - Status: PENDING
+[14:32:02] Created VIP Order #2 - Status: PENDING
+[14:32:03] Bot #1 created - Status: IDLE
+[14:32:03] Bot #1 picked up VIP Order #2 - Status: PROCESSING
+...
+Final Status:
+- Total Orders Processed: 4 (2 VIP, 2 NORMAL)
+- Orders Completed: 4
+- Active Bots: 1
+- Pending Orders: 0
+```
+
+The simulation validates:
+- VIP priority
+- FIFO ordering
+- Bot removal during processing
+- Correct order re-queuing
+
+---
+
+## ▶️ How to Run
+
+### Using provided script (recommended)
+```bash
+sh scripts/run.sh
+sh scripts/build.sh
+sh scripts/test.sh
+```
+
+The script runs the CLI simulation end-to-end and mirrors the expected `result.txt` output.
+
+### Manual run
+
+### Install dependencies
+```bash
+npm install
+```
+
+### Run the CLI simulation
+```bash
+npm run start
+```
+
+The simulation output will be printed directly to the console.
+
+---
+
+## 🧪 Tests
+
+Unit tests verify:
+- Order creation sequence
+- Bot lifecycle behavior
+- Scheduling triggers
+- Final system summary
+
+### Using provided script (recommended)
+```bash
+sh scripts/test.sh
+```
+
+### Manual run
+
+Run tests with:
+```bash
+npm run test
+```
+
+All GitHub Actions checks should pass successfully ✅.
+
+---
+
+## 🙏 Thank You
+
+Thank you for reviewing this submission.  
+I’m happy to walk through the design decisions, trade-offs, or potential extensions during the next interview round.
