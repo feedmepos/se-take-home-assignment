@@ -49,7 +49,7 @@ The backend supports **two execution modes**.
 
 ### Using provided script (recommended)
 ```bash
-sh scripts/run-cli.sh
+sh scripts/run.sh
 ```
 
 ```bash
