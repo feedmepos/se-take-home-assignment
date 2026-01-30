@@ -1,0 +1,26 @@
+export enum OrderType {
+  VIP = 'VIP',
+  NORMAL = 'NORMAL',
+}
+
+export enum OrderStatus {
+  PENDING = 'PENDING',
+  PROCESSING = 'PROCESSING',
+  COMPLETE = 'COMPLETE',
+}
+
+export interface Order {
+  id: number;
+  type: OrderType;
+  status: OrderStatus;
+  createdAt: Date;
+  startedAt?: Date;
+  completedAt?: Date;
+}
+
+export interface OrderSummary {
+  totalProcessed: number;
+  vipCompleted: number;
+  normalCompleted: number;
+  pending: number;
+}

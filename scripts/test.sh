@@ -9,6 +9,10 @@ echo "Running unit tests..."
 # go test ./... -v
 
 # For Node.js projects:
-# npm test
+echo "Installing dependencies..."
+npm install
+
+echo "Running tests with coverage..."
+npm test -- --coverage
 
 echo "Unit tests completed"
