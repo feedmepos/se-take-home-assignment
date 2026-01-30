@@ -1,15 +1,33 @@
-import { Bot } from '../../models/bot';
+import { Bot } from '../../types/bot';
 
-export const BotCard: React.FC<{ bot: Bot }> = ({ bot }) => (
+type Props = {
+  bot: Bot;
+};
+
+export const BotCard: React.FC<Props> = ({ bot }) => {
+  return (
     <li className="bot">
-        <strong>Bot #{bot.id}</strong>
-        <div><b>Status:</b> {bot.status}</div>
-        {bot.currentOrder && (
-            <div>
-                <b>Order:</b> #{bot.currentOrder.id} ({bot.currentOrder.type})<br />
-                <b>Processing at:</b>{' '}
-                {bot.currentOrder.processingAt?.toLocaleTimeString()}
-            </div>
-        )}
+      <b>Bot #{bot.id}</b>
+      <div>Status: {bot.status}</div>
+
+      {bot.currentOrder ? (
+        <>
+          <div>
+            Processing order #{bot.currentOrder.id} (
+            {bot.currentOrder.type})
+          </div>
+          <div>
+            Processing at:{' '}
+            {bot.currentOrder.startedAt
+              ? new Date(
+                  bot.currentOrder.startedAt,
+                ).toLocaleTimeString()
+              : '-'}
+          </div>
+        </>
+      ) : (
+        <div className="idle">Idle</div>
+      )}
     </li>
-);
+  );
+};

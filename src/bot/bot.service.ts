@@ -49,36 +49,6 @@ export class BotService {
 
     return bot;
   }
-
-  /**
-   * Starts work on the next pending order if any; otherwise stays IDLE.
-   */
-  private tryStartWork(bot: Bot): void {
-    if (bot.currentOrder) {
-      return;
-    }
-
-    const next = this.orders.getNextPendingOrder();
-    if (!next) {
-      bot.isIdle = true;
-      this.logger.log(`Bot #${bot.id} is now IDLE - No pending orders`);
-      return;
-    }
-
-    bot.currentOrder = next;
-    bot.isIdle = false;
-    this.logger.log(
-      `Bot #${bot.id} picked up ${next.type} Order #${next.id} - Status: PROCESSING`,
-    );
-
-    bot.timer = setTimeout(() => {
-      this.orders.completeOrder(bot.id, next);
-      bot.currentOrder = undefined;
-      bot.timer = undefined;
-      this.tryStartWork(bot);
-    }, PROCESSING_TIME_MS);
-  }
-
   /**
    * Called when a new order comes in, to wake up idle bots.
    */
@@ -109,5 +79,48 @@ export class BotService {
       activeBots: this.bots.length,
     };
   }
+
+  getBots() {
+    return this.bots.map(b => ({
+      id: b.id,
+      status: b.isIdle ? 'IDLE':'PROCESS',
+      currentOrder: b.currentOrder,
+    }));
+  }
+  
+  getActiveCount() {
+    return this.bots.length;
+  }
+  
+
+  /**
+   * Starts work on the next pending order if any; otherwise stays IDLE.
+   */
+  private tryStartWork(bot: Bot): void {
+    if (bot.currentOrder) {
+      return;
+    }
+
+    const next = this.orders.getNextPendingOrder();
+    if (!next) {
+      bot.isIdle = true;
+      this.logger.log(`Bot #${bot.id} is now IDLE - No pending orders`);
+      return;
+    }
+
+    bot.currentOrder = next;
+    bot.isIdle = false;
+    this.logger.log(
+      `Bot #${bot.id} picked up ${next.type} Order #${next.id} - Status: PROCESSING`,
+    );
+
+    bot.timer = setTimeout(() => {
+      this.orders.completeOrder(bot.id, next);
+      bot.currentOrder = undefined;
+      bot.timer = undefined;
+      this.tryStartWork(bot);
+    }, PROCESSING_TIME_MS);
+  }
+
 }
 
