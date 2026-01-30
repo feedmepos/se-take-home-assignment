@@ -1,7 +1,7 @@
-import { BotService } from './bot.service';
-import { OrderService } from '../order/order.service';
-import { LoggerService } from '../logger/logger.service';
-import { OrderType } from '../order/order.types';
+import { BotService } from '../bot.service';
+import { OrderService } from '../../order/order.service';
+import { LoggerService } from '../../logger/logger.service';
+import { OrderType } from '../../order/order.types';
 
 jest.useFakeTimers();
 
@@ -79,6 +79,13 @@ describe('BotService', () => {
 
     jest.advanceTimersByTime(11_000);
     expect(bots.hasActiveWork()).toBe(false);
+  });
+
+  it('removes idle bot safely', () => {
+    bots.addBot();
+    bots.removeBot();
+  
+    expect(bots.getBots().length).toBe(0);
   });
 });
 

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Order, OrderStatus, OrderSummary, OrderType } from './order.types';
 import { LoggerService } from '../logger/logger.service';
-import { Bot, PROCESSING_TIME_MS } from '../bot/bot.types';
+import { PROCESSING_TIME_MS } from '../bot/bot.types';
 
 @Injectable()
 export class OrderService {
@@ -108,6 +108,13 @@ export class OrderService {
     };
   }
 
+  getPending() {
+    return [...this.vipQueue, ...this.normalQueue];
+  }
+  
+  getCompleted() {
+    return [...this.completed];
+  }
 
   private sortByCreatedAt(queue: Order[]): void {
     queue.sort(

@@ -1,124 +1,181 @@
-# 🍔 McDonald's Order Management System
+# McDonald's Order Management System
 
-This repository contains a **technical take-home assignment** that simulates a McDonald’s order management system with **VIP priority**, **FIFO scheduling**, and **bot-based order processing**.
+This repository contains a solution for the **FeedMe POS – Software Engineer Take‑Home Assignment**.
 
-The solution is implemented in **NestJS (TypeScript)** and demonstrates all required behaviors using a **deterministic CLI simulation**.
-
----
-
-## ✨ Features
-
-### 🧾 Orders
-- Types: `VIP`, `NORMAL`
-- Status flow: `PENDING → PROCESSING → COMPLETE`
-- Orders are processed fairly using FIFO (`createdAt`) rules
-
-### 🤖 Bots
-- Each bot processes **one order at a time**
-- Orders take **10 seconds** to complete
-- Bots can be added or removed dynamically
-- Removing a bot safely stops processing and re-queues the order
-
-### ⚡ Scheduling Rules
-- VIP orders always have priority over NORMAL orders
-- FIFO ordering is preserved within the same priority
-- Interrupted orders resume based on original creation time
+The system simulates McDonald's order processing with **VIP priority**, **FIFO ordering**, and **bot‑based processing**, implemented with **NestJS (TypeScript)** and an optional **React frontend**.
 
 ---
 
-## ✅ Assignment Requirements Coverage
+## 🧩 Features
 
-This implementation explicitly demonstrates:
+### Core Requirements
 
-- VIP priority over NORMAL orders
-- Concurrent bot processing
-- Bot removal during processing
-- Safe order re-queuing
-- Deterministic and reproducible behavior
+- VIP orders are always processed before NORMAL orders
+- FIFO ordering within the same order type (by `createdAt`)
+- Multiple bots can process orders concurrently
+- Bots can be dynamically added or removed
+- If a bot is removed while processing, the order safely returns to `PENDING`
+- Orders move through states: `PENDING → PROCESSING → COMPLETE`
+
+### Optional Features
+
+- RESTful API mode (in addition to CLI simulation)
+- Aggregated `/state` endpoint for frontend consumption
+- React frontend UI with polling‑based updates
+- Clear module separation and unit test coverage ≥ 80%
 
 ---
 
-## 🧪 CLI Simulation
+## 🏗 Architecture Overview
 
-A deterministic CLI simulation (`SimulationService`) is used to validate all behaviors.
+The backend is designed with **clear separation of concerns**:
 
-### Example Output (Aligned with Provided `result.txt`)
-```
-McDonald's Order Management System - Simulation Results
+- **OrderService** – manages order lifecycle and priority queues
+- **BotManagerService** – manages bot lifecycle and scheduling
+- **SimulationService** – drives deterministic CLI scenarios
+- **Controllers** – thin REST layer for API mode only
 
-[14:32:01] System initialized with 0 bots
-[14:32:01] Created NORMAL Order #1 - Status: PENDING
-[14:32:02] Created VIP Order #2 - Status: PENDING
-[14:32:03] Bot #1 created - Status: IDLE
-[14:32:03] Bot #1 picked up VIP Order #2 - Status: PROCESSING
-...
-Final Status:
-- Total Orders Processed: 4 (2 VIP, 2 NORMAL)
-- Orders Completed: 4
-- Active Bots: 1
-- Pending Orders: 0
-```
-
-The simulation validates:
-- VIP priority
-- FIFO ordering
-- Bot removal during processing
-- Correct order re-queuing
+Business logic is reused across **CLI simulation** and **REST API** without duplication.
 
 ---
 
 ## ▶️ How to Run
 
+### Backend
+
+The backend supports **two execution modes**.
+
+#### 1️⃣ CLI Simulation (Primary – Assignment Requirement)
+
 ### Using provided script (recommended)
 ```bash
-sh scripts/run.sh
-sh scripts/build.sh
-sh scripts/test.sh
+sh scripts/run-cli.sh
 ```
 
-The script runs the CLI simulation end-to-end and mirrors the expected `result.txt` output.
-
-### Manual run
-
-### Install dependencies
 ```bash
 npm install
+npm run start:cli
 ```
 
-### Run the CLI simulation
-```bash
-npm run start
-```
-
-The simulation output will be printed directly to the console.
+This runs a deterministic simulation and prints logs similar to `result.txt`.
 
 ---
 
-## 🧪 Tests
+#### 2️⃣ REST API Server
 
-Unit tests verify:
-- Order creation sequence
-- Bot lifecycle behavior
-- Scheduling triggers
-- Final system summary
+### Using provided script (recommended)
+```bash
+sh scripts/run-api.sh
+```
+
+```bash
+npm install
+npm run start:api
+```
+
+The API runs on:
+
+```
+http://localhost:3000
+```
+
+Available endpoints:
+
+- `POST /orders` – create order (`{ type: "VIP" | "NORMAL" }`)
+- `POST /bots` – add bot
+- `DELETE /bots` – remove newest bot
+- `GET /state` – aggregated system state
+
+---
+
+### Frontend
+
+The frontend is a **React + Vite** application that consumes the REST API using **polling**.
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Environment variable:
+
+```env
+VITE_API_URL=http://localhost:3000
+```
+
+---
+
+## 🧪 Testing
+
+Unit tests are provided for:
+
+- Services (`OrderService`, `BotManagerService`)
+- Controllers (`OrderController`, `BotController`, `StateController`)
+- Simulation flow (`SimulationService`)
+
+Test coverage is enforced at **80%+ globally**.
 
 ### Using provided script (recommended)
 ```bash
 sh scripts/test.sh
 ```
 
-### Manual run
-
-Run tests with:
 ```bash
-npm run test
+npm test -- --coverage
 ```
 
-All GitHub Actions checks should pass successfully ✅.
+Boilerplate files such as `main.ts`, `*.module.ts` are excluded from coverage by design.
 
 ---
 
-## 🙏 Thank You
+## 📂 Project Structure
 
-Thank you for reviewing this submission.  
-I’m happy to walk through the design decisions, trade-offs, or potential extensions during the next interview round.
+```text
+src/
+├── app.module.ts
+├── main.cli.ts        # CLI simulation entry
+├── main.api.ts        # REST API entry
+│
+├── order/             # Order domain logic
+├── bot/               # Bot scheduling logic
+├── simulation/        # CLI simulation
+├── state/             # Aggregated API state
+├── logger/            # Logging abstraction
+└── frontend/          # React UI
+```
+
+---
+
+## 🧠 Design Decisions
+
+- **CLI first**: The core requirement is fulfilled via a CLI‑based simulation using `createApplicationContext`
+- **Stateless REST API**: Added as a additional without affecting CLI behavior
+- **Polling over SSE/WebSockets**: Chosen for simplicity, scalability, and reliability
+- **Single source of truth**: Backend owns all state; frontend is a pure renderer
+
+---
+
+## 🔀 GitHub Flow
+
+- Work is done on a feature branch
+- A Pull Request is opened against:
+  ```
+  github.com/feedmepos/se-take-home-assignment
+  ```
+- All GitHub Actions checks pass before review
+
+---
+
+## ✅ Assignment Status
+
+- [x] Core requirements implemented
+- [x] Edge cases handled
+- [x] Unit tests added
+- [x] Optional REST API
+- [x] Optional frontend UI
+
+---
+
+Thank you for reviewing this submission 🙏
+

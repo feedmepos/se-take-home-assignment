@@ -14,6 +14,6 @@ export interface Order {
     type: OrderType;
     status: OrderStatus;
     createdAt: Date;
-    processingAt?: Date;
+    startedAt?: Date;
     completedAt?: Date;
 }

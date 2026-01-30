@@ -1,259 +1,136 @@
-import { useEffect, useReducer } from 'react';
-import { Order, OrderType, OrderStatus } from './models/order';
-import { Bot, BotStatus } from './models/bot';
-import { PROCESSING_TIME_MS } from './constants/timing';
-import { Controls } from './components/Controls';
-import { OrderSection } from './components/orders/OrderSection';
+import React, { useEffect, useState } from 'react';
+import { Order, OrderType } from './types/order';
+import { Bot } from './types/bot';
+import { OrderCard } from './components/orders/OrderCard';
 import { BotCard } from './components/bots/BotCard';
 
-/* =======================
-   STATE & TYPES
-======================= */
+const API_URL = import.meta.env.VITE_API_URL as string;
 
-type State = {
-  nextOrderId: number;
-  nextBotId: number;
+interface StateResponse {
   pending: Order[];
   completed: Order[];
   bots: Bot[];
-};
-
-type Action =
-  | { type: 'CREATE_ORDER'; orderType: OrderType }
-  | { type: 'ADD_BOT' }
-  | { type: 'BOT_READY'; botId: number }
-  | { type: 'START_PROCESSING'; botId: number; order: Order }
-  | { type: 'COMPLETE_ORDER'; botId: number; order: Order }
-  | { type: 'REMOVE_BOT' };
-
-const initialState: State = {
-  nextOrderId: 1,
-  nextBotId: 1,
-  pending: [],
-  completed: [],
-  bots: [],
-};
-
-/* =======================
-   REDUCER (PURE)
-======================= */
-
-function orderComparator(a: Order, b: Order) {
-  // VIP first
-  if (a.type !== b.type) {
-    return a.type === OrderType.VIP ? -1 : 1;
-  }
-
-  // FIFO within same type
-  return a.createdAt.getTime() - b.createdAt.getTime();
 }
 
+export const App: React.FC = () => {
+  const [pending, setPending] = useState<Order[]>([]);
+  const [completed, setCompleted] = useState<Order[]>([]);
+  const [bots, setBots] = useState<Bot[]>([]);
+  const [loading, setLoading] = useState(true);
 
-function reducer(state: State, action: Action): State {
-  switch (action.type) {
-    case 'CREATE_ORDER': {
-      const order: Order = {
-        id: state.nextOrderId,
-        type: action.orderType,
-        status: OrderStatus.PENDING,
-        createdAt: new Date(),
-      };
+  /* =======================
+     Fetch state (polling)
+  ======================= */
 
-      const pending = [...state.pending, order].sort(orderComparator);
+  const fetchState = async () => {
+    try {
+      const res = await fetch(`${API_URL}/state`);
+      if (!res.ok) return;
 
-      return {
-        ...state,
-        nextOrderId: state.nextOrderId + 1,
-        pending,
-      };
+      const data: StateResponse = await res.json();
+      setPending(data.pending);
+      setCompleted(data.completed);
+      setBots(data.bots);
+      setLoading(false);
+    } catch (err) {
+      console.error('Failed to fetch state', err);
     }
+  };
 
+  useEffect(() => {
+    fetchState();
+  }, []);
 
-    case 'ADD_BOT':
-      return {
-        ...state,
-        nextBotId: state.nextBotId + 1,
-        bots: [...state.bots, { id: state.nextBotId, status: BotStatus.INITIALIZING }],
-      };
+  useEffect(() => {
+    const id = setInterval(fetchState, 3000);
+    return () => clearInterval(id);
+  }, []);
 
-    case 'BOT_READY':
-      return {
-        ...state,
-        bots: state.bots.map(b =>
-          b.id === action.botId ? { ...b, status: BotStatus.IDLE } : b,
-        ),
-      };
+  /* =======================
+     Actions
+  ======================= */
 
-    case 'START_PROCESSING':
-      return {
-        ...state,
-        pending: state.pending.slice(1),
-        bots: state.bots.map(b =>
-          b.id === action.botId
-            ? {
-              ...b,
-              status: BotStatus.PROCESSING,
-              currentOrder: action.order,
-              processingStartedAt: Date.now(),
-            }
-            : b,
-        ),
-      };
+  const createOrder = async (type: OrderType) => {
+    await fetch(`${API_URL}/orders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type }),
+    });
 
-    case 'COMPLETE_ORDER':
-      return {
-        ...state,
-        completed: [...state.completed, action.order],
-        bots: state.bots.map(b =>
-          b.id === action.botId
-            ? {
-              ...b,
-              status: BotStatus.IDLE,
-              currentOrder: undefined,
-              processingStartedAt: undefined,
-            }
-            : b,
-        ),
-      };
+    fetchState();
+  };
 
-    case 'REMOVE_BOT': {
-      const bots = [...state.bots];
-      const removed = bots.pop();
-      if (!removed) return state;
+  const addBot = async () => {
+    await fetch(`${API_URL}/bots`, { method: 'POST' });
+    fetchState();
+  };
 
-      let pending = state.pending;
+  const removeBot = async () => {
+    await fetch(`${API_URL}/bots`, { method: 'DELETE' });
+    fetchState();
+  };
 
-      if (removed.currentOrder) {
-        const returnedOrder: Order = {
-          ...removed.currentOrder,
-          status: OrderStatus.PENDING,
-          processingAt: undefined,
-        };
-
-        pending = [...pending, returnedOrder].sort(orderComparator);
-      }
-
-      return { ...state, bots, pending };
-    }
-
-
+  if (loading) {
+    return <div className="app">Loading...</div>;
   }
-}
 
-/* =======================
-   COMPONENT
-======================= */
-
-export const App = () => {
-  const [state, dispatch] = useReducer(reducer, initialState);
-
-  /* -----------------------
-     BOT INIT → IDLE
-  ----------------------- */
-  useEffect(() => {
-    const timers = state.bots
-      .filter(b => b.status === BotStatus.INITIALIZING)
-      .map(bot =>
-        setTimeout(() => {
-          dispatch({ type: 'BOT_READY', botId: bot.id });
-        }, 500),
-      );
-
-    return () => timers.forEach(clearTimeout);
-  }, [state.bots]);
-
-  /* -----------------------
-     SCHEDULER
-  ----------------------- */
-  useEffect(() => {
-    const idleBot = state.bots.find(b => b.status === BotStatus.IDLE);
-    if (!idleBot || state.pending.length === 0) return;
-
-    const order: Order = {
-      ...state.pending[0],
-      status: OrderStatus.PROCESSING,
-      processingAt: new Date(),
-    };
-
-    dispatch({ type: 'START_PROCESSING', botId: idleBot.id, order });
-  }, [state.pending, state.bots]);
-
-  /* -----------------------
-     PROCESSING TIMER
-  ----------------------- */
-  useEffect(() => {
-    const timers = state.bots
-      .filter(
-        b =>
-          b.status === BotStatus.PROCESSING &&
-          b.currentOrder &&
-          b.processingStartedAt,
-      )
-      .map(bot => {
-        const elapsed = Date.now() - bot.processingStartedAt!;
-        const remaining = PROCESSING_TIME_MS - elapsed;
-
-        return setTimeout(() => {
-          dispatch({
-            type: 'COMPLETE_ORDER',
-            botId: bot.id,
-            order: {
-              ...bot.currentOrder!,
-              status: OrderStatus.COMPLETE,
-              completedAt: new Date(),
-            },
-          });
-        }, remaining);
-      });
-
-    return () => timers.forEach(clearTimeout);
-  }, [state.bots]);
-
-  /* -----------------------
-     UI
-  ----------------------- */
   return (
     <div className="app">
       <h1>McDonald Order Controller</h1>
+      <p className="subtitle">
+        Frontend UI consuming backend REST API (polling)
+      </p>
 
-      <Controls
-        onCreateOrder={t => dispatch({ type: 'CREATE_ORDER', orderType: t })}
-        onAddBot={() => dispatch({ type: 'ADD_BOT' })}
-        onRemoveBot={() => dispatch({ type: 'REMOVE_BOT' })}
-        disableRemoveBot={!state.bots.length}
-      />
+      {/* Controls */}
+      <div className="controls">
+        <button onClick={() => createOrder(OrderType.NORMAL)}>
+          New Normal Order
+        </button>
+        <button onClick={() => createOrder(OrderType.VIP)}>
+          New VIP Order
+        </button>
+        <button onClick={addBot}>+ Bot</button>
+        <button onClick={removeBot} disabled={bots.length === 0}>
+          - Bot
+        </button>
+      </div>
 
+      {/* Layout */}
       <div className="layout">
+        {/* Pending */}
         <section className="panel">
-          <h2>Pending</h2>
-          <OrderSection
-            title="VIP"
-            orders={state.pending.filter(o => o.type === OrderType.VIP)}
-            variant="vip"
-            emptyText="No VIP orders"
-          />
-          <OrderSection
-            title="Normal"
-            orders={state.pending.filter(o => o.type === OrderType.NORMAL)}
-            variant="normal"
-            emptyText="No normal orders"
-          />
+          <h2>Pending Orders</h2>
+          {pending.length === 0 && (
+            <p className="empty">No pending orders</p>
+          )}
+          <ul>
+            {pending.map((o) => (
+              <OrderCard key={o.id} order={o} />
+            ))}
+          </ul>
         </section>
 
+        {/* Completed */}
         <section className="panel">
-          <h2>Completed</h2>
-          <OrderSection
-            orders={state.completed}
-            variant="complete"
-            showProcessing
-            emptyText="No completed orders"
-          />
+          <h2>Completed Orders</h2>
+          {completed.length === 0 && (
+            <p className="empty">No completed orders</p>
+          )}
+          <ul>
+            {completed.map((o) => (
+              <OrderCard key={o.id} order={o} />
+            ))}
+          </ul>
         </section>
 
+        {/* Bots */}
         <section className="panel">
           <h2>Bots</h2>
+          {bots.length === 0 && (
+            <p className="empty">No bots</p>
+          )}
           <ul>
-            {state.bots.map(b => (
+            {bots.map((b) => (
               <BotCard key={b.id} bot={b} />
             ))}
           </ul>
