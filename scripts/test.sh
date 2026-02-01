@@ -1,14 +1,19 @@
 #!/bin/bash
 
 # Unit Test Script
-# This script should contain all unit test execution steps
+# This script runs all unit tests under /tests
 
 echo "Running unit tests..."
 
-# For Go projects:
-# go test ./... -v
+# Absolute path to /tests (assuming test.sh is inside /scripts)
+TEST_DIR="$(dirname "$0")/../tests"
 
-# For Node.js projects:
-# npm test
+# Loop through all .test.js files
+for file in "$TEST_DIR"/*.test.js; do
+    if [ -f "$file" ]; then
+        echo "Running $file..."
+        node "$file"
+    fi
+done
 
-echo "Unit tests completed"
+echo "Unit tests completed successfully!"
