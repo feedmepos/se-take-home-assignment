@@ -1,0 +1,19 @@
+# Local Tools (Go installation)
+tools/
+env.sh
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+
+# Backend
+backend/order-controller
+backend/order-controller.exe
+
+# Output
+result.txt
+
+# System
+.DS_Store
