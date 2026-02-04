@@ -5,7 +5,7 @@ export PATH=$PATH:$(pwd)/tools/go/bin
 echo "Running simulation..."
 cd backend
 if command -v go &> /dev/null; then
-    go run . -simulation > ../result.txt
+    go run . -simulation
 else
     echo "Error: 'go' command not found."
     exit 1

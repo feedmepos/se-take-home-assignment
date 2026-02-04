@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"sync"
 	"time"
 )
@@ -180,8 +181,28 @@ func (m *Manager) processOrder(botID, orderID int) {
 	}()
 }
 
-// LogCompletion prints the completion event to standard output
+// LogCompletion prints the completion event to standard output and records it in result.txt
 func (m *Manager) LogCompletion(order *Order) {
-	fmt.Printf("Order %d %s completed at %s\n", 
+	logMsg := fmt.Sprintf("Order %d %s completed at %s\n", 
 		order.ID, order.Type, time.Now().Format("15:04:05"))
+
+	// Print to terminal
+	fmt.Print(logMsg)
+
+	// Append to scripts/result.txt
+	// Assuming CWD is 'backend/' when running
+	f, err := os.OpenFile("../scripts/result.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		// Fallback to root result.txt if scripts dir not found, or just ignore/log error
+		f, err = os.OpenFile("../result.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			fmt.Println("Error opening result.txt:", err)
+			return
+		}
+	}
+	defer f.Close()
+	
+	if _, err := f.WriteString(logMsg); err != nil {
+		fmt.Println("Error writing to result.txt:", err)
+	}
 }
