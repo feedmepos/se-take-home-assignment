@@ -20,6 +20,7 @@ cd ..
 echo "Running Frontend Tests..."
 cd frontend
 if command -v npm &> /dev/null; then
+    npm install
     npm test
     if [ $? -ne 0 ]; then
         echo "Frontend tests failed!"
