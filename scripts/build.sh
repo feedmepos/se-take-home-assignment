@@ -1,15 +1,24 @@
 #!/bin/bash
+# Add local Go to PATH
+export PATH=$PATH:$(pwd)/tools/go/bin
 
-# Build Script
-# This script should contain all compilation steps for your CLI application
 
-echo "Building CLI application..."
+echo "Building Backend (Go)..."
+cd backend
+if command -v go &> /dev/null; then
+    go build -o order-controller .
+else
+    echo "Warning: 'go' command not found. Skipping Go build."
+fi
+cd ..
 
-# For Go projects:
-# go build -o order-controller ./cmd/main.go
-
-# For Node.js projects:
-# npm install
-# npm run build (if needed)
+echo "Building Frontend (Vue)..."
+cd frontend
+if command -v npm &> /dev/null; then
+    npm install
+else
+    echo "Warning: 'npm' command not found. Skipping Frontend install."
+fi
+cd ..
 
 echo "Build completed"
