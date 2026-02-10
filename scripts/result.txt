@@ -1,26 +1,177 @@
-McDonald's Order Management System - Simulation Results
-
-[14:32:01] System initialized with 0 bots
-[14:32:01] Created Normal Order #1001 - Status: PENDING
-[14:32:02] Created VIP Order #1002 - Status: PENDING
-[14:32:02] Created Normal Order #1003 - Status: PENDING
-[14:32:03] Bot #1 created - Status: ACTIVE
-[14:32:03] Bot #1 picked up VIP Order #1002 - Status: PROCESSING
-[14:32:04] Bot #2 created - Status: ACTIVE
-[14:32:04] Bot #2 picked up Normal Order #1001 - Status: PROCESSING
-[14:32:13] Bot #1 completed VIP Order #1002 - Status: COMPLETE (Processing time: 10s)
-[14:32:13] Bot #1 picked up Normal Order #1003 - Status: PROCESSING
-[14:32:14] Bot #2 completed Normal Order #1001 - Status: COMPLETE (Processing time: 10s)
-[14:32:14] Bot #2 is now IDLE - No pending orders
-[14:32:15] Created VIP Order #1004 - Status: PENDING
-[14:32:15] Bot #2 picked up VIP Order #1004 - Status: PROCESSING
-[14:32:23] Bot #1 completed Normal Order #1003 - Status: COMPLETE (Processing time: 10s)
-[14:32:25] Bot #2 completed VIP Order #1004 - Status: COMPLETE (Processing time: 10s)
-[14:32:25] Bot #2 destroyed while IDLE
-[14:32:26] Bot #1 is now IDLE - No pending orders
-
-Final Status:
-- Total Orders Processed: 4 (2 VIP, 2 Normal)
-- Orders Completed: 4
-- Active Bots: 1
-- Pending Orders: 0
+[21:14:15] Created Normal Order #1 - Status: PENDING
+[21:14:15] Status Check:
+[21:14:15] - Completed Orders: 0 (0 VIP, 0 Normal) - Sequence: none
+[21:14:15] - Processing Orders: 0 - Sequence: none
+[21:14:15] - Pending Orders: 1 (0 VIP, 1 Normal) - Sequence: #1(N)
+[21:14:15] - Total Bots: 0 (0 Active, 0 Idle) - none
+[21:14:16] Created Normal Order #2 - Status: PENDING
+[21:14:16] Status Check:
+[21:14:16] - Completed Orders: 0 (0 VIP, 0 Normal) - Sequence: none
+[21:14:16] - Processing Orders: 0 - Sequence: none
+[21:14:16] - Pending Orders: 2 (0 VIP, 2 Normal) - Sequence: #1(N), #2(N)
+[21:14:16] - Total Bots: 0 (0 Active, 0 Idle) - none
+[21:14:17] Created Normal Order #3 - Status: PENDING
+[21:14:17] Status Check:
+[21:14:17] - Completed Orders: 0 (0 VIP, 0 Normal) - Sequence: none
+[21:14:17] - Processing Orders: 0 - Sequence: none
+[21:14:17] - Pending Orders: 3 (0 VIP, 3 Normal) - Sequence: #1(N), #2(N), #3(N)
+[21:14:17] - Total Bots: 0 (0 Active, 0 Idle) - none
+[21:14:18] Created VIP Order #4 - Status: PENDING
+[21:14:18] Status Check:
+[21:14:18] - Completed Orders: 0 (0 VIP, 0 Normal) - Sequence: none
+[21:14:18] - Processing Orders: 0 - Sequence: none
+[21:14:18] - Pending Orders: 4 (1 VIP, 3 Normal) - Sequence: #4(V), #1(N), #2(N), #3(N)
+[21:14:18] - Total Bots: 0 (0 Active, 0 Idle) - none
+[21:14:19] Created VIP Order #5 - Status: PENDING
+[21:14:19] Status Check:
+[21:14:19] - Completed Orders: 0 (0 VIP, 0 Normal) - Sequence: none
+[21:14:19] - Processing Orders: 0 - Sequence: none
+[21:14:19] - Pending Orders: 5 (2 VIP, 3 Normal) - Sequence: #4(V), #5(V), #1(N), #2(N), #3(N)
+[21:14:19] - Total Bots: 0 (0 Active, 0 Idle) - none
+[21:14:20] Created VIP Order #6 - Status: PENDING
+[21:14:20] Status Check:
+[21:14:20] - Completed Orders: 0 (0 VIP, 0 Normal) - Sequence: none
+[21:14:20] - Processing Orders: 0 - Sequence: none
+[21:14:20] - Pending Orders: 6 (3 VIP, 3 Normal) - Sequence: #4(V), #5(V), #6(V), #1(N), #2(N), #3(N)
+[21:14:20] - Total Bots: 0 (0 Active, 0 Idle) - none
+[21:14:23] Status Check:
+[21:14:23] - Completed Orders: 0 (0 VIP, 0 Normal) - Sequence: none
+[21:14:23] - Processing Orders: 0 - Sequence: none
+[21:14:23] - Pending Orders: 6 (3 VIP, 3 Normal) - Sequence: #4(V), #5(V), #6(V), #1(N), #2(N), #3(N)
+[21:14:23] - Total Bots: 0 (0 Active, 0 Idle) - none
+[21:14:24] Status Check:
+[21:14:24] - Completed Orders: 0 (0 VIP, 0 Normal) - Sequence: none
+[21:14:24] - Processing Orders: 0 - Sequence: none
+[21:14:24] - Pending Orders: 6 (3 VIP, 3 Normal) - Sequence: #4(V), #5(V), #6(V), #1(N), #2(N), #3(N)
+[21:14:24] - Total Bots: 0 (0 Active, 0 Idle) - none
+[21:14:25] Status Check:
+[21:14:25] - Completed Orders: 0 (0 VIP, 0 Normal) - Sequence: none
+[21:14:25] - Processing Orders: 0 - Sequence: none
+[21:14:25] - Pending Orders: 6 (3 VIP, 3 Normal) - Sequence: #4(V), #5(V), #6(V), #1(N), #2(N), #3(N)
+[21:14:25] - Total Bots: 0 (0 Active, 0 Idle) - none
+[21:14:29] Bot #1 created - Status: ACTIVE
+[21:14:29] Bot #1 picked up VIP Order #4 - Status: PROCESSING
+[21:14:29] Status Check:
+[21:14:29] - Completed Orders: 0 (0 VIP, 0 Normal) - Sequence: none
+[21:14:29] - Processing Orders: 1 - Sequence: #4(V)
+[21:14:29] - Pending Orders: 5 (2 VIP, 3 Normal) - Sequence: #5(V), #6(V), #1(N), #2(N), #3(N)
+[21:14:29] - Total Bots: 1 (1 Active, 0 Idle) - Bot #1: Active (Order #4(V))
+[21:14:36] Status Check:
+[21:14:36] - Completed Orders: 0 (0 VIP, 0 Normal) - Sequence: none
+[21:14:36] - Processing Orders: 1 - Sequence: #4(V)
+[21:14:36] - Pending Orders: 5 (2 VIP, 3 Normal) - Sequence: #5(V), #6(V), #1(N), #2(N), #3(N)
+[21:14:36] - Total Bots: 1 (1 Active, 0 Idle) - Bot #1: Active (Order #4(V))
+[21:14:39] Bot #1 completed VIP Order #4 - Status: COMPLETE (Processing time: 10s)
+[21:14:39] Bot #1 picked up VIP Order #5 - Status: PROCESSING
+[21:14:39] Status Check:
+[21:14:39] - Completed Orders: 1 (1 VIP, 0 Normal) - Sequence: #4(V)
+[21:14:39] - Processing Orders: 1 - Sequence: #5(V)
+[21:14:39] - Pending Orders: 4 (1 VIP, 3 Normal) - Sequence: #6(V), #1(N), #2(N), #3(N)
+[21:14:39] - Total Bots: 1 (1 Active, 0 Idle) - Bot #1: Active (Order #5(V))
+[21:14:43] Status Check:
+[21:14:43] - Completed Orders: 1 (1 VIP, 0 Normal) - Sequence: #4(V)
+[21:14:43] - Processing Orders: 1 - Sequence: #5(V)
+[21:14:43] - Pending Orders: 4 (1 VIP, 3 Normal) - Sequence: #6(V), #1(N), #2(N), #3(N)
+[21:14:43] - Total Bots: 1 (1 Active, 0 Idle) - Bot #1: Active (Order #5(V))
+[21:14:44] Status Check:
+[21:14:44] - Completed Orders: 1 (1 VIP, 0 Normal) - Sequence: #4(V)
+[21:14:44] - Processing Orders: 1 - Sequence: #5(V)
+[21:14:44] - Pending Orders: 4 (1 VIP, 3 Normal) - Sequence: #6(V), #1(N), #2(N), #3(N)
+[21:14:44] - Total Bots: 1 (1 Active, 0 Idle) - Bot #1: Active (Order #5(V))
+[21:14:45] Status Check:
+[21:14:45] - Completed Orders: 1 (1 VIP, 0 Normal) - Sequence: #4(V)
+[21:14:45] - Processing Orders: 1 - Sequence: #5(V)
+[21:14:45] - Pending Orders: 4 (1 VIP, 3 Normal) - Sequence: #6(V), #1(N), #2(N), #3(N)
+[21:14:45] - Total Bots: 1 (1 Active, 0 Idle) - Bot #1: Active (Order #5(V))
+[21:14:46] Status Check:
+[21:14:46] - Completed Orders: 1 (1 VIP, 0 Normal) - Sequence: #4(V)
+[21:14:46] - Processing Orders: 1 - Sequence: #5(V)
+[21:14:46] - Pending Orders: 4 (1 VIP, 3 Normal) - Sequence: #6(V), #1(N), #2(N), #3(N)
+[21:14:46] - Total Bots: 1 (1 Active, 0 Idle) - Bot #1: Active (Order #5(V))
+[21:14:47] Status Check:
+[21:14:47] - Completed Orders: 1 (1 VIP, 0 Normal) - Sequence: #4(V)
+[21:14:47] - Processing Orders: 1 - Sequence: #5(V)
+[21:14:47] - Pending Orders: 4 (1 VIP, 3 Normal) - Sequence: #6(V), #1(N), #2(N), #3(N)
+[21:14:47] - Total Bots: 1 (1 Active, 0 Idle) - Bot #1: Active (Order #5(V))
+[21:14:48] Status Check:
+[21:14:48] - Completed Orders: 1 (1 VIP, 0 Normal) - Sequence: #4(V)
+[21:14:48] - Processing Orders: 1 - Sequence: #5(V)
+[21:14:48] - Pending Orders: 4 (1 VIP, 3 Normal) - Sequence: #6(V), #1(N), #2(N), #3(N)
+[21:14:48] - Total Bots: 1 (1 Active, 0 Idle) - Bot #1: Active (Order #5(V))
+[21:14:48] Status Check:
+[21:14:48] - Completed Orders: 1 (1 VIP, 0 Normal) - Sequence: #4(V)
+[21:14:48] - Processing Orders: 1 - Sequence: #5(V)
+[21:14:48] - Pending Orders: 4 (1 VIP, 3 Normal) - Sequence: #6(V), #1(N), #2(N), #3(N)
+[21:14:48] - Total Bots: 1 (1 Active, 0 Idle) - Bot #1: Active (Order #5(V))
+[21:14:49] Bot #1 completed VIP Order #5 - Status: COMPLETE (Processing time: 10s)
+[21:14:49] Bot #1 picked up VIP Order #6 - Status: PROCESSING
+[21:14:59] Bot #1 completed VIP Order #6 - Status: COMPLETE (Processing time: 10s)
+[21:14:59] Bot #1 picked up Normal Order #1 - Status: PROCESSING
+[21:15:08] Status Check:
+[21:15:08] - Completed Orders: 3 (3 VIP, 0 Normal) - Sequence: #4(V), #5(V), #6(V)
+[21:15:08] - Processing Orders: 1 - Sequence: #1(N)
+[21:15:08] - Pending Orders: 2 (0 VIP, 2 Normal) - Sequence: #2(N), #3(N)
+[21:15:08] - Total Bots: 1 (1 Active, 0 Idle) - Bot #1: Active (Order #1(N))
+[21:15:09] Bot #1 completed Normal Order #1 - Status: COMPLETE (Processing time: 10s)
+[21:15:09] Bot #1 picked up Normal Order #2 - Status: PROCESSING
+[21:15:13] Status Check:
+[21:15:13] - Completed Orders: 4 (3 VIP, 1 Normal) - Sequence: #1(N), #4(V), #5(V), #6(V)
+[21:15:13] - Processing Orders: 1 - Sequence: #2(N)
+[21:15:13] - Pending Orders: 1 (0 VIP, 1 Normal) - Sequence: #3(N)
+[21:15:13] - Total Bots: 1 (1 Active, 0 Idle) - Bot #1: Active (Order #2(N))
+[21:15:16] Status Check:
+[21:15:16] - Completed Orders: 4 (3 VIP, 1 Normal) - Sequence: #1(N), #4(V), #5(V), #6(V)
+[21:15:16] - Processing Orders: 1 - Sequence: #2(N)
+[21:15:16] - Pending Orders: 1 (0 VIP, 1 Normal) - Sequence: #3(N)
+[21:15:16] - Total Bots: 1 (1 Active, 0 Idle) - Bot #1: Active (Order #2(N))
+[21:15:19] Bot #1 completed Normal Order #2 - Status: COMPLETE (Processing time: 10s)
+[21:15:19] Bot #1 picked up Normal Order #3 - Status: PROCESSING
+[21:15:19] Bot #1 is now IDLE - No pending orders
+[21:15:26] Bot #2 created - Status: ACTIVE
+[21:15:26] Status Check:
+[21:15:26] - Completed Orders: 5 (3 VIP, 2 Normal) - Sequence: #1(N), #2(N), #4(V), #5(V), #6(V)
+[21:15:26] - Processing Orders: 1 - Sequence: #3(N)
+[21:15:26] - Pending Orders: 0 (0 VIP, 0 Normal) - Sequence: none
+[21:15:26] - Total Bots: 2 (1 Active, 1 Idle) - Bot #1: Active (Order #3(N)), Bot #2: Idle
+[21:15:29] Bot #1 completed Normal Order #3 - Status: COMPLETE (Processing time: 10s)
+[21:15:29] Bot #1 is now IDLE - No pending orders
+[21:15:32] Status Check:
+[21:15:32] - Completed Orders: 6 (3 VIP, 3 Normal) - Sequence: #1(N), #2(N), #3(N), #4(V), #5(V), #6(V)
+[21:15:32] - Processing Orders: 0 - Sequence: none
+[21:15:32] - Pending Orders: 0 (0 VIP, 0 Normal) - Sequence: none
+[21:15:32] - Total Bots: 2 (0 Active, 2 Idle) - Bot #1: Idle, Bot #2: Idle
+[21:15:36] Status Check:
+[21:15:36] - Completed Orders: 6 (3 VIP, 3 Normal) - Sequence: #1(N), #2(N), #3(N), #4(V), #5(V), #6(V)
+[21:15:36] - Processing Orders: 0 - Sequence: none
+[21:15:36] - Pending Orders: 0 (0 VIP, 0 Normal) - Sequence: none
+[21:15:36] - Total Bots: 2 (0 Active, 2 Idle) - Bot #1: Idle, Bot #2: Idle
+[21:15:38] Bot #2 destroyed while IDLE
+[21:15:38] Status Check:
+[21:15:38] - Completed Orders: 6 (3 VIP, 3 Normal) - Sequence: #1(N), #2(N), #3(N), #4(V), #5(V), #6(V)
+[21:15:38] - Processing Orders: 0 - Sequence: none
+[21:15:38] - Pending Orders: 0 (0 VIP, 0 Normal) - Sequence: none
+[21:15:38] - Total Bots: 1 (0 Active, 1 Idle) - Bot #1: Idle
+[21:15:40] Bot #1 destroyed while IDLE
+[21:15:40] Status Check:
+[21:15:40] - Completed Orders: 6 (3 VIP, 3 Normal) - Sequence: #1(N), #2(N), #3(N), #4(V), #5(V), #6(V)
+[21:15:40] - Processing Orders: 0 - Sequence: none
+[21:15:40] - Pending Orders: 0 (0 VIP, 0 Normal) - Sequence: none
+[21:15:40] - Total Bots: 0 (0 Active, 0 Idle) - none
+[21:15:48] Bot #3 created - Status: ACTIVE
+[21:15:48] Status Check:
+[21:15:48] - Completed Orders: 6 (3 VIP, 3 Normal) - Sequence: #1(N), #2(N), #3(N), #4(V), #5(V), #6(V)
+[21:15:48] - Processing Orders: 0 - Sequence: none
+[21:15:48] - Pending Orders: 0 (0 VIP, 0 Normal) - Sequence: none
+[21:15:48] - Total Bots: 1 (0 Active, 1 Idle) - Bot #3: Idle
+[21:15:51] Bot #4 created - Status: ACTIVE
+[21:15:51] Status Check:
+[21:15:51] - Completed Orders: 6 (3 VIP, 3 Normal) - Sequence: #1(N), #2(N), #3(N), #4(V), #5(V), #6(V)
+[21:15:51] - Processing Orders: 0 - Sequence: none
+[21:15:51] - Pending Orders: 0 (0 VIP, 0 Normal) - Sequence: none
+[21:15:51] - Total Bots: 2 (0 Active, 2 Idle) - Bot #3: Idle, Bot #4: Idle
+[21:15:54] Bot #5 created - Status: ACTIVE
+[21:15:54] Status Check:
+[21:15:54] - Completed Orders: 6 (3 VIP, 3 Normal) - Sequence: #1(N), #2(N), #3(N), #4(V), #5(V), #6(V)
+[21:15:54] - Processing Orders: 0 - Sequence: none
+[21:15:54] - Pending Orders: 0 (0 VIP, 0 Normal) - Sequence: none
+[21:15:54] - Total Bots: 3 (0 Active, 3 Idle) - Bot #3: Idle, Bot #4: Idle, Bot #5: Idle
