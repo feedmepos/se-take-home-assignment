@@ -134,23 +134,39 @@ const resetState = () => {
 // --- CLI Simulation Execution ---
 if (require.main === module) {
   (async () => {
-    // 1. Ensure the directory exists (optional but safe)
-    if (!fs.existsSync("scripts")) fs.mkdirSync("scripts");
+    log(`System initialized with 0 bots`);
+    
+    // Simulate the exact flow from the sample
+    createOrder("NORMAL"); // 1001
+    createOrder("VIP");    // 1002
+    createOrder("NORMAL"); // 1003
+    addBot();              // Bot 1
+    addBot();              // Bot 2
+    
+    // Wait for initial orders to process
+    await new Promise(r => setTimeout(r, 11000));
+    
+    createOrder("VIP");    // 1004
+    await new Promise(r => setTimeout(r, 11000));
+    
+    removeBot(); // Destroy newest bot
+    
+    // Generate Final Status
+    const completed = state.orders.filter(o => o.status === 'COMPLETE').length;
+    const vips = state.orders.filter(o => o.type === 'VIP' && o.status === 'COMPLETE').length;
+    const normals = state.orders.filter(o => o.type === 'NORMAL' && o.status === 'COMPLETE').length;
 
-    log("Simulation Started");
+    state.results.push(`\nFinal Status:`);
+    state.results.push(`- Total Orders Processed: ${state.orders.length} (${vips} VIP, ${normals} Normal)`);
+    state.results.push(`- Orders Completed: ${completed}`);
+    state.results.push(`- Active Bots: ${state.bots.length}`);
+    state.results.push(`- Pending Orders: ${state.orders.filter(o => o.status === 'PENDING').length}`);
 
-    addBot();
-    createOrder("NORMAL"); // ID 1
-    createOrder("VIP"); // ID 2 (Jumps to front if ID 1 isn't processing yet)
-
-    // 2. Wait 11 seconds for the bot to finish at least one order
-    // This ensures your result.txt has a "COMPLETE" entry
-    await new Promise((r) => setTimeout(r, 11000));
-
-    // 3. Write the results specifically to the path expected by the workflow
-    fs.writeFileSync("scripts/result.txt", state.results.join("\n"));
-
-    log("Simulation Finished. Results written to scripts/result.txt");
+    // Write to file
+    const fs = require('fs');
+    if (!fs.existsSync('scripts')) fs.mkdirSync('scripts');
+    fs.writeFileSync('scripts/result.txt', state.results.join('\n'));
+    
     process.exit(0);
   })();
 }

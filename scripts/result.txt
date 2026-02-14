@@ -1,7 +1,22 @@
-[01:07:34] Simulation Started
-[01:07:34] Added Bot 1
-[01:07:34] New NORMAL Order #1 added.
-[01:07:34] Bot 1 started processing Order #1
-[01:07:34] New VIP Order #2 added.
-[01:07:44] Order #1 COMPLETE (by Bot 1)
-[01:07:44] Bot 1 started processing Order #2
+[01:21:15] System initialized with 0 bots
+[01:21:15] New NORMAL Order #1 added.
+[01:21:15] New VIP Order #2 added.
+[01:21:15] New NORMAL Order #3 added.
+[01:21:15] Added Bot 1
+[01:21:15] Bot 1 started processing Order #2
+[01:21:15] Added Bot 2
+[01:21:15] Bot 2 started processing Order #1
+[01:21:25] Order #2 COMPLETE (by Bot 1)
+[01:21:25] Bot 1 started processing Order #3
+[01:21:25] Order #1 COMPLETE (by Bot 2)
+[01:21:26] New VIP Order #4 added.
+[01:21:26] Bot 2 started processing Order #4
+[01:21:35] Order #3 COMPLETE (by Bot 1)
+[01:21:36] Order #4 COMPLETE (by Bot 2)
+[01:21:37] Removed IDLE Bot 2
+
+Final Status:
+- Total Orders Processed: 4 (2 VIP, 2 Normal)
+- Orders Completed: 4
+- Active Bots: 1
+- Pending Orders: 0
