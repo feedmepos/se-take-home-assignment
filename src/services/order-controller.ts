@@ -1,14 +1,16 @@
-import { Order } from "../models/order";
 import { Bot } from "../models/bot";
+import { Order } from "../models/order";
 import { BotManager } from "./bot-manager";
 import { OrderQueue } from "./order-queue";
 import { log } from "../utils/logger";
-import { OrderType } from "../types";
+import { LogType, OrderType } from "../types";
+
+const { ORDER_CREATE } = LogType;
 
 export class OrderController {
   private orderQueue: OrderQueue;
   private botManager: BotManager;
-  private nextOrderId: number = 1001;
+  private lastOrderId: number = 1001;
 
   constructor() {
     this.orderQueue = new OrderQueue();
@@ -16,19 +18,27 @@ export class OrderController {
   }
 
   addOrder(type: OrderType): Order {
-    const order = new Order(this.nextOrderId++, type);
-    this.orderQueue.add(order);
-    log(`Created ${order.toString()}`);
+    const nextOrderId = this.lastOrderId++;
+    const newOrder = new Order(nextOrderId, type);
 
-    this.botManager.dispatchNextOrderAndProcess();
-    return order;
+    this.orderQueue.add(newOrder);
+
+    log(ORDER_CREATE, {
+      order_id: newOrder.id,
+      order_type: newOrder.type,
+      order_status: newOrder.status,
+    });
+
+    this.botManager.assignAndProcessOrder();
+
+    return newOrder;
   }
 
-  addBot() {
+  addBot(): Bot {
     return this.botManager.addBot();
   }
 
-  removeBot() {
+  removeBot(): Bot | null {
     return this.botManager.removeBot();
   }
 
@@ -37,8 +47,8 @@ export class OrderController {
       totalOrders: Order.totalCount,
       countByType: Order.countByType,
       completedCount: Order.completedCount,
-      activeBots: this.botManager.activeBotCount,
-      destroyedBots: Bot.destroyedCount,
+      activeBots: BotManager.activeBotCount,
+      destroyedBots: BotManager.removeBotCount,
       pendingOrders: this.orderQueue.pendingCount,
     };
   }

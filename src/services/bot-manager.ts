@@ -1,59 +1,70 @@
 import { Bot } from "../models/bot";
 import { OrderQueue } from "./order-queue";
 import { log } from "../utils/logger";
+import { LogType } from "../types";
+
+const { BOT_CREATE, BOT_IDLE, BOT_DESTROY } = LogType;
 
 export class BotManager {
   private bots: Bot[] = [];
-  private nextBotId: number = 1;
+  private lastBotId: number = 1;
+
+  static activeBotCount: number = 0;
+  static removeBotCount: number = 0;
 
   constructor(private queue: OrderQueue) {}
 
-  get activeBotCount(): number {
-    return this.bots.length;
-  }
-
   addBot(): Bot {
-    const bot = new Bot(this.nextBotId++, () => {
-      this.dispatchNextOrderAndProcess(bot);
-    });
+    const nextBotId: number = this.lastBotId++;
+    const onComplete = (): void => this.assignAndProcessOrder(newBot);
 
-    log(`Bot #${bot.id} created - Status: ACTIVE`);
+    const newBot = new Bot(nextBotId, onComplete);
 
-    this.bots.push(bot);
-    this.dispatchNextOrderAndProcess(bot);
+    BotManager.activeBotCount++;
+    this.bots.push(newBot);
 
-    return bot;
+    log(BOT_CREATE, { bot_id: newBot.id });
+
+    onComplete();
+
+    return newBot;
   }
 
   removeBot(): Bot | null {
     if (this.bots.length === 0) return null;
 
     const bot = this.bots.pop()!;
-    const order = bot.destroy();
+    const order = bot.stop();
 
     if (order) {
       this.queue.requeue(order);
     }
 
-    log(`Bot #${bot.id} destroyed`);
+    BotManager.activeBotCount--;
+    BotManager.removeBotCount++;
+
+    log(BOT_DESTROY, { bot_id: bot.id });
+
     return bot;
   }
 
-  dispatchNextOrderAndProcess(checkBot?: Bot): void {
+  assignAndProcessOrder(checkBot?: Bot): void {
+    // iterate through all bots and assign and process orders
     for (const bot of this.bots) {
-      // find an available bot
+      // find an idle bot
       if (bot.isIdle) {
         // get next pending order
-        const order = this.queue.next();
+        const pendingOrder = this.queue.next();
+
         // if has next pending order, process it (10 seconds)
-        if (order) {
-          bot.process(order);
+        if (pendingOrder) {
+          bot.process(pendingOrder);
         }
       }
     }
 
     if (checkBot && checkBot.isIdle) {
-      log(`Bot #${checkBot.id} is now IDLE - No pending orders`);
+      log(BOT_IDLE, { bot_id: checkBot.id });
     }
   }
 }

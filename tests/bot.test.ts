@@ -1,12 +1,11 @@
 import { Bot } from "../src/models/bot";
 import { Order } from "../src/models/order";
-import { OrderType } from "../src/types";
+import { OrderType, OrderStatus } from "../src/types";
 
 describe("Bot", () => {
   // 使用 Jest 假計時器，避免真的等 10 秒
   beforeEach(() => {
     jest.useFakeTimers();
-    Bot.destroyedCount = 0; // 重置 static 計數器
   });
 
   afterEach(() => {
@@ -44,14 +43,14 @@ describe("Bot", () => {
     bot.process(order);
 
     // 還沒到 10 秒
-    expect(order.status).toBe("PROCESSING");
+    expect(order.status).toBe(OrderStatus.PROCESSING);
     expect(onComplete).not.toHaveBeenCalled();
 
     // 快進 10 秒
     jest.advanceTimersByTime(10000);
 
     // 完成了
-    expect(order.status).toBe("COMPLETE");
+    expect(order.status).toBe(OrderStatus.COMPLETE);
     expect(onComplete).toHaveBeenCalledTimes(1);
     expect(bot.isIdle).toBe(true);
   });
@@ -68,7 +67,7 @@ describe("Bot", () => {
 
     expect(stoppedOrder).toBe(order);
     expect(bot.isIdle).toBe(true);
-    expect(order.status).toBe("PROCESSING"); // 狀態未變（由 queue.requeue 處理）
+    expect(order.status).toBe(OrderStatus.PROCESSING); // 狀態未變（由 queue.requeue 處理）
   });
 
   // 5. idle 時 stop 返回 null
@@ -93,31 +92,5 @@ describe("Bot", () => {
     jest.advanceTimersByTime(10000);
 
     expect(onComplete).not.toHaveBeenCalled();
-  });
-
-  // === Destroy 功能 (Bot 被移除) ===
-
-  // 7. destroy 增加 destroyedCount
-  it("should increment destroyedCount when destroyed", () => {
-    const bot = new Bot(1, jest.fn());
-
-    expect(Bot.destroyedCount).toBe(0);
-
-    bot.destroy();
-
-    expect(Bot.destroyedCount).toBe(1);
-  });
-
-  // 8. destroy 時返回正在處理的訂單
-  it("should stop and return order when destroyed", () => {
-    const bot = new Bot(1, jest.fn());
-    const order = new Order(1001, OrderType.VIP);
-
-    bot.process(order);
-    const destroyedOrder = bot.destroy();
-
-    expect(destroyedOrder).toBe(order);
-    expect(bot.isIdle).toBe(true);
-    expect(Bot.destroyedCount).toBe(1);
   });
 });

@@ -1,7 +1,12 @@
 import { OrderType, OrderStatus, OrderPriority } from "../types";
 
+const { PENDING, PROCESSING, COMPLETE } = OrderStatus;
+
 export class Order {
-  // static
+  // constructure：id, type
+  // getter: status()
+  // methods：process(), complete(), reset()
+
   static completedCount: number = 0;
   static countByType: Record<OrderType, number> = {
     [OrderType.VIP]: 0,
@@ -12,16 +17,15 @@ export class Order {
     return Object.values(Order.countByType).reduce((sum, count) => sum + count, 0);
   }
 
-  // instance props
-  public readonly createdAt: number = Date.now();
-  private _status: OrderStatus = OrderStatus.PENDING;
+  private _status: OrderStatus = PENDING;
 
-  // constructor
-  constructor(public readonly id: number, public readonly type: OrderType) {
+  constructor(
+    public readonly id: number,
+    public readonly type: OrderType,
+  ) {
     Order.countByType[type]++;
   }
 
-  // instance getters
   get status(): OrderStatus {
     return this._status;
   }
@@ -30,21 +34,16 @@ export class Order {
     return OrderPriority[this.type];
   }
 
-  // instance methods
   process(): void {
-    this._status = OrderStatus.PROCESSING;
+    this._status = PROCESSING;
   }
 
   complete(): void {
-    this._status = OrderStatus.COMPLETE;
+    this._status = COMPLETE;
     Order.completedCount++;
   }
 
   reset(): void {
-    this._status = OrderStatus.PENDING;
-  }
-
-  toString(): string {
-    return `Order(${this.type}) #${this.id} - Status: ${this._status}`;
+    this._status = PENDING;
   }
 }

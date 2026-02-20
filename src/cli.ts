@@ -1,10 +1,11 @@
 import * as readline from "readline";
 import { OrderController } from "./services/order-controller";
-import { OrderType } from "./types";
 import { logger, log } from "./utils/logger";
+import { LogType, OrderType, OutputType } from "./types";
 
-// CLI mode: logs only go to file (use: tail -f output.log)
-logger.setOutput("file");
+const { FILE } = OutputType;
+const { NORMAL, VIP } = OrderType;
+const { SYSTEM_INIT } = LogType;
 
 const controller = new OrderController();
 
@@ -12,6 +13,8 @@ const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
 });
+
+logger.setLogOutput(FILE);
 
 function showMenu(): void {
   console.log("\n=== McDonald's Order Management System ===");
@@ -28,8 +31,8 @@ function showStatus(): void {
   const stats = controller.getStats();
   console.log("\n--- Current Status ---");
   console.log(`Orders: ${stats.completedCount}/${stats.totalOrders} completed`);
-  console.log(`  - VIP: ${stats.countByType[OrderType.VIP]}`);
-  console.log(`  - Normal: ${stats.countByType[OrderType.NORMAL]}`);
+  console.log(`  - VIP: ${stats.countByType[VIP]}`);
+  console.log(`  - Normal: ${stats.countByType[NORMAL]}`);
   console.log(`Pending: ${stats.pendingOrders}`);
   console.log(`Active Bots: ${stats.activeBots}`);
   console.log(`Destroyed Bots: ${stats.destroyedBots}`);
@@ -38,10 +41,10 @@ function showStatus(): void {
 function handleInput(choice: string): boolean {
   switch (choice.trim()) {
     case "1":
-      controller.addOrder(OrderType.NORMAL);
+      controller.addOrder(NORMAL);
       break;
     case "2":
-      controller.addOrder(OrderType.VIP);
+      controller.addOrder(VIP);
       break;
     case "3":
       controller.addBot();
@@ -73,6 +76,7 @@ function handleInput(choice: string): boolean {
 function prompt(): void {
   rl.question("> ", (answer) => {
     const continueLoop = handleInput(answer);
+
     if (continueLoop) {
       prompt();
     } else {
@@ -81,9 +85,15 @@ function prompt(): void {
   });
 }
 
-// Start
-console.log("=== McDonald's Order Management System ===");
-log("System initialized");
-showMenu();
-console.log("(Enter 'm' to show menu again)\n");
-prompt();
+function main(): void {
+  console.log("=== McDonald's Order Management System ===");
+  log(SYSTEM_INIT);
+
+  // initial menu
+  showMenu();
+  console.log("(Enter 'm' to show menu again)\n");
+
+  prompt();
+}
+
+main();
