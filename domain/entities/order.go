@@ -7,6 +7,7 @@ type OrderType string
 const (
 	OrderTypeNormal OrderType = "NORMAL"
 	OrderTypeVIP    OrderType = "VIP"
+	OrderTypeVVIP   OrderType = "VVIP"
 )
 
 type Order struct {

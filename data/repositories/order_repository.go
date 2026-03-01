@@ -49,11 +49,14 @@ func (r *InMemoryOrderRepository) GetPendingOrders() []*entities.Order {
 		}
 	}
 
+	var vvipOrders []*models.OrderModel
 	var vipOrders []*models.OrderModel
 	var normalOrders []*models.OrderModel
 
 	for _, order := range pending {
-		if order.Type == string(entities.OrderTypeVIP) {
+		if order.Type == string(entities.OrderTypeVVIP) {
+			vvipOrders = append(vvipOrders, order)
+		} else if order.Type == string(entities.OrderTypeVIP) {
 			vipOrders = append(vipOrders, order)
 		} else {
 			normalOrders = append(normalOrders, order)
@@ -61,6 +64,9 @@ func (r *InMemoryOrderRepository) GetPendingOrders() []*entities.Order {
 	}
 
 	result := make([]*entities.Order, 0, len(pending))
+	for _, orderModel := range vvipOrders {
+		result = append(result, orderModel.ToEntity())
+	}
 	for _, orderModel := range vipOrders {
 		result = append(result, orderModel.ToEntity())
 	}
@@ -116,6 +122,7 @@ func (r *InMemoryOrderRepository) ClaimNextPendingOrder() *entities.Order {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
+	var vvipOrders []*models.OrderModel
 	var vipOrders []*models.OrderModel
 	var normalOrders []*models.OrderModel
 
@@ -123,6 +130,8 @@ func (r *InMemoryOrderRepository) ClaimNextPendingOrder() *entities.Order {
 		if order.Status == string(entities.OrderStatusPending) {
 			if order.Type == string(entities.OrderTypeVIP) {
 				vipOrders = append(vipOrders, order)
+			} else if order.Type == string(entities.OrderTypeVVIP) {
+				vvipOrders = append(vvipOrders, order)
 			} else {
 				normalOrders = append(normalOrders, order)
 			}
@@ -130,7 +139,9 @@ func (r *InMemoryOrderRepository) ClaimNextPendingOrder() *entities.Order {
 	}
 
 	var nextOrderModel *models.OrderModel
-	if len(vipOrders) > 0 {
+	if len(vvipOrders) > 0 {
+		nextOrderModel = vvipOrders[0]
+	} else if len(vipOrders) > 0 {
 		nextOrderModel = vipOrders[0]
 	} else if len(normalOrders) > 0 {
 		nextOrderModel = normalOrders[0]

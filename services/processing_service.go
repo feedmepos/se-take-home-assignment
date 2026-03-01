@@ -61,6 +61,7 @@ type processingTask struct {
 type ProcessingStats struct {
 	mu              sync.Mutex
 	OrdersCompleted int
+	VVIPCompleted   int
 	VIPCompleted    int
 	NormalCompleted int
 }
@@ -127,10 +128,10 @@ func (ps *ProcessingService) CancelBotProcessing(botID int) (int, bool) {
 }
 
 // GetStats returns the current processing statistics
-func (ps *ProcessingService) GetStats() (completed, vip, normal int) {
+func (ps *ProcessingService) GetStats() (completed, vvip, vip, normal int) {
 	ps.stats.mu.Lock()
 	defer ps.stats.mu.Unlock()
-	return ps.stats.OrdersCompleted, ps.stats.VIPCompleted, ps.stats.NormalCompleted
+	return ps.stats.OrdersCompleted, ps.stats.VVIPCompleted, ps.stats.VIPCompleted, ps.stats.NormalCompleted
 }
 
 // GetActiveProcessingCount returns the number of orders currently being processed
@@ -256,9 +257,12 @@ func (ps *ProcessingService) completeProcessing(botID int, order *entities.Order
 	// Update stats
 	ps.stats.mu.Lock()
 	ps.stats.OrdersCompleted++
-	if order.Type == entities.OrderTypeVIP {
+	switch order.Type {
+	case entities.OrderTypeVVIP:
+		ps.stats.VVIPCompleted++
+	case entities.OrderTypeVIP:
 		ps.stats.VIPCompleted++
-	} else {
+	default:
 		ps.stats.NormalCompleted++
 	}
 	ps.stats.mu.Unlock()

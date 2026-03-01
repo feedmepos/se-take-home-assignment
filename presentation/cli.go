@@ -70,6 +70,9 @@ func orderTypeString(orderType entities.OrderType) string {
 	if orderType == entities.OrderTypeVIP {
 		return "VIP"
 	}
+	if orderType == entities.OrderTypeVVIP {
+		return "VVIP"
+	}
 	return "Normal"
 }
 
@@ -148,6 +151,42 @@ func (cli *CLI) CreateVIPOrder() error {
 	return nil
 }
 
+func (cli *CLI) CreateVVIPOrder() error {
+	// Check for pending normal orders before creating VIP order
+	status := cli.getStatusUC.Execute()
+	pendingNormalCount := 0
+	pendingVIPCount := 0
+	for _, order := range status.PendingOrders {
+		if order.Type == entities.OrderTypeNormal {
+			pendingNormalCount++
+		} else if order.Type == entities.OrderTypeVIP {
+			pendingVIPCount++
+		}
+	}
+
+	result, err := cli.createOrderUC.Execute(usecases.CreateOrderArgs{
+		OrderType: entities.OrderTypeVVIP,
+	})
+	if err != nil {
+		cli.output.WriteLine(fmt.Sprintf("[ERROR] %v", err))
+		return err
+	}
+	cli.output.WriteLine(fmt.Sprintf("[%s] Created VVIP Order #%d - Status: PENDING",
+		cli.timestamp(), result.Order.ID))
+
+	// If there were pending normal orders, print reprioritization message
+	if pendingNormalCount > 0 {
+		cli.output.WriteLine(fmt.Sprintf("[%s] Queue reprioritized - VVIP Order #%d moved ahead of %d normal order(s) and %d VIP order(s)",
+			cli.timestamp(), result.Order.ID, pendingNormalCount, pendingVIPCount))
+	}
+
+	// Trigger background processing to pick up the order
+	if cli.processingService != nil {
+		cli.processingService.TriggerProcessing()
+	}
+	return nil
+}
+
 func (cli *CLI) AddBot() error {
 	res, err := cli.addBotUC.Execute()
 	if err != nil {
@@ -208,22 +247,26 @@ func (cli *CLI) RemoveBot() error {
 }
 
 // GetProcessingStats returns the processing statistics from the processing service
-func (cli *CLI) GetProcessingStats() (completed, vip, normal int) {
+func (cli *CLI) GetProcessingStats() (completed, vvip, vip, normal int) {
 	if cli.processingService != nil {
 		return cli.processingService.GetStats()
 	}
-	return 0, 0, 0
+	return 0, 0, 0, 0
 }
 
 func (cli *CLI) PrintStatus() {
 	status := cli.getStatusUC.Execute()
 
+	vvipCount := 0
 	vipCount := 0
 	normalCount := 0
 	for _, order := range status.CompleteOrders {
-		if order.Type == entities.OrderTypeVIP {
+		switch order.Type {
+		case entities.OrderTypeVVIP:
+			vvipCount++
+		case entities.OrderTypeVIP:
 			vipCount++
-		} else {
+		default:
 			normalCount++
 		}
 	}
@@ -233,8 +276,8 @@ func (cli *CLI) PrintStatus() {
 
 	cli.output.WriteLine("")
 	cli.output.WriteLine("Final Status:")
-	cli.output.WriteLine(fmt.Sprintf("- Total Orders Processed: %d (%d VIP, %d Normal)",
-		len(status.CompleteOrders), vipCount, normalCount))
+	cli.output.WriteLine(fmt.Sprintf("- Total Orders Processed: %d (%d VVIP, %d VIP, %d Normal)",
+		len(status.CompleteOrders), vvipCount, vipCount, normalCount))
 	cli.output.WriteLine(fmt.Sprintf("- Orders Completed: %d", len(status.CompleteOrders)))
 	cli.output.WriteLine(fmt.Sprintf("- Active Bots: %d", len(status.Bots)))
 	cli.output.WriteLine(fmt.Sprintf("- Pending Orders: %d", pendingCount))

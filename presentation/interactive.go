@@ -6,10 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"sync"
 )
-
-var promptMu sync.Mutex
 
 // RunInteractive starts the interactive command loop
 func (app *App) RunInteractive() {
@@ -18,9 +15,7 @@ func (app *App) RunInteractive() {
 	reader := bufio.NewReader(os.Stdin)
 
 	for {
-		promptMu.Lock()
 		fmt.Print("Enter command> ")
-		promptMu.Unlock()
 
 		input, err := reader.ReadString('\n')
 		if err != nil {
@@ -53,8 +48,6 @@ func (app *App) CreateEventHandler() services.EventHandler {
 }
 
 func reprintPrompt() {
-	promptMu.Lock()
-	defer promptMu.Unlock()
 	fmt.Print("\nEnter command> ")
 }
 
@@ -76,13 +69,17 @@ func (app *App) executeCommand(command string) bool {
 		if cmd := app.GetCommand("add-vip-order"); cmd != nil {
 			cmd.Run(cmd, nil)
 		}
-	case "5", "status":
+	case "5", "add vvip order", "add-vvip-order", "add vvip":
+		if cmd := app.GetCommand("add-vvip-order"); cmd != nil {
+			cmd.Run(cmd, nil)
+		}
+	case "6", "status":
 		if cmd := app.GetCommand("status"); cmd != nil {
 			cmd.Run(cmd, nil)
 		}
-	case "6", "help":
+	case "7", "help":
 		app.printAvailableCommands()
-	case "7", "exit", "quit", "q":
+	case "8", "exit", "quit", "q":
 		fmt.Println("Exiting...")
 		return false
 	default:
@@ -114,14 +111,15 @@ func (app *App) printAvailableCommands() {
 	fmt.Println("  2. remove bot    - Remove the most recently added bot")
 	fmt.Println("  3. add order     - Create a new normal order")
 	fmt.Println("  4. add vip order - Create a new VIP order (priority)")
-	fmt.Println("  5. status        - Show current system status")
-	fmt.Println("  6. help          - Show this help message")
-	fmt.Println("  7. exit          - Exit the program")
+	fmt.Println("  5. add vvip order - Create a new VVIP order (priority)")
+	fmt.Println("  6. status        - Show current system status")
+	fmt.Println("  7. help          - Show this help message")
+	fmt.Println("  8. exit          - Exit the program")
 	fmt.Println()
 }
 
 func (app *App) printSessionSummary() {
-	completed, vipCompleted, normalCompleted := app.cli.GetProcessingStats()
+	completed, vvipCompleted, vipCompleted, normalCompleted := app.cli.GetProcessingStats()
 
 	fmt.Println()
 	fmt.Println("╔════════════════════════════════════════════════════════════════╗")
@@ -131,12 +129,14 @@ func (app *App) printSessionSummary() {
 	fmt.Println("Session Activity:")
 	fmt.Printf("  • Normal orders created: %d\n", app.stats.NormalOrdersCreated)
 	fmt.Printf("  • VIP orders created:    %d\n", app.stats.VIPOrdersCreated)
-	fmt.Printf("  • Total orders created:  %d\n", app.stats.NormalOrdersCreated+app.stats.VIPOrdersCreated)
+	fmt.Printf("  • VVIP orders created:   %d\n", app.stats.VVIPOrdersCreated)
+	fmt.Printf("  • Total orders created:  %d\n", app.stats.NormalOrdersCreated+app.stats.VIPOrdersCreated+app.stats.VVIPOrdersCreated)
 	fmt.Printf("  • Bots added:            %d\n", app.stats.BotsAdded)
 	fmt.Printf("  • Bots removed:          %d\n", app.stats.BotsRemoved)
 	fmt.Println()
 	fmt.Println("Orders Completed:")
 	fmt.Printf("  • Total completed:       %d\n", completed)
+	fmt.Printf("  • VVIP completed:        %d\n", vvipCompleted)
 	fmt.Printf("  • VIP completed:         %d\n", vipCompleted)
 	fmt.Printf("  • Normal completed:      %d\n", normalCompleted)
 	fmt.Println()

@@ -19,6 +19,7 @@ type App struct {
 type SessionStats struct {
 	NormalOrdersCreated int
 	VIPOrdersCreated    int
+	VVIPOrdersCreated   int
 	BotsAdded           int
 	BotsRemoved         int
 }
@@ -105,6 +106,20 @@ How it works:
 			err := app.cli.CreateVIPOrder()
 			if err == nil {
 				app.stats.VIPOrdersCreated++
+			}
+			fmt.Println()
+		},
+	}
+
+	// Add VVIP order command
+	app.commands["add-vvip-order"] = &cobra.Command{
+		Use:   "add-vvip-order",
+		Short: "Create a new VVIP order (priority)",
+		Long:  "Create a new VVIP order. VVIP orders have priority and are processed before VIP and normal orders.",
+		Run: func(cmd *cobra.Command, args []string) {
+			err := app.cli.CreateVVIPOrder()
+			if err == nil {
+				app.stats.VVIPOrdersCreated++
 			}
 			fmt.Println()
 		},
