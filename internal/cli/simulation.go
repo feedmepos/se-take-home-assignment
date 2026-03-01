@@ -14,12 +14,12 @@ func RunSimulation(logFunc models.LogFunc) {
 	fmt.Println()
 
 	c := controller.New(logFunc)
-	logFunc("System initialized with 0 bots")
+	logFunc("Simulation mode started")
 
 	// Create 3 orders: Normal, VIP, Normal
 	c.NewNormalOrder() // #1001
 	time.Sleep(1 * time.Second)
-	c.NewVIPOrder() // #1002
+	c.NewVIPOrder()    // #1002
 	c.NewNormalOrder() // #1003
 	time.Sleep(1 * time.Second)
 

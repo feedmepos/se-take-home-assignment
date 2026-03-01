@@ -14,7 +14,7 @@ import (
 // RunInteractive starts the interactive CLI mode.
 func RunInteractive(c *controller.Controller, logFunc models.LogFunc) {
 	fmt.Println("\nMcDonald's Order Management System - Interactive CLI")
-	logFunc("Interactive mode started")
+	logFunc("Interactive mode started - waiting for user input...")
 
 	reader := bufio.NewReader(os.Stdin)
 

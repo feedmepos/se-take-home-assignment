@@ -4,8 +4,8 @@
 
 | Command | Description |
 |---------|-------------|
-| `go run ./cmd/main.go` | Run app in **Simulation Mode** (auto-saves to `scripts/result_simulation.txt`) |
-| `go run ./cmd/main.go --interactive` | Run app in **Interactive CLI Mode** (auto-saves to `scripts/result_interactive.txt`) |
+| `go run ./cmd/main.go` | Run app in **Simulation Mode** (auto-saves to `scripts/result.txt`) |
+| `go run ./cmd/main.go --interactive` | Run app in **Interactive CLI Mode** (auto-saves to `scripts/result.txt`) |
 | `go test ./... -v` | Run all tests with verbose output |
 | `go test ./... -cover` | Run all tests with coverage report |
 | `go build -o order-controller ./cmd/main.go` | Build binary |
@@ -106,7 +106,7 @@ Status updates after every action, showing:
 - **Pending Orders**: Waiting in queue
 - **Active Bots**: Currently running
 
-**Progress Logging:** All interactive mode activity (order creation, bot addition/removal, system shutdown) is automatically logged to `scripts/result_interactive.txt` with timestamps.
+**Progress Logging:** All interactive mode activity (order creation, bot addition/removal, system shutdown) is automatically logged to `scripts/result.txt` with timestamps and an interactive mode header.
 
 ## Simulation Mode (Default)
 
@@ -119,7 +119,11 @@ Run `go run ./cmd/main.go` (without `--interactive`) to execute the hardcoded si
 5. Removes a bot
 6. Displays final results
 
-Output saves to `scripts/result_simulation.txt` with timestamps.
+Output saves to `scripts/result.txt` with timestamps and mode tags.
+
+**Mode Tags:** Each run includes a mode header:
+- `[HH:MM:SS] === SIMULATION MODE ===` for simulation
+- `[HH:MM:SS] === INTERACTIVE MODE ===` for interactive
 
 ## Scripts (for CI/CD)
 
@@ -127,7 +131,7 @@ Output saves to `scripts/result_simulation.txt` with timestamps.
 |--------|-------------|
 | `./scripts/test.sh` | Run unit tests |
 | `./scripts/build.sh` | Build binary → `order-controller` |
-| `./scripts/run.sh` | Run binary in **Simulation Mode** → `scripts/result_simulation.txt` |
+| `./scripts/run.sh` | Run binary in **Simulation Mode** → `scripts/result.txt` |
 
 ## GitHub Actions
 
@@ -138,11 +142,11 @@ Output saves to `scripts/result_simulation.txt` with timestamps.
 
 1. `./scripts/test.sh` — Run tests
 2. `./scripts/build.sh` — Build binary
-3. `./scripts/run.sh` — Execute and write to `result_simulation.txt`
-4. Verify `result_simulation.txt` exists and contains `HH:MM:SS` timestamps
+3. `./scripts/run.sh` — Execute and write to `result.txt`
+4. Verify `result.txt` exists and contains `HH:MM:SS` timestamps
 
 **Requirements for PR to pass:**
 
 - All tests must pass
-- `scripts/result_simulation.txt` must not be empty
+- `scripts/result.txt` must not be empty
 - Output must include timestamps (e.g., `[11:06:01]`)

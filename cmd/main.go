@@ -20,18 +20,10 @@ func main() {
 	interactiveFlag := flag.Bool("interactive", false, "Run in interactive CLI mode instead of simulation")
 	flag.Parse()
 
-	// Determine filename based on mode
-	var filename string
-	if *interactiveFlag {
-		filename = "scripts/result_interactive.txt"
-	} else {
-		filename = "scripts/result_simulation.txt"
-	}
-
-	// Auto-save output to appropriate file
-	file, err := os.Create(filename)
+	// write to scripts/result.txt
+	file, err := os.Create("scripts/result.txt")
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Warning: could not create %s: %v (writing to terminal only)\n", filename, err)
+		fmt.Fprintf(os.Stderr, "Warning: could not create scripts/result.txt: %v (writing to terminal only)\n", err)
 		file = nil
 	}
 	if file != nil {
@@ -49,8 +41,10 @@ func main() {
 
 	if *interactiveFlag {
 		c := controller.New(logFunc)
+		logFunc("=== INTERACTIVE MODE ===")
 		cli.RunInteractive(c, logFunc)
 	} else {
+		logFunc("=== SIMULATION MODE ===")
 		cli.RunSimulation(logFunc)
 	}
 }
