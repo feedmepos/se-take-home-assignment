@@ -42,21 +42,33 @@ The McDonald's Bot Controller is a take-home assignment project that demonstrate
 
 ```
 src/
-├── App.jsx                 # Main component with state management
-├── main.jsx               # Entry point
-├── App.css                # Global styles
-├── index.css              # Base styles
+├── App.jsx                    # Main component with state management (reducer logic)
+├── main.jsx                   # Entry point
+├── App.css                    # Global styles
+├── index.css                  # Base styles
 ├── components/
-│   ├── CreateOrderModal.jsx        # Modal for creating orders
-│   ├── BotsList.jsx                # Display active bots
-│   ├── PendingOrdersList.jsx       # Show pending orders
-│   ├── CompletedOrdersList.jsx     # Show completed orders
+│   ├── CreateOrderModal.jsx           # Modal for creating orders
+│   ├── BotsList.jsx                   # Display active bots
+│   ├── PendingOrdersList.jsx          # Show pending orders
+│   ├── CompletedOrdersList.jsx        # Show completed orders
 │   └── MobileFloatingActionButton.jsx # Mobile UI controls
+├── hooks/
+│   └── useOrderTimers.js      # Custom hook managing order completion timers
 └── utils/
-    └── enums.js           # Enum definitions for actions, statuses, customer types
+    ├── enums.js               # Enum definitions (actions, statuses, customer types)
+    ├── constants.js           # Constants (processing time, ID padding)
+    └── orderUtils.js          # Helper functions (order assignment, creation)
 ```
 
 ## How It Works
+
+### Architecture
+The app follows a **clean, modular architecture**:
+- **App.jsx**: Centralized state management using `useReducer` pattern
+- **Custom Hooks**: `useOrderTimers` encapsulates timer logic for order completion
+- **Utilities**: Pure functions for business logic (order assignment, creation)
+- **Components**: Dumb components focused only on rendering UI
+- **Constants**: Centralized configuration for easy updates
 
 ### State Management
 The app uses React's `useReducer` hook to manage global state including:
@@ -70,7 +82,7 @@ The app uses React's `useReducer` hook to manage global state including:
 2. Order receives a unique ID (V-0001 for VIP, N-0001 for Normal)
 3. Order is automatically assigned to the first available idle bot
 4. Bot begins processing (status changes to Busy)
-5. After 10 seconds, the order completes automatically
+5. After 10 seconds (configurable), the order completes automatically
 6. Bot returns to Idle status and processes next pending order
 7. Next pending order (VIP preferred) is assigned if available
 
@@ -122,25 +134,49 @@ npm run lint
 
 ## Usage Guide
 
-1. **Add a Bot**: Click "Add Bot" to create a new bot. It will immediately start processing pending orders.
-2. **Create an Order**: Click "Add Order" and select the customer type (VIP or Normal).
-3. **Monitor Progress**: 
-   - Watch the pending orders decrease as bots process them
-   - See the completed orders accumulate
-   - Check bot status in real-time
-4. **Remove Bots**: Click "Remove Bot" to remove the last bot. In-progress orders will rejoin the pending queue.
-
-## Key Components
+1. **Add a Bot**: & Files
 
 ### App.jsx
 Main application component containing:
-- State management with `useReducer`
-- Order assignment logic with VIP prioritization
-- Timer-based auto-completion of orders
+- State management with `useReducer` pattern
+- Reducer function handling CREATE_ORDER, ADD_BOT, REMOVE_BOT, COMPLETE_ORDER actions
+- Modal state management
+- Integration with custom timer hook
 - Responsive layout with Ant Design Grid system
 
-### CreateOrderModal.jsx
+### Hooks
+
+#### useOrderTimers.js
+Custom hook that manages order completion timers:
+- Sets up timers for busy bots
+- Cleans up timers when bots become idle or are removed
+- Handles component unmount cleanup to prevent memory leaks
+- Uses refs to avoid stale callback issues
+
+### Utilities
+
+#### orderUtils.js
+Pure functions for order and bot logic:
+- `assignOrdersToBots()` - Intelligently assigns pending orders to idle bots with VIP priority
+- `createOrder()` - Generates orders with unique IDs based on type
+
+#### constants.js
+Centralized configuration:
+- `ORDER_PROCESSING_TIME` - Time for bot to process an order (10 seconds)
+- `ORDER_ID_PADDING` - Digit padding for order IDs (4 digits)
+
+### Components
+
+#### CreateOrderModal.jsx
 Modal dialog for creating new orders with customer type selection.
+
+#### BotsList.jsx
+Displays all active bots with their status and current orders.
+
+#### PendingOrdersList.jsx & CompletedOrdersList.jsx
+Display queued and completed orders respectively.
+
+#Modal dialog for creating new orders with customer type selection.
 
 ### BotsList.jsx
 Displays all active bots with their status and current orders.

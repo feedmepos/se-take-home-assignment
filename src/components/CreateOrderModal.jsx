@@ -1,9 +1,13 @@
 import { Modal, Select, Form } from "antd";
 import { useState } from "react";
-import { ECustomerType } from "../utils/enums";
+import { CUSTOMER_TYPES } from "../utils/enums";
+import { Z_INDEX } from "../utils/constants";
 
+/**
+ * Modal for creating new orders
+ */
 export default function CreateOrderModal({ open, onClose, onCreate }) {
-  const [customerType, setCustomerType] = useState(ECustomerType.NORMAL);
+  const [customerType, setCustomerType] = useState(CUSTOMER_TYPES.NORMAL);
 
   const handleOk = () => {
     onCreate(customerType);
@@ -17,7 +21,7 @@ export default function CreateOrderModal({ open, onClose, onCreate }) {
       onOk={handleOk}
       onCancel={onClose}
       okText="Confirm"
-      style={{ zIndex: 9999 }}
+      style={{ zIndex: Z_INDEX.MODAL }}
     >
       <Form layout="vertical">
         <Form.Item label="Customer Type">
@@ -25,8 +29,8 @@ export default function CreateOrderModal({ open, onClose, onCreate }) {
             value={customerType}
             onChange={setCustomerType}
             options={[
-              { value: ECustomerType.NORMAL, label: "Normal" },
-              { value: ECustomerType.VIP, label: "VIP" },
+              { value: CUSTOMER_TYPES.NORMAL, label: "Normal" },
+              { value: CUSTOMER_TYPES.VIP, label: "VIP" },
             ]}
           />
         </Form.Item>

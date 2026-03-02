@@ -1,12 +1,18 @@
 import { Card } from "antd";
 
-export default function PendingOrders({ orders }) {
+/**
+ * Displays pending orders awaiting processing
+ */
+export default function PendingOrdersList({ orders }) {
   return (
     <Card title="Pending Orders">
       <div className="card-content">
-        {orders.map(o => (
-          <div key={o.id} className={`order-tag ${o.customerType.toLowerCase()}`}>
-            #{o.id} - {o.customerType}
+        {orders.map(order => (
+          <div 
+            key={order.id} 
+            className={`order-tag ${order.customerType.toLowerCase()}`}
+          >
+            #{order.id} - {order.customerType}
           </div>
         ))}
       </div>

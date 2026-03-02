@@ -1,12 +1,14 @@
-import { useReducer, useEffect, useRef, useState } from "react";
-import { Layout, Button, Row, Col, Typography, Card, Grid } from "antd";
-import { PlusOutlined, RobotOutlined, MinusOutlined } from "@ant-design/icons";
+import { useReducer, useState } from "react";
+import { Layout, Button, Row, Col, Typography, Grid } from "antd";
+import { PlusOutlined, RobotOutlined } from "@ant-design/icons";
 import CreateOrderModal from "./components/CreateOrderModal";
-import { EActionType, EBotStatus, ECustomerType } from "./utils/enums";
+import { ACTION_TYPES, BOT_STATUS, CUSTOMER_TYPES } from "./utils/enums";
 import MobileFloatingActionButton from "./components/MobileFloatingActionButton";
-import PendingOrders from "./components/PendingOrdersList";
-import CompletedOrders from "./components/CompletedOrdersList";
-import BotsPanel from "./components/BotsList";
+import PendingOrdersList from "./components/PendingOrdersList";
+import CompletedOrdersList from "./components/CompletedOrdersList";
+import BotsList from "./components/BotsList";
+import { assignOrdersToBots, createOrder } from "./utils/orderUtils";
+import { useOrderTimers } from "./hooks/useOrderTimers";
 
 const { Header, Content } = Layout;
 const { Title } = Typography;
@@ -20,48 +22,10 @@ const initialState = {
   bots: []
 };
 
-const assignOrdersToBots = (bots, pending) => {
-  let remaining = [...pending];
-
-  const updatedBots = bots.map(bot => {
-    if (bot.status !== EBotStatus.Idle) return bot;
-    if (!remaining.length) return bot;
-
-    const vipIndex = remaining.findIndex(
-      o => o.customerType === ECustomerType.VIP
-    );
-
-    const index = vipIndex !== -1 ? vipIndex : 0;
-    const [order] = remaining.splice(index, 1);
-
-    return {
-      ...bot,
-      status: EBotStatus.Busy,
-      currentOrder: order,
-    };
-  });
-
-  return { bots: updatedBots, pending: remaining };
-}
-
-const createOrder = (customerType, vipCounter, normalCounter) => {
-  const isVip = customerType === ECustomerType.VIP;
-  const counter = isVip ? vipCounter + 1 : normalCounter + 1;
-
-  const idPrefix = isVip ? "V" : "N";
-  const id = `${idPrefix}-${counter.toString().padStart(4, "0")}`;
-
-  return {
-    order: { id, customerType },
-    vipCounter: isVip ? counter : vipCounter,
-    normalCounter: !isVip ? counter : normalCounter,
-  };
-}
-
 const reducer = (state, action) => {
   switch (action.type) {
 
-    case EActionType.CREATE_ORDER: {
+    case ACTION_TYPES.CREATE_ORDER: {
       const { order, vipCounter, normalCounter } = createOrder(
         action.customerType,
         state.vipCounter,
@@ -82,13 +46,13 @@ const reducer = (state, action) => {
       };
     }
 
-    case EActionType.ADD_BOT: {
+    case ACTION_TYPES.ADD_BOT: {
       const botNumber = state.bots.length + 1;
 
       const newBot = {
         id: botNumber,
         name: `Bot #${botNumber}`,
-        status: EBotStatus.Idle,
+        status: BOT_STATUS.IDLE,
         currentOrder: null,
       };
 
@@ -104,10 +68,10 @@ const reducer = (state, action) => {
       };
     }
 
-    case EActionType.COMPLETE_ORDER: {
+    case ACTION_TYPES.COMPLETE_ORDER: {
       const updatedBots = state.bots.map(bot =>
         bot.id === action.botId
-          ? { ...bot, status: EBotStatus.Idle, currentOrder: null }
+          ? { ...bot, status: BOT_STATUS.IDLE, currentOrder: null }
           : bot
       );
 
@@ -121,7 +85,7 @@ const reducer = (state, action) => {
       };
     }
 
-    case EActionType.REMOVE_BOT: {
+    case ACTION_TYPES.REMOVE_BOT: {
       if (!state.bots.length) return state;
 
       const botsCopy = [...state.bots];
@@ -149,47 +113,21 @@ const reducer = (state, action) => {
 export default function App() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const timersRef = useRef({});
   const screenSize = useBreakpoint();
 
   const handleCreateOrder = (customerType) => {
-    dispatch({ type: EActionType.CREATE_ORDER, customerType });
+    dispatch({ type: ACTION_TYPES.CREATE_ORDER, customerType });
   };
 
-  useEffect(() => {
-    const activeBotIds = new Set(state.bots.map(b => b.id));
-    // Clear timers for removed bots
-    Object.keys(timersRef.current).forEach(botId => {
-      if (!activeBotIds.has(Number(botId))) {
-        clearTimeout(timersRef.current[botId]);
-        delete timersRef.current[botId];
-      }
-  });
+  const handleOrderComplete = (botId, order) => {
+    dispatch({
+      type: ACTION_TYPES.COMPLETE_ORDER,
+      botId,
+      order,
+    });
+  };
 
-  // Handle active bots
-  state.bots.forEach(bot => {
-    if (
-      bot.status === EBotStatus.Busy &&
-      bot.currentOrder &&
-      !timersRef.current[bot.id]
-    ) {
-      timersRef.current[bot.id] = setTimeout(() => {
-        dispatch({
-          type: EActionType.COMPLETE_ORDER,
-          botId: bot.id,
-          order: bot.currentOrder,
-        });
-
-        delete timersRef.current[bot.id];
-      }, 10000);
-    }
-
-    if (bot.status === EBotStatus.Idle && timersRef.current[bot.id]) {
-      clearTimeout(timersRef.current[bot.id]);
-      delete timersRef.current[bot.id];
-    }
-  });
-}, [state.bots]);
+  useOrderTimers(state.bots, handleOrderComplete);
 
   return (
     <Layout style={{ minHeight: "100vh", width: "100%" }}>
@@ -205,12 +143,12 @@ export default function App() {
             </Button>
           </Col>
           <Col>
-            <Button icon={<RobotOutlined />} onClick={() => dispatch({ type: EActionType.ADD_BOT })}>
+            <Button icon={<RobotOutlined />} onClick={() => dispatch({ type: ACTION_TYPES.ADD_BOT })}>
               Add Bot
             </Button>
           </Col>
           <Col>
-            <Button danger icon={[<RobotOutlined />]} onClick={() => dispatch({ type: EActionType.REMOVE_BOT })}>
+            <Button danger icon={[<RobotOutlined />]} onClick={() => dispatch({ type: ACTION_TYPES.REMOVE_BOT })}>
               Remove Bot
             </Button>
           </Col>
@@ -218,21 +156,21 @@ export default function App() {
 
        <Row gutter={16} className="status-grid">
           <Col xs={24} md={8}>
-            <PendingOrders orders={state.pending} />
+            <PendingOrdersList orders={state.pending} />
           </Col>
 
           <Col xs={24} md={8}>
-            <BotsPanel bots={state.bots} />
+            <BotsList bots={state.bots} />
           </Col>
 
           <Col xs={24} md={8}>
-            <CompletedOrders orders={state.completed} />
+            <CompletedOrdersList orders={state.completed} />
           </Col>
         </Row>
         <MobileFloatingActionButton
           onAddOrder={() => setIsModalOpen(true)}
-          onAddBot={() => dispatch({ type: EActionType.ADD_BOT })}
-          onRemoveBot={() => dispatch({ type: EActionType.REMOVE_BOT })}
+          onAddBot={() => dispatch({ type: ACTION_TYPES.ADD_BOT })}
+          onRemoveBot={() => dispatch({ type: ACTION_TYPES.REMOVE_BOT })}
         />
 
         <CreateOrderModal
