@@ -17,21 +17,19 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v5
       with:
-        go-version: '1.21'
+        go-version: '1.23.9'
         
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '20'
-        cache: 'npm'
-        cache-dependency-path: frontend/package.json
+        node-version: '22.19.0'
         
     - name: Install Backend Dependencies
       run: go mod tidy
       
     - name: Install Frontend Dependencies
       working-directory: ./frontend
-      run: npm install
+      run: npm install --legacy-peer-deps
       
     - name: Build Backend
       run: go build -o order-controller ./cmd/api/main.go
@@ -52,8 +50,6 @@ jobs:
     - name: Check Frontend Coverage threshold (85%)
       working-directory: ./frontend
       run: |
-        # Extract the percentage from the text-summary output
-        # Example format: "Lines        : 94.87% ( 74/78 )"
         COVERAGE=$(grep "Lines" coverage-summary.txt | awk '{print $3}' | sed 's/%//')
         echo "Current Frontend Coverage: $COVERAGE%"
         if (( $(echo "$COVERAGE < 85" | bc -l) )); then
