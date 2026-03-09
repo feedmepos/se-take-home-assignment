@@ -1,15 +1,14 @@
 #!/bin/bash
+set -e
 
-# Build Script
-# This script should contain all compilation steps for your CLI application
+# Load nvm if it exists
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-echo "Building CLI application..."
+echo "Building Backend (Go)..."
+go build -o order-controller ./cmd/api/main.go
 
-# For Go projects:
-# go build -o order-controller ./cmd/main.go
+echo "Building Frontend (Next.js)..."
+cd frontend && npm run build
 
-# For Node.js projects:
-# npm install
-# npm run build (if needed)
-
-echo "Build completed"
+echo "Builds completed successfully!"

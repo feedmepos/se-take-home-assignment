@@ -1,14 +1,14 @@
 #!/bin/bash
+set -e
 
-# Unit Test Script
-# This script should contain all unit test execution steps
+# Load nvm if it exists
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-echo "Running unit tests..."
+echo "Running Backend unit tests..."
+go test ./... -v
 
-# For Go projects:
-# go test ./... -v
+echo "Running Frontend unit tests with coverage..."
+cd frontend && npm run test:coverage
 
-# For Node.js projects:
-# npm test
-
-echo "Unit tests completed"
+echo "All tests completed successfully!"
