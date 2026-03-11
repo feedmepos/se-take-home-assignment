@@ -1,11 +1,15 @@
 #!/bin/bash
 
 # Unit Test Script
-# This script should contain all unit test execution steps
+# This script contains all unit test execution steps
+
+set -e
 
 echo "Running unit tests..."
 
-# For Go projects:
-go test ./... -v
+cd "$(dirname "$0")/.."
 
-echo "Unit tests completed"
+# Run Go tests with verbose output
+go test ./... -v -timeout 60s
+
+echo "Unit tests completed successfully"
