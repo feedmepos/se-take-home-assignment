@@ -1,0 +1,19 @@
+{
+  "name": "feedme-order-controller",
+  "version": "1.0.0",
+  "description": "McDonald's order controller — FeedMe SE take-home assignment",
+  "main": "src/OrderController.js",
+  "scripts": {
+    "start": "node src/cli.js",
+    "start:fast": "node src/cli.js --fast",
+    "test": "jest --forceExit"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testTimeout": 10000
+  },
+  "license": "Apache-2.0"
+}

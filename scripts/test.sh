@@ -1,14 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-# Unit Test Script
-# This script should contain all unit test execution steps
+echo "=== Installing dependencies ==="
+npm ci
 
-echo "Running unit tests..."
-
-# For Go projects:
-# go test ./... -v
-
-# For Node.js projects:
-# npm test
-
-echo "Unit tests completed"
+echo "=== Running unit tests ==="
+npm test

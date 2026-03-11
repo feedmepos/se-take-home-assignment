@@ -1,15 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-# Build Script
-# This script should contain all compilation steps for your CLI application
+echo "=== Installing dependencies ==="
+npm ci
 
-echo "Building CLI application..."
-
-# For Go projects:
-# go build -o order-controller ./cmd/main.go
-
-# For Node.js projects:
-# npm install
-# npm run build (if needed)
-
-echo "Build completed"
+echo "=== Build complete (Node.js — no compilation needed) ==="
+node --check src/OrderController.js
+node --check src/cli.js
+echo "Syntax check passed."
