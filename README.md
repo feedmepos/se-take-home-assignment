@@ -1,63 +1,163 @@
-## FeedMe Software Engineer Take Home Assignment
-Below is a take home assignment before the interview of the position. You are required to
-1. Understand the situation and use case. You may contact the interviewer for further clarification.
-2. implement the requirement with **either frontend or backend components**.
-3. Complete the requirement with **AI** if possible, but perform your own testing.
-4. Provide documentation for the any part that you think is needed.
-5. Bring the source code and functioning prototype to the interview session.
+# FeedMe — McDonald's Order Controller (Node.js CLI)
 
-### Situation
-McDonald is transforming their business during COVID-19. They wish to build the automated cooking bots to reduce workforce and increase their efficiency. As one of the software engineer in the project. You task is to create an order controller which handle the order control flow. 
+A CLI simulation of McDonald's automated cooking bot order management system.
 
-### User Story
-As below is part of the user story:
-1. As McDonald's normal customer, after I submitted my order, I wish to see my order flow into "PENDING" area. After the cooking bot process my order, I want to see it flow into to "COMPLETE" area.
-2. As McDonald's VIP member, after I submitted my order, I want my order being process first before all order by normal customer.  However if there's existing order from VIP member, my order should queue behind his/her order.
-3. As McDonald's manager, I want to increase or decrease number of cooking bot available in my restaurant. When I increase a bot, it should immediately process any pending order. When I decrease a bot, the processing order should remain un-process.
-4. As McDonald bot, it can only pickup and process 1 order at a time, each order required 10 seconds to complete process.
+---
 
-### Requirements
-1. When "New Normal Order" clicked, a new order should show up "PENDING" Area.
-2. When "New VIP Order" clicked, a new order should show up in "PENDING" Area. It should place in-front of all existing "Normal" order but behind of all existing "VIP" order.
-3. The order number should be unique and increasing.
-4. When "+ Bot" clicked, a bot should be created and start processing the order inside "PENDING" area. after 10 seconds picking up the order, the order should move to "COMPLETE" area. Then the bot should start processing another order if there is any left in "PENDING" area.
-5. If there is no more order in the "PENDING" area, the bot should become IDLE until a new order come in.
-6. When "- Bot" clicked, the newest bot should be destroyed. If the bot is processing an order, it should also stop the process. The order now back to "PENDING" and ready to process by other bot.
-7. No data persistance is needed for this prototype, you may perform all the process inside memory.
+## Prerequisites
 
-### Functioning Prototype
-You must implement **either** frontend or backend components as described below:
+Before running the project, ensure the following are installed:
 
-#### 1. Frontend
-- You are free to use **any framework and programming language** of your choice
-- The UI application must be compiled, deployed and hosted on any publicly accessible web platform
-- Must provide a user interface that demonstrates all the requirements listed above
-- Should allow users to interact with the McDonald's order management system
+- **Node.js ≥ 18**
+- **npm** (comes with Node.js)
+- **Git**
 
-#### 2. Backend
-- You must use **either Go (Golang) or Node.js** for the backend implementation
-- The backend must be a CLI application that can be executed in GitHub Actions
-- Must implement the following scripts in the `script` directory:
-  - `test.sh`: Contains unit test execution steps
-  - `build.sh`: Contains compilation steps for the CLI application
-  - `run.sh`: Contains execution steps that run the CLI application
-- The CLI application result must be printed to `result.txt`
-- The `result.txt` output must include timestamps in `HH:MM:SS` format to track order completion times
-- Must follow **GitHub Flow**: Create a Pull Request with your changes to this repository
-- Ensure all GitHub Action checks pass successfully
+Verify installation:
 
-#### Submission Requirements
-- Fork this repository and implement your solution with either frontend or backend
-- **Frontend option**: Deploy to a publicly accessible URL using any technology stack
-- **Backend option**: Must be implemented in Go or Node.js and work within the GitHub Actions environment
-  - Follow GitHub Flow process with Pull Request submission
-  - All tests in `test.sh` must pass
-  - The `result.txt` file must contain meaningful output from your CLI application
-  - All output must include timestamps in `HH:MM:SS` format to track order completion times
-  - Submit a Pull Request and ensure the `go-verify-result` workflow passes
-- Provide documentation for any part that you think is needed
+```bash
+node -v
+npm -v
+```
 
-### Tips on completing this task
-- Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.
-- Treat this assignment as a vibe coding, don't over engineer it. Try to scope your working hour within 30 min. However, ensure you read and understand what your code doing.
-- Complete the implementation as clean as possible, clean code is a strong plus point, do not bring in all the fancy tech stuff.
+## Architecture
+
+```
+src/
+├── OrderController.js   # Core domain logic (queue management, bot lifecycle)
+├── Logger.js            # Timestamped logger — writes to console + result.txt
+├── index.js             # CLI entry point — runs 4 demo scenarios
+└── tests.js             # Unit tests (Node built-ins, no extra deps)
+scripts/
+├── build.sh             # Syntax-check all source files
+├── test.sh              # Run unit tests
+└── run.sh               # Execute CLI, output → result.txt
+```
+
+## Quick Start
+
+```bash
+# Test the system in fast mode (1 second per order)
+ORDER_PROCESS_MS=1000 bash scripts/run.sh
+
+# View output
+cat scripts/result.txt
+```
+
+## Running locally
+
+```bash
+# Build (syntax check)
+bash scripts/build.sh
+
+# Test
+bash scripts/test.sh
+
+# Run full demo (10 s per order — real time)
+bash scripts/run.sh
+
+# Run in fast mode (500 ms per order)
+ORDER_PROCESS_MS=500 bash scripts/run.sh
+```
+
+## Design Decisions
+
+### Queue ordering
+- VIP orders are inserted after the last existing VIP order and before the first Normal order.
+- This preserves FIFO within each tier while keeping VIPs always ahead of Normals.
+
+### Bot removal
+- Bots are identified by a monotonically increasing ID; "newest" means highest ID.
+- On removal the bot's `setTimeout` is cleared immediately, preventing a ghost completion.
+- If the bot was processing an order, the order is re-inserted using the same priority logic.
+
+### No external dependencies
+- Pure Node.js; uses only `fs`, `path`, `assert`, and `setTimeout`/`clearTimeout`.
+- Tests use `node:assert` — no Jest, Mocha, or other test runners needed.
+
+## Public API
+
+### `addOrder(type)`
+- **Parameters**: `type` — `"NORMAL"` or `"VIP"`
+- **Returns**: Order object `{ id, type, status }`
+- **Effect**: Adds order to queue, auto-assigns idle bots
+
+### `addBot()`
+- **Returns**: Bot ID (integer)
+- **Effect**: Creates new bot, immediately tries to pick up pending order
+
+### `removeBot()`
+- **Returns**: Bot ID of removed bot, or `null` if no bots exist
+- **Effect**: Removes newest (highest ID) bot; if processing an order, returns it to PENDING
+
+### `getSnapshot()`
+- **Returns**: Snapshot object with `{ pending, bots, complete }`
+  - `pending`: array of pending orders
+  - `bots`: array of bot statuses
+  - `complete`: array of completed orders with timestamps
+
+## Order Object
+
+```javascript
+{
+  id: 1,           // Unique, monotonically increasing
+  type: "NORMAL",  // or "VIP"
+  status: "PENDING" // or "COMPLETE"
+}
+```
+
+## Scenarios demonstrated
+
+| Scenario | What it tests |
+|---|---|
+| 1 | Normal orders + 1 bot, sequential processing |
+| 2 | VIP priority — VIPs processed before Normals |
+| 3 | Parallel bots — two bots work simultaneously |
+| 4 | Bot removal mid-process — order returns to PENDING |
+
+## Output Format
+
+### result.txt
+
+All output is logged to `scripts/result.txt` in this format:
+
+```
+[HH:MM:SS] [INFO ] <message>
+[HH:MM:SS] [WARN ] <message>
+```
+
+Timestamps use 24-hour `HH:MM:SS` format.
+
+### Snapshot Output
+
+After each operation, the system prints the current state:
+- **PENDING**: Orders waiting to be processed
+- **BOTS**: Bot status (IDLE or WORKING with assigned order)
+- **COMPLETE**: Finished orders with completion timestamps
+
+### Order Notation
+
+- `#1(N)` = Order #1 (Normal)
+- `#2(V)` = Order #2 (VIP)
+- `#1(N) @22:01:33` = Order completed at 22:01:33
+
+## Environment Variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `ORDER_PROCESS_MS` | `10000` | Time (ms) each bot takes to process one order |
+| `OUTPUT_FILE` | `scripts/result.txt` | Path to output log file |
+
+## Troubleshooting
+
+**Q: Tests fail or syntax errors**
+- Run: `bash scripts/build.sh` to check for syntax issues
+
+**Q: Output file not created**
+- Ensure `scripts/` directory exists and is writable
+
+**Q: Bots not processing orders**
+- Make sure at least one order is added before bots are created
+- Bots only pick up orders after they're idle
+
+**Q: Want to see the output in real-time**
+- Run: `tail -f scripts/result.txt` in another terminal while running the demo

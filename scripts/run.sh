@@ -1,19 +1,15 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# run.sh — Execute the CLI and write output to result.txt
+set -e
 
-# Run Script
-# This script should execute your CLI application and output results to result.txt
+OUTPUT_FILE="scripts/result.txt"
 
-echo "Running CLI application..."
+echo "Starting FeedMe Order Controller..."
+echo "Process time: ${ORDER_PROCESS_MS:-10000}ms per order"
+echo "Output file : $OUTPUT_FILE"
+echo ""
 
-# For Go projects:
-# ./order-controller > result.txt
+OUTPUT_FILE="$OUTPUT_FILE" node src/index.js
 
-# For Node.js projects:
-# node index.js > result.txt
-# or npm start > result.txt
-
-# Temporary placeholder - remove this when you implement your CLI
-echo "Added 1 bot" > result.txt
-echo "status: bot: [1], order: []" >> result.txt
-
-echo "CLI application execution completed"
+echo ""
+echo "Done. Results written to $OUTPUT_FILE"

@@ -1,14 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# test.sh — Run unit tests
+set -e
 
-# Unit Test Script
-# This script should contain all unit test execution steps
-
-echo "Running unit tests..."
-
-# For Go projects:
-# go test ./... -v
-
-# For Node.js projects:
-# npm test
-
-echo "Unit tests completed"
+echo "Running OrderController unit tests..."
+ORDER_PROCESS_MS=100 node src/tests.js

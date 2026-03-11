@@ -1,26 +1,224 @@
-McDonald's Order Management System - Simulation Results
 
-[14:32:01] System initialized with 0 bots
-[14:32:01] Created Normal Order #1001 - Status: PENDING
-[14:32:02] Created VIP Order #1002 - Status: PENDING
-[14:32:02] Created Normal Order #1003 - Status: PENDING
-[14:32:03] Bot #1 created - Status: ACTIVE
-[14:32:03] Bot #1 picked up VIP Order #1002 - Status: PROCESSING
-[14:32:04] Bot #2 created - Status: ACTIVE
-[14:32:04] Bot #2 picked up Normal Order #1001 - Status: PROCESSING
-[14:32:13] Bot #1 completed VIP Order #1002 - Status: COMPLETE (Processing time: 10s)
-[14:32:13] Bot #1 picked up Normal Order #1003 - Status: PROCESSING
-[14:32:14] Bot #2 completed Normal Order #1001 - Status: COMPLETE (Processing time: 10s)
-[14:32:14] Bot #2 is now IDLE - No pending orders
-[14:32:15] Created VIP Order #1004 - Status: PENDING
-[14:32:15] Bot #2 picked up VIP Order #1004 - Status: PROCESSING
-[14:32:23] Bot #1 completed Normal Order #1003 - Status: COMPLETE (Processing time: 10s)
-[14:32:25] Bot #2 completed VIP Order #1004 - Status: COMPLETE (Processing time: 10s)
-[14:32:25] Bot #2 destroyed while IDLE
-[14:32:26] Bot #1 is now IDLE - No pending orders
+──────────────────────────────────────────────────
+  SCENARIO 1 — Normal orders + 1 bot
+──────────────────────────────────────────────────
+[22:01:23] [INFO ] Order #1 (NORMAL) added → PENDING
+[22:01:23] [INFO ] Order #2 (NORMAL) added → PENDING
+[22:01:23] [INFO ] Order #3 (NORMAL) added → PENDING
 
-Final Status:
-- Total Orders Processed: 4 (2 VIP, 2 Normal)
-- Orders Completed: 4
-- Active Bots: 1
-- Pending Orders: 0
+──────────────────────────────────────────────────
+  After adding 3 normal orders (no bots yet)
+──────────────────────────────────────────────────
+[22:01:23] [INFO ] PENDING  : #1(N), #2(N), #3(N)
+[22:01:23] [INFO ] BOTS     :
+  (none)
+[22:01:23] [INFO ] COMPLETE : (empty)
+[22:01:23] [INFO ] Bot #1 created
+[22:01:23] [INFO ] Bot #1 picked up Order #1 (NORMAL) — processing…
+
+──────────────────────────────────────────────────
+  After adding Bot #1
+──────────────────────────────────────────────────
+[22:01:23] [INFO ] PENDING  : #2(N), #3(N)
+[22:01:23] [INFO ] BOTS     :
+  Bot #1: WORKING → Order #1
+[22:01:23] [INFO ] COMPLETE : (empty)
+[22:01:33] [INFO ] Order #1 (NORMAL) COMPLETE ✓
+[22:01:33] [INFO ] Bot #1 picked up Order #2 (NORMAL) — processing…
+
+──────────────────────────────────────────────────
+  After 10000ms — Order #1 should be COMPLETE
+──────────────────────────────────────────────────
+[22:01:33] [INFO ] PENDING  : #3(N)
+[22:01:33] [INFO ] BOTS     :
+  Bot #1: WORKING → Order #2
+[22:01:33] [INFO ] COMPLETE : #1(N) @22:01:33
+[22:01:43] [INFO ] Order #2 (NORMAL) COMPLETE ✓
+[22:01:43] [INFO ] Bot #1 picked up Order #3 (NORMAL) — processing…
+
+──────────────────────────────────────────────────
+  After 20000ms — Order #2 should be COMPLETE
+──────────────────────────────────────────────────
+[22:01:43] [INFO ] PENDING  : (empty)
+[22:01:43] [INFO ] BOTS     :
+  Bot #1: WORKING → Order #3
+[22:01:43] [INFO ] COMPLETE : #1(N) @22:01:33, #2(N) @22:01:43
+[22:01:53] [INFO ] Order #3 (NORMAL) COMPLETE ✓
+
+──────────────────────────────────────────────────
+  After 30000ms — All orders COMPLETE
+──────────────────────────────────────────────────
+[22:01:53] [INFO ] PENDING  : (empty)
+[22:01:53] [INFO ] BOTS     :
+  Bot #1: IDLE
+[22:01:53] [INFO ] COMPLETE : #1(N) @22:01:33, #2(N) @22:01:43, #3(N) @22:01:53
+
+──────────────────────────────────────────────────
+  SCENARIO 2 — VIP priority ordering
+──────────────────────────────────────────────────
+[22:01:53] [INFO ] Order #4 (NORMAL) added → PENDING
+[22:01:53] [INFO ] Bot #1 picked up Order #4 (NORMAL) — processing…
+[22:01:53] [INFO ] Order #5 (NORMAL) added → PENDING
+[22:01:53] [INFO ] Order #6 (VIP) added → PENDING
+[22:01:53] [INFO ] Order #7 (VIP) added → PENDING
+
+──────────────────────────────────────────────────
+  Queue: should be VIP#6, VIP#7, Normal#4, Normal#5
+──────────────────────────────────────────────────
+[22:01:53] [INFO ] PENDING  : #6(V), #7(V), #5(N)
+[22:01:53] [INFO ] BOTS     :
+  Bot #1: WORKING → Order #4
+[22:01:53] [INFO ] COMPLETE : #1(N) @22:01:33, #2(N) @22:01:43, #3(N) @22:01:53
+[22:01:53] [INFO ] Bot #2 created
+[22:01:53] [INFO ] Bot #2 picked up Order #6 (VIP) — processing…
+[22:02:03] [INFO ] Order #4 (NORMAL) COMPLETE ✓
+[22:02:03] [INFO ] Bot #1 picked up Order #7 (VIP) — processing…
+[22:02:03] [INFO ] Order #6 (VIP) COMPLETE ✓
+[22:02:03] [INFO ] Bot #2 picked up Order #5 (NORMAL) — processing…
+
+──────────────────────────────────────────────────
+  After 10000ms — VIP#6 done, Bot #2 picks up VIP#7
+──────────────────────────────────────────────────
+[22:02:03] [INFO ] PENDING  : (empty)
+[22:02:03] [INFO ] BOTS     :
+  Bot #1: WORKING → Order #7
+  Bot #2: WORKING → Order #5
+[22:02:03] [INFO ] COMPLETE : #1(N) @22:01:33, #2(N) @22:01:43, #3(N) @22:01:53, #4(N) @22:02:03, #6(V) @22:02:03
+[22:02:13] [INFO ] Order #7 (VIP) COMPLETE ✓
+[22:02:13] [INFO ] Order #5 (NORMAL) COMPLETE ✓
+
+──────────────────────────────────────────────────
+  After 20000ms — VIP#7 done, Bot #2 picks up Normal#4
+──────────────────────────────────────────────────
+[22:02:13] [INFO ] PENDING  : (empty)
+[22:02:13] [INFO ] BOTS     :
+  Bot #1: IDLE
+  Bot #2: IDLE
+[22:02:13] [INFO ] COMPLETE : #1(N) @22:01:33, #2(N) @22:01:43, #3(N) @22:01:53, #4(N) @22:02:03, #6(V) @22:02:03, #7(V) @22:02:13, #5(N) @22:02:13
+
+──────────────────────────────────────────────────
+  All orders from Scenario 2 complete
+──────────────────────────────────────────────────
+[22:02:33] [INFO ] PENDING  : (empty)
+[22:02:33] [INFO ] BOTS     :
+  Bot #1: IDLE
+  Bot #2: IDLE
+[22:02:33] [INFO ] COMPLETE : #1(N) @22:01:33, #2(N) @22:01:43, #3(N) @22:01:53, #4(N) @22:02:03, #6(V) @22:02:03, #7(V) @22:02:13, #5(N) @22:02:13
+
+──────────────────────────────────────────────────
+  SCENARIO 3 — Multiple bots, parallel processing
+──────────────────────────────────────────────────
+[22:02:33] [INFO ] Order #8 (NORMAL) added → PENDING
+[22:02:33] [INFO ] Bot #1 picked up Order #8 (NORMAL) — processing…
+[22:02:33] [INFO ] Order #9 (VIP) added → PENDING
+[22:02:33] [INFO ] Bot #2 picked up Order #9 (VIP) — processing…
+[22:02:33] [INFO ] Order #10 (NORMAL) added → PENDING
+[22:02:33] [INFO ] Order #11 (VIP) added → PENDING
+[22:02:33] [INFO ] Bot #3 created
+[22:02:33] [INFO ] Bot #3 picked up Order #11 (VIP) — processing…
+[22:02:33] [INFO ] Bot #4 created
+[22:02:33] [INFO ] Bot #4 picked up Order #10 (NORMAL) — processing…
+
+──────────────────────────────────────────────────
+  2 new bots: each picks up a VIP order in parallel
+──────────────────────────────────────────────────
+[22:02:33] [INFO ] PENDING  : (empty)
+[22:02:33] [INFO ] BOTS     :
+  Bot #1: WORKING → Order #8
+  Bot #2: WORKING → Order #9
+  Bot #3: WORKING → Order #11
+  Bot #4: WORKING → Order #10
+[22:02:33] [INFO ] COMPLETE : #1(N) @22:01:33, #2(N) @22:01:43, #3(N) @22:01:53, #4(N) @22:02:03, #6(V) @22:02:03, #7(V) @22:02:13, #5(N) @22:02:13
+[22:02:43] [INFO ] Order #8 (NORMAL) COMPLETE ✓
+[22:02:43] [INFO ] Order #9 (VIP) COMPLETE ✓
+[22:02:43] [INFO ] Order #11 (VIP) COMPLETE ✓
+[22:02:43] [INFO ] Order #10 (NORMAL) COMPLETE ✓
+
+──────────────────────────────────────────────────
+  After 10000ms — VIP orders done, bots pick up Normal orders
+──────────────────────────────────────────────────
+[22:02:43] [INFO ] PENDING  : (empty)
+[22:02:43] [INFO ] BOTS     :
+  Bot #1: IDLE
+  Bot #2: IDLE
+  Bot #3: IDLE
+  Bot #4: IDLE
+[22:02:43] [INFO ] COMPLETE : #1(N) @22:01:33, #2(N) @22:01:43, #3(N) @22:01:53, #4(N) @22:02:03, #6(V) @22:02:03, #7(V) @22:02:13, #5(N) @22:02:13, #8(N) @22:02:43, #9(V) @22:02:43, #11(V) @22:02:43, #10(N) @22:02:43
+
+──────────────────────────────────────────────────
+  All Scenario 3 orders complete
+──────────────────────────────────────────────────
+[22:02:53] [INFO ] PENDING  : (empty)
+[22:02:53] [INFO ] BOTS     :
+  Bot #1: IDLE
+  Bot #2: IDLE
+  Bot #3: IDLE
+  Bot #4: IDLE
+[22:02:53] [INFO ] COMPLETE : #1(N) @22:01:33, #2(N) @22:01:43, #3(N) @22:01:53, #4(N) @22:02:03, #6(V) @22:02:03, #7(V) @22:02:13, #5(N) @22:02:13, #8(N) @22:02:43, #9(V) @22:02:43, #11(V) @22:02:43, #10(N) @22:02:43
+
+──────────────────────────────────────────────────
+  SCENARIO 4 — Remove bot mid-processing (order returns to PENDING)
+──────────────────────────────────────────────────
+[22:02:53] [INFO ] Order #12 (NORMAL) added → PENDING
+[22:02:53] [INFO ] Bot #1 picked up Order #12 (NORMAL) — processing…
+[22:02:53] [INFO ] Order #13 (NORMAL) added → PENDING
+[22:02:53] [INFO ] Bot #2 picked up Order #13 (NORMAL) — processing…
+[22:02:53] [INFO ] Bot #5 created
+
+──────────────────────────────────────────────────
+  Bot #5 processing Order #12
+──────────────────────────────────────────────────
+[22:02:53] [INFO ] PENDING  : (empty)
+[22:02:53] [INFO ] BOTS     :
+  Bot #1: WORKING → Order #12
+  Bot #2: WORKING → Order #13
+  Bot #3: IDLE
+  Bot #4: IDLE
+  Bot #5: IDLE
+[22:02:53] [INFO ] COMPLETE : #1(N) @22:01:33, #2(N) @22:01:43, #3(N) @22:01:53, #4(N) @22:02:03, #6(V) @22:02:03, #7(V) @22:02:13, #5(N) @22:02:13, #8(N) @22:02:43, #9(V) @22:02:43, #11(V) @22:02:43, #10(N) @22:02:43
+[22:02:58] [INFO ] Bot #5 removed (was idle)
+
+──────────────────────────────────────────────────
+  After 5000ms — Bot #5 removed, Order #12 back in PENDING
+──────────────────────────────────────────────────
+[22:02:58] [INFO ] PENDING  : (empty)
+[22:02:58] [INFO ] BOTS     :
+  Bot #1: WORKING → Order #12
+  Bot #2: WORKING → Order #13
+  Bot #3: IDLE
+  Bot #4: IDLE
+[22:02:58] [INFO ] COMPLETE : #1(N) @22:01:33, #2(N) @22:01:43, #3(N) @22:01:53, #4(N) @22:02:03, #6(V) @22:02:03, #7(V) @22:02:13, #5(N) @22:02:13, #8(N) @22:02:43, #9(V) @22:02:43, #11(V) @22:02:43, #10(N) @22:02:43
+[22:02:58] [INFO ] Bot #6 created
+[22:03:03] [INFO ] Order #12 (NORMAL) COMPLETE ✓
+[22:03:03] [INFO ] Order #13 (NORMAL) COMPLETE ✓
+
+──────────────────────────────────────────────────
+  After 10000ms — Order #12 complete by Bot #6
+──────────────────────────────────────────────────
+[22:03:08] [INFO ] PENDING  : (empty)
+[22:03:08] [INFO ] BOTS     :
+  Bot #1: IDLE
+  Bot #2: IDLE
+  Bot #3: IDLE
+  Bot #4: IDLE
+  Bot #6: IDLE
+[22:03:08] [INFO ] COMPLETE : #1(N) @22:01:33, #2(N) @22:01:43, #3(N) @22:01:53, #4(N) @22:02:03, #6(V) @22:02:03, #7(V) @22:02:13, #5(N) @22:02:13, #8(N) @22:02:43, #9(V) @22:02:43, #11(V) @22:02:43, #10(N) @22:02:43, #12(N) @22:03:03, #13(N) @22:03:03
+
+──────────────────────────────────────────────────
+  All Scenario 4 orders complete
+──────────────────────────────────────────────────
+[22:03:18] [INFO ] PENDING  : (empty)
+[22:03:18] [INFO ] BOTS     :
+  Bot #1: IDLE
+  Bot #2: IDLE
+  Bot #3: IDLE
+  Bot #4: IDLE
+  Bot #6: IDLE
+[22:03:18] [INFO ] COMPLETE : #1(N) @22:01:33, #2(N) @22:01:43, #3(N) @22:01:53, #4(N) @22:02:03, #6(V) @22:02:03, #7(V) @22:02:13, #5(N) @22:02:13, #8(N) @22:02:43, #9(V) @22:02:43, #11(V) @22:02:43, #10(N) @22:02:43, #12(N) @22:03:03, #13(N) @22:03:03
+
+──────────────────────────────────────────────────
+  FINAL SUMMARY
+──────────────────────────────────────────────────
+[22:03:18] [INFO ] Total orders completed : 13
+[22:03:18] [INFO ] Orders still pending   : 0
+[22:03:18] [INFO ] Active bots            : 5
