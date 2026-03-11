@@ -12,7 +12,7 @@ Before running the project, ensure the following are installed:
 - **npm** (comes with Node.js)
 - **Git**
 
-Verify installation:
+Before installation:
 
 ```bash
 node -v
