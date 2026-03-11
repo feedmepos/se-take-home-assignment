@@ -1,15 +1,14 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# build.sh — Validate that Node.js is available and syntax-check all source files
+set -e
 
-# Build Script
-# This script should contain all compilation steps for your CLI application
+echo "Checking Node.js version..."
+node --version
 
-echo "Building CLI application..."
+echo "Syntax-checking source files..."
+node --check src/OrderController.js
+node --check src/Logger.js
+node --check src/index.js
+node --check src/tests.js
 
-# For Go projects:
-# go build -o order-controller ./cmd/main.go
-
-# For Node.js projects:
-# npm install
-# npm run build (if needed)
-
-echo "Build completed"
+echo "Build OK ✅"
