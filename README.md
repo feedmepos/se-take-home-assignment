@@ -19,6 +19,11 @@ node -v
 npm -v
 ```
 
+Perform installation:
+```bash
+npm i
+```
+
 ## Architecture
 
 ```
