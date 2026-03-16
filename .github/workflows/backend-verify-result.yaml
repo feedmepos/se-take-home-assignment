@@ -4,6 +4,7 @@ on:
   pull_request:
     types: [ opened, synchronize, reopened, edited ]
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   verify-result:

@@ -12,7 +12,7 @@ McDonald is transforming their business during COVID-19. They wish to build the 
 ### User Story
 As below is part of the user story:
 1. As McDonald's normal customer, after I submitted my order, I wish to see my order flow into "PENDING" area. After the cooking bot process my order, I want to see it flow into to "COMPLETE" area.
-2. As McDonald's VIP member, after I submitted my order, I want my order being process first before all order by normal customer.  However if there's existing order from VIP member, my order should queue behind his/her order.
+2. As McDonald's VIP member, after I submitted my order, I want my order being process first before all order by normal customer. However if there's existing order from VIP member, my order should queue behind his/her order.
 3. As McDonald's manager, I want to increase or decrease number of cooking bot available in my restaurant. When I increase a bot, it should immediately process any pending order. When I decrease a bot, the processing order should remain un-process.
 4. As McDonald bot, it can only pickup and process 1 order at a time, each order required 10 seconds to complete process.
 
@@ -38,9 +38,9 @@ You must implement **either** frontend or backend components as described below:
 - You must use **either Go (Golang) or Node.js** for the backend implementation
 - The backend must be a CLI application that can be executed in GitHub Actions
 - Must implement the following scripts in the `script` directory:
-  - `test.sh`: Contains unit test execution steps
-  - `build.sh`: Contains compilation steps for the CLI application
-  - `run.sh`: Contains execution steps that run the CLI application
+ - `test.sh`: Contains unit test execution steps
+ - `build.sh`: Contains compilation steps for the CLI application
+ - `run.sh`: Contains execution steps that run the CLI application
 - The CLI application result must be printed to `result.txt`
 - The `result.txt` output must include timestamps in `HH:MM:SS` format to track order completion times
 - Must follow **GitHub Flow**: Create a Pull Request with your changes to this repository
@@ -51,11 +51,11 @@ You must implement **either** frontend or backend components as described below:
 - Fork this repository and implement your solution with either frontend or backend
 - **Frontend option**: Deploy to a publicly accessible URL using any technology stack
 - **Backend option**: Must be implemented in Go or Node.js and work within the GitHub Actions environment
-  - Follow GitHub Flow process with Pull Request submission
-  - All tests in `test.sh` must pass
-  - The `result.txt` file must contain meaningful output from your CLI application
-  - All output must include timestamps in `HH:MM:SS` format to track order completion times
-  - Submit a Pull Request and ensure the `go-verify-result` workflow passes
+ - Follow GitHub Flow process with Pull Request submission
+ - All tests in `test.sh` must pass
+ - The `result.txt` file must contain meaningful output from your CLI application
+ - All output must include timestamps in `HH:MM:SS` format to track order completion times
+ - Submit a Pull Request and ensure the `go-verify-result` workflow passes
 - Provide documentation for any part that you think is needed
 
 ### Tips on completing this task
