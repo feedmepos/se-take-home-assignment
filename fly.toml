@@ -1,0 +1,19 @@
+# fly.toml app configuration file generated for mcdonalds-order-system on 2026-03-08T21:28:28+08:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'mcdonalds-order-system'
+primary_region = 'sin'
+
+[build]
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
+  memory_mb = 1024

@@ -1,0 +1,16 @@
+# Go binaries
+backend/order-controller
+backend/order-server
+backend/server
+
+# Frontend build output (embedded at build time)
+backend/cmd/server/static/*
+!backend/cmd/server/static/.gitkeep
+
+# Node
+frontend/node_modules/
+frontend/build/
+frontend/.svelte-kit/
+
+# OS
+.DS_Store
