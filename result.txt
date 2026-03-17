@@ -1,0 +1,15 @@
+[15:39:38] === McDonald's Order Management System Started ===
+[15:39:38] System ready, use the following commands to operate:
+[15:39:38] normal - Create Normal Order | vip - Create VIP Order | addbot - Add Cooking Bot | rmbot - Remove Newest Bot | status - View Status | exit - Exit System
+[15:39:38] Created NORMAL Order #1, Pending Queue: NORMAL#1
+[15:39:38] Created VIP Order #2, Pending Queue: VIP#2, NORMAL#1
+[15:39:38] Added new Bot #1, Total Bots: 1
+[15:39:38] Bot #1 started processing VIP Order #2, expected completion in 10 seconds
+[15:39:38] ===== Current System Status =====
+Pending Orders: NORMAL#1
+Completed Orders: Empty
+Bots Status: #1(PROCESSING:Processing VIP#2)
+=================================
+[15:39:38] Removed Bot #1, Total Bots: 0
+[15:39:38] Bot #1 was destroyed, interrupted VIP Order #2, returned to Pending Queue
+[15:39:38] === McDonald's Order Management System Exited ===

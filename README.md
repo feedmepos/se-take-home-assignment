@@ -1,3 +1,31 @@
+
+# commends
+```text
+normal    → create normal order
+vip       → create VIP order
+addbot    → add one cooking bot
+rmbot     → remove the newest bot
+status    → show current system status
+exit      → exit the program
+```
+
+# how to run
+```shell script
+
+# 1. Navigate to project directory (replace with your actual path)
+cd F:\workplace\demo\se-take-home-assignment
+
+# 2. Build environment (Windows)
+scripts\build.bat
+
+# 3. Run interactive CLI
+scripts\run.bat
+
+# 4. Run automated tests
+scripts\test.bat
+```
+
+
 ## FeedMe Software Engineer Take Home Assignment
 Below is a take home assignment before the interview of the position. You are required to
 1. Understand the situation and use case. You may contact the interviewer for further clarification.

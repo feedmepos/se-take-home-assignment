@@ -1,0 +1,19 @@
+{
+  "name": "auto_cooking_bot",
+  "version": "1.0.0",
+  "description": "McDonald's Order Management CLI Application for cooking bot automation",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "bash script/test.sh",
+    "build": "bash script/build.sh",
+    "run": "bash script/run.sh"
+  },
+
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

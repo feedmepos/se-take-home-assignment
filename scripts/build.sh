@@ -1,15 +1,13 @@
 #!/bin/bash
+set -e # Exit on error
 
-# Build Script
-# This script should contain all compilation steps for your CLI application
+echo "=== Building McDonald's Order CLI Application ==="
+# Initialize npm (if not initialized)
+if [ ! -f package.json ]; then
+  npm init -y
+fi
 
-echo "Building CLI application..."
+# Check Node.js installation
+node -v || (echo "Error: Node.js is not installed" && exit 1)
 
-# For Go projects:
-# go build -o order-controller ./cmd/main.go
-
-# For Node.js projects:
-# npm install
-# npm run build (if needed)
-
-echo "Build completed"
+echo "Build completed ✅"
