@@ -2,34 +2,34 @@ const { state, getStateSnapshot } = require('../state');
 const { generateSystemId, generateBotDisplayId } = require('../utils/idHelper');
 const { log, broadcastState } = require('../logger');
 const { insertPending, getPendingOrders } = require('./orderService');
-const { ORDER_PROCESS_MS } = require('../constants');
+const { ORDER_PROCESS_MS, ORDER_STATUS, BOT_STATUS } = require('../constants');
 
 function assignNextOrder(bot) {
   const pending = getPendingOrders();
   if (pending.length === 0) {
-    bot.status = 'IDLE';
+    bot.status = BOT_STATUS.IDLE;
     bot.currentOrderId = null;
-    log(`Bot ${bot.displayId} is now [IDLE]`);
+    log(`Bot ${bot.displayId} is now [${BOT_STATUS.IDLE}]`);
     broadcastState(getStateSnapshot());
     return;
   }
 
   const order = pending[0];
-  order.status = 'PROCESSING';
+  order.status = ORDER_STATUS.PROCESSING;
   order.processingBotId = bot.systemId;
-  bot.status = 'PROCESSING';
+  bot.status = BOT_STATUS.PROCESSING;
   bot.currentOrderId = order.systemId;
 
-  log(`Bot ${bot.displayId} picked up order ${order.displayId} [PROCESSING]`);
+  log(`Bot ${bot.displayId} picked up order ${order.displayId} [${BOT_STATUS.PROCESSING}]`);
   broadcastState(getStateSnapshot());
 
   bot.timer = setTimeout(() => {
-    order.status = 'COMPLETE';
+    order.status = ORDER_STATUS.COMPLETE;
     order.completedAt = new Date();
     bot.currentOrderId = null;
     bot.timer = null;
 
-    log(`Order ${order.displayId} completed [COMPLETE]`);
+    log(`Order ${order.displayId} completed [${ORDER_STATUS.COMPLETE}]`);
     assignNextOrder(bot);
   }, ORDER_PROCESS_MS);
 }
@@ -38,13 +38,13 @@ function addBot() {
   const bot = {
     systemId: generateSystemId(),
     displayId: generateBotDisplayId(),
-    status: 'IDLE',
+    status: BOT_STATUS.IDLE,
     currentOrderId: null,
     timer: null,
   };
 
   state.bots.push(bot);
-  log(`Bot ${bot.displayId} created [IDLE]`);
+  log(`Bot ${bot.displayId} created [${BOT_STATUS.IDLE}]`);
   broadcastState(getStateSnapshot());
 
   assignNextOrder(bot);
@@ -64,14 +64,13 @@ function removeNewestBot() {
   if (bot.currentOrderId) {
     const order = state.orders.find(o => o.systemId === bot.currentOrderId);
     if (order) {
-      order.status = 'PENDING';
+      order.status = ORDER_STATUS.PENDING;
       order.processingBotId = null;
       order.completedAt = null;
-      // Remove from current position and re-insert at correct priority slot
       const idx = state.orders.indexOf(order);
       state.orders.splice(idx, 1);
       insertPending(order);
-      log(`Order ${order.displayId} returned to queue [PENDING]`);
+      log(`Order ${order.displayId} returned to queue [${ORDER_STATUS.PENDING}]`);
     }
   }
 
@@ -81,9 +80,8 @@ function removeNewestBot() {
   return bot;
 }
 
-// Called when a new order is created — assign to any idle bot
 function tryAssignIdleBot() {
-  const idleBot = state.bots.find(b => b.status === 'IDLE');
+  const idleBot = state.bots.find(b => b.status === BOT_STATUS.IDLE);
   if (idleBot) assignNextOrder(idleBot);
 }
 

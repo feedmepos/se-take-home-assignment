@@ -3,6 +3,7 @@ const { createOrder, getPendingOrders, getCompleteOrders } = require('./services
 const { addBot, removeNewestBot, tryAssignIdleBot } = require('./services/botService');
 const { state } = require('./state');
 const { log } = require('./logger');
+const { ORDER_TYPE } = require('./constants');
 
 function startCLI() {
   const rl = readline.createInterface({
@@ -20,11 +21,11 @@ function startCLI() {
 
     switch (cmd) {
       case '+order':
-        createOrder('NORMAL');
+        createOrder(ORDER_TYPE.NORMAL);
         tryAssignIdleBot();
         break;
       case '+vip':
-        createOrder('VIP');
+        createOrder(ORDER_TYPE.VIP);
         tryAssignIdleBot();
         break;
       case '+bot':

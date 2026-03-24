@@ -1,11 +1,12 @@
 const { createOrder } = require('../services/orderService');
 const { tryAssignIdleBot } = require('../services/botService');
 const { getStateSnapshot } = require('../state');
+const { ORDER_TYPE } = require('../constants');
 
 function handleCreateOrder(req, res) {
   const { type } = req.body;
-  if (type !== 'NORMAL' && type !== 'VIP') {
-    return res.status(400).json({ error: 'type must be NORMAL or VIP' });
+  if (type !== ORDER_TYPE.NORMAL && type !== ORDER_TYPE.VIP) {
+    return res.status(400).json({ error: `type must be ${ORDER_TYPE.NORMAL} or ${ORDER_TYPE.VIP}` });
   }
   const order = createOrder(type);
   tryAssignIdleBot();
