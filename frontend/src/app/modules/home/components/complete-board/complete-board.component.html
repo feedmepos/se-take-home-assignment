@@ -23,7 +23,13 @@
             </div>
             <div class="font-bold text-base-content text-lg">{{ order.type }}</div>
           </div>
-          <div class="badge badge-sm badge-success badge-outline font-bold">Ready</div>
+          <div class="flex items-center gap-4">
+            <div class="flex flex-col gap-0.5 text-right hidden sm:flex">
+              <span class="text-[10px] font-bold text-base-content/40 uppercase tracking-wider">Placed - Completed</span>
+              <span class="text-xs font-semibold text-base-content/70">{{ order.createdAt | date:'HH:mm:ss' }} - {{ order.completedAt | date:'HH:mm:ss' }}</span>
+            </div>
+            <div class="badge badge-sm badge-success badge-outline font-bold">Ready</div>
+          </div>
         </div>
       }
     </div>

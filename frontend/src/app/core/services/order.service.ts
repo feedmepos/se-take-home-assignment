@@ -32,7 +32,7 @@ export class OrderService {
   }
 
   addOrder(type: OrderType) {
-    const order: Order = { id: this.orderIdCounter++, type, status: OrderStatus.PENDING };
+    const order: Order = { id: this.orderIdCounter++, type, status: OrderStatus.PENDING, createdAt: new Date() };
     this.pendingOrders.update(orders => {
       const newOrders = [...orders, order];
       return newOrders.sort((a, b) => {
@@ -85,7 +85,7 @@ export class OrderService {
         if (bot.status === BotStatus.PROCESSING) {
           if (bot.timeLeft <= 1) {
             if (bot.processingOrder) {
-               const completedOrder = { ...bot.processingOrder!, status: OrderStatus.COMPLETED };
+               const completedOrder = { ...bot.processingOrder!, status: OrderStatus.COMPLETED, completedAt: new Date() };
                this.completeOrders.update(c => [...c, completedOrder].sort((a, b) => b.id - a.id)); 
             }
             statusChanged = true;

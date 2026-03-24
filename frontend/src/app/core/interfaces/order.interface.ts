@@ -5,4 +5,6 @@ export interface Order {
   id: number;
   type: OrderType;
   status: OrderStatus;
+  createdAt: Date;
+  completedAt?: Date;
 }

@@ -26,6 +26,10 @@
             </div>
             <div class="font-bold text-lg" [ngClass]="order.type === OrderType.VIP ? 'text-error' : 'text-base-content'">{{ order.type }}</div>
           </div>
+          <div class="flex flex-col gap-0.5 items-end text-right">
+            <span class="text-[10px] font-bold text-base-content/40 uppercase tracking-wider">Placed</span>
+            <span class="text-xs font-bold text-base-content/70">{{ order.createdAt | date:'HH:mm:ss' }}</span>
+          </div>
         </div>
       }
     </div>
