@@ -69,7 +69,7 @@ function removeNewestBot() {
       order.completedAt = null;
       const idx = state.orders.indexOf(order);
       state.orders.splice(idx, 1);
-      insertPending(order);
+      insertPending(order, ORDER_STATUS.ABORT);
       log(`Order ${order.displayId} returned to queue [${ORDER_STATUS.PENDING}]`);
     }
   }

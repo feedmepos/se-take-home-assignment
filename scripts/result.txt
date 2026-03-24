@@ -77,3 +77,67 @@
 23:34:23 - Bot Bot-1 is now [IDLE]
 23:34:23 - Order 100 (NORMAL) created [PENDING]
 23:34:23 - Bot Bot-1 picked up order 100 [PROCESSING]
+23:39:45 - Order 100 (NORMAL) created [PENDING]
+23:39:49 - Order 101 (NORMAL) created [PENDING]
+23:39:52 - Order 102 (VIP) created [PENDING]
+23:39:54 - Order 103 (VIP) created [PENDING]
+23:39:59 - Bot Bot-1 created [IDLE]
+23:39:59 - Bot Bot-1 picked up order 102 [PROCESSING]
+23:40:02 - Order 102 returned to queue [PENDING]
+23:40:02 - Bot Bot-1 removed
+23:40:05 - --- STATUS: pending=4 complete=0 bots=0 ---
+23:40:05 -   PENDING  [VIP] 103
+23:40:05 -   PENDING  [VIP] 102
+23:40:05 -   PENDING  [NORMAL] 100
+23:40:05 -   PENDING  [NORMAL] 101
+23:40:18 - Bot Bot-2 created [IDLE]
+23:40:18 - Bot Bot-2 picked up order 103 [PROCESSING]
+23:40:28 - Order 103 completed [COMPLETE]
+23:40:28 - Bot Bot-2 picked up order 102 [PROCESSING]
+23:40:38 - Order 102 completed [COMPLETE]
+23:40:38 - Bot Bot-2 picked up order 100 [PROCESSING]
+23:40:48 - Order 100 completed [COMPLETE]
+23:40:48 - Bot Bot-2 picked up order 101 [PROCESSING]
+23:40:58 - Order 101 completed [COMPLETE]
+23:40:58 - Bot Bot-2 is now [IDLE]
+23:43:18 - --- STATUS: pending=0 complete=4 bots=1 ---
+23:43:18 -   COMPLETE [VIP] 103 at 23:40:28
+23:43:18 -   COMPLETE [VIP] 102 at 23:40:38
+23:43:18 -   COMPLETE [NORMAL] 100 at 23:40:48
+23:43:18 -   COMPLETE [NORMAL] 101 at 23:40:58
+23:43:18 -   BOT Bot-2 [IDLE]
+00:01:31 - Order 100 (NORMAL) created [PENDING]
+00:01:33 - Order 101 (NORMAL) created [PENDING]
+00:01:39 - Order 102 (VIP) created [PENDING]
+00:01:43 - Order 103 (VIP) created [PENDING]
+00:01:45 - --- STATUS: pending=4 complete=0 bots=0 ---
+00:01:45 -   PENDING  [VIP] 102
+00:01:45 -   PENDING  [VIP] 103
+00:01:45 -   PENDING  [NORMAL] 100
+00:01:45 -   PENDING  [NORMAL] 101
+00:01:56 - Bot Bot-1 created [IDLE]
+00:01:56 - Bot Bot-1 picked up order 102 [PROCESSING]
+00:01:59 - Order 102 returned to queue [PENDING]
+00:01:59 - Bot Bot-1 removed
+00:02:02 - --- STATUS: pending=4 complete=0 bots=0 ---
+00:02:02 -   PENDING  [VIP] 102
+00:02:02 -   PENDING  [VIP] 103
+00:02:02 -   PENDING  [NORMAL] 100
+00:02:02 -   PENDING  [NORMAL] 101
+00:02:14 - Bot Bot-2 created [IDLE]
+00:02:14 - Bot Bot-2 picked up order 102 [PROCESSING]
+00:02:18 - Bot Bot-3 created [IDLE]
+00:02:18 - Bot Bot-3 picked up order 103 [PROCESSING]
+00:02:21 - Order 103 returned to queue [PENDING]
+00:02:21 - Bot Bot-3 removed
+00:02:23 - --- STATUS: pending=3 complete=0 bots=1 ---
+00:02:23 -   PENDING  [VIP] 103
+00:02:23 -   PENDING  [NORMAL] 100
+00:02:23 -   PENDING  [NORMAL] 101
+00:02:23 -   BOT Bot-2 [PROCESSING]
+00:02:24 - Order 102 completed [COMPLETE]
+00:02:24 - Bot Bot-2 picked up order 103 [PROCESSING]
+00:02:34 - Order 103 completed [COMPLETE]
+00:02:34 - Bot Bot-2 picked up order 100 [PROCESSING]
+00:02:44 - Order 100 completed [COMPLETE]
+00:02:44 - Bot Bot-2 picked up order 101 [PROCESSING]

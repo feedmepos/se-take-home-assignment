@@ -11,27 +11,38 @@ function getCompleteOrders() {
   return state.orders.filter(o => o.status === ORDER_STATUS.COMPLETE);
 }
 
-function insertPending(order) {
-  const pending = getPendingOrders();
-
-  if (order.type === ORDER_TYPE.VIP) {
-    const vipCount = pending.filter(o => o.type === ORDER_TYPE.VIP).length;
-    let seen = 0;
-    let insertAt = state.orders.length;
-    for (let i = 0; i < state.orders.length; i++) {
-      if (state.orders[i].status === ORDER_STATUS.PENDING) {
-        if (seen === vipCount) { insertAt = i; break; }
-        seen++;
-      }
-    }
-    state.orders.splice(insertAt, 0, order);
-  } else {
-    let lastPendingIdx = -1;
-    for (let i = 0; i < state.orders.length; i++) {
-      if (state.orders[i].status === ORDER_STATUS.PENDING) lastPendingIdx = i;
-    }
-    state.orders.splice(lastPendingIdx + 1, 0, order);
+function insertPending(order, status) {
+  if (status === ORDER_STATUS.ABORT) {
+    order.displayId = Number(order.displayId);
   }
+
+  const isVip = order.type === ORDER_TYPE.VIP;
+
+  let insertAt = state.orders.findIndex((o) => {
+    if (o.status !== ORDER_STATUS.PENDING) return false;
+
+    if (isVip) {
+      return (o.type === ORDER_TYPE.VIP && Number(o.displayId) > order.displayId) || 
+             (o.type !== ORDER_TYPE.VIP);
+    } else {
+      return o.type !== ORDER_TYPE.VIP && Number(o.displayId) > order.displayId;
+    }
+  });
+
+  if (insertAt === -1) {
+    if (isVip) {
+      const firstRegularIdx = state.orders.findIndex(o => o.type !== ORDER_TYPE.VIP && o.status === ORDER_STATUS.PENDING);
+      insertAt = firstRegularIdx === -1 ? state.orders.length : firstRegularIdx;
+    } else {
+      let lastPendingIdx = -1;
+      for (let i = 0; i < state.orders.length; i++) {
+        if (state.orders[i].status === ORDER_STATUS.PENDING) lastPendingIdx = i;
+      }
+      insertAt = lastPendingIdx + 1;
+    }
+  }
+
+  state.orders.splice(insertAt, 0, order);
 }
 
 function createOrder(type) {
