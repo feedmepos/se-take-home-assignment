@@ -375,7 +375,10 @@ func (oc *OrderController) PrintFinalStatus() {
 	oc.mu.RLock()
 	defer oc.mu.RUnlock()
 
-	fmt.Println("\nFinal Status:")
+	fmt.Println("")
+	fmt.Println("=========================================================")
+	fmt.Println("Final System Status:")
+	fmt.Println("=========================================================")
 
 	vipCount := 0
 	normalCount := 0
@@ -387,9 +390,27 @@ func (oc *OrderController) PrintFinalStatus() {
 		}
 	}
 
-	fmt.Printf("- Total Orders Processed: %d (%d VIP, %d Normal)\n",
-		len(oc.completedOrders), vipCount, normalCount)
-	fmt.Printf("- Orders Completed: %d\n", len(oc.completedOrders))
-	fmt.Printf("- Active Bots: %d\n", len(oc.bots))
-	fmt.Printf("- Pending Orders: %d\n", len(oc.pendingQueue))
+	fmt.Printf("Total Orders Created:    %d\n", oc.totalOrdersCreated)
+	fmt.Printf("Orders Completed:        %d\n", len(oc.completedOrders))
+	fmt.Printf("  - VIP Orders:          %d\n", vipCount)
+	fmt.Printf("  - Normal Orders:       %d\n", normalCount)
+	fmt.Printf("Pending Orders:          %d\n", len(oc.pendingQueue))
+	fmt.Printf("Active Bots:             %d\n", len(oc.bots))
+	
+	if len(oc.bots) > 0 {
+		fmt.Println("\nActive Bots Details:")
+		for _, bot := range oc.bots {
+			fmt.Printf("  %s\n", bot.String())
+		}
+	}
+
+	if len(oc.pendingQueue) > 0 {
+		fmt.Println("\nPending Orders:")
+		for _, order := range oc.pendingQueue {
+			fmt.Printf("  %s\n", order.String())
+		}
+	}
+
+	fmt.Println("=========================================================")
+	fmt.Printf("[%s] Simulation completed successfully\n", time.Now().Format("15:04:05"))
 }
