@@ -36,27 +36,27 @@ bash scripts/run.sh
 
 | Command | Action |
 |---------|--------|
-| `new normal` | Create a normal order |
-| `new vip` | Create a VIP order (queued before all normal orders) |
-| `add bot` | Add a cooking bot (immediately picks up a pending order) |
-| `remove bot` | Remove the newest bot (returns its order to the queue) |
+| `+order` | Create a normal order |
+| `+vip` | Create a VIP order (queued before all normal orders) |
+| `+bot` | Add a cooking bot (immediately picks up a pending order) |
+| `-bot` | Remove the newest bot (returns its order to the queue) |
 | `status` | Print current queue and bot state |
 | `exit` | Quit the CLI |
 
 Example session:
 
 ```
-> new normal
-14:30:01 - Order 143001ABC (NORMAL) created [PENDING]
-> new vip
-14:30:02 - Order 143002XYZ (VIP) created [PENDING]
-> add bot
-14:30:03 - Bot Bot-143003QRP created [IDLE]
-14:30:03 - Bot Bot-143003QRP picked up order 143002XYZ [PROCESSING]
+> +order
+14:30:01 - Order 100 (NORMAL) created [PENDING]
+> +vip
+14:30:02 - Order 101 (VIP) created [PENDING]
+> +bot
+14:30:03 - Bot Bot-102 created [IDLE]
+14:30:03 - Bot Bot-102 picked up order 101 [PROCESSING]
 > status
 14:30:03 - --- STATUS: pending=1 complete=0 bots=1 ---
-14:30:03 -   PENDING  [NORMAL] 143001ABC
-14:30:03 -   BOT Bot-143003QRP [PROCESSING]
+14:30:03 -   PENDING  [NORMAL] 100
+14:30:03 -   BOT Bot-102 [PROCESSING]
 ```
 
 ### Testing

@@ -10,6 +10,7 @@ if (args.includes('--cli')) {
   const { Server } = require('socket.io');
   const routes = require('./routes');
   const { setEmit } = require('./logger');
+  const { SERVER_PORT } = require('./constants');
 
   const app = express();
   app.use(cors());
@@ -23,7 +24,7 @@ if (args.includes('--cli')) {
     io.emit('state:update', stateSnapshot);
   });
 
-  const PORT = process.env.PORT || 3000;
+  const PORT = process.env.PORT || SERVER_PORT;
   server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
   });

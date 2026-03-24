@@ -1,17 +1,19 @@
 const { randomUUID } = require('crypto');
+const { ORDER_COUNTER_START, BOT_COUNTER_START } = require('../constants');
+
+let orderCounter = ORDER_COUNTER_START;
+let botCounter = BOT_COUNTER_START;
 
 function generateSystemId() {
   return randomUUID();
 }
 
-function generateDisplayId(prefix = '') {
-  const now = new Date();
-  const time = now.toTimeString().slice(0, 8).replace(/:/g, ''); // "143022"
-  const rand = Array.from({ length: 3 }, () =>
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[Math.floor(Math.random() * 26)]
-  ).join('');
-  const id = time + rand; // e.g. "143022XKP"
-  return prefix ? `${prefix}-${id}` : id;
+function generateOrderDisplayId() {
+  return String(orderCounter++);
 }
 
-module.exports = { generateSystemId, generateDisplayId };
+function generateBotDisplayId() {
+  return `Bot-${botCounter++}`;
+}
+
+module.exports = { generateSystemId, generateOrderDisplayId, generateBotDisplayId };

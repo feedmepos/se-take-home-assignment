@@ -1,55 +1,32 @@
-22:49:45 - Order 224945TJA (NORMAL) created [PENDING]
-22:49:45 - Order 224945PBC (VIP) created [PENDING]
-22:49:45 - Bot Bot-224945LSK created [IDLE]
-22:49:45 - Bot Bot-224945LSK picked up order 224945PBC [PROCESSING]
-22:49:45 - Order 224945OKG (NORMAL) created [PENDING]
-22:49:45 - Bot Bot-224945LVD created [IDLE]
-22:49:45 - Bot Bot-224945LVD picked up order 224945TJA [PROCESSING]
-22:49:45 - Order 224945TJA returned to queue [PENDING]
-22:49:45 - Bot Bot-224945LVD removed
-22:49:45 - --- STATUS: pending=2 complete=0 bots=1 ---
-22:49:45 -   PENDING  [NORMAL] 224945OKG
-22:49:45 -   PENDING  [NORMAL] 224945TJA
-22:49:45 -   BOT Bot-224945LSK [PROCESSING]
-22:52:09 - Order 225209SPE (NORMAL) created [PENDING]
-22:52:09 - Bot Bot-225209XGK created [IDLE]
-22:52:09 - Bot Bot-225209XGK is now [IDLE]
-22:52:09 - Order 225209LBO (VIP) created [PENDING]
-22:52:09 - Order 225209EUG (NORMAL) created [PENDING]
-22:52:09 - Bot Bot-225209ERB created [IDLE]
-22:52:09 - Bot Bot-225209ERB picked up order 225209EUG [PROCESSING]
-22:52:09 - Order 225209NEB (NORMAL) created [PENDING]
-22:52:09 - Order 225209EAF (NORMAL) created [PENDING]
-22:52:09 - Order 225209JRY (VIP) created [PENDING]
-22:52:09 - Order 225209GOH (NORMAL) created [PENDING]
-22:52:09 - Bot Bot-225209YVS created [IDLE]
-22:52:09 - Order 225209UAH (VIP) created [PENDING]
-22:52:09 - Bot Bot-225209YVS picked up order 225209GOH [PROCESSING]
-22:52:09 - Order 225209XXF (VIP) created [PENDING]
-22:52:09 - Order 225209XBL (NORMAL) created [PENDING]
-22:52:09 - Order 225209GCH (NORMAL) created [PENDING]
-22:52:09 - Order 225209TPF (NORMAL) created [PENDING]
-22:52:09 - Order 225209DSC (VIP) created [PENDING]
-22:52:09 - Order 225209PAL (NORMAL) created [PENDING]
-22:52:09 - Bot Bot-225209TEY created [IDLE]
-22:52:09 - Bot Bot-225209TEY is now [IDLE]
-22:52:09 - Bot Bot-225209LGI created [IDLE]
-22:52:09 - Bot Bot-225209LGI is now [IDLE]
-22:52:09 - Order 225209APP (VIP) created [PENDING]
-22:52:09 - Bot Bot-225209LGI removed
-22:52:09 - Order 225209SUW (NORMAL) created [PENDING]
-22:52:09 - Order 225209CWS (NORMAL) created [PENDING]
-22:52:09 - Bot Bot-225209NMT created [IDLE]
-22:52:09 - Bot Bot-225209NMT picked up order 225209CWS [PROCESSING]
-22:52:09 - Order 225209CWS returned to queue [PENDING]
-22:52:09 - Bot Bot-225209NMT removed
-22:52:09 - Order 225209LLD (VIP) created [PENDING]
-22:52:09 - Order 225209OPS (NORMAL) created [PENDING]
-22:52:09 - Bot Bot-225209UXY created [IDLE]
-22:52:09 - Bot Bot-225209UXY picked up order 225209LLD [PROCESSING]
-22:52:09 - Order 225209LLD returned to queue [PENDING]
-22:52:09 - Bot Bot-225209UXY removed
-22:52:09 - Bot Bot-225209YCQ created [IDLE]
-22:52:09 - Bot Bot-225209YCQ is now [IDLE]
-22:52:09 - Order 225209BQL (NORMAL) created [PENDING]
-22:52:09 - Bot Bot-225209YCQ picked up order 225209BQL [PROCESSING]
+23:27:09 - Order 100 (NORMAL) created [PENDING]
+23:27:09 - Order 101 (VIP) created [PENDING]
+23:27:09 - Bot Bot-1 created [IDLE]
+23:27:09 - Bot Bot-1 picked up order 101 [PROCESSING]
+23:27:09 - Order 102 (NORMAL) created [PENDING]
+23:27:09 - Bot Bot-2 created [IDLE]
+23:27:09 - Bot Bot-2 picked up order 100 [PROCESSING]
+23:27:09 - Order 100 returned to queue [PENDING]
+23:27:09 - Bot Bot-2 removed
+23:27:09 - --- STATUS: pending=2 complete=0 bots=1 ---
+23:27:09 -   PENDING  [NORMAL] 102
+23:27:09 -   PENDING  [NORMAL] 100
+23:27:09 -   BOT Bot-1 [PROCESSING]
+23:27:24 - Order 100 (NORMAL) created [PENDING]
+23:27:28 - Order 101 (VIP) created [PENDING]
+23:27:36 - Bot Bot-1 created [IDLE]
+23:27:36 - Bot Bot-1 picked up order 101 [PROCESSING]
+23:27:39 - Order 102 (VIP) created [PENDING]
+23:27:46 - Order 101 completed [COMPLETE]
+23:27:46 - Bot Bot-1 picked up order 102 [PROCESSING]
+23:27:56 - Order 102 completed [COMPLETE]
+23:27:56 - Bot Bot-1 picked up order 100 [PROCESSING]
+23:28:05 - Order 100 returned to queue [PENDING]
+23:28:05 - Bot Bot-1 removed
+23:28:07 - --- STATUS: pending=1 complete=2 bots=0 ---
+23:28:07 -   PENDING  [NORMAL] 100
+23:28:07 -   COMPLETE [VIP] 101 at 23:27:46
+23:28:07 -   COMPLETE [VIP] 102 at 23:27:56
+23:28:16 - Bot Bot-2 created [IDLE]
+23:28:16 - Bot Bot-2 picked up order 100 [PROCESSING]
+23:28:26 - Order 100 completed [COMPLETE]
+23:28:26 - Bot Bot-2 is now [IDLE]

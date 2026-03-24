@@ -19,38 +19,37 @@ function startCLI() {
     const cmd = line.trim().toLowerCase();
 
     switch (cmd) {
-      case 'new normal':
+      case '+order':
         createOrder('NORMAL');
         tryAssignIdleBot();
         break;
-      case 'new vip':
+      case '+vip':
         createOrder('VIP');
         tryAssignIdleBot();
         break;
-      case 'add bot':
+      case '+bot':
         addBot();
         break;
-      case 'remove bot':
+      case '-bot':
         removeNewestBot();
         break;
-      case 'status':
+      case 'status': {
         const pending = getPendingOrders();
         const complete = getCompleteOrders();
         const bots = state.bots;
-
         log(`--- STATUS: pending=${pending.length} complete=${complete.length} bots=${bots.length} ---`);
         pending.forEach(o => log(`  PENDING  [${o.type}] ${o.displayId}`));
         complete.forEach(o => log(`  COMPLETE [${o.type}] ${o.displayId} at ${o.completedAt.toTimeString().slice(0, 8)}`));
         bots.forEach(b => log(`  BOT ${b.displayId} [${b.status}]`));
         break;
+      }
       case 'exit':
         console.log('Exiting...');
         rl.close();
-        // Allow pending timers to resolve, then exit
         setTimeout(() => process.exit(0), 100);
         return;
       default:
-        if (cmd) console.log(`Unknown command: "${cmd}". Try: new normal, new vip, add bot, remove bot, status, exit`);
+        if (cmd) console.log('Commands: +order, +vip, +bot, -bot, status, exit');
     }
 
     if (process.stdin.isTTY) {

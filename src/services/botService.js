@@ -1,9 +1,8 @@
 const { state, getStateSnapshot } = require('../state');
-const { generateSystemId, generateDisplayId } = require('../utils/idHelper');
+const { generateSystemId, generateBotDisplayId } = require('../utils/idHelper');
 const { log, broadcastState } = require('../logger');
 const { insertPending, getPendingOrders } = require('./orderService');
-
-const ORDER_PROCESS_MS = 10000;
+const { ORDER_PROCESS_MS } = require('../constants');
 
 function assignNextOrder(bot) {
   const pending = getPendingOrders();
@@ -38,7 +37,7 @@ function assignNextOrder(bot) {
 function addBot() {
   const bot = {
     systemId: generateSystemId(),
-    displayId: generateDisplayId('Bot'),
+    displayId: generateBotDisplayId(),
     status: 'IDLE',
     currentOrderId: null,
     timer: null,

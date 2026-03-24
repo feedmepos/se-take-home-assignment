@@ -1,5 +1,5 @@
 const { state, getStateSnapshot } = require('../state');
-const { generateSystemId, generateDisplayId } = require('../utils/idHelper');
+const { generateSystemId, generateOrderDisplayId } = require('../utils/idHelper');
 const { log, broadcastState } = require('../logger');
 
 function getPendingOrders() {
@@ -37,7 +37,7 @@ function insertPending(order) {
 function createOrder(type) {
   const order = {
     systemId: generateSystemId(),
-    displayId: generateDisplayId(),
+    displayId: generateOrderDisplayId(),
     type,
     status: 'PENDING',
     createdAt: new Date(),
