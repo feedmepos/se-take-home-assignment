@@ -3,6 +3,7 @@ import { Order } from '../interfaces/order.interface';
 import { Bot } from '../interfaces/bot.interface';
 import { BotStatus } from '../enums/bot-status.enum';
 import { OrderType } from '../enums/order-type.enum';
+import { OrderStatus } from '../enums/order-status.enum';
 
 @Injectable({
   providedIn: 'root'
@@ -31,7 +32,7 @@ export class OrderService {
   }
 
   addOrder(type: OrderType) {
-    const order: Order = { id: this.orderIdCounter++, type };
+    const order: Order = { id: this.orderIdCounter++, type, status: OrderStatus.PENDING };
     this.pendingOrders.update(orders => {
       const newOrders = [...orders, order];
       return newOrders.sort((a, b) => {
@@ -63,7 +64,8 @@ export class OrderService {
       
       if (removedBot.status === BotStatus.PROCESSING && removedBot.processingOrder) {
         this.pendingOrders.update(orders => {
-          const newOrders = [...orders, removedBot.processingOrder!];
+          const pendingOrder = { ...removedBot.processingOrder!, status: OrderStatus.PENDING };
+          const newOrders = [...orders, pendingOrder];
           return newOrders.sort((a, b) => {
             if (a.type !== b.type) return a.type === OrderType.VIP ? -1 : 1;
             return a.id - b.id;
@@ -72,6 +74,7 @@ export class OrderService {
       }
       return copy;
     });
+    this.assignBots();
   }
 
   private tick() {
@@ -82,7 +85,8 @@ export class OrderService {
         if (bot.status === BotStatus.PROCESSING) {
           if (bot.timeLeft <= 1) {
             if (bot.processingOrder) {
-               this.completeOrders.update(c => [...c, bot.processingOrder!].sort((a, b) => b.id - a.id)); 
+               const completedOrder = { ...bot.processingOrder!, status: OrderStatus.COMPLETED };
+               this.completeOrders.update(c => [...c, completedOrder].sort((a, b) => b.id - a.id)); 
             }
             statusChanged = true;
             return {
@@ -109,17 +113,18 @@ export class OrderService {
 
   private assignBots() {
     this.bots.update(bots => {
-      const pending = this.pendingOrders();
+      const pending = [...this.pendingOrders()];
       let hasUpdates = false;
       
       const newBots = bots.map(bot => {
         if (bot.status === BotStatus.IDLE && pending.length > 0) {
           const order = pending.shift()!;
+          const processingOrder = { ...order, status: OrderStatus.PROCESSING };
           hasUpdates = true;
           return {
             ...bot,
             status: BotStatus.PROCESSING,
-            processingOrder: order,
+            processingOrder: processingOrder,
             timeLeft: 10
           } as Bot;
         }
