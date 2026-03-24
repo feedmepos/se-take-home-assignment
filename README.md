@@ -1,64 +1,105 @@
-## FeedMe Software Engineer Take Home Assignment
-Below is a take home assignment before the interview of the position. You are required to
-1. Understand the situation and use case. You may contact the interviewer for further clarification.
-2. implement the requirement with **either frontend or backend components**.
-3. Complete the requirement with **AI** if possible, but perform your own testing.
-4. Provide documentation for the any part that you think is needed.
-5. Bring the source code and functioning prototype to the interview session.
+## Implementation — Node.js Backend
 
-### Situation
-McDonald is transforming their business during COVID-19. They wish to build the automated cooking bots to reduce workforce and increase their efficiency. As one of the software engineer in the project. You task is to create an order controller which handle the order control flow. 
+### Prerequisites
 
-### User Story
-As below is part of the user story:
-1. As McDonald's normal customer, after I submitted my order, I wish to see my order flow into "PENDING" area. After the cooking bot process my order, I want to see it flow into to "COMPLETE" area.
-2. As McDonald's VIP member, after I submitted my order, I want my order being process first before all order by normal customer.  However if there's existing order from VIP member, my order should queue behind his/her order.
-3. As McDonald's manager, I want to increase or decrease number of cooking bot available in my restaurant. When I increase a bot, it should immediately process any pending order. When I decrease a bot, the processing order should remain un-process.
-4. As McDonald bot, it can only pickup and process 1 order at a time, each order required 10 seconds to complete process.
+- Node.js 22
+- npm
 
-### Requirements
-1. When "New Normal Order" clicked, a new order should show up "PENDING" Area.
-2. When "New VIP Order" clicked, a new order should show up in "PENDING" Area. It should place in-front of all existing "Normal" order but behind of all existing "VIP" order.
-3. The order number should be unique and increasing.
-4. When "+ Bot" clicked, a bot should be created and start processing the order inside "PENDING" area. after 10 seconds picking up the order, the order should move to "COMPLETE" area. Then the bot should start processing another order if there is any left in "PENDING" area.
-5. If there is no more order in the "PENDING" area, the bot should become IDLE until a new order come in.
-6. When "- Bot" clicked, the newest bot should be destroyed. If the bot is processing an order, it should also stop the process. The order should return to its original position in the "PENDING" area (maintaining VIP/Normal order priority).
-7. No data persistance is needed for this prototype, you may perform all the process inside memory.
+### Setup
 
-### Functioning Prototype
-You must implement **either** frontend or backend components as described below:
+```bash
+npm install
+```
 
-#### 1. Frontend
-- You are free to use **any framework and programming language** of your choice
-- The UI application must be compiled, deployed and hosted on any publicly accessible web platform
-- Must provide a user interface that demonstrates all the requirements listed above
-- Should allow users to interact with the McDonald's order management system
+### Running
 
-#### 2. Backend
-- You must use **either Go (Golang) or Node.js** for the backend implementation
-- The backend must be a CLI application that can be executed in GitHub Actions
-- Must implement the following scripts in the `script` directory:
-  - `test.sh`: Contains unit test execution steps
-  - `build.sh`: Contains compilation steps for the CLI application
-  - `run.sh`: Contains execution steps that run the CLI application
-- The CLI application result must be printed to `result.txt`
-- The `result.txt` output must include timestamps in `HH:MM:SS` format to track order completion times
-- Must follow **GitHub Flow**: Create a Pull Request with your changes to this repository
-- Ensure all GitHub Action checks pass successfully
-- **Note**: An interactive CLI implementation is compulsory for the next round of interview. Candidates should be prepared to demonstrate interactive command handling.
+**Interactive CLI** — type commands manually:
 
-#### Submission Requirements
-- Fork this repository and implement your solution with either frontend or backend
-- **Frontend option**: Deploy to a publicly accessible URL using any technology stack
-- **Backend option**: Must be implemented in Go or Node.js and work within the GitHub Actions environment
-  - Follow GitHub Flow process with Pull Request submission
-  - All tests in `test.sh` must pass
-  - The `result.txt` file must contain meaningful output from your CLI application
-  - All output must include timestamps in `HH:MM:SS` format to track order completion times
-  - Submit a Pull Request and ensure the `go-verify-result` workflow passes
-- Provide documentation for any part that you think is needed
+```bash
+npm run cli
+```
 
-### Tips on completing this task
-- Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.
-- Treat this assignment as a vibe coding, don't over engineer it. Try to scope your working hour within 30 min. However, ensure you read and understand what your code doing.
-- Complete the implementation as clean as possible, clean code is a strong plus point, do not bring in all the fancy tech stuff.
+**HTTP + WebSocket server** — for frontend integration:
+
+```bash
+npm run server
+# Server starts on http://localhost:3000
+```
+
+**CI demo run** — pipes a preset command sequence and writes output to `scripts/result.txt`:
+
+```bash
+bash scripts/run.sh
+```
+
+### CLI Commands
+
+| Command | Action |
+|---------|--------|
+| `new normal` | Create a normal order |
+| `new vip` | Create a VIP order (queued before all normal orders) |
+| `add bot` | Add a cooking bot (immediately picks up a pending order) |
+| `remove bot` | Remove the newest bot (returns its order to the queue) |
+| `status` | Print current queue and bot state |
+| `exit` | Quit the CLI |
+
+Example session:
+
+```
+> new normal
+14:30:01 - Order 143001ABC (NORMAL) created [PENDING]
+> new vip
+14:30:02 - Order 143002XYZ (VIP) created [PENDING]
+> add bot
+14:30:03 - Bot Bot-143003QRP created [IDLE]
+14:30:03 - Bot Bot-143003QRP picked up order 143002XYZ [PROCESSING]
+> status
+14:30:03 - --- STATUS: pending=1 complete=0 bots=1 ---
+14:30:03 -   PENDING  [NORMAL] 143001ABC
+14:30:03 -   BOT Bot-143003QRP [PROCESSING]
+```
+
+### Testing
+
+```bash
+bash scripts/test.sh
+```
+
+Runs all unit tests via the Node.js built-in test runner. No extra dependencies needed.
+
+### REST API (server mode)
+
+| Method | Path | Body | Description |
+|--------|------|------|-------------|
+| `POST` | `/api/orders` | `{ "type": "NORMAL" \| "VIP" }` | Create an order |
+| `GET` | `/api/orders` | — | Get `{ pending, complete }` |
+| `POST` | `/api/bots` | — | Add a bot |
+| `DELETE` | `/api/bots` | — | Remove the newest bot |
+
+WebSocket event `state:update` is emitted to all connected clients on every state change, with payload `{ pending, complete, bots }`.
+
+### Project Structure
+
+```
+src/
+├── index.js              # Entry point (--cli or --server)
+├── cli.js                # Interactive CLI
+├── logger.js             # Timestamped logger → stdout + scripts/result.txt
+├── state.js              # In-memory state + getStateSnapshot()
+├── routes.js             # Express route definitions
+├── controllers/
+│   ├── orderController.js
+│   └── botController.js
+├── services/
+│   ├── orderService.js   # Queue insertion and priority logic
+│   └── botService.js     # Bot lifecycle and 10s processing timers
+└── utils/
+    └── idHelper.js       # ID generation helpers
+tests/
+├── orderService.test.js
+└── botService.test.js
+scripts/
+├── build.sh              # npm install
+├── test.sh               # Run unit tests
+└── run.sh                # Run CLI demo, output to scripts/result.txt
+```
