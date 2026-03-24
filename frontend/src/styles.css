@@ -1,0 +1,37 @@
+/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap') layer(base);
+@import url('https://fonts.googleapis.com/css2?family=Audiowide&display=swap') ;
+
+@import "tailwindcss";
+
+@plugin "@tailwindcss/typography";
+@plugin "tailwind-scrollbar";
+
+@plugin "daisyui" {
+  themes: light --default;
+  logs: false;
+}
+
+@theme {
+  --font-*: initial;
+  --font-poppins: Poppins, system-ui, sans-serif;
+  --font-nunito: Nunito Sans, sans-serif;
+  --font-price: "Audiowide", sans-serif;
+
+
+  --text-tiny: 0.625rem;
+}
+
+/** Scroll bar **/
+@supports selector(::-webkit-scrollbar) {
+  .supports-scrollbars\: pr-2 {
+    padding-right: 0.5rem;
+  }
+}
+
+body {
+  ::selection {
+    background-color: var(--color-primary);
+    color: var(--color-primary-content);
+  }
+}

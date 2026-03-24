@@ -1,0 +1,50 @@
+<div class="card bg-base-100 shadow-sm border border-base-200 h-full flex flex-col">
+  <div class="card-body p-6 lg:p-6 flex flex-col h-full gap-0">
+    <div class="flex items-center justify-between border-b border-base-200 pb-4 mb-4 shrink-0">
+      <div class="badge badge-neutral gap-2 p-4 text-sm font-bold text-neutral-content">
+        <ng-icon name="lucideBot" class="text-base"></ng-icon>
+        BOTS
+      </div>
+      <span class="text-sm font-medium text-base-content/50 w-24 text-right">{{ orderService.bots().length }} Active Bots</span>
+    </div>
+
+    <div class="flex flex-col gap-3 overflow-y-auto max-h-[450px] pr-2">
+      @if (orderService.bots().length === 0) {
+        <div class="text-center py-12 opacity-40 flex flex-col items-center justify-center">
+          <ng-icon name="lucideInbox" class="text-5xl mb-3"></ng-icon>
+          <span class="font-medium">No bots deployed</span>
+        </div>
+      }
+      @for (bot of orderService.bots(); track bot.id) {
+        <div class="flex flex-col p-4 rounded-xl transition-all bg-base-100"
+             [ngClass]="bot.status === BotStatus.PROCESSING ? 'border-2 border-neutral' : 'border border-base-200'">
+          <div class="flex justify-between items-center mb-2">
+            <div class="font-bold flex items-center gap-3 text-lg">
+              <span class="text-base-content">Bot #{{ bot.id }}</span>
+              <div class="badge badge-sm font-bold shadow-sm" [ngClass]="bot.status === BotStatus.PROCESSING ? 'badge-neutral text-neutral-content' : 'badge-ghost text-base-content/60'">
+                {{ bot.status }}
+              </div>
+            </div>
+          </div>
+          
+          @if (bot.status === BotStatus.PROCESSING && bot.processingOrder) {
+            <div class="flex flex-col gap-3 mt-1">
+              <div class="flex items-center gap-2 bg-base-200/50 p-2 rounded-lg border border-base-300">
+                <span class="font-medium text-base-content/70 text-sm">Cooking: </span>
+                <span class="badge font-bold" [ngClass]="bot.processingOrder.type === OrderType.VIP ? 'badge-error' : 'badge-warning'">
+                  #{{ bot.processingOrder.id }} ({{ bot.processingOrder.type }})
+                </span>
+              </div>
+              <div class="w-full flex items-center gap-3">
+                <progress class="progress progress-neutral w-full" [value]="10 - bot.timeLeft" max="10"></progress>
+                <div class="text-sm font-bold w-6 text-right">{{ bot.timeLeft }}s</div>
+              </div>
+            </div>
+          } @else {
+            <div class="text-sm text-base-content/50 font-medium mt-1 bg-base-200/50 p-3 rounded-lg flex align-center justify-center">Waiting for orders...</div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>

@@ -1,0 +1,33 @@
+<div class="card bg-base-100 shadow-sm border border-base-200 h-full flex flex-col">
+  <div class="card-body p-6 lg:p-6 flex flex-col h-full gap-0">
+    <div class="flex items-center justify-between border-b border-base-200 pb-4 mb-4 shrink-0">
+      <div class="badge badge-warning gap-2 p-4 text-sm font-bold text-warning-content">
+        <div class="w-2.5 h-2.5 rounded-full bg-warning-content/80 animate-ping"></div>
+        PENDING
+      </div>
+      <span class="text-sm font-medium text-base-content/50 w-24 text-right">{{ orderService.pendingOrders().length }} Orders</span>
+    </div>
+    
+    <div class="flex flex-col gap-3 overflow-y-auto max-h-[450px] pr-2">
+      @if (orderService.pendingOrders().length === 0) {
+        <div class="text-center py-12 opacity-40 flex flex-col items-center justify-center">
+          <ng-icon name="lucideInbox" class="text-5xl mb-3"></ng-icon>
+          <span class="font-medium">No pending orders</span>
+        </div>
+      }
+      @for (order of orderService.pendingOrders(); track order.id) {
+        <div class="flex items-center justify-between p-4 rounded-xl border transition-all"
+             [ngClass]="order.type === OrderType.VIP ? 'bg-error/10 border-error/20' : 'bg-base-100 border-base-200'">
+          <div class="flex items-center gap-4">
+            <!-- VIP is Red (Error), Normal is Yellow (Warning) -->
+            <div class="flex flex-shrink-0 items-center justify-center w-12 h-12 rounded-full font-bold text-lg" 
+                 [ngClass]="order.type === OrderType.VIP ? 'bg-error text-error-content' : 'bg-warning text-warning-content'">
+              #{{ order.id }}
+            </div>
+            <div class="font-bold text-lg" [ngClass]="order.type === OrderType.VIP ? 'text-error' : 'text-base-content'">{{ order.type }}</div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>
