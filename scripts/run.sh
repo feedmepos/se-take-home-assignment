@@ -1,19 +1,33 @@
 #!/bin/bash
+# run.sh
 
-# Run Script
-# This script should execute your CLI application and output results to result.txt
+set -e
 
 echo "Running CLI application..."
 
-# For Go projects:
-# ./order-controller > result.txt
+# Check if the binary exists, if not build it
+if [ ! -f ./order-controller ]; then
+    echo "Binary not found, building first..."
+    ./build.sh
+fi
 
-# For Node.js projects:
-# node index.js > result.txt
-# or npm start > result.txt
-
-# Temporary placeholder - remove this when you implement your CLI
-echo "Added 1 bot" > result.txt
-echo "status: bot: [1], order: []" >> result.txt
+# Run the application with a sample scenario
+{
+    echo "n"
+    sleep 1
+    echo "v"
+    sleep 1
+    echo "n"
+    sleep 1
+    echo "+"
+    sleep 1
+    echo "+"
+    sleep 1
+    echo "v"
+    sleep 1
+    echo "-"
+    sleep 2
+    echo "q"
+} | ./order-controller > result.txt
 
 echo "CLI application execution completed"
