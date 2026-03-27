@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>订单管理</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+  <div id="app" class="container py-4">
+    <h2 class="mb-4">订单管理</h2>
+    <div class="mb-3">
+      <button class="btn btn-primary me-2" @click="openOrderModal(false)">新建普通订单</button>
+      <button class="btn btn-warning me-2" @click="openOrderModal(true)">新建VIP订单</button>
+      <button class="btn btn-success me-2" @click="addRobot">+机器人</button>
+      <button class="btn btn-danger" :disabled="robotsCount===0" @click="removeRobot">-机器人</button>
+      <span class="ms-3">机器人数量：{{ robotCount }}</span>
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+        <h5>待处理订单</h5>
+        <table class="table table-bordered table-hover">
+          <thead class="table-light">
+            <tr>
+              <th>ID</th>
+              <th>订单号</th>
+              <th>用户ID</th>
+              <th>金额</th>
+              <th>VIP</th>
+              <th>创建时间</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="order in pendingOrders" :key="order.id">
+              <td>{{ order.id }}</td>
+              <td>{{ order.order_no }}</td>
+              <td>{{ order.user_id }}</td>
+              <td>{{ order.amount }}</td>
+              <td>{{ order.vip ? '是' : '否' }}</td>
+              <td>{{ order.created_at }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="col-md-6">
+        <h5>已完成订单</h5>
+        <table class="table table-bordered table-hover">
+          <thead class="table-light">
+            <tr>
+              <th>ID</th>
+              <th>订单号</th>
+              <th>用户ID</th>
+              <th>金额</th>
+              <th>VIP</th>
+              <th>创建时间</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="order in finishedOrders" :key="order.id">
+              <td>{{ order.id }}</td>
+              <td>{{ order.order_no }}</td>
+              <td>{{ order.user_id }}</td>
+              <td>{{ order.amount }}</td>
+              <td>{{ order.vip ? '是' : '否' }}</td>
+              <td>{{ order.created_at }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 新建订单模态框 -->
+    <div class="modal fade" tabindex="-1" :class="{show: showModal}" style="display: block;" v-if="showModal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">{{ isVip ? '新建VIP订单' : '新建普通订单' }}</h5>
+            <button type="button" class="btn-close" @click="closeModal"></button>
+          </div>
+          <div class="modal-body">
+            <form @submit.prevent="createOrder">
+              <div class="mb-3">
+                <label class="form-label">用户ID</label>
+                <input type="number" class="form-control" v-model="form.user_id" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">金额</label>
+                <input type="number" class="form-control" v-model="form.amount" required step="0.01">
+              </div>
+              <button type="submit" class="btn btn-success">提交</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- 模态框遮罩 -->
+    <div class="modal-backdrop fade show" v-if="showModal"></div>
+  </div>
+  <script>
+    const { createApp, ref, reactive, computed, onUnmounted } = Vue;
+    createApp({
+      setup() {
+        const pendingOrders = ref([]);
+        const finishedOrders = ref([]);
+        const robotCount = ref(0);
+        const showModal = ref(false);
+        const isVip = ref(false);
+        const form = ref({ user_id: '', amount: '' });
+
+        // 拉取订单和机器人数量
+        function fetchAll() {
+          fetch('/orders/pending')
+            .then(r => r.json())
+            .then(data => { pendingOrders.value = data; });
+
+          fetch('/orders/finished')
+            .then(r => r.json())
+            .then(data => { finishedOrders.value = data; });
+
+          fetch('/robots/count')
+            .then(r => r.json())
+            .then(data => { robotCount.value = data.count; });
+        }
+        fetchAll();
+        setInterval(fetchAll, 2000); // 定时刷新
+
+        function openOrderModal(vip) {
+          isVip.value = vip;
+          form.value = { user_id: '', amount: '' };
+          showModal.value = true;
+        }
+        function closeModal() {
+          showModal.value = false;
+        }
+        function createOrder() {
+          fetch('/orders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              user_id: Number(form.value.user_id),
+              amount: Number(form.value.amount),
+              vip: isVip.value
+            })
+          }).then(() => {
+            closeModal();
+            fetchAll();
+          });
+        }
+        function addRobot() {
+          fetch('/robots/add', { method: 'POST' }).then(fetchAll);
+        }
+        function removeRobot() {
+          fetch('/robots/remove', { method: 'POST' }).then(fetchAll);
+        }
+
+        return {
+          pendingOrders,
+          finishedOrders,
+          robotCount,
+          showModal,
+          isVip,
+          form,
+          openOrderModal,
+          closeModal,
+          createOrder,
+          addRobot,
+          removeRobot,
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>
