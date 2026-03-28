@@ -5,17 +5,20 @@
 
 echo "Running CLI application..."
 
+# Change to project root directory
+cd "$(dirname "$0")/.."
+
 # Detect OS and set executable name
 OS=$(uname -s 2>/dev/null || echo "Windows")
 if [ "$OS" = "Linux" ] || [ "$OS" = "Darwin" ]; then
-    EXECUTABLE="../order-controller"
+    EXECUTABLE="./order-controller"
 else
-    EXECUTABLE="../order-controller.exe"
+    EXECUTABLE="./order-controller.exe"
 fi
 
 # For Go projects:
 if [ -f "$EXECUTABLE" ]; then
-    echo -e "new-normal\nnew-vip\n+bot\nstatus\nhelp\n-bot\nexit" | "$EXECUTABLE" > ../result.txt
+    echo -e "new-normal\nnew-vip\n+bot\nstatus\nhelp\n-bot\nexit" | "$EXECUTABLE" > ./result.txt
 else
     echo "Error: order-controller executable not found. Please run build.sh first."
     exit 1

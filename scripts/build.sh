@@ -12,15 +12,18 @@ if ! command -v go &> /dev/null; then
 fi
 
 # For Go projects:
+# Change to project root directory
+cd "$(dirname "$0")/.."
+
 # Detect OS and set executable name
 OS=$(uname -s 2>/dev/null || echo "Windows")
 if [ "$OS" = "Linux" ] || [ "$OS" = "Darwin" ]; then
-    EXECUTABLE="../order-controller"
+    EXECUTABLE="./order-controller"
 else
-    EXECUTABLE="../order-controller.exe"
+    EXECUTABLE="./order-controller.exe"
 fi
 
-go build -o "$EXECUTABLE" ../cmd/main.go
+go build -o "$EXECUTABLE" ./cmd/main.go
 
 if [ $? -eq 0 ]; then
     echo "Build completed successfully"

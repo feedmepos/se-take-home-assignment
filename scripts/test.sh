@@ -12,7 +12,11 @@ if ! command -v go &> /dev/null; then
 fi
 
 # For Go projects:
-cd .. && go test ./... -v
+# Change to project root directory
+cd "$(dirname "$0")/.."
+
+# Run tests
+go test ./... -v
 
 if [ $? -eq 0 ]; then
     echo "All tests passed"
