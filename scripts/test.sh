@@ -21,7 +21,4 @@ else
     exit 1
 fi
 
-# For Node.js projects:
-# npm test
-
 echo "Unit tests completed"

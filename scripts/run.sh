@@ -21,9 +21,5 @@ else
     exit 1
 fi
 
-# For Node.js projects:
-# node index.js > result.txt
-# or npm start > result.txt
-
 echo "CLI application execution completed"
 echo "Output saved to result.txt"

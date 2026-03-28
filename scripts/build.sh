@@ -30,6 +30,4 @@ else
     exit 1
 fi
 
-# For Node.js projects:
-# npm install
-# npm run build (if needed)
+
