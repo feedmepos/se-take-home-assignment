@@ -1,0 +1,7 @@
+new-normal
+new-vip
++bot
+status
+help
+-bot
+exit
