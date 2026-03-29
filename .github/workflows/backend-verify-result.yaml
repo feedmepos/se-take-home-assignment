@@ -5,7 +5,6 @@ on:
     types: [opened, synchronize, reopened, edited]
     branches: [golang20260328]
   push:
-    branches: [ '*' ]
     branches-ignore:
       - '**tempsave**'
 
