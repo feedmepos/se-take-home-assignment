@@ -1,13 +1,75 @@
-// simulation_test.go
-package main
+// pkg/controller/simulation_test.go
+package controller
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 )
 
-func TestAddNormalOrder(t *testing.T) {
+// 获取项目根目录（se-take-home-assignment）
+func getProjectRoot() string {
+	// 从当前文件位置开始查找项目根目录
+	// 当前文件在 pkg/controller/ 下，需要向上两级
+	dir, err := os.Getwd()
+	if err != nil {
+		return "."
+	}
+	
+	// 尝试找到包含 go.mod 的目录
+	for {
+		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
+			return dir
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			break
+		}
+		dir = parent
+	}
+	return "."
+}
+
+// 测试辅助函数：确保在项目根目录运行
+func setupTestSimulation(t *testing.T) *Simulation {
+	// 获取项目根目录
+	projectRoot := getProjectRoot()
+	
+	// 切换到项目根目录
+	oldDir, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("Failed to get current directory: %v", err)
+	}
+	
+	if err := os.Chdir(projectRoot); err != nil {
+		t.Fatalf("Failed to change to project root: %v", err)
+	}
+	
+	// 确保 scripts 目录存在
+	if err := os.MkdirAll("scripts", 0755); err != nil {
+		t.Fatalf("Failed to create scripts directory: %v", err)
+	}
+	
+	// 删除旧的 result.txt（可选，确保每次测试是干净的）
+	os.Remove("scripts/result.txt")
+	
+	// 创建新的 Simulation（会在 scripts/result.txt 写入）
 	sim := NewSimulation()
+	
+	// 注册清理函数：切换回原目录，但不删除 result.txt
+	t.Cleanup(func() {
+		if sim.output != nil {
+			sim.output.Close()
+		}
+		os.Chdir(oldDir)
+	})
+	
+	return sim
+}
+
+func TestAddNormalOrder(t *testing.T) {
+	sim := setupTestSimulation(t)
 	sim.addOrder(NORMAL)
 	
 	if len(sim.orders) != 1 {
@@ -25,7 +87,7 @@ func TestAddNormalOrder(t *testing.T) {
 }
 
 func TestAddVIPOrder(t *testing.T) {
-	sim := NewSimulation()
+	sim := setupTestSimulation(t)
 	sim.addOrder(VIP)
 	
 	if len(sim.orders) != 1 {
@@ -39,7 +101,7 @@ func TestAddVIPOrder(t *testing.T) {
 }
 
 func TestOrderPriority(t *testing.T) {
-	sim := NewSimulation()
+	sim := setupTestSimulation(t)
 	
 	// Add orders in sequence: Normal, VIP, Normal
 	sim.addOrder(NORMAL) // ID: 1001
@@ -69,7 +131,7 @@ func TestOrderPriority(t *testing.T) {
 }
 
 func TestAddBot(t *testing.T) {
-	sim := NewSimulation()
+	sim := setupTestSimulation(t)
 	sim.addBot()
 	
 	if len(sim.bots) != 1 {
@@ -83,7 +145,7 @@ func TestAddBot(t *testing.T) {
 }
 
 func TestRemoveBot(t *testing.T) {
-	sim := NewSimulation()
+	sim := setupTestSimulation(t)
 	sim.addBot() // Bot #1
 	sim.addBot() // Bot #2
 	
@@ -99,7 +161,7 @@ func TestRemoveBot(t *testing.T) {
 }
 
 func TestOrderProcessing(t *testing.T) {
-	sim := NewSimulation()
+	sim := setupTestSimulation(t)
 	sim.addOrder(NORMAL)
 	sim.addBot()
 	
@@ -127,7 +189,7 @@ func TestOrderProcessing(t *testing.T) {
 }
 
 func TestBotIdleWhenNoOrders(t *testing.T) {
-	sim := NewSimulation()
+	sim := setupTestSimulation(t)
 	sim.addBot()
 	
 	if len(sim.bots) != 1 {
@@ -141,7 +203,7 @@ func TestBotIdleWhenNoOrders(t *testing.T) {
 }
 
 func TestVIPPriority(t *testing.T) {
-	sim := NewSimulation()
+	sim := setupTestSimulation(t)
 	
 	// Add multiple orders
 	sim.addOrder(NORMAL) // 1001
@@ -174,7 +236,7 @@ func TestVIPPriority(t *testing.T) {
 }
 
 func TestBotRemovalWithActiveOrder(t *testing.T) {
-	sim := NewSimulation()
+	sim := setupTestSimulation(t)
 	
 	// Add an order and a bot
 	sim.addOrder(NORMAL)
@@ -204,7 +266,7 @@ func TestBotRemovalWithActiveOrder(t *testing.T) {
 }
 
 func TestMultipleBots(t *testing.T) {
-	sim := NewSimulation()
+	sim := setupTestSimulation(t)
 	
 	// Add multiple orders
 	sim.addOrder(NORMAL) // 1001

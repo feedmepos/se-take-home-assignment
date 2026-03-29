@@ -1,5 +1,4 @@
-// simulation.go
-package main
+package controller
 
 import (
 	"bufio"
@@ -38,7 +37,7 @@ type Order struct {
 	CreatedAt   time.Time
 	StartedAt   time.Time
 	CompletedAt time.Time
-	Position    int // For maintaining order in pending queue
+	Position    int
 }
 
 type Bot struct {
@@ -60,10 +59,16 @@ type Simulation struct {
 }
 
 func NewSimulation() *Simulation {
-	// Create or truncate result.txt
-	output, err := os.Create("result.txt")
+	// 确保 scripts 目录存在
+	if err := os.MkdirAll("scripts", 0755); err != nil {
+		fmt.Printf("Error creating scripts directory: %v\n", err)
+		os.Exit(1)
+	}
+	
+	// Create or truncate result.txt in scripts directory
+	output, err := os.Create("scripts/result.txt")
 	if err != nil {
-		fmt.Printf("Error creating result.txt: %v\n", err)
+		fmt.Printf("Error creating scripts/result.txt: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -89,7 +94,6 @@ func (s *Simulation) log(format string, args ...interface{}) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	fmt.Fprintf(s.output, format+"\n", args...)
-	// Also print to stdout for interactive mode
 	fmt.Printf(format+"\n", args...)
 }
 
@@ -120,7 +124,6 @@ func (s *Simulation) addOrder(orderType OrderType) {
 	s.nextOrderID++
 	s.mu.Unlock()
 	
-	// Log outside of lock
 	fmt.Println(logMsg)
 	s.mu.Lock()
 	fmt.Fprintln(s.output, logMsg)
@@ -144,7 +147,6 @@ func (s *Simulation) addBot() {
 	
 	s.mu.Unlock()
 	
-	// Log outside of lock
 	fmt.Println(logMsg)
 	s.mu.Lock()
 	fmt.Fprintln(s.output, logMsg)
@@ -164,7 +166,6 @@ func (s *Simulation) removeBot() {
 		return
 	}
 
-	// Find the newest bot
 	var newestBot *Bot
 	maxID := -1
 	for _, bot := range s.bots {
@@ -175,21 +176,17 @@ func (s *Simulation) removeBot() {
 	}
 
 	if newestBot.Status == ACTIVE && newestBot.CurrentOrder != nil {
-		// Return order to pending queue
 		order := newestBot.CurrentOrder
 		order.Status = PENDING
 		order.StartedAt = time.Time{}
 		
-		// Reinsert order maintaining priority
 		if order.Type == VIP {
 			s.pendingVIP = append(s.pendingVIP, order)
-			// Sort VIP orders by original position
 			sort.Slice(s.pendingVIP, func(i, j int) bool {
 				return s.pendingVIP[i].Position < s.pendingVIP[j].Position
 			})
 		} else {
 			s.pendingNormal = append(s.pendingNormal, order)
-			// Sort normal orders by original position
 			sort.Slice(s.pendingNormal, func(i, j int) bool {
 				return s.pendingNormal[i].Position < s.pendingNormal[j].Position
 			})
@@ -221,10 +218,8 @@ func (s *Simulation) assignOrdersToIdleBots() {
 }
 
 func (s *Simulation) assignOrderToBot(bot *Bot) {
-	// s.mu is already locked by caller
 	var nextOrder *Order
 	
-	// Priority: VIP first, then Normal
 	if len(s.pendingVIP) > 0 {
 		nextOrder = s.pendingVIP[0]
 		s.pendingVIP = s.pendingVIP[1:]
@@ -232,7 +227,6 @@ func (s *Simulation) assignOrderToBot(bot *Bot) {
 		nextOrder = s.pendingNormal[0]
 		s.pendingNormal = s.pendingNormal[1:]
 	} else {
-		// No orders to process
 		return
 	}
 
@@ -244,23 +238,18 @@ func (s *Simulation) assignOrderToBot(bot *Bot) {
 	logMsg := fmt.Sprintf("[%s] Bot #%d picked up %s Order #%d - Status: PROCESSING", 
 		nextOrder.StartedAt.Format("15:04:05"), bot.ID, nextOrder.Type, nextOrder.ID)
 	
-	// Log outside of main lock to avoid deadlock
 	fmt.Println(logMsg)
 	fmt.Fprintln(s.output, logMsg)
 
-	// Process order in background
 	go s.processOrder(bot, nextOrder)
 }
 
 func (s *Simulation) processOrder(bot *Bot, order *Order) {
-	// Simulate 10 seconds processing time
 	time.Sleep(10 * time.Second)
 
-	// Lock simulation to update state
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	// Check if bot still exists and has this order
 	if _, exists := s.bots[bot.ID]; !exists || bot.CurrentOrder != order {
 		return
 	}
@@ -272,11 +261,9 @@ func (s *Simulation) processOrder(bot *Bot, order *Order) {
 	logMsg := fmt.Sprintf("[%s] Bot #%d completed %s Order #%d - Status: COMPLETE (Processing time: 10s)", 
 		order.CompletedAt.Format("15:04:05"), bot.ID, order.Type, order.ID)
 	
-	// Log
 	fmt.Println(logMsg)
 	fmt.Fprintln(s.output, logMsg)
 
-	// Check if there are more orders to process
 	if len(s.pendingVIP) > 0 || len(s.pendingNormal) > 0 {
 		bot.Status = IDLE
 		s.assignOrderToBot(bot)
@@ -348,7 +335,6 @@ func (s *Simulation) printFinalStatus() {
 	finalOutput += fmt.Sprintf("- Pending Orders: %d\n", len(s.pendingVIP)+len(s.pendingNormal))
 	finalOutput += "\n"
 	
-	// Write to file and console
 	fmt.Fprint(s.output, finalOutput)
 	fmt.Print(finalOutput)
 }
@@ -367,7 +353,6 @@ func (s *Simulation) Start() {
 	fmt.Println("  q - Quit")
 	fmt.Println("")
 
-	// For non-interactive mode (like in run.sh), process commands from stdin
 	for scanner.Scan() {
 		cmd := strings.TrimSpace(scanner.Text())
 		if cmd == "" {
@@ -387,13 +372,12 @@ func (s *Simulation) Start() {
 			s.printStatus()
 		case "q":
 			s.printFinalStatus()
-			fmt.Println("\nSimulation ended. Results saved to result.txt")
+			fmt.Println("\nSimulation ended. Results saved to scripts/result.txt")
 			return
 		default:
 			fmt.Println("Unknown command. Available commands: n, v, +, -, s, q")
 		}
 		
-		// Small sleep to allow goroutines to process
 		time.Sleep(100 * time.Millisecond)
 	}
 }
