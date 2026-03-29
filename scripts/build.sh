@@ -1,15 +1,42 @@
 #!/bin/bash
+set -e
 
-# Build Script
-# This script should contain all compilation steps for your CLI application
+echo "========================================="
+echo "Building McDonald's Order Management System"
+echo "========================================="
 
-echo "Building CLI application..."
+# 切换到项目根目录
+cd "$(dirname "$0")/.."
 
-# For Go projects:
-# go build -o order-controller ./cmd/main.go
+# 创建 bin 目录
+mkdir -p bin
 
-# For Node.js projects:
-# npm install
-# npm run build (if needed)
+# 初始化 Go 模块（如果不存在）
+if [ ! -f go.mod ]; then
+    echo "Initializing Go module..."
+    go mod init order-controller
+fi
 
-echo "Build completed"
+# 整理依赖
+echo "Tidying dependencies..."
+go mod tidy
+
+# 编译应用
+echo "Compiling application..."
+go build -o bin/order-controller ./cmd/main.go
+
+# 检查编译结果
+if [ -f bin/order-controller ]; then
+    echo ""
+    echo "========================================="
+    echo "✅ Build completed successfully!"
+    echo "Binary location: $(pwd)/bin/order-controller"
+    echo "Binary size: $(ls -lh bin/order-controller | awk '{print $5}')"
+    echo "========================================="
+else
+    echo ""
+    echo "========================================="
+    echo "❌ Build failed!"
+    echo "========================================="
+    exit 1
+fi
