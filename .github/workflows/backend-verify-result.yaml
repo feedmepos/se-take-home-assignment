@@ -5,7 +5,9 @@ on:
     types: [opened, synchronize, reopened, edited]
     branches: [golang20260328]
   push:
-    branches: [golang20260328]
+    branches: [ '*' ]
+    branches-ignore:
+      - '**tempsave**'
 
 jobs:
   verify-result:
