@@ -2,12 +2,12 @@ name: backend-verify-result
 
 on:
   workflow_dispatch:
-  inputs:
-    debug:
-      description: 'Debug mode'
-      required: false
-      default: false
-      type: boolean
+    inputs:
+      debug:
+        description: 'Debug mode'
+        required: false
+        default: false
+        type: boolean
       
   pull_request:
     types: [ opened, synchronize, reopened, edited ]
