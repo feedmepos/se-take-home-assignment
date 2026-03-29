@@ -13,13 +13,15 @@ type Bot struct {
 	CurrentOrder        *Order
 	CreatedAt           time.Time
 	ProcessingStartTime time.Time
+	StateMachine        *FSM
 }
 
 func NewBot(id uint64) *Bot {
 	return &Bot{
-		ID:        id,
-		Status:    Idle,
-		CreatedAt: time.Now(),
+		ID:           id,
+		Status:       Idle,
+		CreatedAt:    time.Now(),
+		StateMachine: NewBotFSM(),
 	}
 }
 
@@ -31,6 +33,7 @@ func (b *Bot) StartProcessing(order *Order) error {
 		return errors.New("order cannot be nil")
 	}
 
+	b.StateMachine.HandleEvent("assign", order)
 	b.Status = Processing
 	b.CurrentOrder = order
 	b.ProcessingStartTime = time.Now()
@@ -49,6 +52,7 @@ func (b *Bot) CompleteProcessing() *Order {
 		order.MarkComplete()
 	}
 
+	b.StateMachine.HandleEvent("complete")
 	b.Status = Idle
 	b.CurrentOrder = nil
 	b.ProcessingStartTime = time.Time{}
@@ -86,6 +90,7 @@ func (b *Bot) StopProcessing() *Order {
 
 	order := b.CurrentOrder
 
+	b.StateMachine.HandleEvent("error")
 	b.Status = Idle
 	b.CurrentOrder = nil
 	b.ProcessingStartTime = time.Time{}
