@@ -1,87 +1,87 @@
-# McDonald's Order Controller CLI (Node.js)
+# McDonald's Automated Order Controller (Node.js CLI)
 
-A clean, fully testable Node.js backend CLI implementation for the FeedMe take‑home assignment.
- Implements a priority‑based order dispatching system with VIP preemption, robot management, and deterministic testability.
+A clean, deterministic, fully testable Node.js backend implementation of the FeedMe take‑home assignment.  
+This project simulates an automated McDonald's kitchen with:
 
+- Priority‑based order scheduling  
+- VIP preemption  
+- Robot worker pool  
+- Order rollback  
+- Deterministic 10‑second processing  
+- CLI interaction  
+- Automated result export  
+- Full test coverage  
+- GitHub Actions CI
 
+This repository is designed to be **production‑quality**, **interview‑ready**, and **fully aligned with the official assignment requirements**.
 
-## ✨ Features
+---
 
-- **Normal & VIP order creation**
-- **Globally increasing order IDs**
-- **VIP-first priority queue** with FIFO inside each group
-- **VIP preemption**: VIP orders interrupt robots processing normal orders
-- **Robot add/remove management**
-- **Automatic order processing** (configurable duration)
-- **Rollback of in‑flight orders** when removing a robot
-- **Deterministic scheduling** with injectable timers (for testing)
-- **`result.txt` export** on exit
-- **Built-in tests** using `node --test`
+## ✨ Core Features
 
+### 🟡 Order Management
+- Create **NORMAL** and **VIP** orders  
+- Globally increasing order IDs  
+- VIP‑first priority queue  
+- FIFO inside VIP and NORMAL groups  
+- Deterministic timestamps (`HH:MM:SS`)
 
+### 🔴 VIP Preemption
+- VIP orders **interrupt robots processing NORMAL orders**
+- Interrupted NORMAL orders are **rolled back** into the pending queue  
+- Queue order is preserved using `vipSeq` / `normalSeq`
 
-## 🚀 Run
+### 🤖 Robot Management
+- Add robots (immediately dispatch orders)
+- Remove robots (LIFO)
+- If a robot is removed while working:
+  - Its order is rolled back
+  - Timer is cancelled safely
 
-```bash
-./script/build.sh
-./script/test.sh
-./script/run.sh
+### ⏱️ Deterministic Processing
+- Each order takes **10 seconds**
+- Uses injectable timers for deterministic testing
+
+### 📄 Output
+- On exit, system writes `result.txt`:
+  ```
+  Order <id> completed at <HH:MM:SS>
+  ```
+- Sorted by actual completion time
+
+### 🧪 Testing
+- Pure Node.js test runner (`node --test`)
+- Fake timers for deterministic behavior
+- Covers:
+  - Queue ordering
+  - VIP preemption
+  - Robot lifecycle
+  - Rollback correctness
+
+---
+
+## 🏗️ Architecture Overview
+
+```mermaid
+flowchart TD
+  A[OrderSystem] --> B[Pending Queue<br>VIP FIFO + NORMAL FIFO]
+  A --> C[Robot Pool<br>IDLE/WORKING]
+  C --> D[10s Processing Timer]
+  A --> E[Completed Orders]
+  A --> F[CLI Layer<br>Commands & result.txt]
 ```
 
-Interactive mode:
+For full architecture details, see:  
+📄 [docs/architecture.md](docs/architecture.md)
 
-```bash
-node src/cli.js
-```
-
-Demo mode:
-
-```bash
-./script/run-demo.sh
-```
-
-
-
-## 🧭 Commands
-
-| Command          | Description                                        |
-| ---------------- | -------------------------------------------------- |
-| `add normal`     | Create a normal order                              |
-| `add vip`        | Create a VIP order                                 |
-| `add robot`      | Add a robot                                        |
-| `remove robot`   | Remove the newest robot (with rollback if working) |
-| `list pending`   | Show pending orders                                |
-| `list completed` | Show completed orders                              |
-| `state`          | Show full system state                             |
-| `help`           | Show command list                                  |
-| `exit`           | Write `result.txt` and quit                        |
-
-
-
-## 🧪 Testing
-
-This project uses **pure Node.js test runner** (`node --test`) with **fake timers** and **injected clocks** to guarantee deterministic behavior.
-
-Run tests:
-
-```bash
-npm test
-```
-
-All tests pass:
-
-- VIP FIFO ordering
-- Robot processing lifecycle
-- Correct rollback ordering when removing a working robot
-
-
+---
 
 ## 📁 Project Structure
 
 ```
 src/
-  orderSystem.js   # Core scheduling engine
-  cli.js           # Interactive CLI
+  orderSystem.js     # Core scheduling engine
+  cli.js             # Interactive CLI
 script/
   build.sh
   test.sh
@@ -89,6 +89,114 @@ script/
   run-demo.sh
 tests/
   orderSystem.test.js
-result.txt          # Generated on exit
+docs/
+  business-spec.md
+  user-stories.md
+  architecture.md
+  sequence-diagram.md
+  testing.md
+result.txt            # Generated on exit
 ```
 
+---
+
+## 🧭 CLI Commands
+
+| Command          | Description                                   |
+| ---------------- | --------------------------------------------- |
+| `add normal`     | Create a normal order                         |
+| `add vip`        | Create a VIP order                            |
+| `add robot`      | Add a robot                                   |
+| `remove robot`   | Remove the newest robot (rollback if working) |
+| `list pending`   | Show pending orders                           |
+| `list completed` | Show completed orders                         |
+| `state`          | Show full system state                        |
+| `help`           | Show command list                             |
+| `exit`           | Write `result.txt` and quit                   |
+
+---
+
+## 🚀 Running the Project
+
+### Build
+```bash
+./script/build.sh
+```
+
+### Run tests
+```bash
+./script/test.sh
+```
+
+### Interactive CLI
+```bash
+./script/run.sh
+```
+
+Or directly:
+
+```bash
+node src/cli.js
+```
+
+### Demo mode (auto‑run)
+```bash
+./script/run-demo.sh
+```
+
+---
+
+## 🧪 Testing
+
+This project uses **pure Node.js test runner** (`node --test`) with **fake timers** for deterministic behavior.
+
+Run tests:
+
+```bash
+npm test
+```
+
+Covers:
+
+- VIP FIFO ordering  
+- Robot processing lifecycle  
+- Correct rollback ordering  
+- Preemption correctness  
+- Deterministic timestamps  
+
+Full testing documentation:  
+📄 [docs/testing.md](docs/testing.md)
+
+---
+
+## 📚 Documentation
+
+| Document                                             | Description                                 |
+| ---------------------------------------------------- | ------------------------------------------- |
+| [docs/business-spec.md](docs/business-spec.md)       | Full business specification                 |
+| [docs/user-stories.md](docs/user-stories.md)         | Complete user stories & acceptance criteria |
+| [docs/architecture.md](docs/architecture.md)         | Architecture design & rationale             |
+| [docs/sequence-diagram.md](docs/sequence-diagram.md) | Key system sequence diagrams                |
+| [docs/testing.md](docs/testing.md)                   | Testing strategy & key test cases           |
+
+---
+
+## ✔️ Assignment Compliance
+
+This implementation satisfies **all** FeedMe take‑home requirements:
+
+- Priority queue with VIP preemption  
+- Robot add/remove with rollback  
+- Deterministic 10‑second processing  
+- CLI with required commands  
+- result.txt output  
+- Automated CI  
+- Full test coverage  
+- Clean, readable, maintainable code  
+- Professional documentation  
+
+---
+
+## 📜 License
+
+MIT License.
