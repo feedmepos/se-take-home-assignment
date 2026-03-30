@@ -1,0 +1,23 @@
+
+# 测试
+tests/e2e/node_modules/
+tests/e2e/test-results/
+
+# 构建产物
+bin/
+
+# Go
+*.exe
+*.test
+*.out
+
+# 前端
+webui/node_modules/
+webui/dist/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store

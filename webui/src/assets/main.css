@@ -1,0 +1,113 @@
+/* Google Fonts - @import 必须在 tailwindcss 之前 */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@import "tailwindcss";
+
+/* 自定义 CSS 变量 */
+:root {
+  --color-bg: #0F0F1A;
+  --color-surface: #1A1A2E;
+  --color-surface-light: #252540;
+  --color-border: #2A2A45;
+  --color-text: #E8E8ED;
+  --color-text-muted: #8888A0;
+  --color-mc-red: #DA291C;
+  --color-mc-red-hover: #E83326;
+  --color-mc-gold: #FFC72C;
+  --color-mc-gold-hover: #FFD45A;
+  --color-pending: #6366F1;
+  --color-processing: #F59E0B;
+  --color-complete: #10B981;
+}
+
+/* 全局样式 */
+body {
+  font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 等宽字体 */
+.font-mono {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+/* VIP 订单金色光晕 */
+.vip-glow {
+  box-shadow: 0 0 12px rgba(255, 199, 44, 0.3), 0 0 4px rgba(255, 199, 44, 0.15);
+}
+
+.vip-glow:hover {
+  box-shadow: 0 0 20px rgba(255, 199, 44, 0.45), 0 0 8px rgba(255, 199, 44, 0.2);
+}
+
+/* 处理中动画 */
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(245, 158, 11, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+  }
+}
+
+.processing-pulse {
+  animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+/* 进度条动画 */
+@keyframes progress-indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+.progress-bar-animated {
+  animation: progress-indeterminate 2s ease-in-out infinite;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* 卡片悬停效果 */
+.order-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.order-card:hover {
+  transform: translateY(-2px);
+}
+
+/* 按钮点击效果 */
+.btn-press:active {
+  transform: scale(0.96);
+}

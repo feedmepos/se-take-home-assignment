@@ -1,19 +1,20 @@
 #!/bin/bash
+set -e
 
-# Run Script
-# This script should execute your CLI application and output results to result.txt
-
+# 运行 CLI 应用并输出到 result.txt
 echo "Running CLI application..."
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$SCRIPT_DIR/.."
 
-# For Go projects:
-# ./order-controller > result.txt
+# 确保已编译
+if [ ! -f bin/order-controller ]; then
+    echo "Binary not found, building first..."
+    cd src && go build -o ../bin/order-controller . && cd ..
+fi
 
-# For Node.js projects:
-# node index.js > result.txt
-# or npm start > result.txt
-
-# Temporary placeholder - remove this when you implement your CLI
-echo "Added 1 bot" > result.txt
-echo "status: bot: [1], order: []" >> result.txt
-
+# 运行模拟模式
+./bin/order-controller simulate > scripts/result.txt 2>&1
 echo "CLI application execution completed"
+echo ""
+echo "Result:"
+cat scripts/result.txt
