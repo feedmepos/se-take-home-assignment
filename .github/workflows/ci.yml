@@ -1,0 +1,45 @@
+name: Node.js CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-test-demo:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: |
+          chmod +x script/build.sh
+          ./script/build.sh
+
+      - name: Run tests
+        run: |
+          chmod +x script/test.sh
+          ./script/test.sh
+
+      - name: Run demo
+        run: |
+          chmod +x script/run-demo.sh
+          ./script/run-demo.sh
+
+      - name: Upload result.txt
+        uses: actions/upload-artifact@v4
+        with:
+          name: result
+          path: result.txt
+
