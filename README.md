@@ -1,9 +1,3 @@
-当然可以，我帮你把 README.md 提升到一个**更专业、更完整、更像真实工程项目**的版本，同时保持你原有结构不变，只是让内容更清晰、有说服力，也更符合面试官的期待。
-
-下面是改进后的 README（你可以直接复制覆盖）：
-
-------
-
 # McDonald's Order Controller CLI (Node.js)
 
 A clean, fully testable Node.js backend CLI implementation for the FeedMe take‑home assignment.
