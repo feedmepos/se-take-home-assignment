@@ -1,0 +1,12 @@
+{
+  "name": "mcd-order-controller-node",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "McDonald's automated cooking bot order controller CLI",
+  "scripts": {
+    "test": "node --test",
+    "build": "node -e \"console.log('build ok')\"",
+    "start": "node src/cli.js"
+  }
+}
