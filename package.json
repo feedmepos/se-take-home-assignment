@@ -1,0 +1,28 @@
+{
+  "name": "mcdonald-bot-manager",
+  "version": "1.0.0",
+  "description": "Below is a take home assignment before the interview of the position. You are required to 1. Understand the situation and use case. You may contact the interviewer for further clarification. 2. implement the requirement with **either frontend or backend components**. 3. Complete the requirement with **AI** if possible, but perform your own testing. 4. Provide documentation for the any part that you think is needed. 5. Bring the source code and functioning prototype to the interview session.",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Miroon99/mcdonald-bot-manager.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Miroon99/mcdonald-bot-manager/issues"
+  },
+  "homepage": "https://github.com/Miroon99/mcdonald-bot-manager#readme",
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.2"
+  }
+}
