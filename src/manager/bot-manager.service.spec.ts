@@ -128,6 +128,38 @@ describe('BotManagerService', () => {
       expect(pending.map((o) => o.id)).toEqual([1001, 1002, 1003]);
     });
 
+    it('should return vip and normal orders to correct queues and positions', () => {
+      manager.addVipOrder();
+      manager.addNormalOrder();
+      manager.addNormalOrder();
+      manager.addNormalOrder();
+
+      expect(manager.getPendingOrders().map((o) => o.id)).toEqual([1001, 1002, 1003, 1004]);
+
+      const firstBot = manager.addBot(); // #1
+
+      vi.advanceTimersByTime(5_000);
+
+      const secondBot = manager.addBot(); // #2
+
+      expect(firstBot.currentOrder?.id).toBe(1001);
+      expect(secondBot.currentOrder?.id).toBe(1002);
+
+      vi.advanceTimersByTime(5_000);
+
+      expect(firstBot.currentOrder?.id).toBe(1003);
+
+      expect(manager.getPendingOrders().map((o) => o.id)).toEqual([1004]);
+
+      manager.removeBot(); // removes bot #2, order 1002 returns to pending
+
+      expect(manager.getPendingOrders().map((o) => o.id)).toEqual([1002, 1004]);
+
+      manager.removeBot(); // removes bot #1, order 1003 returns to pending
+      
+      expect(manager.getPendingOrders().map((o) => o.id)).toEqual([1002, 1003, 1004]);
+    })
+
     it('should idle bot pick up returned order when processing bot is removed', () => {
       manager = new BotManagerService();
       manager.addBot();
