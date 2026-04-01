@@ -3,7 +3,7 @@ import { Order, OrderType } from './order.model.js';
 export class OrderQueueService {
   private vipQueue: Order[] = [];
   private normalQueue: Order[] = [];
-  private nextId = 1;
+  private nextId = 1001;
 
   addOrder(type: OrderType): Order {
     const order: Order = { id: this.nextId++, type, status: 'pending' };
@@ -24,13 +24,7 @@ export class OrderQueueService {
   }
 
   nextOrder(): Order | null {
-    if (this.vipQueue.length > 0) {
-      return this.vipQueue.shift()!;
-    }
-    if (this.normalQueue.length > 0) {
-      return this.normalQueue.shift()!;
-    }
-    return null;
+    return this.vipQueue.shift() || this.normalQueue.shift() || null;
   }
 
   returnOrder(order: Order): void {

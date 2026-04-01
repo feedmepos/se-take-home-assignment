@@ -11,14 +11,14 @@ describe('OrderQueueService', () => {
   describe('addOrder', () => {
     it('should add a normal order with incremented id and pending status', () => {
       const order = queue.addOrder('normal');
-      expect(order).toEqual({ id: 1, type: 'normal', status: 'pending' });
+      expect(order).toEqual({ id: 1001, type: 'normal', status: 'pending' });
     });
 
     it('should add a vip order with incremented id', () => {
       const order1 = queue.addOrder('normal');
       const order2 = queue.addOrder('vip');
-      expect(order1.id).toBe(1);
-      expect(order2).toEqual({ id: 2, type: 'vip', status: 'pending' });
+      expect(order1.id).toBe(1001);
+      expect(order2).toEqual({ id: 1002, type: 'vip', status: 'pending' });
     });
   });
 
@@ -37,9 +37,9 @@ describe('OrderQueueService', () => {
       queue.addOrder('normal');
       queue.addOrder('vip');
       const next = queue.nextOrder();
-      expect(next).toEqual({ id: 2, type: 'vip', status: 'pending' });
+      expect(next).toEqual({ id: 1002, type: 'vip', status: 'pending' });
       expect(queue.pending()).toEqual([
-        { id: 1, type: 'normal', status: 'pending' },
+        { id: 1001, type: 'normal', status: 'pending' },
       ]);
     });
     it('should return null when queue is empty', () => {
@@ -49,7 +49,7 @@ describe('OrderQueueService', () => {
       queue.addOrder('normal');
       queue.addOrder('normal');
       const next = queue.nextOrder();
-      expect(next).toEqual({ id: 1, type: 'normal', status: 'pending' });
+      expect(next).toEqual({ id: 1001, type: 'normal', status: 'pending' });
     });
   });
 
@@ -58,13 +58,13 @@ describe('OrderQueueService', () => {
       queue.addOrder('normal');
       queue.addOrder('normal');
       queue.addOrder('normal');
-      const order = queue.nextOrder()!; // id: 1
-      queue.nextOrder(); // id: 2 removed
+      const order = queue.nextOrder()!; // id: 1001
+      queue.nextOrder(); // id: 1002 removed
       queue.returnOrder(order);
       const pending = queue.pending();
       expect(pending).toEqual([
-        { id: 1, type: 'normal', status: 'pending' },
-        { id: 3, type: 'normal', status: 'pending' },
+        { id: 1001, type: 'normal', status: 'pending' },
+        { id: 1003, type: 'normal', status: 'pending' },
       ]);
     });
 
@@ -72,13 +72,13 @@ describe('OrderQueueService', () => {
       queue.addOrder('vip');
       queue.addOrder('vip');
       queue.addOrder('vip');
-      const order = queue.nextOrder()!; // id: 1
-      queue.nextOrder(); // id: 2 removed
+      const order = queue.nextOrder()!; // id: 1001
+      queue.nextOrder(); // id: 1002 removed
       queue.returnOrder(order);
       const pending = queue.pending();
       expect(pending).toEqual([
-        { id: 1, type: 'vip', status: 'pending' },
-        { id: 3, type: 'vip', status: 'pending' },
+        { id: 1001, type: 'vip', status: 'pending' },
+        { id: 1003, type: 'vip', status: 'pending' },
       ]);
     });
 
@@ -98,9 +98,9 @@ describe('OrderQueueService', () => {
       queue.addOrder('vip');
       const pending = queue.pending();
       expect(pending).toEqual([
-        { id: 3, type: 'vip', status: 'pending' },
-        { id: 1, type: 'normal', status: 'pending' },
-        { id: 2, type: 'normal', status: 'pending' },
+        { id: 1003, type: 'vip', status: 'pending' },
+        { id: 1001, type: 'normal', status: 'pending' },
+        { id: 1002, type: 'normal', status: 'pending' },
       ]);
     });
   });

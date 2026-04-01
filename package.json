@@ -5,8 +5,12 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx src/index.ts",
+    "dev:interactive": "tsx src/index.ts --interactive",
+    "dev:demo": "tsx src/index.ts --demo",
     "build": "tsc",
     "start": "node dist/index.js",
+    "start:interactive": "node dist/index.js --interactive",
+    "start:demo": "node dist/index.js --demo",
     "test": "vitest run"
   },
   "repository": {

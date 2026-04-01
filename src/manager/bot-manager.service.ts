@@ -43,6 +43,7 @@ export class BotManagerService extends EventEmitter {
     }
 
     this.emit('bot:removed', { bot, returnedOrder });
+    this.processNext();
     return bot;
   }
 

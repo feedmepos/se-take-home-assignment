@@ -16,7 +16,7 @@ describe('BotManagerService', () => {
   describe('addNormalOrder', () => {
     it('should add a normal order to pending', () => {
       const order = manager.addNormalOrder();
-      expect(order).toEqual({ id: 1, type: 'normal', status: 'pending' });
+      expect(order).toEqual({ id: 1001, type: 'normal', status: 'pending' });
       expect(manager.getPendingOrders()).toEqual([order]);
     });
   });
@@ -36,7 +36,7 @@ describe('BotManagerService', () => {
       manager.addNormalOrder();
       const bot = manager.addBot();
       expect(bot.status).toBe('processing');
-      expect(bot.currentOrder?.id).toBe(1);
+      expect(bot.currentOrder?.id).toBe(1001);
       expect(manager.getPendingOrders()).toEqual([]);
     });
 
@@ -56,12 +56,12 @@ describe('BotManagerService', () => {
       vi.advanceTimersByTime(10_000);
 
       expect(manager.getCompletedOrders()).toHaveLength(1);
-      expect(manager.getCompletedOrders()[0].id).toBe(1);
+      expect(manager.getCompletedOrders()[0].id).toBe(1001);
 
       // Bot should now be processing order 2
       const bots = manager.getBots();
       expect(bots[0].status).toBe('processing');
-      expect(bots[0].currentOrder?.id).toBe(2);
+      expect(bots[0].currentOrder?.id).toBe(1002);
     });
 
     it('should become idle when no more orders to process', () => {
@@ -81,7 +81,7 @@ describe('BotManagerService', () => {
 
       const bots = manager.getBots();
       expect(bots[0].status).toBe('processing');
-      expect(bots[0].currentOrder?.id).toBe(1);
+      expect(bots[0].currentOrder?.id).toBe(1001);
     });
   });
 
@@ -110,7 +110,7 @@ describe('BotManagerService', () => {
 
       expect(manager.getPendingOrders()).toHaveLength(1);
       expect(manager.getPendingOrders()[0]).toEqual({
-        id: 2,
+        id: 1002,
         type: 'normal',
         status: 'pending',
       });
@@ -125,7 +125,35 @@ describe('BotManagerService', () => {
       manager.removeBot(); // removes bot, order 1 returns to pending
 
       const pending = manager.getPendingOrders();
-      expect(pending.map((o) => o.id)).toEqual([1, 2, 3]);
+      expect(pending.map((o) => o.id)).toEqual([1001, 1002, 1003]);
+    });
+
+    it('should idle bot pick up returned order when processing bot is removed', () => {
+      manager = new BotManagerService();
+      manager.addBot();
+      manager.addBot();
+      manager.addNormalOrder();
+
+      vi.advanceTimersByTime(5_000);
+
+      const targetOrder = manager.addNormalOrder();
+
+      vi.advanceTimersByTime(5_000);
+
+      const bots = manager.getBots();
+
+      expect(bots[0].status).toBe('idle');
+      expect(bots[1].status).toBe('processing');
+
+      manager.removeBot();
+
+      const remainingBots = manager.getBots();
+      expect(remainingBots).toHaveLength(1);
+
+      expect(manager.getPendingOrders()).toHaveLength(0);
+
+      expect(remainingBots[0].status).toBe('processing');
+      expect(remainingBots[0].currentOrder?.id).toBe(targetOrder.id);
     });
 
     it('should not complete the order after bot is removed', () => {
@@ -150,13 +178,13 @@ describe('BotManagerService', () => {
 
       // Bot should be processing VIP order (id: 3)
       const bots = manager.getBots();
-      expect(bots[0].currentOrder?.id).toBe(3);
+      expect(bots[0].currentOrder?.id).toBe(1003);
       expect(bots[0].currentOrder?.type).toBe('vip');
 
       // After completing VIP, should process normal orders
       vi.advanceTimersByTime(10_000);
-      expect(manager.getCompletedOrders()[0].id).toBe(3);
-      expect(bots[0].currentOrder?.id).toBe(1);
+      expect(manager.getCompletedOrders()[0].id).toBe(1003);
+      expect(bots[0].currentOrder?.id).toBe(1001);
     });
 
     it('should place vip order behind existing vip but before normal', () => {
@@ -165,7 +193,7 @@ describe('BotManagerService', () => {
       manager.addVipOrder();   // id: 3
 
       const pending = manager.getPendingOrders();
-      expect(pending.map((o) => o.id)).toEqual([2, 3, 1]);
+      expect(pending.map((o) => o.id)).toEqual([1002, 1003, 1001]);
     });
   });
 });
