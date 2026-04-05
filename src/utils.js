@@ -11,6 +11,7 @@ function printState(queue, workerManager) {
   const workers = workerManager.listWorkers();
 
   const lines = [];
+
   lines.push("");
   lines.push(format(`--- SYSTEM STATE ---`));
   lines.push(format(`PENDING -> ${queue.getQueueStructure().join(", ")}`));
