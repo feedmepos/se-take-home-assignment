@@ -13,7 +13,7 @@ function printState(queue, workerManager) {
   const lines = [];
   lines.push("");
   lines.push(format(`--- SYSTEM STATE ---`));
-  lines.push(format(`Queue -> ${queue.getQueueStructure().join(", ")}`));
+  lines.push(format(`PENDING -> ${queue.getQueueStructure().join(", ")}`));
   workers.forEach((w) => {
     lines.push(
       format(
@@ -21,9 +21,7 @@ function printState(queue, workerManager) {
       ),
     );
   });
-  lines.push(
-    format(`Processed Orders -> ${queue.getProcessedOrders().join(", ")}`),
-  );
+  lines.push(format(`COMPLETE -> ${queue.getProcessedOrders().join(", ")}`));
 
   lines.push(format(`--------------------`));
   lines.push("");
