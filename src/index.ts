@@ -96,6 +96,19 @@ async function interactive(): Promise<void> {
   const manager = new OrderManager();
   logger.log('Interactive session started - System initialized with 0 bots');
 
+  const countdownInterval = setInterval(() => {
+    const activeBots = manager.getBots().filter((b) => b.currentOrder !== null);
+    if (activeBots.length > 0) {
+      activeBots.forEach((bot) => {
+        const remaining = bot.getRemainingMs();
+        if (remaining !== null) {
+          const secs = Math.ceil(remaining / 1000);
+          console.log(`Bot #${bot.id}: ${secs} second${secs !== 1 ? 's' : ''} left`);
+        }
+      });
+    }
+  }, 1000);
+
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -109,6 +122,7 @@ async function interactive(): Promise<void> {
   };
 
   const shutdown = async (): Promise<void> => {
+    clearInterval(countdownInterval);
     console.log('\nExiting. Goodbye!');
     rl.close();
     await logger.closeResultFile();

@@ -14,6 +14,8 @@ export class Bot {
   currentOrder: Order | null;
   private readonly _onOrderComplete: OnOrderComplete;
   private _timer: ReturnType<typeof setTimeout> | null;
+  private _pickedUpAt: number | null;
+  private _processingDelay: number | null;
 
   constructor(id: number, onOrderComplete: OnOrderComplete) {
     this.id = id;
@@ -21,6 +23,8 @@ export class Bot {
     this.currentOrder = null;
     this._onOrderComplete = onOrderComplete;
     this._timer = null;
+    this._pickedUpAt = null;
+    this._processingDelay = null;
   }
 
   /** Pick up an order and start processing it. */
@@ -30,9 +34,17 @@ export class Bot {
     this.status = BOT_STATUS.ACTIVE;
 
     const delay = order.isVVIP ? VVIP_PROCESSING_TIME_MS : PROCESSING_TIME_MS;
+    this._pickedUpAt = Date.now();
+    this._processingDelay = delay;
     this._timer = setTimeout(() => {
       this._completeOrder();
     }, delay);
+  }
+
+  /** Returns milliseconds remaining until this bot's current order completes, or null if idle. */
+  getRemainingMs(): number | null {
+    if (this._pickedUpAt === null || this._processingDelay === null) return null;
+    return Math.max(0, this._processingDelay - (Date.now() - this._pickedUpAt));
   }
 
   /**
@@ -50,6 +62,8 @@ export class Bot {
       this.currentOrder = null;
     }
     this.status = BOT_STATUS.IDLE;
+    this._pickedUpAt = null;
+    this._processingDelay = null;
     return order;
   }
 
@@ -59,6 +73,8 @@ export class Bot {
     this.currentOrder = null;
     this.status = BOT_STATUS.IDLE;
     this._timer = null;
+    this._pickedUpAt = null;
+    this._processingDelay = null;
     this._onOrderComplete(this, order);
   }
 }
