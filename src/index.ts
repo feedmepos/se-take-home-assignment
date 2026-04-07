@@ -53,11 +53,12 @@ async function main(): Promise<void> {
   // Final summary
   const status = manager.getStatus();
   const completed = manager.getCompletedOrders();
+  const vvipCompleted = completed.filter((o) => o.isVVIP).length;
   const vipCompleted = completed.filter((o) => o.isVIP).length;
-  const normalCompleted = completed.filter((o) => !o.isVIP).length;
+  const normalCompleted = completed.filter((o) => !o.isVVIP && !o.isVIP).length;
 
   logger.write('\nFinal Status:');
-  logger.write(`- Total Orders Processed: ${completed.length} (${vipCompleted} VIP, ${normalCompleted} Normal)`);
+  logger.write(`- Total Orders Processed: ${completed.length} (${vvipCompleted} VVIP, ${vipCompleted} VIP, ${normalCompleted} Normal)`);
   logger.write(`- Orders Completed: ${completed.length}`);
   logger.write(`- Active Bots: ${status.bots}`);
   logger.write(`- Pending Orders: ${status.pending}`);
@@ -81,11 +82,12 @@ function printStatusBar(manager: OrderManager): void {
 function printMenu(): void {
   console.log('  1) Add Normal Order');
   console.log('  2) Add VIP Order');
-  console.log('  3) Add Bot');
-  console.log('  4) Remove Bot');
-  console.log('  5) Show pending queue');
-  console.log('  6) Show completed orders');
-  console.log('  7) Exit');
+  console.log('  3) Add VVIP Order');
+  console.log('  4) Add Bot');
+  console.log('  5) Remove Bot');
+  console.log('  6) Show pending queue');
+  console.log('  7) Show completed orders');
+  console.log('  8) Exit');
 }
 
 async function interactive(): Promise<void> {
@@ -127,12 +129,15 @@ async function interactive(): Promise<void> {
         manager.addVIPOrder();
         break;
       case '3':
-        manager.addBot();
+        manager.addVVIPOrder();
         break;
       case '4':
+        manager.addBot();
+        break;
+      case '5':
         manager.removeBot();
         break;
-      case '5': {
+      case '6': {
         const queue = manager.getPendingQueue();
         if (queue.length === 0) {
           console.log('  (pending queue is empty)');
@@ -141,7 +146,7 @@ async function interactive(): Promise<void> {
         }
         break;
       }
-      case '6': {
+      case '7': {
         const done = manager.getCompletedOrders();
         if (done.length === 0) {
           console.log('  (no completed orders yet)');
@@ -150,11 +155,11 @@ async function interactive(): Promise<void> {
         }
         break;
       }
-      case '7':
+      case '8':
         await shutdown();
         return;
       default:
-        console.log(`  Unknown option: "${choice}". Enter 1-7.`);
+        console.log(`  Unknown option: "${choice}". Enter 1-8.`);
     }
     prompt();
   }

@@ -1,4 +1,4 @@
-export const ORDER_TYPE = Object.freeze({ NORMAL: 'Normal', VIP: 'VIP' } as const);
+export const ORDER_TYPE = Object.freeze({ NORMAL: 'Normal', VIP: 'VIP', VVIP: 'VVIP' } as const);
 export const ORDER_STATUS = Object.freeze({ PENDING: 'PENDING', PROCESSING: 'PROCESSING', COMPLETE: 'COMPLETE' } as const);
 
 export type OrderType = (typeof ORDER_TYPE)[keyof typeof ORDER_TYPE];
@@ -17,6 +17,10 @@ export class Order {
 
   get isVIP(): boolean {
     return this.type === ORDER_TYPE.VIP;
+  }
+
+  get isVVIP(): boolean {
+    return this.type === ORDER_TYPE.VVIP;
   }
 
   toString(): string {

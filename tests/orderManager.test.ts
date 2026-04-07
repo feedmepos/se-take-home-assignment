@@ -36,6 +36,12 @@ describe('Order', () => {
     const order = manager.addVIPOrder();
     assert.equal(order.status, ORDER_STATUS.PENDING);
   });
+
+  it('new VVIP order starts as PENDING', () => {
+    const manager = new OrderManager();
+    const order = manager.addVVIPOrder();
+    assert.equal(order.status, ORDER_STATUS.PENDING);
+  });
 });
 
 describe('Priority Queue', () => {
@@ -60,6 +66,35 @@ describe('Priority Queue', () => {
     assert.equal(queue[0].id, 1); // VIP #1
     assert.equal(queue[1].id, 3); // VIP #3
     assert.equal(queue[2].id, 2); // Normal #2
+  });
+
+  it('VVIP order is placed before VIP and Normal orders', () => {
+    const manager = new OrderManager();
+    manager.addNormalOrder(); // #1
+    manager.addVIPOrder();    // #2
+    manager.addVVIPOrder();   // #3 — should jump to front, ahead of VIP #2
+
+    const queue = manager.getPendingQueue();
+    assert.equal(queue[0].type, ORDER_TYPE.VVIP);
+    assert.equal(queue[0].id, 3);
+    assert.equal(queue[1].type, ORDER_TYPE.VIP);
+    assert.equal(queue[1].id, 2);
+    assert.equal(queue[2].type, ORDER_TYPE.NORMAL);
+    assert.equal(queue[2].id, 1);
+  });
+
+  it('second VVIP order is placed after first VVIP, before VIP', () => {
+    const manager = new OrderManager();
+    manager.addVVIPOrder();   // #1 VVIP
+    manager.addVIPOrder();    // #2 VIP
+    manager.addNormalOrder(); // #3 Normal
+    manager.addVVIPOrder();   // #4 VVIP — should go after #1 VVIP, before #2 VIP
+
+    const queue = manager.getPendingQueue();
+    assert.equal(queue[0].id, 1); // VVIP #1
+    assert.equal(queue[1].id, 4); // VVIP #4
+    assert.equal(queue[2].id, 2); // VIP #2
+    assert.equal(queue[3].id, 3); // Normal #3
   });
 
   it('multiple Normal orders queue in arrival order', () => {
@@ -105,6 +140,18 @@ describe('Bot - add bot', () => {
 
     manager.addBot();
     assert.equal(vip.status, ORDER_STATUS.PROCESSING);
+    t.mock.timers.reset();
+  });
+
+  it('adding a bot picks up VVIP before VIP before Normal', (t) => {
+    t.mock.timers.enable({ apis: ['setTimeout'] });
+    const manager = new OrderManager();
+    manager.addNormalOrder(); // #1
+    manager.addVIPOrder();    // #2
+    const vvip = manager.addVVIPOrder(); // #3 — should be processed first
+
+    manager.addBot();
+    assert.equal(vvip.status, ORDER_STATUS.PROCESSING);
     t.mock.timers.reset();
   });
 });
@@ -213,6 +260,26 @@ describe('Bot - remove bot', () => {
     const queue = manager.getPendingQueue();
     assert.equal(queue[0].type, ORDER_TYPE.VIP);
     assert.equal(queue[0].id, vip.id);
+    t.mock.timers.reset();
+  });
+
+  it('returned VVIP order is re-inserted ahead of VIP and Normal orders', (t) => {
+    t.mock.timers.enable({ apis: ['setTimeout'] });
+    const manager = new OrderManager();
+    manager.addVIPOrder();    // #1 VIP
+    manager.addNormalOrder(); // #2 Normal
+    const vvip = manager.addVVIPOrder(); // #3 VVIP — jumps to front; bot picks it up
+
+    manager.addBot(); // picks up VVIP #3
+
+    manager.addNormalOrder(); // #4 — now in queue
+
+    manager.removeBot(); // returns VVIP #3 — should land at front, ahead of VIP #1
+
+    const queue = manager.getPendingQueue();
+    assert.equal(queue[0].type, ORDER_TYPE.VVIP);
+    assert.equal(queue[0].id, vvip.id);
+    assert.equal(queue[1].type, ORDER_TYPE.VIP);
     t.mock.timers.reset();
   });
 

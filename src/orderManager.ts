@@ -39,6 +39,15 @@ export class OrderManager {
     return order;
   }
 
+  /** Add a new VVIP order (placed after existing VVIPs, before all VIPs and Normals). */
+  addVVIPOrder(): Order {
+    const order = new Order(this._nextOrderId++, ORDER_TYPE.VVIP);
+    this._enqueue(order);
+    logger.log(`Created ${order} - Status: ${order.status}`);
+    this._dispatchIdleBots();
+    return order;
+  }
+
   // ---------------------------------------------------------------------------
   // Bots
   // ---------------------------------------------------------------------------
@@ -104,15 +113,30 @@ export class OrderManager {
 
   /**
    * Insert an order into the pending queue respecting priority:
-   * VIP orders go after the last existing VIP order, before any Normal orders.
+   * VVIP orders go after the last existing VVIP order, before any VIP or Normal orders.
+   * VIP orders go after the last existing VVIP or VIP order, before any Normal orders.
    * Normal orders go at the end.
+   *
+   * Resulting queue shape: [ ...VVIPs, ...VIPs, ...Normals ]
    */
   private _enqueue(order: Order): void {
-    if (order.type === ORDER_TYPE.VIP) {
-      // Find the insertion point: after the last VIP entry
+    if (order.type === ORDER_TYPE.VVIP) {
+      // Insert after the last VVIP entry (before any VIP or Normal)
       let insertAt = 0;
       for (let i = 0; i < this._pendingQueue.length; i++) {
-        if (this._pendingQueue[i].type === ORDER_TYPE.VIP) {
+        if (this._pendingQueue[i].type === ORDER_TYPE.VVIP) {
+          insertAt = i + 1;
+        }
+      }
+      this._pendingQueue.splice(insertAt, 0, order);
+    } else if (order.type === ORDER_TYPE.VIP) {
+      // Insert after the last VVIP or VIP entry (before any Normal)
+      let insertAt = 0;
+      for (let i = 0; i < this._pendingQueue.length; i++) {
+        if (
+          this._pendingQueue[i].type === ORDER_TYPE.VVIP ||
+          this._pendingQueue[i].type === ORDER_TYPE.VIP
+        ) {
           insertAt = i + 1;
         }
       }
