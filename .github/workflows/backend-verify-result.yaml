@@ -37,10 +37,10 @@ jobs:
       
     - name: Execute test script
       run: ./scripts/test.sh
-      
+
     - name: Execute build script
       run: ./scripts/build.sh
-      
+
     - name: Execute run script
       run: ./scripts/run.sh
       
