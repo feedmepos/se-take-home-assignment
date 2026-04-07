@@ -8,7 +8,7 @@ logger.write = () => {};
 
 import { OrderManager } from '../src/orderManager.js';
 import { ORDER_TYPE, ORDER_STATUS } from '../src/order.js';
-import { PROCESSING_TIME_MS } from '../src/bot.js';
+import { PROCESSING_TIME_MS, VVIP_PROCESSING_TIME_MS } from '../src/bot.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -197,6 +197,61 @@ describe('Bot - order completion', () => {
     const bots = manager.getBots();
     assert.equal(bots[0].currentOrder, null);
     assert.equal(manager.getPendingQueue().length, 0);
+    t.mock.timers.reset();
+  });
+
+  it('VVIP order completes after 7s, not 10s', (t) => {
+    t.mock.timers.enable({ apis: ['setTimeout'] });
+    const manager = new OrderManager();
+    const order = manager.addVVIPOrder();
+    manager.addBot();
+
+    assert.equal(order.status, ORDER_STATUS.PROCESSING);
+
+    // Should still be processing just before the 7s mark
+    t.mock.timers.tick(VVIP_PROCESSING_TIME_MS - 1);
+    assert.equal(order.status, ORDER_STATUS.PROCESSING);
+
+    // Should be complete exactly at the 7s mark
+    t.mock.timers.tick(1);
+    assert.equal(order.status, ORDER_STATUS.COMPLETE);
+    assert.equal(manager.getCompletedOrders().length, 1);
+    t.mock.timers.reset();
+  });
+
+  it('VIP order still completes after 10s', (t) => {
+    t.mock.timers.enable({ apis: ['setTimeout'] });
+    const manager = new OrderManager();
+    const order = manager.addVIPOrder();
+    manager.addBot();
+
+    // Should still be processing at the 7s mark
+    t.mock.timers.tick(VVIP_PROCESSING_TIME_MS);
+    assert.equal(order.status, ORDER_STATUS.PROCESSING);
+
+    // Should complete at the full 10s
+    t.mock.timers.tick(PROCESSING_TIME_MS - VVIP_PROCESSING_TIME_MS);
+    assert.equal(order.status, ORDER_STATUS.COMPLETE);
+    t.mock.timers.reset();
+  });
+
+  it('VVIP completes at 7s while concurrent VIP is still processing', (t) => {
+    t.mock.timers.enable({ apis: ['setTimeout'] });
+    const manager = new OrderManager();
+    const vvip = manager.addVVIPOrder(); // #1 — picked up by Bot #1
+    const vip  = manager.addVIPOrder();  // #2 — picked up by Bot #2
+    manager.addBot(); // Bot #1 picks up VVIP #1
+    manager.addBot(); // Bot #2 picks up VIP #2
+
+    // Both orders are processing simultaneously from time zero
+    assert.equal(vvip.status, ORDER_STATUS.PROCESSING);
+    assert.equal(vip.status,  ORDER_STATUS.PROCESSING);
+
+    // At the 7s mark: VVIP is done, VIP is still running
+    t.mock.timers.tick(VVIP_PROCESSING_TIME_MS);
+    assert.equal(vvip.status, ORDER_STATUS.COMPLETE);
+    assert.equal(vip.status,  ORDER_STATUS.PROCESSING);
+
     t.mock.timers.reset();
   });
 });

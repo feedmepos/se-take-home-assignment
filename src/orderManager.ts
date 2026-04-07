@@ -171,7 +171,8 @@ export class OrderManager {
   /** Called by a bot when it finishes processing an order. */
   private _onOrderComplete(bot: Bot, order: Order): void {
     this._completedOrders.push(order);
-    logger.log(`Bot #${bot.id} completed ${order} - Status: COMPLETE (Processing time: 10s)`);
+    const processingTime = order.isVVIP ? '7s' : '10s';
+    logger.log(`Bot #${bot.id} completed ${order} - Status: COMPLETE (Processing time: ${processingTime})`);
     this._dispatchBot(bot);
   }
 }

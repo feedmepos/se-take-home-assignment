@@ -4,6 +4,7 @@ export const BOT_STATUS = Object.freeze({ IDLE: 'IDLE', ACTIVE: 'ACTIVE' } as co
 export type BotStatus = (typeof BOT_STATUS)[keyof typeof BOT_STATUS];
 
 export const PROCESSING_TIME_MS = 10_000;
+export const VVIP_PROCESSING_TIME_MS = 7_000;
 
 export type OnOrderComplete = (bot: Bot, order: Order) => void;
 
@@ -28,9 +29,10 @@ export class Bot {
     this.currentOrder = order;
     this.status = BOT_STATUS.ACTIVE;
 
+    const delay = order.isVVIP ? VVIP_PROCESSING_TIME_MS : PROCESSING_TIME_MS;
     this._timer = setTimeout(() => {
       this._completeOrder();
-    }, PROCESSING_TIME_MS);
+    }, delay);
   }
 
   /**
