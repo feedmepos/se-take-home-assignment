@@ -18,19 +18,8 @@ jobs:
       with:
         go-version: '1.23.9'
         
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '22.19.0'
-        
     - name: Verify Go version
       run: go version
-      
-    - name: Verify Node.js version
-      run: node --version
-      
-    - name: Verify npm version
-      run: npm --version
 
     - name: Make scripts executable
       run: chmod +x scripts/test.sh scripts/build.sh scripts/run.sh
