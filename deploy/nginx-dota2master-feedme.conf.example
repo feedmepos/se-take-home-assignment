@@ -1,0 +1,13 @@
+# 片段：加入 dota2master.com 的 server { } 内。
+# FeedMe 在本机 18080，Go 进程需带 -base /feedme；前端构建需 VITE_BASE_PATH=/feedme/
+#
+# 注意：proxy_pass 末尾不要加 /，以便把 /feedme/... 原样传给上游（由 Go StripPrefix 处理）。
+
+location /feedme/ {
+    proxy_pass http://127.0.0.1:18080;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}

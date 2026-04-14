@@ -20,8 +20,18 @@ type Snapshot = {
   bots: Bot[];
 };
 
+/** 开发环境走 Vite proxy（/api）；生产子路径走 BASE_URL（如 /feedme/） */
+function apiUrl(path: string): string {
+  if (import.meta.env.DEV) {
+    return path.startsWith("/") ? path : `/${path}`;
+  }
+  const b = (import.meta.env.BASE_URL || "/").replace(/\/?$/, "/");
+  const tail = path.startsWith("/") ? path.slice(1) : path;
+  return b + tail;
+}
+
 const api = (path: string, init?: RequestInit) =>
-  fetch(path, { ...init, headers: { "Content-Type": "application/json", ...init?.headers } });
+  fetch(apiUrl(path), { ...init, headers: { "Content-Type": "application/json", ...init?.headers } });
 
 export default function App() {
   const [snap, setSnap] = useState<Snapshot | null>(null);
@@ -66,7 +76,7 @@ export default function App() {
 
   return (
     <div style={{ fontFamily: "system-ui", maxWidth: 960, margin: "0 auto", padding: 16 }}>
-      <h1>FeedMe 订单控制台</h1>
+      <h1>FeedMe 订单控制台1</h1>
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
         <button type="button" onClick={() => void newOrder("normal")}>
           New Normal Order

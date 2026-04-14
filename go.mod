@@ -1,3 +1,3 @@
 module github.com/feedme/se-take-home-assignment
 
-go 1.23.9
+go 1.23
