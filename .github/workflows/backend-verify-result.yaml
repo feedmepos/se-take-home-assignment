@@ -37,6 +37,9 @@ jobs:
       
     - name: Execute test script
       run: ./scripts/test.sh
+
+    - name: Build web (Vite + React)
+      run: cd web && npm install && npm run build
       
     - name: Execute build script
       run: ./scripts/build.sh
