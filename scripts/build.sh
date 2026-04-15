@@ -1,15 +1,18 @@
 #!/bin/bash
 
 # Build Script
-# This script should contain all compilation steps for your CLI application
+# Builds the McDonald's Order Management System CLI application
 
-echo "Building CLI application..."
+echo "Building McDonald's Order Management System..."
+echo ""
 
-# For Go projects:
-# go build -o order-controller ./cmd/main.go
+# Build the application
+go build main.go
 
-# For Node.js projects:
-# npm install
-# npm run build (if needed)
-
-echo "Build completed"
+if [ $? -eq 0 ]; then
+  echo "Build successful! Binary created at root "
+  echo "To run the application, execute: main"
+else
+  echo "Build failed!"
+  exit 1
+fi

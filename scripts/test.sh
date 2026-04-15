@@ -1,14 +1,12 @@
 #!/bin/bash
 
 # Unit Test Script
-# This script should contain all unit test execution steps
+# Runs all unit tests for the McDonald's Order Management System
 
-echo "Running unit tests..."
+echo "Running unit tests for McDonald's Order Management System..."
+echo ""
 
-# For Go projects:
-# go test ./... -v
+go test -v ./mcdonald -timeout 60s
 
-# For Node.js projects:
-# npm test
-
-echo "Unit tests completed"
+echo ""
+echo "Unit tests completed!"

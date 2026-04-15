@@ -1,64 +1,142 @@
-## FeedMe Software Engineer Take Home Assignment
-Below is a take home assignment before the interview of the position. You are required to
-1. Understand the situation and use case. You may contact the interviewer for further clarification.
-2. implement the requirement with **either frontend or backend components**.
-3. Complete the requirement with **AI** if possible, but perform your own testing.
-4. Provide documentation for the any part that you think is needed.
-5. Bring the source code and functioning prototype to the interview session.
+# McDonald's Order Management System - Usage Guide
 
-### Situation
-McDonald is transforming their business during COVID-19. They wish to build the automated cooking bots to reduce workforce and increase their efficiency. As one of the software engineer in the project. You task is to create an order controller which handle the order control flow. 
+## Overview
 
-### User Story
-As below is part of the user story:
-1. As McDonald's normal customer, after I submitted my order, I wish to see my order flow into "PENDING" area. After the cooking bot process my order, I want to see it flow into to "COMPLETE" area.
-2. As McDonald's VIP member, after I submitted my order, I want my order being process first before all order by normal customer.  However if there's existing order from VIP member, my order should queue behind his/her order.
-3. As McDonald's manager, I want to increase or decrease number of cooking bot available in my restaurant. When I increase a bot, it should immediately process any pending order. When I decrease a bot, the processing order should remain un-process.
-4. As McDonald bot, it can only pickup and process 1 order at a time, each order required 10 seconds to complete process.
+This is an interactive CLI application for McDonald's Order Management System that allows you to:
+- Create Normal and VIP orders
+- Add/remove cooking bots
+- View pending and completed orders
+- Process orders automatically (10 seconds per order)
+- Log all activities with timestamps
 
-### Requirements
-1. When "New Normal Order" clicked, a new order should show up "PENDING" Area.
-2. When "New VIP Order" clicked, a new order should show up in "PENDING" Area. It should place in-front of all existing "Normal" order but behind of all existing "VIP" order.
-3. The order number should be unique and increasing.
-4. When "+ Bot" clicked, a bot should be created and start processing the order inside "PENDING" area. after 10 seconds picking up the order, the order should move to "COMPLETE" area. Then the bot should start processing another order if there is any left in "PENDING" area.
-5. If there is no more order in the "PENDING" area, the bot should become IDLE until a new order come in.
-6. When "- Bot" clicked, the newest bot should be destroyed. If the bot is processing an order, it should also stop the process. The order should return to its original position in the "PENDING" area (maintaining VIP/Normal order priority).
-7. No data persistance is needed for this prototype, you may perform all the process inside memory.
+## Getting Started
 
-### Functioning Prototype
-You must implement **either** frontend or backend components as described below:
+### Prerequisites
+- Go 1.26 or higher
 
-#### 1. Frontend
-- You are free to use **any framework and programming language** of your choice
-- The UI application must be compiled, deployed and hosted on any publicly accessible web platform
-- Must provide a user interface that demonstrates all the requirements listed above
-- Should allow users to interact with the McDonald's order management system
+### Installation
 
-#### 2. Backend
-- You must use **either Go (Golang) or Node.js** for the backend implementation
-- The backend must be a CLI application that can be executed in GitHub Actions
-- Must implement the following scripts in the `script` directory:
-  - `test.sh`: Contains unit test execution steps
-  - `build.sh`: Contains compilation steps for the CLI application
-  - `run.sh`: Contains execution steps that run the CLI application
-- The CLI application result must be printed to `result.txt`
-- The `result.txt` output must include timestamps in `HH:MM:SS` format to track order completion times
-- Must follow **GitHub Flow**: Create a Pull Request with your changes to this repository
-- Ensure all GitHub Action checks pass successfully
-- **Note**: An interactive CLI implementation is compulsory for the next round of interview. Candidates should be prepared to demonstrate interactive command handling.
+Install Go dependencies (if needed):
+```bash
+go mod download
+```
 
-#### Submission Requirements
-- Fork this repository and implement your solution with either frontend or backend
-- **Frontend option**: Deploy to a publicly accessible URL using any technology stack
-- **Backend option**: Must be implemented in Go or Node.js and work within the GitHub Actions environment
-  - Follow GitHub Flow process with Pull Request submission
-  - All tests in `test.sh` must pass
-  - The `result.txt` file must contain meaningful output from your CLI application
-  - All output must include timestamps in `HH:MM:SS` format to track order completion times
-  - Submit a Pull Request and ensure the `go-verify-result` workflow passes
-- Provide documentation for any part that you think is needed
+### Running the Application
 
-### Tips on completing this task
-- Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.
-- Treat this assignment as a vibe coding, don't over engineer it. Try to scope your working hour within 30 min. However, ensure you read and understand what your code doing.
-- Complete the implementation as clean as possible, clean code is a strong plus point, do not bring in all the fancy tech stuff.
+#### Option 1: Direct Interactive Mode
+```bash
+go run main.go
+```
+
+Then interact with the menu:
+```
+Commands:
+  1 - Create Normal Order
+  2 - Create VIP Order
+  3 - Add Bot (+Bot)
+  4 - Remove Bot (-Bot)
+  5 - Show Menu
+  6 - Exit
+```
+
+#### Option 2: Run with Script
+```bash
+bash scripts/run.sh
+```
+
+This script demonstrates:
+- Creating 3 normal and 2 VIP orders
+- Adding 2 bots
+- Processing orders for 12 seconds
+- Viewing results
+- Exiting and logging final status
+
+## Features
+
+### Order Management
+- **Create Normal Order** - Creates a standard customer order
+- **Create VIP Order** - Creates a priority VIP order (processed before normal orders)
+- VIP orders automatically position before the first normal order in the queue
+
+### Bot Management
+- **Add Bot** - Creates a new bot with unique ID
+- **Remove Bot** - Removes the newest (last) bot
+  - If bot is processing an order, the order returns to pending with correct priority
+  - If bot is idle, it's simply removed
+
+### Order Processing
+- Each order takes exactly 10 seconds to process
+- Bots automatically pick up orders from the pending queue
+- When a bot finishes, it automatically picks up the next pending order
+- If no pending orders exist, bot becomes IDLE
+
+### Viewing Status
+- **View Pending Orders** - Shows all orders waiting to be processed
+- **View Complete Orders** - Shows all successfully completed orders
+- **View Active Bots** - Shows all bots with their current status (IDLE or PROCESSING)
+
+## Running Tests
+
+### Run All Unit Tests
+```bash
+bash scripts/test.sh
+```
+
+Or directly:
+```bash
+go test -v ./mcdonald
+```
+
+### Test Coverage
+- **CreateOrder Tests** - Order creation, prioritization, and assignment
+- **AddCookingBot Tests** - Bot creation, concurrent operations
+- **RemoveCookingBot Tests** - Bot removal, order return handling
+- **Logger Tests** - File logging, timestamps, concurrent logging
+
+## Output Files
+
+### Result Logging
+All activities are logged to `scripts/result.txt` with timestamps in HH:MM:SS format:
+
+Example:
+```
+McDonald's Order Management System - Simulation Results
+
+[14:32:01] Created normal Order #1001 - Status: PENDING
+[14:32:01] Bot #1 created - Status: ACTIVE
+[14:32:01] Bot #1 picked up normal Order #1001 - Status: PROCESSING
+[14:32:11] Order ID #1001 for normal customer completed by Bot #1 in 10 seconds - Status: COMPLETE
+
+Final Status:
+- Total Orders Processed: 4 (2 VIP, 2 Normal)
+- Orders Completed: 4
+- Active Bots: 1
+- Pending Orders: 0
+```
+
+## Project Structure
+```
+feedme-se-requirement/
+├── main.go                      # CLI application entry point
+├── mcdonald/
+│   ├── mcdonald.go             # Main system structure
+│   ├── order.go                # Order types and constants
+│   ├── bot.go                  # Bot types and structure
+│   ├── customer.go             # Customer types
+│   ├── create_order.go         # Order creation logic
+│   ├── add_cooking_bot.go      # Bot addition logic
+│   ├── remove_cooking_bot.go   # Bot removal logic
+│   ├── logger.go               # Logging functionality
+│   ├── mcdonald_test.go        # Main tests
+│   ├── create_order_test.go    # CreateOrder tests
+│   ├── remove_cooking_bot_test.go # RemoveCookingBot tests
+│   └── logger_test.go          # Logger tests
+├── scripts/
+│   ├── build.sh                # Build script
+│   ├── test.sh                 # Test script
+│   ├── run.sh                  # demo script
+│   └── result.txt              # Output log file
+├── go.mod                       # Go module definition
+```
+
+

@@ -1,19 +1,40 @@
 #!/bin/bash
 
-# Run Script
-# This script should execute your CLI application and output results to result.txt
+echo "Running McDonald's Order Management System..."
+echo ""
 
-echo "Running CLI application..."
+(
+  # Create normal orders
+  echo "1"
+  sleep 1
+  echo "1"
+  sleep 1
+  echo "1"
+  sleep 1
 
-# For Go projects:
-# ./order-controller > result.txt
+  # Create VIP orders
+  echo "2"
+  sleep 1
+  echo "2"
+  sleep 1
 
-# For Node.js projects:
-# node index.js > result.txt
-# or npm start > result.txt
+  # Add first bot
+  echo "3"
+  sleep 1
 
-# Temporary placeholder - remove this when you implement your CLI
-echo "Added 1 bot" > result.txt
-echo "status: bot: [1], order: []" >> result.txt
+  # Wait a moment, then add second bot
+  sleep 2
+  echo "3"
+  sleep 1
 
-echo "CLI application execution completed"
+  # Wait for orders to process
+  sleep 12
+
+  # Exit and log final status
+  echo "6"
+
+) | go run main.go
+
+echo ""
+echo "Application completed. Results logged to scripts/result.txt"
+
