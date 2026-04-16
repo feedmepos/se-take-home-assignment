@@ -1,0 +1,796 @@
+/* =====================================================
+   CSS CUSTOM PROPERTIES — Design Tokens
+   ===================================================== */
+:root {
+  --gold: #FFC72C;
+  --gold-dark: #e6a800;
+  --red: #DA291C;
+  --red-dark: #b71c1c;
+  --bg: #0d0d0d;
+  --surface: #161616;
+  --surface-2: #1f1f1f;
+  --border: #2a2a2a;
+  --text: #f0f0f0;
+  --text-dim: #888;
+  --vip-accent: #ffd700;
+  --vip-glow: rgba(255, 215, 0, 0.25);
+  --normal-accent: #4da6ff;
+  --normal-glow: rgba(77, 166, 255, 0.15);
+  --complete-accent: #3ddc84;
+  --bot-idle: #888;
+  --bot-busy: #3ddc84;
+  --radius: 6px;
+  --transition: 0.2s ease;
+}
+
+/* =====================================================
+   RESET & BASE
+   ===================================================== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  min-height: 100vh;
+  /* Subtle noise texture for depth */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+}
+
+/* =====================================================
+   LAYOUT
+   ===================================================== */
+.app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px 20px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* =====================================================
+   HEADER
+   ===================================================== */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 2px solid var(--gold);
+  padding-bottom: 20px;
+}
+
+.logo {
+  width: 52px;
+  height: 52px;
+  background: var(--gold);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Bebas Neue', cursive;
+  font-size: 28px;
+  color: var(--red);
+  flex-shrink: 0;
+  box-shadow: 0 0 24px rgba(255, 199, 44, 0.4);
+}
+
+.header-text h1 {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 32px;
+  letter-spacing: 2px;
+  color: var(--gold);
+  line-height: 1;
+}
+
+.header-text p {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  margin-top: 4px;
+}
+
+.header-clock {
+  margin-left: auto;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  color: var(--gold);
+  text-align: right;
+}
+
+.header-clock .time {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 2px;
+}
+
+/* =====================================================
+   CONTROL PANEL
+   ===================================================== */
+.control-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.control-group-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.control-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 9px 18px;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition), opacity var(--transition);
+  white-space: nowrap;
+}
+
+.btn:active {
+  transform: scale(0.96);
+}
+
+/* Normal Order button */
+.btn-normal {
+  background: var(--normal-accent);
+  color: #000;
+}
+
+.btn-normal:hover {
+  box-shadow: 0 0 16px var(--normal-glow);
+  opacity: 0.92;
+}
+
+/* VIP Order button */
+.btn-vip {
+  background: var(--vip-accent);
+  color: #000;
+  box-shadow: 0 0 12px var(--vip-glow);
+}
+
+.btn-vip:hover {
+  box-shadow: 0 0 24px var(--vip-glow);
+}
+
+/* Bot add button */
+.btn-bot-add {
+  background: var(--complete-accent);
+  color: #000;
+}
+
+.btn-bot-add:hover {
+  opacity: 0.88;
+}
+
+/* Bot remove button */
+.btn-bot-remove {
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn-bot-remove:hover {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.divider {
+  width: 1px;
+  height: 48px;
+  background: var(--border);
+  margin: 0 4px;
+}
+
+/* Bot count display */
+.bot-count-display {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.bot-count-num {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--complete-accent);
+}
+
+/* =====================================================
+   BOT STATUS ROW
+   ===================================================== */
+.bot-status-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+/* "More" overflow pill */
+.bot-overflow-pill {
+  background: var(--surface-2);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text-dim);
+  cursor: pointer;
+  position: relative;
+  transition: border-color var(--transition), color var(--transition);
+  user-select: none;
+}
+
+.bot-overflow-pill:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.bot-overflow-pill .pill-count {
+  font-size: 16px;
+  font-weight: 600;
+  font-family: 'Bebas Neue', cursive;
+  color: var(--gold);
+}
+
+/* Popover panel that expands when clicking the overflow pill */
+.bot-overflow-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 100;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px;
+  width: 340px;
+  max-height: 320px;
+  overflow-y: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+.bot-overflow-popover.hidden {
+  display: none;
+}
+
+.bot-overflow-popover.visible {
+  display: flex;
+}
+
+/* Compact bot card used inside the popover */
+.bot-mini-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  min-width: 140px;
+}
+
+.bot-mini-card.busy {
+  border-color: var(--complete-accent);
+}
+
+/* Hold-to-remove visual feedback on the button */
+.btn-bot-remove.holding {
+  background: var(--red);
+  color: #fff;
+  border-color: var(--red);
+}
+
+.bot-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  min-width: 180px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color var(--transition);
+}
+
+.bot-card.busy {
+  border-color: var(--complete-accent);
+}
+
+.bot-card.idle {
+  border-color: var(--border);
+  opacity: 0.6;
+}
+
+/* Progress bar inside bot card */
+.bot-progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: var(--complete-accent);
+  transition: width 0.5s linear;
+  width: 0%;
+}
+
+.bot-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.bot-indicator.idle {
+  background: var(--bot-idle);
+}
+
+.bot-indicator.busy {
+  background: var(--bot-busy);
+  animation: pulse 1.2s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(61, 220, 132, 0.4);
+  }
+
+  50% {
+    opacity: 0.7;
+    box-shadow: 0 0 0 4px rgba(61, 220, 132, 0);
+  }
+}
+
+.bot-info {
+  line-height: 1.5;
+}
+
+.bot-id {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 12px;
+}
+
+.bot-status-text {
+  color: var(--text-dim);
+  font-size: 10px;
+}
+
+/* =====================================================
+   QUEUE COLUMNS LAYOUT
+   ===================================================== */
+.queues {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 700px) {
+  .queues {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =====================================================
+   QUEUE COLUMN
+   ===================================================== */
+.queue-col {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  min-height: 420px;
+}
+
+.queue-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.queue-title {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 20px;
+  letter-spacing: 2px;
+}
+
+.queue-title.pending {
+  color: var(--gold);
+}
+
+.queue-title.complete {
+  color: var(--complete-accent);
+}
+
+.queue-badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.queue-badge.pending {
+  background: rgba(255, 199, 44, 0.12);
+  color: var(--gold);
+  border: 1px solid rgba(255, 199, 44, 0.3);
+}
+
+.queue-badge.complete {
+  background: rgba(61, 220, 132, 0.1);
+  color: var(--complete-accent);
+  border: 1px solid rgba(61, 220, 132, 0.25);
+}
+
+.queue-list {
+  flex: 1;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  max-height: 560px;
+}
+
+.queue-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--text-dim);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  padding: 40px;
+  text-align: center;
+}
+
+.queue-empty-icon {
+  font-size: 32px;
+  opacity: 0.3;
+}
+
+/* =====================================================
+   ORDER CARD
+   ===================================================== */
+.order-card {
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid transparent;
+  position: relative;
+  overflow: hidden;
+  animation: slideIn 0.25s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideComplete {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.order-card.normal {
+  background: rgba(77, 166, 255, 0.06);
+  border-color: rgba(77, 166, 255, 0.2);
+}
+
+.order-card.vip {
+  background: rgba(255, 215, 0, 0.07);
+  border-color: rgba(255, 215, 0, 0.3);
+}
+
+.order-card.complete {
+  background: rgba(61, 220, 132, 0.05);
+  border-color: rgba(61, 220, 132, 0.15);
+  animation: slideComplete 0.25s ease;
+}
+
+/* Processing shimmer for order being worked on */
+.order-card.processing::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.04), transparent);
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.order-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.order-type-badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.order-type-badge.vip {
+  background: var(--vip-accent);
+  color: #000;
+}
+
+.order-type-badge.normal {
+  background: var(--normal-accent);
+  color: #000;
+}
+
+.order-number {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.order-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.order-status {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+.order-status.processing {
+  color: var(--complete-accent);
+}
+
+.order-time {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--text-dim);
+  opacity: 0.6;
+}
+
+/* =====================================================
+   STATS ROW
+   ===================================================== */
+.stats-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 20px;
+  flex: 1;
+  min-width: 130px;
+}
+
+.stat-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.stat-value {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 28px;
+  margin-top: 4px;
+  line-height: 1;
+}
+
+.stat-value.gold {
+  color: var(--gold);
+}
+
+.stat-value.blue {
+  color: var(--normal-accent);
+}
+
+.stat-value.green {
+  color: var(--complete-accent);
+}
+
+.stat-value.yellow {
+  color: var(--vip-accent);
+}
+
+/* =====================================================
+   ACTIVITY LOG
+   ===================================================== */
+.log-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.log-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.log-title {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 16px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+}
+
+.log-clear {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  border-radius: 3px;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: color var(--transition), border-color var(--transition);
+}
+
+.log-clear:hover {
+  color: var(--text);
+  border-color: var(--text-dim);
+}
+
+.log-list {
+  max-height: 160px;
+  overflow-y: auto;
+  padding: 10px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.log-entry {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text-dim);
+  display: flex;
+  gap: 10px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.log-ts {
+  color: var(--text-dim);
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+
+.log-msg.gold {
+  color: var(--gold);
+}
+
+.log-msg.green {
+  color: var(--complete-accent);
+}
+
+.log-msg.blue {
+  color: var(--normal-accent);
+}
+
+.log-msg.yellow {
+  color: var(--vip-accent);
+}
+
+.log-msg.red {
+  color: var(--red);
+}
+
+.log-msg.dim {
+  color: var(--text-dim);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>McDonald's Order Controller</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet" />
+
+  <!-- External stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <div class="app" id="app">
+
+    <!-- HEADER -->
+    <header class="header">
+      <div class="logo">M</div>
+      <div class="header-text">
+        <h1>Order Controller</h1>
+        <p>MCDONALD'S AUTOMATED KITCHEN SYSTEM · v1.0.0</p>
+      </div>
+      <div class="header-clock">
+        <div class="time" id="clock">00:00:00</div>
+        <div style="font-size:10px;color:var(--text-dim);margin-top:2px;">SYSTEM TIME</div>
+      </div>
+    </header>
+
+    <!-- STATS ROW -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Total Orders</div>
+        <div class="stat-value gold" id="stat-total">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Pending</div>
+        <div class="stat-value blue" id="stat-pending">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Completed</div>
+        <div class="stat-value green" id="stat-complete">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">VIP Orders</div>
+        <div class="stat-value yellow" id="stat-vip">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Active Bots</div>
+        <div class="stat-value green" id="stat-bots">0</div>
+      </div>
+    </div>
+
+    <!-- CONTROL PANEL -->
+    <div class="control-panel">
+      <div class="control-group">
+        <div class="control-group-label">New Order</div>
+        <div class="control-buttons">
+          <button class="btn btn-normal" id="btn-normal">＋ New Normal Order</button>
+          <button class="btn btn-vip" id="btn-vip">★ New VIP Order</button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="control-group">
+        <div class="control-group-label">Bot Management</div>
+        <div class="control-buttons">
+          <button class="btn btn-bot-add" id="btn-bot-add">＋ Bot</button>
+          <button class="btn btn-bot-remove" id="btn-bot-remove">− Bot</button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="control-group">
+        <div class="control-group-label">Fleet Status</div>
+        <div class="bot-count-display">
+          <span class="bot-count-num" id="bot-count-display">0</span>
+          <span>bots online</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOT STATUS ROW -->
+    <div class="bot-status-row" id="bot-status-row">
+      <!-- Bot cards injected here by app.js -->
+    </div>
+
+    <!-- QUEUE COLUMNS -->
+    <div class="queues">
+      <!-- PENDING -->
+      <div class="queue-col">
+        <div class="queue-header">
+          <span class="queue-title pending">⏳ PENDING</span>
+          <span class="queue-badge pending" id="badge-pending">0 orders</span>
+        </div>
+        <div class="queue-list" id="queue-pending">
+          <div class="queue-empty" id="empty-pending">
+            <div class="queue-empty-icon">🍟</div>
+            <div>No orders in queue</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMPLETE -->
+      <div class="queue-col">
+        <div class="queue-header">
+          <span class="queue-title complete">✅ COMPLETE</span>
+          <span class="queue-badge complete" id="badge-complete">0 orders</span>
+        </div>
+        <div class="queue-list" id="queue-complete">
+          <div class="queue-empty" id="empty-complete">
+            <div class="queue-empty-icon">✅</div>
+            <div>No completed orders yet</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIVITY LOG -->
+    <div class="log-panel">
+      <div class="log-header">
+        <span class="log-title">▸ ACTIVITY LOG</span>
+        <button class="log-clear" id="btn-clear-log">CLEAR</button>
+      </div>
+      <div class="log-list" id="log-list">
+        <div class="log-entry">
+          <span class="log-ts">--:--:--</span>
+          <span class="log-msg dim">System initialised. Awaiting orders.</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.app -->
+
+  <!-- External JavaScript — loaded at end of body so DOM is ready -->
+  <script src="app.js"></script>
+</body>
+
+</html>
