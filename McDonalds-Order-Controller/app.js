@@ -167,11 +167,14 @@ function addBot() {
 }
 
 /**
- * Removes the NEWEST IDLE bot (highest ID among idle bots).
+ * Removes the NEWEST bot (highest ID, i.e. last in the array).
  *
- * New rule: A bot that is currently processing an order CANNOT be
- * removed. Only idle bots are eligible for removal. If all bots are
- * busy, the action is rejected and the user is notified.
+ * Per assignment spec:
+ *   - Always removes the most recently added bot.
+ *   - If that bot is currently processing an order, the timers are
+ *     stopped and the order is returned to the pending queue,
+ *     maintaining correct VIP/Normal priority ordering.
+ *   - If the bot is idle, it is simply destroyed.
  */
 function removeBot() {
   if (state.bots.length === 0) {
@@ -179,29 +182,29 @@ function removeBot() {
     return;
   }
 
-  // Find the newest (last) idle bot — iterate from end for highest ID first
-  let idleBotIndex = -1;
-  for (let i = state.bots.length - 1; i >= 0; i--) {
-    if (state.bots[i].status === 'idle') {
-      idleBotIndex = i;
-      break;
-    }
-  }
+  // Always remove the last bot in the array (highest bot ID = newest)
+  const bot = state.bots[state.bots.length - 1];
+  state.bots.pop();
 
-  // All bots are busy — reject removal
-  if (idleBotIndex === -1) {
-    log('Cannot remove bot — all bots are currently processing orders.', 'red');
-    return;
-  }
-
-  const bot = state.bots[idleBotIndex];
-  state.bots.splice(idleBotIndex, 1);
-
-  // Idle bots have no active timers, but clear defensively
+  // Stop both timers regardless of bot status
   clearInterval(bot.progressTimer);
   clearTimeout(bot.processTimeout);
 
-  log(`Bot #${bot.id} destroyed (was idle).`, 'red');
+  if (bot.status === 'busy' && bot.currentOrder !== null) {
+    const order = bot.currentOrder; // directly access the stored order object
+
+    // Reset order back to pending state
+    order.status = 'pending';
+    order.processingBotId = null;
+
+    // Reinsert into pending queue at the correct priority position
+    reinsertIntoPending(order);
+
+    log(`Bot #${bot.id} destroyed. Order #${order.id} [${order.type.toUpperCase()}] returned to PENDING.`, 'red');
+  } else {
+    log(`Bot #${bot.id} destroyed (was idle).`, 'red');
+  }
+
   render();
 }
 
@@ -265,6 +268,7 @@ function assignOrderToBot(bot) {
 
   bot.status = 'busy';
   bot.currentOrderId = order.id;
+  bot.currentOrder = order;   // store the full object so removeBot can retrieve it
   bot.progress = 0;
   bot.elapsed = 0;
 
@@ -293,6 +297,7 @@ function assignOrderToBot(bot) {
     // Reset bot to idle
     bot.status = 'idle';
     bot.currentOrderId = null;
+    bot.currentOrder = null;    // clear the stored order reference
     bot.progress = 0;
 
     log(`Order #${order.id} [${order.type.toUpperCase()}] COMPLETED by Bot #${bot.id}.`, 'gold');

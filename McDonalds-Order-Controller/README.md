@@ -45,10 +45,8 @@ Each file has a single, clear responsibility:
 | 3 | Order numbers are unique and auto-incrementing | ✅ |
 | 4 | `+ Bot` creates a bot that processes orders (10s each), then picks up the next | ✅ |
 | 5 | Bot becomes IDLE when no pending orders remain | ✅ |
-| 6 | `- Bot` destroys the newest **idle** bot only; busy bots cannot be removed | ✅ |
+| 6 | `- Bot` destroys the **newest** bot (highest ID); if it was mid-process, its order is returned to PENDING maintaining VIP/Normal priority | ✅ |
 | 7 | No data persistence — all state is held in memory | ✅ |
-
-> **Note on Requirement 6:** The original spec states that a bot being removed mid-process should return its order to PENDING. The current implementation takes a stricter, safer approach — only **idle** bots can be removed, preventing any order from being lost or interrupted. The `reinsertIntoPending()` function is implemented and ready if the original behaviour is required.
 
 ---
 
