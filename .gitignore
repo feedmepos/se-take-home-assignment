@@ -1,0 +1,10 @@
+.idea/
+
+# Go build cache
+.cache/
+
+# Local build outputs
+scripts/orderctl
+
+# Generated test run outputs
+scripts/test/result_*.txt
