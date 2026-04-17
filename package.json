@@ -1,0 +1,14 @@
+{
+  "name": "order-controller",
+  "type": "module",
+  "scripts": {
+    "test": "node --import tsx --test tests/v1.test.ts",
+    "build": "tsc --noEmit",
+    "start": "tsx src/cli.ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "tsx": "^4.19.0",
+    "@types/node": "^22.0.0"
+  }
+}

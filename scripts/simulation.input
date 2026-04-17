@@ -1,0 +1,37 @@
+# McDonald's Order Management - Simulation Script
+# Lines starting with # are comments
+# sleep <ms> advances simulated time
+
+# Step 1: Create initial orders
+order normal
+order vip
+order normal
+sleep 1100
+
+# Step 2: Add first bot
+bot add
+sleep 1100
+
+# Step 3: Add second bot
+bot add
+
+# Step 4: Wait for processing
+sleep 11000
+
+# Step 5: Add VIP order while bots idle
+order vip
+sleep 11000
+
+# Step 6: Remove newest bot
+bot remove
+sleep 1100
+
+# Step 7: Add more orders
+order normal
+order vip
+order normal
+sleep 1100
+
+# Step 8: Add bot and wait for completion
+bot add
+sleep 22000
