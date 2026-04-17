@@ -1,0 +1,6 @@
+# remove an idle bot after all queued work is done
+$order normal
+$bot add
+$tick 10s
+$bot remove
+$status

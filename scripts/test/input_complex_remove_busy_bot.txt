@@ -1,0 +1,13 @@
+# remove a busy bot and verify the interrupted order returns to pending
+$order normal
+$order vip
+$order normal
+$bot add
+$bot add
+$tick 4s
+$bot remove
+$status
+$tick 6s
+$status
+$tick 10s
+$status

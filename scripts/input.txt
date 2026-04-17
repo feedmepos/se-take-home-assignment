@@ -1,0 +1,11 @@
+# scripted demo input
+$order normal
+$order vip
+$order normal
+$bot add
+$tick 1s
+$bot add
+$tick 10s
+$order vip
+$tick 10s
+$bot remove

@@ -1,0 +1,12 @@
+# no bot, idle bot, and repeated tick advancement
+$status
+$order vip
+$order normal
+$tick 5s
+$bot add
+$tick 1s
+$tick 4s
+$tick 5s
+$bot remove
+$bot remove
+$status

@@ -1,0 +1,15 @@
+# multi bot with mixed vip and normal orders
+$order normal
+$order normal
+$order vip
+$order vip
+$bot add
+$tick 2s
+$bot add
+$tick 3s
+$bot add
+$status
+$tick 5s
+$status
+$tick 10s
+$status

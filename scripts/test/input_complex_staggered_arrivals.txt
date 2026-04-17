@@ -1,0 +1,14 @@
+# staggered arrivals while bots are already processing
+$bot add
+$order normal
+$tick 2s
+$order vip
+$tick 1s
+$order normal
+$bot add
+$tick 7s
+$status
+$tick 3s
+$order vip
+$tick 10s
+$status
