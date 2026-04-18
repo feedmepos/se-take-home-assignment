@@ -43,7 +43,8 @@ type expectedResult struct {
 
 type testStruct struct {
 	name           string
-	processDelay   time.Duration
+	normalDelay    time.Duration
+	fastDelay      time.Duration
 	steps          func(t *testing.T, e *Engine)
 	expectedResult expectedResult
 }
@@ -51,14 +52,15 @@ type testStruct struct {
 func TestEngineScenarios(t *testing.T) {
 	testcases := []testStruct{
 		{
-			name:         "vip priority with two bots",
-			processDelay: 30 * time.Millisecond,
+			name:        "vip priority with two bots",
+			normalDelay: 30 * time.Millisecond,
+			fastDelay:   20 * time.Millisecond,
 			steps: func(t *testing.T, e *Engine) {
 				e.NewOrder(Normal)
 				e.NewOrder(VIP)
 				e.NewOrder(Normal)
-				e.AddBot()
-				e.AddBot()
+				e.AddBot(NormalBot)
+				e.AddBot(FastBot)
 
 				waitUntil(t, 400*time.Millisecond, func() bool {
 					return e.CompletedCount() == 3
@@ -80,11 +82,12 @@ func TestEngineScenarios(t *testing.T) {
 			},
 		},
 		{
-			name:         "remove bot while processing",
-			processDelay: 200 * time.Millisecond,
+			name:        "remove bot while processing",
+			normalDelay: 200 * time.Millisecond,
+			fastDelay:   140 * time.Millisecond,
 			steps: func(t *testing.T, e *Engine) {
 				e.NewOrder(VIP)
-				e.AddBot()
+				e.AddBot(NormalBot)
 				waitUntil(t, 80*time.Millisecond, func() bool {
 					s := e.Snapshot()
 					return len(s.ActiveTasks) == 1 && s.ActiveTasks[0].Status == Processing
@@ -103,14 +106,15 @@ func TestEngineScenarios(t *testing.T) {
 			},
 		},
 		{
-			name:         "middle status",
-			processDelay: 200 * time.Millisecond,
+			name:        "middle status",
+			normalDelay: 200 * time.Millisecond,
+			fastDelay:   140 * time.Millisecond,
 			steps: func(t *testing.T, e *Engine) {
 				e.NewOrder(VIP)
 				e.NewOrder(Normal)
 				e.NewOrder(Normal)
-				e.AddBot()
-				e.AddBot()
+				e.AddBot(NormalBot)
+				e.AddBot(FastBot)
 				waitUntil(t, 80*time.Millisecond, func() bool {
 					s := e.Snapshot()
 					return countByStatus(s.ActiveTasks, Processing) == 2 && len(s.ActiveTasks) == 3
@@ -134,11 +138,15 @@ func TestEngineScenarios(t *testing.T) {
 			clock := newFakeClock()
 			start := clock.Now()
 			var out bytes.Buffer
-			processDelay := tc.processDelay
-			if processDelay == 0 {
-				processDelay = 30 * time.Millisecond
+			normalDelay := tc.normalDelay
+			if normalDelay == 0 {
+				normalDelay = 30 * time.Millisecond
 			}
-			engine := NewEngine(clock, &out, processDelay)
+			fastDelay := tc.fastDelay
+			if fastDelay == 0 {
+				fastDelay = 20 * time.Millisecond
+			}
+			engine := NewEngine(clock, &out, normalDelay, fastDelay)
 
 			tc.steps(t, engine)
 			// Single stop function for every testcase:
@@ -173,6 +181,41 @@ func TestEngineScenarios(t *testing.T) {
 				t.Fatalf("expected totalUsedTime >= %dms, got %dms", tc.expectedResult.totalUsedTime, totalUsedMS)
 			}
 		})
+	}
+}
+
+func TestBotTypeProcessingSpeed(t *testing.T) {
+	clock := newFakeClock()
+	var out bytes.Buffer
+	engine := NewEngine(clock, &out, 100*time.Millisecond, 70*time.Millisecond)
+
+	engine.NewOrder(Normal)
+	engine.AddBot(NormalBot)
+	waitUntil(t, 300*time.Millisecond, func() bool {
+		return engine.CompletedCount() == 1
+	})
+	engine.RemoveNewestBot()
+	normalElapsed := clock.Now().Sub(time.Date(2026, 4, 10, 14, 32, 0, 0, time.UTC))
+
+	clock = newFakeClock()
+	out.Reset()
+	engine = NewEngine(clock, &out, 100*time.Millisecond, 70*time.Millisecond)
+	engine.NewOrder(Normal)
+	engine.AddBot(FastBot)
+	waitUntil(t, 300*time.Millisecond, func() bool {
+		return engine.CompletedCount() == 1
+	})
+	engine.RemoveNewestBot()
+	fastElapsed := clock.Now().Sub(time.Date(2026, 4, 10, 14, 32, 0, 0, time.UTC))
+
+	if fastElapsed >= normalElapsed {
+		t.Fatalf("expected fast bot to complete sooner than normal bot, normal=%v fast=%v", normalElapsed, fastElapsed)
+	}
+	if normalElapsed < 100*time.Millisecond {
+		t.Fatalf("expected normal bot runtime >= 100ms, got %v", normalElapsed)
+	}
+	if fastElapsed < 70*time.Millisecond {
+		t.Fatalf("expected fast bot runtime >= 70ms, got %v", fastElapsed)
 	}
 }
 

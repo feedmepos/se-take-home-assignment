@@ -10,7 +10,7 @@ Core goals implemented:
 - VIP priority over normal orders
 - Dynamic bot add/remove behavior
 - 1 bot processes 1 order at a time
-- Order processing duration is configurable (10s in CLI runtime)
+- Two bot types with configurable processing durations
 - Timestamped output compatible with GitHub Actions verification
 
 ---
@@ -52,7 +52,7 @@ Core goals implemented:
 - `Order`
   - `ID`, `Type`, `Status`
 - `Bot`
-  - `ID`, `cancelCh`, `doneCh`, `current`
+  - `ID`, `Type`, `ProcessDelay`, `cancelCh`, `doneCh`, `current`
 
 The `Engine` manages:
 
@@ -86,8 +86,13 @@ When adding a bot:
    - poll queue
    - pick one order
    - set order to `PROCESSING`
-   - sleep for processing duration
+   - sleep for processing duration based on bot type
    - set order to `COMPLETE`
+
+Bot types:
+
+- `NORMAL` bot: 10 seconds in CLI runtime
+- `FAST` bot: 7 seconds in CLI runtime
 
 When removing the newest bot:
 
@@ -120,7 +125,8 @@ In interactive mode (`go run cmd/order-controller/main.go`):
 
 - `n` -> create normal order
 - `v` -> create VIP order
-- `+` -> add a new bot
+- `+` -> add a new normal bot
+- `f` -> add a new fast bot
 - `-` -> remove newest bot
 - `s` -> print current snapshot tables
 - `demo` -> run a predefined scenario

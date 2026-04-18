@@ -1,28 +1,28 @@
 FeedMe Order Controller CLI
-Commands: n (new normal) | v (new vip) | + (add bot) | - (destroy bot) | s (status) | demo | help | exit
-> [19:40:07] Created NORMAL Order #1001 - Status: PENDING
-[19:40:07] Created VIP Order #1002 - Status: PENDING
-[19:40:07] Created NORMAL Order #1003 - Status: PENDING
-[19:40:07] Bot #1 created - Status: ACTIVE
-[19:40:07] Bot #2 created - Status: ACTIVE
-[19:40:07] Bot #1 picked up VIP Order #1002 - Status: PROCESSING
-[19:40:07] Bot #2 picked up NORMAL Order #1001 - Status: PROCESSING
-[19:40:17] Bot #2 completed NORMAL Order #1001 - Status: COMPLETE (Processing time: 10s)
-[19:40:17] Bot #2 picked up NORMAL Order #1003 - Status: PROCESSING
-[19:40:17] Bot #1 completed VIP Order #1002 - Status: COMPLETE (Processing time: 10s)
-[19:40:18] Created VIP Order #1004 - Status: PENDING
-[19:40:18] Bot #1 picked up VIP Order #1004 - Status: PROCESSING
-[19:40:27] Bot #2 completed NORMAL Order #1003 - Status: COMPLETE (Processing time: 10s)
-[19:40:28] Bot #1 completed VIP Order #1004 - Status: COMPLETE (Processing time: 10s)
-[19:40:29] Bot #2 destroyed
+Commands: n (new normal) | v (new vip) | + (add normal bot) | f (add fast bot) | - (destroy bot) | s (status) | demo | help | exit
+> [14:51:45] Created NORMAL Order #1001 - Status: PENDING
+[14:51:45] Created VIP Order #1002 - Status: PENDING
+[14:51:45] Created NORMAL Order #1003 - Status: PENDING
+[14:51:45] NORMAL Bot #1 created - Status: ACTIVE
+[14:51:45] FAST Bot #2 created - Status: ACTIVE
+[14:51:45] NORMAL Bot #1 picked up VIP Order #1002 - Status: PROCESSING
+[14:51:45] FAST Bot #2 picked up NORMAL Order #1001 - Status: PROCESSING
+[14:51:53] FAST Bot #2 completed NORMAL Order #1001 - Status: COMPLETE (Processing time: 7s)
+[14:51:53] FAST Bot #2 picked up NORMAL Order #1003 - Status: PROCESSING
+[14:51:56] NORMAL Bot #1 completed VIP Order #1002 - Status: COMPLETE (Processing time: 10s)
+[14:51:56] Created VIP Order #1004 - Status: PENDING
+[14:51:56] NORMAL Bot #1 picked up VIP Order #1004 - Status: PROCESSING
+[14:52:00] FAST Bot #2 completed NORMAL Order #1003 - Status: COMPLETE (Processing time: 7s)
+[14:52:04] FAST Bot #2 destroyed
 
 Bots:
-BOT_ID   STATE        CURRENT_ORDER 
-1        IDLE         -             
+BOT_ID   TYPE     STATE        CURRENT_ORDER 
+1        NORMAL   PROCESSING   1004          
 --------------------------------
 
 Active Tasks:
 ORDER_ID   TYPE     STATUS       BOT_ID  
+1004       VIP      PROCESSING   1       
 --------------------------------
 
 Completed Tasks:
@@ -30,5 +30,4 @@ ORDER_ID   TYPE     STATUS
 1001       NORMAL   COMPLETE    
 1002       VIP      COMPLETE    
 1003       NORMAL   COMPLETE    
-1004       VIP      COMPLETE    
 > 

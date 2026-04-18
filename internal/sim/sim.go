@@ -12,6 +12,14 @@ type OrderType string
 const (
 	Normal OrderType = "NORMAL"
 	VIP    OrderType = "VIP"
+	VVIP OrderType = "VVIP"
+)
+
+type BotType string
+
+const (
+	NormalBot BotType = "NORMAL"
+	FastBot   BotType = "FAST"
 )
 
 type OrderStatus string
@@ -41,16 +49,21 @@ func (RealClock) Sleep(d time.Duration) {
 }
 
 type Bot struct {
-	ID       int
-	cancelCh chan struct{}
-	doneCh   chan struct{}
-	current  *Order
+	ID           int
+	Type         BotType
+	ProcessDelay time.Duration
+	cancelCh     chan struct{}
+	doneCh       chan struct{}
+	current      *Order
+	pickupTime time.Time
 }
 
 type BotStatus struct {
 	BotID        int
+	Type         BotType
 	State        string
 	CurrentOrder int
+	RemainingTime int64
 }
 
 type TaskStatus struct {
@@ -67,27 +80,30 @@ type Snapshot struct {
 }
 
 type Engine struct {
-	mu           sync.Mutex
-	clock        Clock
-	out          io.Writer
-	processDelay time.Duration
+	mu          sync.Mutex
+	clock       Clock
+	out         io.Writer
+	normalDelay time.Duration
+	fastDelay   time.Duration
 
 	nextOrderID int
 	nextBotID   int
 
+	vvipQueue []*Order
 	vipQueue    []*Order
 	normalQueue []*Order
 	completed   []*Order
 	bots        []*Bot
 }
 
-func NewEngine(clock Clock, out io.Writer, processDelay time.Duration) *Engine {
+func NewEngine(clock Clock, out io.Writer, normalDelay, fastDelay time.Duration) *Engine {
 	return &Engine{
-		clock:        clock,
-		out:          out,
-		processDelay: processDelay,
-		nextOrderID:  1001,
-		nextBotID:    1,
+		clock:       clock,
+		out:         out,
+		normalDelay: normalDelay,
+		fastDelay:   fastDelay,
+		nextOrderID: 1001,
+		nextBotID:   1,
 	}
 }
 
@@ -104,7 +120,9 @@ func (e *Engine) NewOrder(t OrderType) *Order {
 		Status: Pending,
 	}
 	e.nextOrderID++
-	if t == VIP {
+	if t == VVIP {
+		e.vvipQueue = append(e.vvipQueue, order)
+	} else if t == VIP {
 		e.vipQueue = append(e.vipQueue, order)
 	} else {
 		e.normalQueue = append(e.normalQueue, order)
@@ -114,16 +132,18 @@ func (e *Engine) NewOrder(t OrderType) *Order {
 	return order
 }
 
-func (e *Engine) AddBot() int {
+func (e *Engine) AddBot(t BotType) int {
 	e.mu.Lock()
 	bot := &Bot{
-		ID:       e.nextBotID,
-		cancelCh: make(chan struct{}),
-		doneCh:   make(chan struct{}),
+		ID:           e.nextBotID,
+		Type:         t,
+		ProcessDelay: e.delayForBotType(t),
+		cancelCh:     make(chan struct{}),
+		doneCh:       make(chan struct{}),
 	}
 	e.nextBotID++
 	e.bots = append(e.bots, bot)
-	e.logf("Bot #%d created - Status: ACTIVE", bot.ID)
+	e.logf("%s Bot #%d created - Status: ACTIVE", bot.Type, bot.ID)
 	e.mu.Unlock()
 
 	go e.runBot(bot)
@@ -148,15 +168,16 @@ func (e *Engine) runBot(bot *Bot) {
 		e.mu.Lock()
 		order.Status = Processing
 		bot.current = order
-		e.logf("Bot #%d picked up %s Order #%d - Status: %s", bot.ID, order.Type, order.ID, order.Status)
+		bot.pickupTime = time.Now()
+		e.logf("%s Bot #%d picked up %s Order #%d - Status: %s", bot.Type, bot.ID, order.Type, order.ID, order.Status)
 		e.mu.Unlock()
 
-		if e.waitOrCancelled(bot.cancelCh, e.processDelay) {
+		if e.waitOrCancelled(bot.cancelCh, bot.ProcessDelay) {
 			e.mu.Lock()
 			order.Status = Pending
 			bot.current = nil
 			e.requeueFront(order)
-			e.logf("Bot #%d destroyed while processing Order #%d - returned to PENDING", bot.ID, order.ID)
+			e.logf("%s Bot #%d destroyed while processing Order #%d - returned to PENDING", bot.Type, bot.ID, order.ID)
 			e.mu.Unlock()
 			return
 		}
@@ -165,8 +186,17 @@ func (e *Engine) runBot(bot *Bot) {
 		order.Status = Complete
 		bot.current = nil
 		e.completed = append(e.completed, order)
-		e.logf("Bot #%d completed %s Order #%d - Status: %s (Processing time: %ds)", bot.ID, order.Type, order.ID, order.Status, int(e.processDelay.Seconds()))
+		e.logf("%s Bot #%d completed %s Order #%d - Status: %s (Processing time: %ds)", bot.Type, bot.ID, order.Type, order.ID, order.Status, int(bot.ProcessDelay.Seconds()))
 		e.mu.Unlock()
+	}
+}
+
+func (e *Engine) delayForBotType(t BotType) time.Duration {
+	switch t {
+	case FastBot:
+		return e.fastDelay
+	default:
+		return e.normalDelay
 	}
 }
 
@@ -197,6 +227,13 @@ func (e *Engine) waitOrCancelled(cancel <-chan struct{}, d time.Duration) bool {
 func (e *Engine) dequeue() *Order {
 	e.mu.Lock()
 	defer e.mu.Unlock()
+	
+	if len(e.vvipQueue) > 0 {
+		o := e.vvipQueue[0]
+		e.vvipQueue = e.vvipQueue[1:]
+		return o
+	}
+
 	if len(e.vipQueue) > 0 {
 		o := e.vipQueue[0]
 		e.vipQueue = e.vipQueue[1:]
@@ -211,7 +248,9 @@ func (e *Engine) dequeue() *Order {
 }
 
 func (e *Engine) requeueFront(o *Order) {
-	if o.Type == VIP {
+	if o.Type == VVIP {
+		e.vvipQueue = append([]*Order{o}, e.vvipQueue...)
+	}else if o.Type == VIP {
 		e.vipQueue = append([]*Order{o}, e.vipQueue...)
 		return
 	}
@@ -231,14 +270,14 @@ func (e *Engine) RemoveNewestBot() bool {
 
 	close(bot.cancelCh)
 	<-bot.doneCh
-	e.logf("Bot #%d destroyed", bot.ID)
+	e.logf("%s Bot #%d destroyed", bot.Type, bot.ID)
 	return true
 }
 
 func (e *Engine) PendingCount() int {
 	e.mu.Lock()
 	defer e.mu.Unlock()
-	return len(e.vipQueue) + len(e.normalQueue)
+	return len(e.vvipQueue) + len(e.vipQueue) + len(e.normalQueue)
 }
 
 func (e *Engine) CompletedCount() int {
@@ -263,9 +302,11 @@ func (e *Engine) Snapshot() Snapshot {
 		CompletedTasks: make([]TaskStatus, 0, len(e.completed)),
 	}
 
+	now := time.Now().Unix();
 	for _, b := range e.bots {
 		state := "IDLE"
 		currentOrder := 0
+		var rt int64
 		if b.current != nil {
 			state = "PROCESSING"
 			currentOrder = b.current.ID
@@ -275,14 +316,26 @@ func (e *Engine) Snapshot() Snapshot {
 				Status:  b.current.Status,
 				BotID:   b.ID,
 			})
+
+		rt = int64(b.ProcessDelay.Seconds()) - (now - b.pickupTime.Unix())
 		}
 		s.Bots = append(s.Bots, BotStatus{
 			BotID:        b.ID,
+			Type:         b.Type,
 			State:        state,
 			CurrentOrder: currentOrder,
+			RemainingTime: rt,
 		})
 	}
 
+	for _, o := range e.vvipQueue {
+		s.ActiveTasks = append(s.ActiveTasks, TaskStatus{
+			OrderID: o.ID,
+			Type:    o.Type,
+			Status:  o.Status,
+			BotID:   0,
+		})
+	}
 	for _, o := range e.vipQueue {
 		s.ActiveTasks = append(s.ActiveTasks, TaskStatus{
 			OrderID: o.ID,
