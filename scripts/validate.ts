@@ -214,6 +214,57 @@ function validateVipPriority(events: Event[], _orders: Map<number, OrderInfo>): 
   return errors;
 }
 
+function validateBotPostCompletion(events: Event[], _orders: Map<number, OrderInfo>): string[] {
+  const errors: string[] = [];
+  const pending = new Set<number>();
+  const processing = new Map<number, number>(); // orderId -> botId
+
+  for (let i = 0; i < events.length; i++) {
+    const e = events[i];
+
+    const created = e.body.match(/^Created (NORMAL|VIP) Order #(\d+)/);
+    if (created) { pending.add(parseInt(created[2])); continue; }
+
+    const pickup = e.body.match(/^Bot #(\d+) picked up (NORMAL|VIP) Order #(\d+)/);
+    if (pickup) {
+      const orderId = parseInt(pickup[3]);
+      pending.delete(orderId);
+      processing.set(orderId, parseInt(pickup[1]));
+      continue;
+    }
+
+    const completed = e.body.match(/^Bot #(\d+) completed (NORMAL|VIP) Order #(\d+)/);
+    if (completed) {
+      const botId = parseInt(completed[1]);
+      const orderId = parseInt(completed[3]);
+      processing.delete(orderId);
+
+      // Check next same-timestamp event for this bot
+      const next = i + 1 < events.length ? events[i + 1] : null;
+      const hasNextEvent = next && next.time === e.time && next.body.includes(`Bot #${botId}`);
+      if (pending.size > 0) {
+        if (!hasNextEvent || !next!.body.match(new RegExp(`^Bot #${botId} picked up`))) {
+          errors.push(`L${e.line}: Bot #${botId} completed but has pending orders (${pending.size}) and did not pick up next`);
+        }
+      } else {
+        if (!hasNextEvent || !next!.body.match(new RegExp(`^Bot #${botId} is now IDLE`))) {
+          errors.push(`L${e.line}: Bot #${botId} completed with no pending orders but did not go IDLE`);
+        }
+      }
+      continue;
+    }
+
+    const destroyed = e.body.match(/^Bot #(\d+) destroyed while processing Order #(\d+)/);
+    if (destroyed) {
+      const orderId = parseInt(destroyed[2]);
+      processing.delete(orderId);
+      pending.add(orderId);
+      continue;
+    }
+  }
+  return errors;
+}
+
 function validateDestroyConsistency(events: Event[], _orders: Map<number, OrderInfo>): string[] {
   const errors: string[] = [];
   // "destroyed while processing" must have the order actually being processed by that bot
@@ -311,6 +362,7 @@ const validators: { name: string; fn: (events: Event[], orders: Map<number, Orde
   { name: 'Processing time ~10s (9-11s)', fn: validateProcessingTime },
   { name: 'Bot exclusive (one order at a time)', fn: validateBotExclusive },
   { name: 'VIP priority', fn: validateVipPriority },
+  { name: 'Bot post-completion state', fn: validateBotPostCompletion },
   { name: 'Destroy consistency', fn: validateDestroyConsistency },
 ];
 

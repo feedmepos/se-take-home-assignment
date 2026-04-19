@@ -2,9 +2,9 @@
   "name": "order-controller",
   "type": "module",
   "scripts": {
-    "test": "node --import tsx --test tests/v1.test.ts",
+    "test": "node --import tsx --test tests/mcdonald.test.ts",
     "build": "tsc --noEmit",
-    "start": "tsx src/cli.ts"
+    "start": "tsx src/index.ts"
   },
   "devDependencies": {
     "typescript": "^5.7.0",
