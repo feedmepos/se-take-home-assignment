@@ -55,7 +55,7 @@ You must implement **either** frontend or backend components as described below:
   - All tests in `test.sh` must pass
   - The `result.txt` file must contain meaningful output from your CLI application
   - All output must include timestamps in `HH:MM:SS` format to track order completion times
-  - Submit a Pull Request and ensure the `backend-verify-result` workflow passes
+  - Submit a Pull Request and ensure the `go-verify-result` workflow passes
 - Provide documentation for any part that you think is needed
 
 ### Project documentation (this solution)

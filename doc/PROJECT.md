@@ -21,7 +21,7 @@ No database or persistence; all state lives in the process.
 
 | Item | Notes |
 |------|--------|
-| Runtime | **Node.js** (CI uses **22.x** — see `.github/workflows/backend-verify-result.yaml`) |
+| Runtime | **Node.js** (CI uses **22.x** — see `.github/workflows/go-verify-result.yaml`) |
 | Tests | Node built-in `node:test`, **no extra npm dependencies** |
 | Modules | CommonJS (`require` / `module.exports`) |
 
@@ -44,7 +44,7 @@ No database or persistence; all state lives in the process.
 │   └── PROJECT.md            # This file
 ├── package.json
 └── .github/workflows/
-    └── backend-verify-result.yaml
+    └── go-verify-result.yaml
 ```
 
 ---
@@ -130,7 +130,7 @@ chmod +x scripts/test.sh scripts/build.sh scripts/run.sh
 
 - **`run.sh`** redirects CLI stdout to **`scripts/result.txt`**.
 - Log lines include **`[HH:MM:SS]`** so completion intervals (~10s per order) are visible.
-- **GitHub Actions** workflow **`backend-verify-result`** (see `.github/workflows/backend-verify-result.yaml`) runs the three scripts in order and checks that `scripts/result.txt` exists, is non-empty, and contains a valid time pattern.
+- **GitHub Actions** workflow **`go-verify-result`** (see `.github/workflows/go-verify-result.yaml`) runs the three scripts in order and checks that `scripts/result.txt` exists, is non-empty, and contains a valid time pattern.
 
 Before merging, confirm this workflow passes locally or on the PR.
 
