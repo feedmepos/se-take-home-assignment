@@ -58,6 +58,10 @@ You must implement **either** frontend or backend components as described below:
   - Submit a Pull Request and ensure the `go-verify-result` workflow passes
 - Provide documentation for any part that you think is needed
 
+### Project documentation (this solution)
+
+- **[doc/PROJECT.md](doc/PROJECT.md)** — architecture, local run, scripts, CI
+
 ### Tips on completing this task
 - Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.
 - Treat this assignment as a vibe coding, don't over engineer it. Try to scope your working hour within 30 min. However, ensure you read and understand what your code doing.
