@@ -1,5 +1,5 @@
-# Workflow display name matches assignment: "go-verify-result"
-name: go-verify-result
+# Workflow display name matches demo: "backend-verify-result"
+name: backend-verify-result
 
 on:
   pull_request:

@@ -1,24 +1,24 @@
 McDonald's Order Management System — simulation output
 
-[22:45:51] System initialized with 0 bots
-[22:45:51] Created Normal order #1 — status: PENDING
-[22:45:51] Created VIP order #2 — status: PENDING
-[22:45:51] Created Normal order #3 — status: PENDING
-[22:45:51] Bot #1 created — status: ACTIVE
-[22:45:51] Bot #1 picked up VIP order #2 — status: PROCESSING
-[22:45:51] Bot #2 created — status: ACTIVE
-[22:45:51] Bot #2 picked up Normal order #1 — status: PROCESSING
-[22:46:01] Bot #1 completed VIP order #2 — status: COMPLETE
-[22:46:01] Bot #1 picked up Normal order #3 — status: PROCESSING
-[22:46:01] Bot #2 completed Normal order #1 — status: COMPLETE
-[22:46:01] Bot #2 is now IDLE — no pending orders
-[22:46:02] Created VIP order #4 — status: PENDING
-[22:46:02] Bot #2 picked up VIP order #4 — status: PROCESSING
-[22:46:11] Bot #1 completed Normal order #3 — status: COMPLETE
-[22:46:11] Bot #1 is now IDLE — no pending orders
-[22:46:12] Bot #2 completed VIP order #4 — status: COMPLETE
-[22:46:12] Bot #2 is now IDLE — no pending orders
-[22:46:13] Bot #2 destroyed while IDLE
+[19:32:39] System initialized with 0 bots
+[19:32:39] Created Normal order #1 — status: PENDING
+[19:32:39] Created VIP order #2 — status: PENDING
+[19:32:39] Created Normal order #3 — status: PENDING
+[19:32:39] Bot #1 created — status: ACTIVE
+[19:32:39] Bot #1 picked up VIP order #2 — status: PROCESSING
+[19:32:39] Bot #2 created — status: ACTIVE
+[19:32:39] Bot #2 picked up Normal order #1 — status: PROCESSING
+[19:32:49] Bot #1 completed VIP order #2 — status: COMPLETE
+[19:32:49] Bot #1 picked up Normal order #3 — status: PROCESSING
+[19:32:49] Bot #2 completed Normal order #1 — status: COMPLETE
+[19:32:49] Bot #2 is now IDLE — no pending orders
+[19:32:50] Created VIP order #4 — status: PENDING
+[19:32:50] Bot #2 picked up VIP order #4 — status: PROCESSING
+[19:32:59] Bot #1 completed Normal order #3 — status: COMPLETE
+[19:32:59] Bot #1 is now IDLE — no pending orders
+[19:33:00] Bot #2 completed VIP order #4 — status: COMPLETE
+[19:33:00] Bot #2 is now IDLE — no pending orders
+[19:33:01] Bot #2 destroyed while IDLE
 
 Final status:
 - Total orders processed: 4 (2 VIP, 2 Normal)
