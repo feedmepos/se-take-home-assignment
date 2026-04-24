@@ -1,0 +1,10 @@
+{
+  "name": "order-controller",
+  "version": "1.0.0",
+  "description": "McDonald's Order Management System - Cooking Bot Controller",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js",
+    "test": "node --test controller.test.js"
+  }
+}
