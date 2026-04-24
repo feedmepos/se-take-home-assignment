@@ -1,0 +1,39 @@
+
+> mcdonald-order-controller@1.0.0 start
+> node src/cli.js
+
+[17:25:53] === McDonald's Order Controller Simulation ===
+[17:25:53] 
+[17:25:53] --- Phase 1: Order Priority ---
+[17:25:53] Added Normal Order #1(NORMAL)
+[17:25:53] Added VIP Order #2(VIP)  → placed before Normal orders
+[17:25:53] Added VIP Order #3(VIP)  → placed after #2(VIP), before Normal orders
+[17:25:53]   PENDING : #2(VIP), #3(VIP), #1(NORMAL)
+[17:25:53]   COMPLETE: (empty)
+[17:25:53] 
+[17:25:53] --- Phase 2: Adding Bots ---
+[17:25:53] Bot #1 picks up Order #2(VIP)
+[17:25:53] Bot #2 picks up Order #3(VIP)
+[17:25:53]   PENDING : #1(NORMAL)
+[17:25:53]   COMPLETE: (empty)
+[17:25:53]   Bot #1  : processing #2(VIP)
+[17:25:53]   Bot #2  : processing #3(VIP)
+[17:25:53] 
+[17:25:53] --- Phase 3: Removing Newest Bot (Bot #2) ---
+[17:25:53] Order #3(VIP) returned to PENDING
+[17:25:53]   PENDING : #3(VIP), #1(NORMAL)
+[17:25:53]   COMPLETE: (empty)
+[17:25:53]   Bot #1  : processing #2(VIP)
+[17:25:53] 
+[17:25:53] --- Phase 4: Processing Orders (10s per order) ---
+[17:26:03] Bot #1 completed Order #2(VIP) → COMPLETE
+[17:26:03] Bot #1 picks up Order #3(VIP)
+[17:26:13] Bot #1 completed Order #3(VIP) → COMPLETE
+[17:26:13] Bot #1 picks up Order #1(NORMAL)
+[17:26:23] Bot #1 completed Order #1(NORMAL) → COMPLETE
+[17:26:23] Bot #1 is IDLE
+[17:26:23] 
+[17:26:23] === Simulation Complete ===
+[17:26:23]   PENDING : (empty)
+[17:26:23]   COMPLETE: #2(VIP), #3(VIP), #1(NORMAL)
+[17:26:23]   Bot #1  : IDLE

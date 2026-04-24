@@ -1,0 +1,16 @@
+{
+  "name": "mcdonald-order-controller",
+  "version": "1.0.0",
+  "description": "McDonald's automated cooking bot order controller CLI",
+  "main": "src/cli.js",
+  "type": "commonjs",
+  "scripts": {
+    "test": "node --test test/orderController.test.js",
+    "build": "node -c src/orderController.js && node -c src/cli.js",
+    "start": "node src/cli.js",
+    "interactive": "node src/interactive.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
