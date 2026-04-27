@@ -35,15 +35,13 @@ func main() {
 		if cmd == "exit" || cmd == "quit" {
 			break
 		}
-		if err := handle(ctrl, cmd); err != nil {
-			logger.Log("Unknown command: %q", cmd)
-		}
+		handle(ctrl, logger, cmd)
 	}
 
 	ctrl.WaitAll()
 }
 
-func handle(ctrl *controller.Controller, cmd string) error {
+func handle(ctrl *controller.Controller, logger *output.Logger, cmd string) {
 	switch {
 	case cmd == "order normal":
 		ctrl.AddOrder(false)
@@ -58,11 +56,11 @@ func handle(ctrl *controller.Controller, cmd string) error {
 	case strings.HasPrefix(cmd, "sleep "):
 		d, err := time.ParseDuration(strings.TrimPrefix(cmd, "sleep "))
 		if err != nil {
-			return err
+			logger.Log("Invalid duration: %q", strings.TrimPrefix(cmd, "sleep "))
+			return
 		}
 		time.Sleep(d)
 	default:
-		return fmt.Errorf("unknown")
+		logger.Log("Unknown command: %q", cmd)
 	}
-	return nil
 }
