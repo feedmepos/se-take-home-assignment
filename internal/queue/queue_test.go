@@ -123,3 +123,94 @@ func equal(a, b []int) bool {
 	}
 	return true
 }
+
+func TestPopEmpty(t *testing.T) {
+	var q PendingQueue
+	if o := q.Pop(); o != nil {
+		t.Fatalf("Pop on empty queue should return nil, got %+v", o)
+	}
+}
+
+func TestVIPCountAfterPop(t *testing.T) {
+	var q PendingQueue
+	q.AddVIP(vip(1))
+	q.AddVIP(vip(3))
+	q.AddNormal(norm(5))
+
+	q.Pop() // VIP-1
+	if q.vipCount != 1 {
+		t.Fatalf("vipCount should be 1 after popping one VIP, got %d", q.vipCount)
+	}
+	q.Pop() // VIP-3
+	if q.vipCount != 0 {
+		t.Fatalf("vipCount should be 0 after all VIPs popped, got %d", q.vipCount)
+	}
+	if q.Len() != 1 {
+		t.Fatalf("one Normal should remain, got len=%d", q.Len())
+	}
+}
+
+func TestRequeueVIPIntoEmptyQueue(t *testing.T) {
+	var q PendingQueue
+	q.Requeue(vip(5))
+	if got := ids(&q); !equal(got, []int{5}) {
+		t.Fatalf("want [5], got %v", got)
+	}
+	if q.vipCount != 1 {
+		t.Fatalf("vipCount should be 1, got %d", q.vipCount)
+	}
+}
+
+func TestRequeueNormalIntoEmptyQueue(t *testing.T) {
+	var q PendingQueue
+	q.Requeue(norm(3))
+	if got := ids(&q); !equal(got, []int{3}) {
+		t.Fatalf("want [3], got %v", got)
+	}
+	if q.vipCount != 0 {
+		t.Fatalf("vipCount should be 0, got %d", q.vipCount)
+	}
+}
+
+// TestRequeueVIPAtEndOfVIPSection exercises the firstGreater path that returns hi,
+// meaning the requeued VIP has the largest ID among all VIPs.
+func TestRequeueVIPAtEndOfVIPSection(t *testing.T) {
+	var q PendingQueue
+	q.AddVIP(vip(2))
+	q.AddVIP(vip(4))
+	q.AddNormal(norm(6))
+	q.Requeue(vip(8)) // goes after VIP-4, before Normal-6
+	if got := ids(&q); !equal(got, []int{2, 4, 8, 6}) {
+		t.Fatalf("want [2 4 8 6], got %v", got)
+	}
+	if q.vipCount != 3 {
+		t.Fatalf("vipCount should be 3, got %d", q.vipCount)
+	}
+}
+
+// TestRequeueNormalAtEndOfNormalSection exercises firstGreater returning hi for Normals.
+func TestRequeueNormalAtEndOfNormalSection(t *testing.T) {
+	var q PendingQueue
+	q.AddVIP(vip(1))
+	q.AddNormal(norm(3))
+	q.AddNormal(norm(5))
+	q.Requeue(norm(7)) // goes after Normal-5
+	if got := ids(&q); !equal(got, []int{1, 3, 5, 7}) {
+		t.Fatalf("want [1 3 5 7], got %v", got)
+	}
+}
+
+// TestRequeueNormalWithOnlyVIPs checks that Requeue inserts the Normal after all
+// VIPs when no Normal orders exist yet (lo == hi == len(items)).
+func TestRequeueNormalWithOnlyVIPs(t *testing.T) {
+	var q PendingQueue
+	q.AddVIP(vip(2))
+	q.AddVIP(vip(4))
+	q.Requeue(norm(1))
+	if got := ids(&q); !equal(got, []int{2, 4, 1}) {
+		t.Fatalf("want [2 4 1], got %v", got)
+	}
+	if q.vipCount != 2 {
+		t.Fatalf("vipCount should be 2, got %d", q.vipCount)
+	}
+}

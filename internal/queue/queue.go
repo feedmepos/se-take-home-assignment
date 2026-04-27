@@ -13,6 +13,8 @@ type PendingQueue struct {
 
 func (q *PendingQueue) Len() int { return len(q.items) }
 
+func (q *PendingQueue) Items() []*model.Order { return q.items }
+
 func (q *PendingQueue) AddVIP(o *model.Order) {
 	q.insertAt(q.vipCount, o)
 	q.vipCount++
