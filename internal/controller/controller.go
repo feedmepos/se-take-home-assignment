@@ -133,9 +133,9 @@ func (c *Controller) Status() string {
 	return result
 }
 
-// WaitPickedUp blocks until at least n orders have been picked up and their
+// waitPickedUp blocks until at least n orders have been picked up and their
 // processing timers registered. Use this before fake.Advance in tests.
-func (c *Controller) WaitPickedUp(n int) {
+func (c *Controller) waitPickedUp(n int) {
 	c.mu.Lock()
 	for c.pickupCount < n {
 		c.cond.Wait()
@@ -188,7 +188,7 @@ func (c *Controller) waitAndPickup(b *bot) (o *model.Order, timer <-chan time.Ti
 	o = c.queue.Pop()
 	o.Status = model.Processing
 	b.order = o
-	// Register the timer while still holding c.mu so that WaitPickedUp
+	// Register the timer while still holding c.mu so that waitPickedUp
 	// cannot return before the timer is registered in the fake clock.
 	timer = c.clk.After(c.procTime)
 	c.pickupCount++

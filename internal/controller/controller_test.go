@@ -69,7 +69,7 @@ func TestBotProcessesOrder(t *testing.T) {
 	c.AddOrder(false)
 	c.AddBot()
 
-	c.WaitPickedUp(1)      // bot has picked up order #1, timer registered
+	c.waitPickedUp(1)      // bot has picked up order #1, timer registered
 	fake.Advance(procTime) // fire the timer
 	c.WaitAll()            // bot has completed
 
@@ -89,11 +89,11 @@ func TestVIPProcessedBeforeNormal(t *testing.T) {
 	c.AddOrder(false) // Normal #3
 	c.AddBot()
 
-	c.WaitPickedUp(1)      // bot picked up VIP #2
+	c.waitPickedUp(1)      // bot picked up VIP #2
 	fake.Advance(procTime) // complete VIP #2
-	c.WaitPickedUp(2)      // bot picked up Normal #1
+	c.waitPickedUp(2)      // bot picked up Normal #1
 	fake.Advance(procTime) // complete Normal #1
-	c.WaitPickedUp(3)      // bot picked up Normal #3
+	c.waitPickedUp(3)      // bot picked up Normal #3
 	fake.Advance(procTime) // complete Normal #3
 	c.WaitAll()
 
@@ -113,7 +113,7 @@ func TestRemoveBotRequeuesOrder(t *testing.T) {
 	c.AddOrder(false)
 	c.AddBot()
 
-	c.WaitPickedUp(1) // bot is in select, timer registered but not fired
+	c.waitPickedUp(1) // bot is in select, timer registered but not fired
 	c.RemoveBot()     // cancel bot → order requeued
 
 	status := c.Status()
@@ -142,7 +142,7 @@ func TestIdleBotPicksUpNewOrder(t *testing.T) {
 	c.AddBot() // idle, no orders
 
 	c.AddOrder(false) // wakes idle bot
-	c.WaitPickedUp(1) // bot has picked it up
+	c.waitPickedUp(1) // bot has picked it up
 	fake.Advance(procTime)
 	c.WaitAll()
 
@@ -161,7 +161,7 @@ func TestBotIdleLogWhenQueueEmpty(t *testing.T) {
 	c.AddOrder(false)
 	c.AddBot()
 
-	c.WaitPickedUp(1)
+	c.waitPickedUp(1)
 	fake.Advance(procTime)
 	c.WaitAll()
 
@@ -197,7 +197,7 @@ func TestMultipleBotsProcessConcurrently(t *testing.T) {
 	c.AddBot()        // Bot#1 picks up #1
 	c.AddBot()        // Bot#2 picks up #2
 
-	c.WaitPickedUp(2)      // both timers registered
+	c.waitPickedUp(2)      // both timers registered
 	fake.Advance(procTime) // both complete simultaneously
 	c.WaitAll()
 
@@ -214,7 +214,7 @@ func TestBotProcessesMultipleOrdersSequentially(t *testing.T) {
 	c.AddBot()        // single bot processes all three in order
 
 	for i := 1; i <= 3; i++ {
-		c.WaitPickedUp(i)
+		c.waitPickedUp(i)
 		fake.Advance(procTime)
 	}
 	c.WaitAll()
@@ -235,7 +235,7 @@ func TestRemoveBotVIPRequeuedCorrectly(t *testing.T) {
 	c.AddOrder(true) // VIP #1
 	c.AddBot()
 
-	c.WaitPickedUp(1)
+	c.waitPickedUp(1)
 	c.AddOrder(true)  // VIP #2 — arrives while VIP#1 is processing
 	c.AddOrder(false) // Normal #3
 	c.RemoveBot()     // VIP#1 must be requeued before VIP#2
@@ -261,7 +261,7 @@ func TestAllBotsRemovedOrdersReturnToPending(t *testing.T) {
 	c.AddBot()        // Bot#1 picks up VIP#2
 	c.AddBot()        // Bot#2 picks up Normal#1
 
-	c.WaitPickedUp(2)
+	c.waitPickedUp(2)
 	c.RemoveBot() // Bot#2 removed → Normal#1 returned
 	c.RemoveBot() // Bot#1 removed → VIP#2 returned
 
@@ -279,7 +279,7 @@ func TestOrderIDContinuesAfterCompletion(t *testing.T) {
 	c.AddOrder(false) // #1
 	c.AddBot()
 
-	c.WaitPickedUp(1)
+	c.waitPickedUp(1)
 	fake.Advance(procTime)
 	c.WaitAll()
 
@@ -310,7 +310,7 @@ func TestVIPPriorityWithInterleavedAdditions(t *testing.T) {
 	c.AddBot()        // single bot → processes VIP#3, VIP#4, Normal#1, Normal#2
 
 	for i := 1; i <= 4; i++ {
-		c.WaitPickedUp(i)
+		c.waitPickedUp(i)
 		fake.Advance(procTime)
 	}
 	c.WaitAll()
@@ -337,11 +337,11 @@ func TestRequeuedOrderProcessedByNewBot(t *testing.T) {
 	c.AddOrder(false) // Normal #1
 	c.AddBot()        // Bot#1 picks it up
 
-	c.WaitPickedUp(1)
+	c.waitPickedUp(1)
 	c.RemoveBot() // Bot#1 removed → Normal#1 requeued
 
 	c.AddBot() // Bot#2 — should immediately pick up Normal#1
-	c.WaitPickedUp(2)
+	c.waitPickedUp(2)
 	fake.Advance(procTime)
 	c.WaitAll()
 

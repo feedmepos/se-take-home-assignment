@@ -66,7 +66,7 @@ func TestPop(t *testing.T) {
 	}
 }
 
-func TestRequeuVIP(t *testing.T) {
+func TestRequeueVIP(t *testing.T) {
 	var q PendingQueue
 	// Simulate: VIP-3 was processing, new orders arrived
 	q.AddVIP(vip(7))

@@ -16,6 +16,8 @@ func main() {
 	if v := os.Getenv("PROC_TIME_MS"); v != "" {
 		if d, err := time.ParseDuration(v + "ms"); err == nil {
 			procTime = d
+		} else {
+			fmt.Fprintf(os.Stderr, "invalid PROC_TIME_MS %q, using default %s\n", v, procTime)
 		}
 	}
 
