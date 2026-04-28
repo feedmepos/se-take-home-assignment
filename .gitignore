@@ -1,0 +1,6 @@
+# Build artifacts
+order-controller
+# IDE configs
+.idea/
+# Go test/coverage artifacts
+coverage.out

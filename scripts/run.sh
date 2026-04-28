@@ -3,17 +3,27 @@
 # Run Script
 # This script should execute your CLI application and output results to result.txt
 
+set -e
+
 echo "Running CLI application..."
 
-# For Go projects:
-# ./order-controller > result.txt
+echo "McDonald's Order Management System - Simulation Results" > scripts/result.txt
+echo "" >> scripts/result.txt
 
-# For Node.js projects:
-# node index.js > result.txt
-# or npm start > result.txt
-
-# Temporary placeholder - remove this when you implement your CLI
-echo "Added 1 bot" > result.txt
-echo "status: bot: [1], order: []" >> result.txt
+cat <<'EOF' | ./order-controller >> scripts/result.txt
+new normal
+new vip
+new normal
+add bot
+sleep 1
+add bot
+sleep 11
+new vip
+sleep 11
+remove bot
+sleep 1
+summary
+exit
+EOF
 
 echo "CLI application execution completed"
