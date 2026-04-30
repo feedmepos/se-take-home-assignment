@@ -56,7 +56,7 @@ func runDemo(w io.Writer) {
 func runInteractive(r io.Reader, w io.Writer) {
 	c := order.NewController()
 	scanner := bufio.NewScanner(r)
-	fmt.Fprintln(w, "Commands: normal, vip, bot+, bot-, tick <seconds>, status, quit")
+	fmt.Fprintln(w, "Commands: normal, vip, +bot, -bot, tick <seconds>, status, quit")
 	for {
 		fmt.Fprint(w, "> ")
 		if !scanner.Scan() {
@@ -86,9 +86,9 @@ func execute(c *order.Controller, line string) error {
 		c.AddOrder(order.Normal)
 	case "vip", "new-vip", "new_vip":
 		c.AddOrder(order.VIP)
-	case "bot+", "+bot", "add-bot", "add_bot":
+	case "+bot", "add-bot", "add_bot":
 		c.AddBot()
-	case "bot-", "-bot", "remove-bot", "remove_bot":
+	case "-bot", "remove-bot", "remove_bot":
 		c.RemoveBot()
 	case "tick", "advance":
 		if len(fields) != 2 {

@@ -81,4 +81,4 @@ The run script writes the demo simulation output to `scripts/result.txt`. The CL
 ./order-controller interactive
 ```
 
-Available commands are `normal`, `vip`, `bot+`, `bot-`, `tick <seconds>`, `status`, and `quit`.
+Available commands are `normal`, `vip`, `+bot`, `-bot`, `tick <seconds>`, `status`, and `quit`.
