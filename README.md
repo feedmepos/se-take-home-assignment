@@ -62,3 +62,23 @@ You must implement **either** frontend or backend components as described below:
 - Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.
 - Treat this assignment as a vibe coding, don't over engineer it. Try to scope your working hour within 30 min. However, ensure you read and understand what your code doing.
 - Complete the implementation as clean as possible, clean code is a strong plus point, do not bring in all the fancy tech stuff.
+
+### Backend CLI Implementation
+
+This repository includes a Go CLI implementation of the order controller.
+
+Run the automated checks:
+
+```bash
+./scripts/test.sh
+./scripts/build.sh
+./scripts/run.sh
+```
+
+The run script writes the demo simulation output to `scripts/result.txt`. The CLI also supports an interactive mode for interview demonstration:
+
+```bash
+./order-controller interactive
+```
+
+Available commands are `normal`, `vip`, `bot+`, `bot-`, `tick <seconds>`, `status`, and `quit`.
