@@ -1,14 +1,12 @@
 #!/bin/bash
 
 # Unit Test Script
-# This script should contain all unit test execution steps
+# This script contains all unit test execution steps
 
 echo "Running unit tests..."
 
-# For Go projects:
-# go test ./... -v
+cd "$(dirname "$0")/.."
 
-# For Node.js projects:
-# npm test
+go test ./... -v
 
 echo "Unit tests completed"
