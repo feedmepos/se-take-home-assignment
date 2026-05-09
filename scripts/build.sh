@@ -3,13 +3,9 @@
 # Build Script
 # This script should contain all compilation steps for your CLI application
 
-echo "Building CLI application..."
+echo "Building application..."
 
-# For Go projects:
-# go build -o order-controller ./cmd/main.go
-
-# For Node.js projects:
-# npm install
-# npm run build (if needed)
+go build -o order-system ../main.go
+echo "Build successful: order-system"
 
 echo "Build completed"

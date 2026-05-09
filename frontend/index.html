@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>McDonald's Order System</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9edf2 100%);
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            min-height: 100vh;
+            padding: 0.75rem;
+        }
+
+        .app-container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* 紧凑 header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            padding: 0.5rem 1.25rem;
+            border-radius: 32px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 0.75rem;
+        }
+
+        .title-area h1 {
+            font-size: 1.3rem;
+            background: linear-gradient(135deg, #d62323, #ff8c00);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .title-area p {
+            font-size: 0.7rem;
+            color: #6c757d;
+        }
+
+        .lang-switch {
+            display: flex;
+            gap: 6px;
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 24px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.2s ease;
+            color: #6c757d;
+        }
+
+        .lang-btn.active {
+            background: #e9ecef;
+            color: #2c3e50;
+        }
+
+        /* 紧凑控制栏 */
+        .control-bar {
+            background: white;
+            border-radius: 28px;
+            padding: 0.5rem 1.25rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            justify-content: center;
+        }
+
+        .btn {
+            border: none;
+            padding: 5px 12px;
+            border-radius: 32px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .btn-primary {
+            background: #ffc107;
+            color: #2c3e50;
+        }
+
+        .btn-vip {
+            background: linear-gradient(95deg, #d62323, #b91c1c);
+            color: white;
+        }
+
+        .btn-bot-add {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-bot-remove {
+            background: #6c757d;
+            color: white;
+        }
+
+        .bot-count {
+            background: #e9ecef;
+            padding: 5px 12px;
+            border-radius: 32px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            margin-left: auto;
+        }
+
+        /* 两栏布局：待处理 + 已完成 */
+        .two-columns {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .column-card {
+            background: white;
+            border-radius: 20px;
+            padding: 0.75rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            height: 500px;
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.4rem;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .order-list {
+            flex: 1;
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        .order-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 0.4rem 0.6rem;
+            margin-bottom: 0.3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #e9ecef;
+        }
+
+        .order-id {
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        /* VIP 订单号红色 */
+        .order-id.vip-id {
+            color: #d62323;
+        }
+
+        /* 普通订单号深灰色 */
+        .order-id.normal-id {
+            color: #2c3e50;
+        }
+
+        /* VIP Member 标签红色 */
+        .order-type-badge.vip-badge {
+            color: #d62323;
+            background: rgba(255, 140, 0, 0.1);
+        }
+
+        .order-type-badge {
+            font-size: 0.6rem;
+            padding: 1px 5px;
+            border-radius: 16px;
+            background: rgba(0,0,0,0.04);
+            display: inline-block;
+        }
+
+        .order-status {
+            font-size: 0.7rem;
+            color: #6c757d;
+        }
+
+        .empty-tip {
+            color: #adb5bd;
+            text-align: center;
+            padding: 1rem;
+            font-style: italic;
+            font-size: 0.75rem;
+        }
+
+        /* 弱化的 Processing Orders 横排区域 */
+        .processing-bar {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 16px;
+            padding: 0.5rem 0.75rem;
+            margin-bottom: 0.75rem;
+            border: 1px dashed #dee2e6;
+        }
+
+        .processing-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            color: #6c757d;
+            margin-bottom: 0.35rem;
+        }
+
+        .processing-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .processing-badge {
+            background: #fff3cd;
+            border-radius: 20px;
+            padding: 0.2rem 0.6rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: #856404;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .processing-empty {
+            font-size: 0.7rem;
+            color: #adb5bd;
+            font-style: italic;
+        }
+
+        footer {
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.65rem;
+            margin-top: 0.5rem;
+            margin-bottom: 20px;
+        }
+
+        /* 滚动条美化 */
+        .order-list::-webkit-scrollbar {
+            width: 4px;
+        }
+        .order-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        .order-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        .order-list::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        /* 响应式：中等屏幕 */
+        @media (max-width: 1024px) {
+            body { padding: 0.5rem; }
+            .header { padding: 0.4rem 1rem; margin-bottom: 0.5rem; }
+            .control-bar { padding: 0.4rem 1rem; margin-bottom: 0.5rem; gap: 4px; }
+            .btn { padding: 4px 10px; font-size: 0.75rem; }
+            .two-columns { gap: 0.5rem; }
+            .column-card { padding: 0.6rem; max-height: 450px; }
+            .section-title { font-size: 0.9rem; }
+        }
+
+        /* 响应式：小屏幕（手机）改为单栏 */
+        @media (max-width: 640px) {
+            .two-columns {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+            .header { flex-direction: column; gap: 6px; text-align: center; }
+            .bot-count { margin-left: 0; }
+            .column-card { max-height: 350px; }
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div class="app-container">
+        <div class="header">
+            <div class="title-area">
+                <h1>🍔 McDonald's</h1>
+                <p>{{ t('subtitle') }}</p>
+            </div>
+            <div class="lang-switch">
+                <button class="lang-btn" :class="{ active: lang === 'en' }" @click="setLang('en')">English</button>
+                <button class="lang-btn" :class="{ active: lang === 'zh' }" @click="setLang('zh')">中文</button>
+            </div>
+        </div>
+
+        <div class="control-bar">
+            <button class="btn btn-primary" @click="newNormalOrder">➕ {{ t('newNormal') }}</button>
+            <button class="btn btn-vip" @click="newVipOrder">🌟 {{ t('newVip') }}</button>
+            <button class="btn btn-bot-add" @click="addBot">🤖 {{ t('addBot') }}</button>
+            <button class="btn btn-bot-remove" @click="removeBot">🗑️ {{ t('removeBot') }}</button>
+            <span class="bot-count">🤖 {{ t('robotCount') }}: {{ robotCount }}</span>
+        </div>
+
+        <!-- 两栏布局：待处理 + 已完成 -->
+        <div class="two-columns">
+            <!-- 待处理区域 -->
+            <div class="column-card">
+                <div class="section-title">
+                    <span>⏳</span> {{ t('pendingTitle') }}
+                </div>
+                <div class="order-list">
+                    <div v-if="pendingOrders.length === 0" class="empty-tip">{{ t('emptyPending') }}</div>
+                    <div v-for="order in pendingOrders" :key="order.id" class="order-item">
+                        <div>
+                            <div :class="['order-id', order.type === 'vip' ? 'vip-id' : 'normal-id']">
+                                #{{ order.id }}
+                            </div>
+                            <div :class="['order-type-badge', order.type === 'vip' ? 'vip-badge' : '']">
+                                {{ order.type === 'vip' ? t('vipLabel') : t('normalLabel') }}
+                            </div>
+                        </div>
+                        <div class="order-status">⏳ {{ t('waiting') }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 已完成区域（倒序排列：最新在上） -->
+            <div class="column-card">
+                <div class="section-title">
+                    <span>🍔</span> {{ t('completedTitle') }}
+                </div>
+                <div class="order-list">
+                    <div v-if="completedOrders.length === 0" class="empty-tip">{{ t('emptyCompleted') }}</div>
+                    <div v-for="order in reversedCompletedOrders" :key="order.id" class="order-item">
+                        <div>
+                            <div :class="['order-id', order.type === 'vip' ? 'vip-id' : 'normal-id']">
+                                #{{ order.id }}
+                            </div>
+                            <div :class="['order-type-badge', order.type === 'vip' ? 'vip-badge' : '']">
+                                {{ order.type === 'vip' ? t('vipLabel') : t('normalLabel') }}
+                            </div>
+                        </div>
+                        <div class="order-status">🍔 {{ t('done') }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 弱化的 Processing Orders 横排区域 -->
+        <div class="processing-bar">
+            <div class="processing-header">
+                <span>🍳</span> {{ t('processingTitle') }}
+            </div>
+            <div class="processing-items">
+                <template v-if="processing.length > 0">
+                    <div v-for="orderId in processing" :key="orderId" class="processing-badge">
+                        <span>🍳</span> #{{ orderId }}
+                    </div>
+                </template>
+                <span v-else class="processing-empty">{{ t('emptyProcessing') }}</span>
+            </div>
+        </div>
+
+        <footer>{{ t('footer') }}</footer>
+    </div>
+</div>
+
+<script>
+    const API_BASE = 'http://localhost:8080/api';
+
+    const messages = {
+        zh: {
+            subtitle: '智能订单处理 · 机器人厨师',
+            newNormal: '新普通订单',
+            newVip: '新VIP订单',
+            addBot: '+ 机器人',
+            removeBot: '- 机器人',
+            robotCount: '机器人数量',
+            pendingTitle: '待处理区域',
+            processingTitle: '备餐中订单',
+            completedTitle: '已完成区域',
+            emptyPending: '暂无待处理订单',
+            emptyProcessing: '暂无备餐中订单',
+            emptyCompleted: '暂无已完成订单',
+            vipLabel: 'VIP会员',
+            normalLabel: '普通顾客',
+            waiting: '等待中',
+            inProgress: '备餐中',
+            done: '已完成',
+            footer: '每个订单处理耗时 10 秒 | VIP 订单优先于普通订单'
+        },
+        en: {
+            subtitle: 'Smart Order Processing · Robot Chefs',
+            newNormal: 'New Normal Order',
+            newVip: 'New VIP Order',
+            addBot: '+ Robot',
+            removeBot: '- Robot',
+            robotCount: 'Robots',
+            pendingTitle: 'Pending Orders',
+            processingTitle: 'Processing Orders',
+            completedTitle: 'Completed Orders',
+            emptyPending: 'No pending orders',
+            emptyProcessing: 'No processing orders',
+            emptyCompleted: 'No completed orders',
+            vipLabel: 'VIP Member',
+            normalLabel: 'Normal Customer',
+            waiting: 'Waiting',
+            inProgress: 'In Progress',
+            done: 'Completed',
+            footer: 'Each order takes 10 seconds | VIP prioritized over normal'
+        }
+    };
+
+    const { createApp, ref, computed, onMounted } = Vue;
+
+    createApp({
+        setup() {
+            const lang = ref('en');
+            const t = (key) => messages[lang.value][key] || key;
+
+            const pendingOrders = ref([]);
+            const completedOrders = ref([]);
+            const robotCount = ref(0);
+            const processing = ref([]);
+
+            // 已完成订单倒序排列（最新完成的在最上面）
+            const reversedCompletedOrders = computed(() => {
+                return [...completedOrders.value].reverse();
+            });
+
+            const fetchState = async () => {
+                try {
+                    const res = await fetch(`${API_BASE}/state`);
+                    const data = await res.json();
+                    pendingOrders.value = data.pendingOrders || [];
+                    completedOrders.value = data.completed || [];
+                    robotCount.value = data.robotCount || 0;
+                    processing.value = data.processing || [];
+                } catch (err) {
+                    console.error("fetch state error", err);
+                }
+            };
+
+            const newNormalOrder = async () => {
+                await fetch(`${API_BASE}/order/normal`, { method: 'POST' });
+                fetchState();
+            };
+
+            const newVipOrder = async () => {
+                await fetch(`${API_BASE}/order/vip`, { method: 'POST' });
+                fetchState();
+            };
+
+            const addBot = async () => {
+                await fetch(`${API_BASE}/bot/add`, { method: 'POST' });
+                fetchState();
+            };
+
+            const removeBot = async () => {
+                await fetch(`${API_BASE}/bot/remove`, { method: 'POST' });
+                fetchState();
+            };
+
+            const setLang = (newLang) => {
+                lang.value = newLang;
+            };
+
+            onMounted(() => {
+                fetchState();
+                setInterval(fetchState, 1000);
+            });
+
+            return {
+                lang, t, setLang,
+                pendingOrders, completedOrders, robotCount, processing,
+                reversedCompletedOrders,
+                newNormalOrder, newVipOrder, addBot, removeBot
+            };
+        }
+    }).mount('#app');
+</script>
+</body>
+</html>
