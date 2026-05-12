@@ -1,0 +1,87 @@
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --cream: #f8f4dd;
+  --ink: #0d1b2a;
+}
+
+body {
+  margin: 0;
+  font-family: "IBM Plex Sans", sans-serif;
+  color: var(--ink);
+}
+
+@layer utilities {
+  .font-display {
+    font-family: "Bebas Neue", sans-serif;
+    letter-spacing: 0.03em;
+  }
+
+  .bg-cream {
+    background-color: var(--cream);
+  }
+
+  .bg-grid-pattern {
+    background-color: #efe7cf;
+    background-image:
+      linear-gradient(rgba(13, 27, 42, 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(13, 27, 42, 0.08) 1px, transparent 1px),
+      radial-gradient(
+        circle at 20% 10%,
+        rgba(211, 84, 0, 0.22),
+        transparent 30%
+      ),
+      radial-gradient(
+        circle at 82% 15%,
+        rgba(253, 224, 71, 0.25),
+        transparent 26%
+      );
+    background-size:
+      22px 22px,
+      22px 22px,
+      100% 100%,
+      100% 100%;
+  }
+
+  .shadow-hard {
+    box-shadow: 8px 8px 0 #0d1b2a;
+  }
+
+  .shadow-hard-sm {
+    box-shadow: 4px 4px 0 #0d1b2a;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply rounded-lg border-2 px-4 py-2 text-sm font-semibold tracking-wide transition-transform duration-150;
+  }
+
+  .btn:hover {
+    @apply -translate-y-1;
+  }
+
+  .btn:active {
+    @apply translate-y-0;
+  }
+
+  .btn-normal {
+    @apply border-slate-900 bg-white text-slate-900;
+  }
+
+  .btn-vip {
+    @apply border-amber-700 bg-amber-200 text-amber-900;
+  }
+
+  .btn-bot {
+    @apply border-red-700 bg-red-100 text-red-900;
+  }
+
+  .bot-card {
+    @apply rounded-xl border border-slate-900 bg-white p-3 shadow-hard-sm;
+  }
+}

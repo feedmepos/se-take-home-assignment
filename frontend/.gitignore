@@ -1,0 +1,6 @@
+# macOS
+.DS_Store
+
+# Frontend build artifacts
+node_modules
+dist
