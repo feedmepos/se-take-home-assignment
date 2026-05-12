@@ -1,0 +1,6 @@
+{
+    "editor.formatOnType": true,
+    "[autolisp]": {
+        "editor.wordSeparators": "`|;'\",()"
+    }
+}
