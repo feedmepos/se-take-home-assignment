@@ -34,11 +34,11 @@ jobs:
     - name: Make scripts executable
       run: chmod +x scripts/test.sh scripts/build.sh scripts/run.sh
       
-    - name: Execute test script
-      run: ./scripts/test.sh
-      
     - name: Execute build script
       run: ./scripts/build.sh
+      
+    - name: Execute test script
+      run: ./scripts/test.sh
       
     - name: Verify build artifacts
       run: |
