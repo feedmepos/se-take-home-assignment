@@ -627,8 +627,6 @@ npm test
 - Logger can save to file
 
 #### Build Tests
-- Server build exists
-- Client build exists
 - Package.json files exist
 
 #### Scripts Tests

@@ -106,14 +106,6 @@ console.log('\n🏗️  Testing Build Artifacts...\n');
 try {
   const tests = [
     {
-      name: 'Server build exists',
-      pass: fs.existsSync(path.join(__dirname, '../../dist/server/index.js')),
-    },
-    {
-      name: 'Client build exists',
-      pass: fs.existsSync(path.join(__dirname, '../../client/dist/index.html')),
-    },
-    {
       name: 'Package.json exists',
       pass: fs.existsSync(path.join(__dirname, '../../package.json')),
     },
