@@ -34,7 +34,8 @@ app.use(cors());
 app.use(express.json());
 
 // Serve static files from client build
-const clientDistPath = path.join(__dirname, '../client/dist');
+// __dirname is dist/server, so we need to go up two levels to project root, then into client/dist
+const clientDistPath = path.join(__dirname, '../../client/dist');
 app.use(express.static(clientDistPath));
 
 // Apply general rate limiter to all API routes
