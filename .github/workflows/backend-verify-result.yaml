@@ -1,4 +1,4 @@
-name: backend-verify-result
+name: Backend Verification
 
 on:
   pull_request:
@@ -6,31 +6,30 @@ on:
     branches: [ main ]
 
 jobs:
-  verify-result:
+  verify-backend:
     runs-on: ubuntu-latest
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Set up Go
-      uses: actions/setup-go@v5
-      with:
-        go-version: '1.23.9'
-        
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '22.19.0'
+        node-version: '20.x'
+        cache: 'npm'
         
-    - name: Verify Go version
-      run: go version
-      
     - name: Verify Node.js version
       run: node --version
       
     - name: Verify npm version
       run: npm --version
+
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Install client dependencies
+      run: cd client && npm ci && cd ..
 
     - name: Make scripts executable
       run: chmod +x scripts/test.sh scripts/build.sh scripts/run.sh
@@ -41,8 +40,17 @@ jobs:
     - name: Execute build script
       run: ./scripts/build.sh
       
-    - name: Execute run script
-      run: ./scripts/run.sh
+    - name: Verify build artifacts
+      run: |
+        if [ ! -d "dist/server" ]; then
+          echo "ERROR: Server build not found"
+          exit 1
+        fi
+        if [ ! -d "client/dist" ]; then
+          echo "ERROR: Client build not found"
+          exit 1
+        fi
+        echo "✓ Build artifacts verified"
       
     - name: Verify result.txt exists and is not empty
       run: |

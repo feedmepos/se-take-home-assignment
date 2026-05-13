@@ -1,19 +1,24 @@
 #!/bin/bash
+set -e
 
-# Run Script
-# This script should execute your CLI application and output results to result.txt
+echo "=========================================="
+echo "Starting McDonald's Order Management System"
+echo "=========================================="
+echo ""
 
-echo "Running CLI application..."
+# Check if build exists
+if [ ! -d "dist/server" ] || [ ! -d "client/dist" ]; then
+    echo "Build not found. Building..."
+    bash scripts/build.sh
+    echo ""
+fi
 
-# For Go projects:
-# ./order-controller > result.txt
+echo "Starting server..."
+echo "Server will run on http://localhost:3001"
+echo "Frontend will be served from client/dist"
+echo ""
+echo "Press Ctrl+C to stop the server"
+echo ""
 
-# For Node.js projects:
-# node index.js > result.txt
-# or npm start > result.txt
-
-# Temporary placeholder - remove this when you implement your CLI
-echo "Added 1 bot" > result.txt
-echo "status: bot: [1], order: []" >> result.txt
-
-echo "CLI application execution completed"
+# Start the server
+npm start
