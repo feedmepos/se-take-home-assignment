@@ -1,6 +1,11 @@
 import { Order, OrderType, OrderStatus, SystemState, Bot } from './types.js';
 import { logger } from './utils/logger.js';
 
+// Processing time in milliseconds (10 seconds for demo)
+const PROCESSING_TIME_MS = 10000;
+
+type StateChangeCallback = (state: { orders: Order[]; bots: Bot[] }) => void;
+
 export class OrderManager {
   private state: SystemState = {
     orders: [],
@@ -10,6 +15,20 @@ export class OrderManager {
   };
 
   private processingIntervals: Map<number, NodeJS.Timeout> = new Map();
+  private onStateChange: StateChangeCallback | null = null;
+
+  setStateChangeCallback(callback: StateChangeCallback): void {
+    this.onStateChange = callback;
+  }
+
+  private notifyStateChange(): void {
+    if (this.onStateChange) {
+      this.onStateChange({
+        orders: this.state.orders,
+        bots: this.state.bots,
+      });
+    }
+  }
 
   createOrder(type: OrderType): Order {
     const order: Order = {
@@ -20,6 +39,7 @@ export class OrderManager {
     };
     this.state.orders.push(order);
     logger.logOrderCreated(order.id, type);
+    this.notifyStateChange();
     this.processNextOrder();
     return order;
   }
@@ -31,6 +51,7 @@ export class OrderManager {
     };
     this.state.bots.push(bot);
     logger.logBotCreated(bot.id);
+    this.notifyStateChange();
     this.processNextOrder();
     return bot;
   }
@@ -55,7 +76,8 @@ export class OrderManager {
       }
     }
 
-    logger.logBotRemoved(bot.id);
+    logger.logBotRemoved(bot.id, bot.status);
+    this.notifyStateChange();
     return bot;
   }
 
@@ -71,11 +93,15 @@ export class OrderManager {
     idleBot.processingStartTime = new Date();
     nextOrder.status = 'PROCESSING';
 
+    // Log bot picking up order
+    logger.logBotPickedUpOrder(idleBot.id, nextOrder.id, nextOrder.type);
+    this.notifyStateChange();
+
     const interval = setInterval(() => {
       this.completeOrder(idleBot.id, nextOrder.id);
       clearInterval(interval);
       this.processingIntervals.delete(idleBot.id);
-    }, 10000); // 10 seconds
+    }, PROCESSING_TIME_MS);
 
     this.processingIntervals.set(idleBot.id, interval);
   }
@@ -85,7 +111,13 @@ export class OrderManager {
     if (order) {
       order.status = 'COMPLETE';
       order.completedAt = new Date();
-      logger.logOrderCompleted(order.id);
+      
+      // Calculate processing time
+      // const processingTime = order.completedAt && order.createdAt 
+      //   ? Math.round((order.completedAt.getTime() - order.createdAt.getTime()) / 1000)
+      //   : 0;
+      
+      logger.logOrderCompleted(order.id, 10);
     }
 
     const bot = this.state.bots.find((b) => b.id === botId);
@@ -93,6 +125,8 @@ export class OrderManager {
       bot.status = 'IDLE';
       bot.currentOrderId = undefined;
       bot.processingStartTime = undefined;
+      logger.logBotIdle(bot.id);
+      this.notifyStateChange();
       this.processNextOrder();
     }
   }
@@ -126,5 +160,6 @@ export class OrderManager {
       nextBotId: 1,
     };
     logger.logSystemReset();
+    this.notifyStateChange();
   }
 }

@@ -10,7 +10,7 @@ import {
   ControlPanel,
   StatsDashboard,
   OrderSection,
-  BotSection,
+  ProcessingSection,
 } from './components';
 
 function App() {
@@ -68,17 +68,17 @@ function App() {
   const completeOrders = orders.filter((o) => o.status === 'COMPLETE');
 
   return (
-    <div className="bg-linear-to-br from-red-50 to-yellow-50 p-8 min-h-screen">
-      <div className="mx-auto max-w-7xl">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="mb-2 font-bold text-red-700 text-4xl">
-            🍔 McDonald's Order Management System
-          </h1>
-          <p className="text-gray-600">Automated Cooking Bot Control</p>
-        </div>
+    <div className="flex flex-col bg-linear-to-br from-red-50 to-yellow-50 w-screen h-screen overflow-hidden">
+      {/* Header */}
+      <div className="px-8 pt-8 pb-4 shrink-0">
+        <h1 className="mb-2 font-bold text-red-700 text-4xl">
+          🍔 McDonald's Order Management System
+        </h1>
+        <p className="text-gray-600">Automated Cooking Bot Control</p>
+      </div>
 
-        {/* Control Panel */}
+      {/* Control Panel */}
+      <div className="px-8 pb-4 shrink-0">
         <ControlPanel
           onCreateNormalOrder={handleCreateNormalOrder}
           onCreateVipOrder={handleCreateVipOrder}
@@ -87,50 +87,35 @@ function App() {
           onReset={handleReset}
           loading={false}
         />
+      </div>
 
-        {/* Stats Dashboard */}
+      {/* Stats Dashboard */}
+      <div className="px-8 pb-4 shrink-0">
         <StatsDashboard
           totalOrders={orders.length}
           activeBots={bots.length}
           pendingCount={pendingOrders.length}
           completedCount={completeOrders.length}
         />
+      </div>
 
-        {/* Main Content */}
-        <div className="gap-8 grid grid-cols-1 lg:grid-cols-3">
+      {/* Main Content - Full Height */}
+      <div className="flex-1 px-8 pb-8 overflow-hidden">
+        <div className="gap-6 grid grid-cols-1 lg:grid-cols-3 h-full">
           {/* Pending Orders */}
           <OrderSection
             title="PENDING"
             icon="📋"
             orders={pendingOrders}
             textColor="text-yellow-700"
+            fullHeight
           />
 
           {/* Processing & Bots */}
-          <div className="bg-white shadow-lg p-6 rounded-lg">
-            <div className="mb-6">
-              <h3 className="mb-4 font-bold text-blue-700 text-xl">
-                ⚙️ PROCESSING ({processingOrders.length})
-              </h3>
-              <div className="space-y-3 max-h-40 overflow-y-auto">
-                {processingOrders.length === 0 ? (
-                  <p className="py-4 text-gray-500 text-center">No orders processing</p>
-                ) : (
-                  processingOrders.map((order) => (
-                    <OrderSection
-                      key={order.id}
-                      title=""
-                      icon=""
-                      orders={[order]}
-                      textColor=""
-                    />
-                  ))
-                )}
-              </div>
-            </div>
-
-            <BotSection bots={bots} />
-          </div>
+          <ProcessingSection
+            processingOrders={processingOrders}
+            bots={bots}
+          />
 
           {/* Completed Orders */}
           <OrderSection
@@ -138,6 +123,7 @@ function App() {
             icon="✅"
             orders={completeOrders}
             textColor="text-green-700"
+            fullHeight
           />
         </div>
       </div>

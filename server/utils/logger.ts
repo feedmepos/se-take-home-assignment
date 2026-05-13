@@ -34,11 +34,7 @@ class Logger {
   }
 
   private formatLogLine(entry: LogEntry): string {
-    let line = `[${entry.timestamp}] ${entry.message}`;
-    if (entry.data) {
-      line += ` - ${JSON.stringify(entry.data)}`;
-    }
-    return line;
+    return `[${entry.timestamp}] ${entry.message}`;
   }
 
   private logToConsole(entry: LogEntry): void {
@@ -80,19 +76,33 @@ class Logger {
   }
 
   logOrderCreated(orderId: number, type: string): void {
-    this.success(`Order created`, { id: orderId, type });
+    this.success(`Created ${type} Order #${orderId} - Status: PENDING`);
   }
 
-  logOrderCompleted(orderId: number): void {
-    this.success(`Order completed`, { id: orderId });
+  logOrderCompleted(orderId: number, processingTime?: number): void {
+    const timeStr = processingTime ? ` (Processing time: ${processingTime}s)` : '';
+    this.success(`Order completed #${orderId} - Status: COMPLETE${timeStr}`);
   }
 
   logBotCreated(botId: number): void {
-    this.success(`Bot created`, { id: botId });
+    this.success(`Bot #${botId} created - Status: ACTIVE`);
   }
 
-  logBotRemoved(botId: number): void {
-    this.success(`Bot removed`, { id: botId });
+  logBotRemoved(botId: number, status?: string): void {
+    const statusStr = status ? ` while ${status}` : '';
+    this.success(`Bot #${botId} destroyed${statusStr}`);
+  }
+
+  logBotPickedUpOrder(botId: number, orderId: number, orderType: string): void {
+    this.success(`Bot #${botId} picked up ${orderType} Order #${orderId} - Status: PROCESSING`);
+  }
+
+  logBotIdle(botId: number): void {
+    this.success(`Bot #${botId} is now IDLE - No pending orders`);
+  }
+
+  logSystemInitialized(botCount: number): void {
+    this.success(`System initialized with ${botCount} bots`);
   }
 
   logSystemReset(): void {
@@ -114,52 +124,12 @@ class Logger {
   }
 
   private formatLogs(): string {
-    const header = `McDonald's Order Management System - Results\n`;
-    const separator = '='.repeat(60) + '\n';
-    const timestamp = `Generated: ${new Date().toLocaleString()}\n`;
-    const divider = '-'.repeat(60) + '\n';
-
-    let content = header + separator + timestamp + divider;
-
-    // Group logs by level
-    const grouped = this.groupByLevel();
-
-    if (grouped.SUCCESS.length > 0) {
-      content += `\n✅ SUCCESSFUL OPERATIONS (${grouped.SUCCESS.length}):\n`;
-      grouped.SUCCESS.forEach((log) => {
-        content += `  ${this.formatLogLine(log)}\n`;
-      });
-    }
-
-    if (grouped.INFO.length > 0) {
-      content += `\n📋 INFORMATION (${grouped.INFO.length}):\n`;
-      grouped.INFO.forEach((log) => {
-        content += `  ${this.formatLogLine(log)}\n`;
-      });
-    }
-
-    if (grouped.WARN.length > 0) {
-      content += `\n⚠️  WARNINGS (${grouped.WARN.length}):\n`;
-      grouped.WARN.forEach((log) => {
-        content += `  ${this.formatLogLine(log)}\n`;
-      });
-    }
-
-    if (grouped.ERROR.length > 0) {
-      content += `\n❌ ERRORS (${grouped.ERROR.length}):\n`;
-      grouped.ERROR.forEach((log) => {
-        content += `  ${this.formatLogLine(log)}\n`;
-      });
-    }
-
-    // Summary
-    content += `\n${divider}`;
-    content += `SUMMARY:\n`;
-    content += `  Total Operations: ${this.logs.length}\n`;
-    content += `  Successful: ${grouped.SUCCESS.length}\n`;
-    content += `  Warnings: ${grouped.WARN.length}\n`;
-    content += `  Errors: ${grouped.ERROR.length}\n`;
-    content += `${separator}`;
+    let content = '';
+    
+    // Output all logs in chronological order
+    this.logs.forEach((log) => {
+      content += this.formatLogLine(log) + '\n';
+    });
 
     return content;
   }

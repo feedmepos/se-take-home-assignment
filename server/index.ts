@@ -24,6 +24,11 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const orderManager = new OrderManager();
 
+// Set up SSE broadcast callback
+orderManager.setStateChangeCallback((state) => {
+  sseManager.broadcast(state);
+});
+
 // Middleware
 app.use(cors());
 app.use(express.json());
