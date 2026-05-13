@@ -23,7 +23,7 @@ This application is configured for production deployment on Render with automate
 4. Configure the service:
    - **Name**: `mcdonalds-order-system`
    - **Environment**: `Node`
-   - **Build Command**: `npm install && npm run build`
+   - **Build Command**: `npm install && cd client && npm install && cd .. && npm run build`
    - **Start Command**: `npm start`
    - **Plan**: Free (or paid for production)
 
