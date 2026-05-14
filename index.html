@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>McDonald's Bot System</title>
+    <style>
+        body { font-family: sans-serif; display: flex; gap: 20px; padding: 20px; background: #eee; }
+        .column { flex: 1; background: white; padding: 15px; border-radius: 8px; min-height: 400px; }
+        .order { padding: 8px; margin: 5px 0; border: 1px solid #ddd; border-left: 5px solid #ccc; }
+        .vip { border-left-color: #ffc72c; background: #fffde7; }
+        .bot { border: 2px solid #4caf50; padding: 10px; margin: 5px; border-radius: 5px; }
+        .idle { border-color: #ccc; opacity: 0.6; }
+        button { cursor: pointer; padding: 8px 12px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="column">
+    <h2>Controls</h2>
+    <button onclick="fetch('/add-order?type=normal')">New Normal Order</button>
+    <button onclick="fetch('/add-order?type=vip')">New VIP Order</button><br>
+    <button onclick="fetch('/bot?action=add')">+ Bot</button>
+    <button onclick="fetch('/bot?action=remove')">- Bot</button>
+    
+    <h3>Pending</h3>
+    <div id="pending"></div>
+</div>
+
+<div class="column">
+    <h2>Bots</h2>
+    <div id="bots"></div>
+</div>
+
+<div class="column">
+    <h2>Complete</h2>
+    <div id="completed"></div>
+</div>
+
+<script>
+    async function update() {
+        const res = await fetch('/status');
+        const data = await res.json();
+
+        document.getElementById('pending').innerHTML = data.pending.map(o => `
+            <div class="order ${o.isVip ? 'vip' : ''}">#${o.id} ${o.isVip ? 'VIP' : ''}</div>
+        `).join('');
+
+        document.getElementById('bots').innerHTML = data.bots.map(b => `
+            <div class="bot ${b.isBusy ? '' : 'idle'}">
+                Bot #${b.id} <br>
+                ${b.isBusy ? '<strong>Cooking #' + b.currentOrder.id + '</strong>' : 'IDLE'}
+            </div>
+        `).join('');
+
+        document.getElementById('completed').innerHTML = data.completed.map(o => `
+            <div class="order">#${o.id} - Done at ${o.doneTime}</div>
+        `).reverse().join('');
+    }
+
+    setInterval(update, 1000); // 每一秒拉取一次最新状态
+    update();
+</script>
+</body>
+</html>
