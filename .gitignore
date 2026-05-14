@@ -1,0 +1,12 @@
+# Dependencies
+node_modules
+
+
+# Build output
+dist
+
+# Others
+.DS_Store
+demo/
+output.log
+

@@ -1,0 +1,26 @@
+{
+  "name": "feedme-se-take-home-assignment",
+  "version": "1.0.0",
+  "description": "Below is a take home assignment before the interview of the position. You are required to 1. Understand the situation and use case. You may contact the interviewer for further clarification. 2. implement the requirement with **either frontend or backend components**. 3. Complete the requirement with **AI** if possible, but perform your own testing. 4. Provide documentation for the any part that you think is needed. 5. Bring the source code and functioning prototype to the interview session.",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "build": "tsc",
+    "cli": "ts-node src/cli.ts",
+    "demo": "ts-node src/demo.ts",
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^25.1.0",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.6",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}
