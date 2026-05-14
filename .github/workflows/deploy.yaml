@@ -1,0 +1,72 @@
+name: Build and Deploy to Render
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Install client dependencies
+      run: cd client && npm ci && cd ..
+      
+    - name: Run tests
+      run: npm test
+      
+    - name: Build server
+      run: npm run server:build
+      
+    - name: Build client
+      run: npm run client:build
+      
+    - name: Verify build artifacts
+      run: |
+        if [ ! -d "dist/server" ]; then
+          echo "ERROR: Server build not found"
+          exit 1
+        fi
+        if [ ! -d "client/dist" ]; then
+          echo "ERROR: Client build not found"
+          exit 1
+        fi
+        echo "✓ Build artifacts verified"
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Deploy to Render
+      env:
+        RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+      run: |
+        if [ -z "$RENDER_DEPLOY_HOOK" ]; then
+          echo "WARNING: RENDER_DEPLOY_HOOK not configured. Skipping deployment."
+          echo "To enable automatic deployment:"
+          echo "1. Go to your Render service settings"
+          echo "2. Copy the Deploy Hook URL"
+          echo "3. Add it as a GitHub secret named RENDER_DEPLOY_HOOK"
+          exit 0
+        fi
+        curl "$RENDER_DEPLOY_HOOK"
+        echo "Deployment triggered successfully"

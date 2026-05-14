@@ -1,15 +1,27 @@
 #!/bin/bash
+set -e
 
-# Build Script
-# This script should contain all compilation steps for your CLI application
+echo "=========================================="
+echo "Building McDonald's Order Management System"
+echo "=========================================="
+echo ""
 
-echo "Building CLI application..."
+echo "[1/3] Installing dependencies..."
+npm install
+cd client && npm install && cd ..
+echo "✓ Dependencies installed"
+echo ""
 
-# For Go projects:
-# go build -o order-controller ./cmd/main.go
+echo "[2/3] Building server..."
+npm run server:build
+echo "✓ Server built successfully"
+echo ""
 
-# For Node.js projects:
-# npm install
-# npm run build (if needed)
+echo "[3/3] Building client..."
+npm run client:build
+echo "✓ Client built successfully"
+echo ""
 
-echo "Build completed"
+echo "=========================================="
+echo "✓ Build completed successfully!"
+echo "=========================================="

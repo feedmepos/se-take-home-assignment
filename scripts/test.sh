@@ -1,14 +1,23 @@
 #!/bin/bash
+set -e
 
-# Unit Test Script
-# This script should contain all unit test execution steps
+echo "=========================================="
+echo "Running Tests"
+echo "=========================================="
+echo ""
 
-echo "Running unit tests..."
+# Check if node_modules exists
+if [ ! -d "node_modules" ]; then
+    echo "Dependencies not found. Installing..."
+    npm install
+    echo ""
+fi
 
-# For Go projects:
-# go test ./... -v
+# Run tests
+echo "Running tests..."
+npm test
 
-# For Node.js projects:
-# npm test
-
-echo "Unit tests completed"
+echo ""
+echo "=========================================="
+echo "✓ Tests completed"
+echo "=========================================="
