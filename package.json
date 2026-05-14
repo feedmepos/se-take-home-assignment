@@ -1,0 +1,19 @@
+{
+  "name": "mcdonalds-order-controller",
+  "version": "1.0.0",
+  "description": "McDonald's automated order management system - CLI backend",
+  "main": "dist/simulation.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/simulation.js",
+    "cli": "node dist/cli.js",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/node": "^22.0.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.0",
+    "typescript": "^5.5.0"
+  }
+}
