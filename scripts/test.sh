@@ -9,6 +9,6 @@ echo "Running unit tests..."
 # go test ./... -v
 
 # For Node.js projects:
-# npm test
+npm test
 
 echo "Unit tests completed"

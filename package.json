@@ -1,0 +1,28 @@
+{
+  "name": "se-take-home-assignment",
+  "version": "1.0.0",
+  "description": "Order Management System",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "node dist/index.js",
+    "build": "tsc",
+    "test": "vitest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joel97wong/se-take-home-assignment.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/joel97wong/se-take-home-assignment/issues"
+  },
+  "homepage": "https://github.com/joel97wong/se-take-home-assignment#readme",
+  "devDependencies": {
+    "@types/node": "^25.0.6",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.16"
+  }
+}

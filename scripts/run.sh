@@ -9,11 +9,10 @@ echo "Running CLI application..."
 # ./order-controller > result.txt
 
 # For Node.js projects:
-# node index.js > result.txt
-# or npm start > result.txt
+npm start > scripts/result.txt
 
 # Temporary placeholder - remove this when you implement your CLI
-echo "Added 1 bot" > result.txt
-echo "status: bot: [1], order: []" >> result.txt
+# echo "Added 1 bot" > result.txt
+# echo "status: bot: [1], order: []" >> result.txt
 
 echo "CLI application execution completed"
