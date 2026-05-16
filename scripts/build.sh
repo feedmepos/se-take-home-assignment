@@ -5,11 +5,14 @@
 
 echo "Building CLI application..."
 
-# For Go projects:
-# go build -o order-controller ./cmd/main.go
-
 # For Node.js projects:
-# npm install
-# npm run build (if needed)
+# Check if Node.js is installed
+if ! command -v node &> /dev/null; then
+    echo "Node.js is required but not installed. Please install Node.js."
+    exit 1
+fi
 
-echo "Build completed"
+# Install dependencies (if any are added in the future)
+npm install
+
+echo "Build completed successfully"

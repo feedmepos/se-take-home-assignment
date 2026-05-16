@@ -1,0 +1,15 @@
+{
+  "name": "mcdonald-order-controller",
+  "version": "1.0.0",
+  "description": "McDonald's Order Management CLI Application",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node test.js"
+  },
+  "keywords": ["order", "management", "cli", "mcdonald", "bot"],
+  "author": "Software Engineer",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}
