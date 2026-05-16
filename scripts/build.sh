@@ -5,6 +5,8 @@
 
 echo "Building CLI application..."
 
+go build -o mcd_order_bot main.go
+
 # For Go projects:
 # go build -o order-controller ./cmd/main.go
 
