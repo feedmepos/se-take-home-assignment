@@ -3,17 +3,13 @@
 # Run Script
 # This script should execute your CLI application and output results to result.txt
 
-echo "Running CLI application..."
+cd "$(dirname "$0")/.."
 
-# For Go projects:
-# ./order-controller > result.txt
-
-# For Node.js projects:
-# node index.js > result.txt
-# or npm start > result.txt
-
-# Temporary placeholder - remove this when you implement your CLI
-echo "Added 1 bot" > result.txt
-echo "status: bot: [1], order: []" >> result.txt
-
-echo "CLI application execution completed"
+if [[ "$1" == "--interactive" || "$1" == "-i" ]]; then
+  echo "Starting interactive mode..."
+  node index.js --interactive 
+else
+  echo "Running CLI application..."
+  node index.js > scripts/result.txt
+  echo "CLI application execution completed"
+fi
