@@ -1,0 +1,10 @@
+{
+	"go.goroot": "${env:HOME}/.gvm/gos/go1.24.6",
+	"go.alternateTools": {
+		"gopls": "${env:HOME}/.gvm/pkgsets/go1.24.6/global/bin/gopls"
+	},
+	"go.toolsEnvVars": {
+		"PATH": "${env:HOME}/.gvm/gos/go1.24.6/bin:${env:PATH}"
+	},
+	"go.useLanguageServer": true
+}
