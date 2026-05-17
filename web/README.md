@@ -25,6 +25,8 @@ npm install
 npm run dev
 ```
 
+**CI note:** `scripts/test.sh` and `scripts/build.sh` run `npm ci`, which requires **`package-lock.json` at the repo root to be committed**. If GitHub Actions fails with “can only install with an existing package-lock.json”, add and push that file.
+
 Then open the URL Next prints (usually `http://localhost:3000`).
 
 Optional faster cooks while testing — create **`web/.env.local`**:
