@@ -1,15 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-# Build Script
-# This script should contain all compilation steps for your CLI application
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT"
 
-echo "Building CLI application..."
-
-# For Go projects:
-# go build -o order-controller ./cmd/main.go
-
-# For Node.js projects:
-# npm install
-# npm run build (if needed)
-
-echo "Build completed"
+echo "Building Next.js production bundle (static export)..."
+npm ci
+npm run build -w web
+echo "Build completed (Next.js static export: web/out)"

@@ -1,4 +1,11 @@
 ## FeedMe Software Engineer Take Home Assignment
+
+### Implementation (this fork)
+
+- **Frontend** in `web/`: **Next.js** (App Router) + React + TypeScript + Tailwind. From the repo root run `npm install` then `npm run dev` (npm workspaces). Static export output: `web/out`.
+- **Docs**: `web/README.md` (build, test, deploy).
+- **CI**: `.github/workflows/backend-verify-result.yaml` runs `scripts/test.sh`, `scripts/build.sh`, and `scripts/run.sh` (writes `scripts/result.txt` with `HH:MM:SS` timestamps after a successful `web` build).
+
 Below is a take home assignment before the interview of the position. You are required to
 1. Understand the situation and use case. You may contact the interviewer for further clarification.
 2. implement the requirement with **either frontend or backend components**.
