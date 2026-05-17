@@ -1,0 +1,10 @@
+node_modules/
+web/node_modules/
+web/dist/
+web/.next/
+web/out/
+.DS_Store
+*.log
+.env
+web/.env
+web/.env.local

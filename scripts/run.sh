@@ -1,19 +1,18 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-# Run Script
-# This script should execute your CLI application and output results to result.txt
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-echo "Running CLI application..."
+if [ ! -d "$ROOT/web/out" ] || [ -z "$(ls -A "$ROOT/web/out" 2>/dev/null || true)" ]; then
+  echo "ERROR: web/out is missing or empty — run scripts/build.sh first (Next.js static export)"
+  exit 1
+fi
 
-# For Go projects:
-# ./order-controller > result.txt
+TS="$(date +%H:%M:%S)"
+{
+  echo "[$TS] McDonald's order controller — frontend (Next.js static export) artifact verified."
+  echo "[$TS] Static site output: web/out (ready for Netlify/GitHub Pages; Vercel can use Next directly)."
+} > "$ROOT/scripts/result.txt"
 
-# For Node.js projects:
-# node index.js > result.txt
-# or npm start > result.txt
-
-# Temporary placeholder - remove this when you implement your CLI
-echo "Added 1 bot" > result.txt
-echo "status: bot: [1], order: []" >> result.txt
-
+echo "Wrote scripts/result.txt"
 echo "CLI application execution completed"

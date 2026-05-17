@@ -1,0 +1,13 @@
+{
+  "name": "se-take-home-assignment",
+  "private": true,
+  "description": "McDonald's order controller take-home — frontend workspace: ./web",
+  "workspaces": [
+    "web"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w web",
+    "build": "npm run build -w web",
+    "test": "npm run test -w web"
+  }
+}
