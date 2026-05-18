@@ -1,14 +1,17 @@
 #!/bin/bash
 
-# Unit Test Script
-# This script should contain all unit test execution steps
+set -e
+
+echo "Installing dependencies..."
+npm install
 
 echo "Running unit tests..."
+npm test
 
-# For Go projects:
-# go test ./... -v
+echo "Generating result.txt..."
+npx tsx src/index.ts --simulate < scripts/simulation.input > scripts/result.txt
 
-# For Node.js projects:
-# npm test
+echo "Validating result.txt..."
+npx tsx scripts/validate.ts scripts/result.txt
 
 echo "Unit tests completed"
