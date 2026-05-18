@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "build": "tsc",
+    "run": "node dist/index.js",
+    "test": "bash scripts/test.sh"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.2",
+    "typescript": "^6.0.2"
+  }
+}
