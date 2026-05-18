@@ -19,6 +19,24 @@ function insertWithPriority(list: Order[], order: Order): Order[] {
   return next;
 }
 
+// Insert order keeping VIP/Normal priority. Within same type, smaller id (older) goes first.
+// function insertWithPriority(list: Order[], order: Order): Order[] {
+//   let insertAt: number;
+//   if (order.type === "vip") {
+//     insertAt = list.findIndex((o) => o.type === "vip" && o.id > order.id);
+//     if (insertAt === -1) {
+//       const firstNormal = list.findIndex((o) => o.type === "normal");
+//       insertAt = firstNormal === -1 ? list.length : firstNormal;
+//     }
+//   } else {
+//     insertAt = list.findIndex((o) => o.type === "normal" && o.id > order.id);
+//     if (insertAt === -1) insertAt = list.length;
+//   }
+//   const next = [...list];
+//   next.splice(insertAt, 0, order);
+//   return next;
+// }
+
 // Match idle bots with pending orders. Pure — safe inside setState updaters.
 function assign(s: State): State {
   if (!s.pendingOrders.length || !s.bots.some((b) => b.status === "idle")) return s;
@@ -53,25 +71,23 @@ export function useOrderController() {
   }, []);
 
   const addOrder = useCallback((type: OrderType) => {
+    const newOrder = { id: nextOrderId.current++, type, createdAt: new Date() };
     setState((s) =>
       assign({
         ...s,
-        pendingOrders: insertWithPriority(s.pendingOrders, {
-          id: nextOrderId.current++,
-          type,
-          createdAt: new Date(),
-        }),
+        pendingOrders: insertWithPriority(s.pendingOrders,newOrder),
       })
     );
   }, []);
 
   const addBot = useCallback(() => {
+    const newBot = { id: nextBotId.current++, status: "idle" as const, order: null, startTime: null, progress: 0 };
     setState((s) =>
       assign({
         ...s,
         bots: [
           ...s.bots,
-          { id: nextBotId.current++, status: "idle", order: null, startTime: null, progress: 0 },
+          newBot,
         ],
       })
     );
