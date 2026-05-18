@@ -1,15 +1,9 @@
 #!/bin/bash
+set -euo pipefail
 
-# Build Script
-# This script should contain all compilation steps for your CLI application
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
 
 echo "Building CLI application..."
-
-# For Go projects:
-# go build -o order-controller ./cmd/main.go
-
-# For Node.js projects:
-# npm install
-# npm run build (if needed)
-
+go build -o "$ROOT/scripts/order-controller" ./cmd/order-controller
 echo "Build completed"
