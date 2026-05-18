@@ -1,0 +1,47 @@
+# 与 docs/线上部署说明.md 对齐：外部 Traefik 网络 proxy，域名 feedme.anycolor.ai
+# 在仓库根目录执行：docker compose -f deploy/docker-compose.yml build
+version: "3.9"
+
+networks:
+  proxy:
+    external: true
+  internal:
+    driver: bridge
+
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.api
+    image: feedme-api:local
+    container_name: feedme-api
+    restart: unless-stopped
+    environment:
+      PORT: "8080"
+    expose:
+      - "8080"
+    networks:
+      - internal
+
+  web:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.web
+    image: feedme-web:local
+    container_name: feedme-web
+    restart: unless-stopped
+    depends_on:
+      - api
+    networks:
+      - internal
+      - proxy
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.services.feedme-svc.loadbalancer.server.port=80
+      - traefik.http.routers.feedme.rule=Host(`feedme.anycolor.ai`)
+      - traefik.http.routers.feedme.entrypoints=websecure
+      - traefik.http.routers.feedme.service=feedme-svc
+      - traefik.http.routers.feedme.tls.certresolver=cloudflare
+      - traefik.http.routers.feedme.tls.domains[0].main=anycolor.ai
+      - traefik.http.routers.feedme.tls.domains[0].sans=*.anycolor.ai

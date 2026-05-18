@@ -1,0 +1,70 @@
+<div class="page">
+  <header class="header">
+    <h1>{{ title }}</h1>
+    <p class="sub">McDonald's order flow demo — PENDING / PROCESSING / COMPLETE</p>
+  </header>
+
+  @if (message) {
+    <div class="banner" role="alert">{{ message }}</div>
+  }
+
+  <section class="actions">
+    <button type="button" (click)="newNormalOrder()">New Normal Order</button>
+    <button type="button" class="vip" (click)="newVipOrder()">New VIP Order</button>
+    <button type="button" class="bot-add" (click)="addBot()">+ Bot</button>
+    <button type="button" class="bot-rem" (click)="removeBot()">- Bot</button>
+  </section>
+
+  <section class="grid">
+    <div class="panel">
+      <h2>PENDING</h2>
+      <ul>
+        @for (o of state.pending; track o.id) {
+          <li>#{{ o.id }} <span class="kind">{{ o.kind }}</span></li>
+        } @empty {
+          <li class="empty">No orders</li>
+        }
+      </ul>
+    </div>
+
+    <div class="panel">
+      <h2>PROCESSING</h2>
+      <ul>
+        @for (o of state.processing; track o.id) {
+          <li>#{{ o.id }} <span class="kind">{{ o.kind }}</span></li>
+        } @empty {
+          <li class="empty">None</li>
+        }
+      </ul>
+    </div>
+
+    <div class="panel">
+      <h2>COMPLETE</h2>
+      <ul>
+        @for (o of state.complete; track o.id) {
+          <li>#{{ o.id }} <span class="kind">{{ o.kind }}</span></li>
+        } @empty {
+          <li class="empty">None</li>
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="panel bots">
+    <h2>Bots</h2>
+    <ul class="bot-list">
+      @for (b of state.bots; track b.id) {
+        <li>
+          <span class="bid">ID {{ b.id }}</span>
+          @if (b.idle) {
+            <span class="idle">IDLE</span>
+          } @else {
+            <span class="busy">Processing Order #{{ b.orderId }}</span>
+          }
+        </li>
+      } @empty {
+        <li class="empty">No bots — use + Bot</li>
+      }
+    </ul>
+  </section>
+</div>

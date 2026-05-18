@@ -1,0 +1,20 @@
+# 本地参考仓库，不纳入版本控制
+references/
+
+# Go
+/bin/
+*.exe
+*.test
+*.out
+vendor/
+
+# Node / Angular
+node_modules/
+dist/
+.angular/
+npm-debug.log*
+
+# IDE
+.idea/
+.vscode/
+*.swp

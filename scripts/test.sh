@@ -1,14 +1,8 @@
 #!/bin/bash
-
-# Unit Test Script
-# This script should contain all unit test execution steps
-
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
 echo "Running unit tests..."
-
-# For Go projects:
-# go test ./... -v
-
-# For Node.js projects:
-# npm test
-
+# 限定包路径，避免扫描 frontend/node_modules 内嵌的第三方 Go 示例包
+go test ./internal/... ./cmd/... -count=1
 echo "Unit tests completed"
