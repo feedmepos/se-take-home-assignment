@@ -1,14 +1,9 @@
 #!/bin/bash
+set -e
 
-# Unit Test Script
-# This script should contain all unit test execution steps
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$SCRIPT_DIR/.."
 
 echo "Running unit tests..."
-
-# For Go projects:
-# go test ./... -v
-
-# For Node.js projects:
-# npm test
-
+go test ./... -v
 echo "Unit tests completed"
