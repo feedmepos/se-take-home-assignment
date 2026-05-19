@@ -1,14 +1,16 @@
 #!/bin/bash
+set -euo pipefail
 
-# Unit Test Script
-# This script should contain all unit test execution steps
+cd "$(dirname "$0")/.."
 
 echo "Running unit tests..."
 
-# For Go projects:
-# go test ./... -v
+RACE_FLAG="-race"
+CGO_ENABLED_VAL=$(go env CGO_ENABLED 2>/dev/null || echo "0")
+if [ "${CGO_ENABLED_VAL}" != "1" ]; then
+  echo "CGO disabled - running without -race"
+  RACE_FLAG=""
+fi
 
-# For Node.js projects:
-# npm test
-
+go test ./... -v ${RACE_FLAG} -count=1
 echo "Unit tests completed"
