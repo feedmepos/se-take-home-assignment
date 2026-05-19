@@ -1,19 +1,14 @@
 #!/bin/bash
+set -euo pipefail
 
-# Run Script
-# This script should execute your CLI application and output results to result.txt
+cd "$(dirname "$0")/.."
 
-echo "Running CLI application..."
+if [ ! -x bin/order-controller ]; then
+  echo "binary missing, building..."
+  ./scripts/build.sh
+fi
 
-# For Go projects:
-# ./order-controller > result.txt
+echo "Running CLI application (simulate mode)..."
+./bin/order-controller -mode=simulate -proc-time=10s -out=scripts/result.txt
 
-# For Node.js projects:
-# node index.js > result.txt
-# or npm start > result.txt
-
-# Temporary placeholder - remove this when you implement your CLI
-echo "Added 1 bot" > result.txt
-echo "status: bot: [1], order: []" >> result.txt
-
-echo "CLI application execution completed"
+echo "CLI application execution completed -> scripts/result.txt"
