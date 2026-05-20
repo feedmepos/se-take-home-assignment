@@ -58,6 +58,10 @@ You must implement **either** frontend or backend components as described below:
   - Submit a Pull Request and ensure the `backend-verify-result` workflow passes
 - Provide documentation for any part that you think is needed
 
+### Project documentation (this solution)
+
+- **[doc/PROJECT.md](doc/PROJECT.md)** — architecture, local run, scripts, CI
+
 ### Tips on completing this task
 - Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.
 - Utilize coding agent to complete the assignment scope your working hour within 1 hour, do not over engineer it. However, ensure you read and understand what your code doing and apply good engineering practice.
