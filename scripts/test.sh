@@ -1,14 +1,25 @@
 #!/bin/bash
+set -e
 
-# Unit Test Script
-# This script should contain all unit test execution steps
+echo "=== Unit Test Script ==="
+
+# Use nvm if available
+if [ -f ".nvmrc" ]; then
+  if command -v nvm &>/dev/null; then
+    echo "Loading nvm..."
+    export NVM_DIR="${HOME}/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    nvm install
+    nvm use
+  fi
+fi
+
+echo "Node version: $(node --version)"
+
+echo "Installing dependencies..."
+npm ci
 
 echo "Running unit tests..."
+npm test
 
-# For Go projects:
-# go test ./... -v
-
-# For Node.js projects:
-# npm test
-
-echo "Unit tests completed"
+echo "=== Tests complete ==="

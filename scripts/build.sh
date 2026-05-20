@@ -1,15 +1,26 @@
 #!/bin/bash
+set -e
 
-# Build Script
-# This script should contain all compilation steps for your CLI application
+echo "=== Build Script ==="
 
-echo "Building CLI application..."
+# Use nvm if available to ensure correct Node.js version
+if [ -f ".nvmrc" ]; then
+  if command -v nvm &>/dev/null; then
+    echo "Loading nvm..."
+    export NVM_DIR="${HOME}/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    nvm install
+    nvm use
+  fi
+fi
 
-# For Go projects:
-# go build -o order-controller ./cmd/main.go
+echo "Node version: $(node --version)"
+echo "NPM version:  $(npm --version)"
 
-# For Node.js projects:
-# npm install
-# npm run build (if needed)
+echo "Installing dependencies..."
+npm ci
 
-echo "Build completed"
+echo "Compiling TypeScript..."
+npm run build
+
+echo "=== Build complete — output in ./dist ==="
