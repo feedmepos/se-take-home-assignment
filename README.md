@@ -62,3 +62,12 @@ You must implement **either** frontend or backend components as described below:
 - Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.
 - Utilize coding agent to complete the assignment scope your working hour within 1 hour, do not over engineer it. However, ensure you read and understand what your code doing and apply good engineering practice.
 - Complete the implementation as clean as possible, clean code is a strong plus point, do not bring in all the fancy tech stuff.
+
+### Backend Quick Start (Go CLI)
+- Run tests: `./scripts/test.sh`
+- Build CLI: `./scripts/build.sh`
+- Execute scripted run and generate output: `./scripts/run.sh`
+- Inspect run output: `scripts/result.txt`
+
+### Documentation
+- Backend implementation details and design trade-offs: `docs/backend-solution.md`
