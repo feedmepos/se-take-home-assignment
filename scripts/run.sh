@@ -1,19 +1,27 @@
 #!/bin/bash
+set -e
 
-# Run Script
-# This script should execute your CLI application and output results to result.txt
+echo "=== Run Script ==="
 
-echo "Running CLI application..."
+# Use nvm if available
+if [ -f ".nvmrc" ]; then
+  if command -v nvm &>/dev/null; then
+    echo "Loading nvm..."
+    export NVM_DIR="${HOME}/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    nvm install
+    nvm use
+  fi
+fi
 
-# For Go projects:
-# ./order-controller > result.txt
+echo "Node version: $(node --version)"
 
-# For Node.js projects:
-# node index.js > result.txt
-# or npm start > result.txt
+# Default mode: CLI simulation (writes result.txt and exits)
+# To start the HTTP API server instead, run: node dist/main.js
+echo "Running McDonald's Order Management System CLI simulation..."
+node dist/cli.js
 
-# Temporary placeholder - remove this when you implement your CLI
-echo "Added 1 bot" > result.txt
-echo "status: bot: [1], order: []" >> result.txt
-
-echo "CLI application execution completed"
+echo ""
+echo "=== Execution complete. Output written to scripts/result.txt ==="
+echo ""
+cat scripts/result.txt

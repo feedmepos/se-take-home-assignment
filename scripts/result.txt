@@ -1,26 +1,117 @@
-McDonald's Order Management System - Simulation Results
-
-[14:32:01] System initialized with 0 bots
-[14:32:01] Created Normal Order #1001 - Status: PENDING
-[14:32:02] Created VIP Order #1002 - Status: PENDING
-[14:32:02] Created Normal Order #1003 - Status: PENDING
-[14:32:03] Bot #1 created - Status: ACTIVE
-[14:32:03] Bot #1 picked up VIP Order #1002 - Status: PROCESSING
-[14:32:04] Bot #2 created - Status: ACTIVE
-[14:32:04] Bot #2 picked up Normal Order #1001 - Status: PROCESSING
-[14:32:13] Bot #1 completed VIP Order #1002 - Status: COMPLETE (Processing time: 10s)
-[14:32:13] Bot #1 picked up Normal Order #1003 - Status: PROCESSING
-[14:32:14] Bot #2 completed Normal Order #1001 - Status: COMPLETE (Processing time: 10s)
-[14:32:14] Bot #2 is now IDLE - No pending orders
-[14:32:15] Created VIP Order #1004 - Status: PENDING
-[14:32:15] Bot #2 picked up VIP Order #1004 - Status: PROCESSING
-[14:32:23] Bot #1 completed Normal Order #1003 - Status: COMPLETE (Processing time: 10s)
-[14:32:25] Bot #2 completed VIP Order #1004 - Status: COMPLETE (Processing time: 10s)
-[14:32:25] Bot #2 destroyed while IDLE
-[14:32:26] Bot #1 is now IDLE - No pending orders
-
-Final Status:
-- Total Orders Processed: 4 (2 VIP, 2 Normal)
-- Orders Completed: 4
-- Active Bots: 1
-- Pending Orders: 0
+[22:46:38] ═══════════════════════════════════════════════════
+[22:46:38]   McDonald's Order Management System — Simulation
+[22:46:38] ═══════════════════════════════════════════════════
+[22:46:38] 
+[22:46:38] [ Phase 1 ] Creating initial orders
+[22:46:38] 
+[22:46:38]   + Normal Order #1 added to PENDING
+[22:46:38]   + Normal Order #2 added to PENDING
+[22:46:38]   + Normal Order #3 added to PENDING
+[22:46:38]   + VIP Order #4 added → placed BEFORE all Normal orders
+[22:46:38]   + VIP Order #5 added → placed after VIP #4, before Normal orders
+[22:46:38]   PENDING  : #4(VIP) → #5(VIP) → #1(NORMAL) → #2(NORMAL) → #3(NORMAL)
+[22:46:38]   COMPLETE : (none)
+[22:46:38]   BOTS     : (none)
+[22:46:38] 
+[22:46:38] [ Phase 2 ] Adding 2 bots (+ Bot × 2)
+[22:46:38] 
+[22:46:38]   + Bot #1 created → immediately picks first pending order
+[22:46:38]   PENDING  : #5(VIP) → #1(NORMAL) → #2(NORMAL) → #3(NORMAL)
+[22:46:38]   COMPLETE : (none)
+[22:46:38]   BOTS     : Bot1[PROCESSING:ord4]
+[22:46:38]   + Bot #2 created → immediately picks next pending order
+[22:46:38]   PENDING  : #1(NORMAL) → #2(NORMAL) → #3(NORMAL)
+[22:46:38]   COMPLETE : (none)
+[22:46:38]   BOTS     : Bot1[PROCESSING:ord4]  Bot2[PROCESSING:ord5]
+[22:46:38] 
+[22:46:38] [ Phase 3 ] Removing newest bot mid-processing (- Bot after 5 s)
+[22:46:38]   Waiting 5 seconds...
+[22:46:43]   - Bot #2 removed (was processing Order #5)
+[22:46:43]     → Order #5 returned to PENDING at correct priority
+[22:46:43]   PENDING  : #5(VIP) → #1(NORMAL) → #2(NORMAL) → #3(NORMAL)
+[22:46:43]   COMPLETE : (none)
+[22:46:43]   BOTS     : Bot1[PROCESSING:ord4]
+[22:46:43] 
+[22:46:43] [ Phase 4 ] Waiting for Bot #1 to finish (10 s mark from bot creation)
+[22:46:48]   ✓ Bot #1 COMPLETED Order #4 [VIP]
+[22:46:48]   PENDING  : #5(VIP) → #1(NORMAL) → #2(NORMAL) → #3(NORMAL)
+[22:46:48]   COMPLETE : #4
+[22:46:48]   BOTS     : Bot1[IDLE]
+[22:46:48]   PENDING  : #1(NORMAL) → #2(NORMAL) → #3(NORMAL)
+[22:46:48]   COMPLETE : #4
+[22:46:48]   BOTS     : Bot1[PROCESSING:ord5]
+[22:46:48] 
+[22:46:48] [ Phase 5 ] New orders arrive mid-flight
+[22:46:48] 
+[22:46:48]   + Normal Order #6 added
+[22:46:48]   + VIP Order #7 added → placed BEFORE Normal orders
+[22:46:48]   PENDING  : #7(VIP) → #1(NORMAL) → #2(NORMAL) → #3(NORMAL) → #6(NORMAL)
+[22:46:48]   COMPLETE : #4
+[22:46:48]   BOTS     : Bot1[PROCESSING:ord5]
+[22:46:48] 
+[22:46:48] [ Phase 6 ] Adding Bot (+ Bot)
+[22:46:50]   + Bot #3 created → picks next pending order
+[22:46:50]   PENDING  : #1(NORMAL) → #2(NORMAL) → #3(NORMAL) → #6(NORMAL)
+[22:46:50]   COMPLETE : #4
+[22:46:50]   BOTS     : Bot1[PROCESSING:ord5]  Bot3[PROCESSING:ord7]
+[22:46:50] 
+[22:46:50] [ Phase 7 ] Removing newest bot again (- Bot after 3 s)
+[22:46:53]   - Bot #3 removed (was processing Order #7)
+[22:46:53]     → Order #7 returned to PENDING at correct priority
+[22:46:53]   PENDING  : #7(VIP) → #1(NORMAL) → #2(NORMAL) → #3(NORMAL) → #6(NORMAL)
+[22:46:53]   COMPLETE : #4
+[22:46:53]   BOTS     : Bot1[PROCESSING:ord5]
+[22:46:53] 
+[22:46:53] [ Phase 8 ] Scaling up — adding 2 more bots (+ Bot × 2)
+[22:46:54]   + Bot #4 created
+[22:46:54]   + Bot #5 created
+[22:46:54]   PENDING  : #2(NORMAL) → #3(NORMAL) → #6(NORMAL)
+[22:46:54]   COMPLETE : #4
+[22:46:54]   BOTS     : Bot1[PROCESSING:ord5]  Bot4[PROCESSING:ord7]  Bot5[PROCESSING:ord1]
+[22:46:54] 
+[22:46:54] [ Phase 9 ] Waiting for all remaining orders to complete...
+[22:46:58]   ✓ Bot #1 COMPLETED Order #5 [VIP]
+[22:46:58]   PENDING  : #2(NORMAL) → #3(NORMAL) → #6(NORMAL)
+[22:46:58]   COMPLETE : #4, #5
+[22:46:58]   BOTS     : Bot1[IDLE]  Bot4[PROCESSING:ord7]  Bot5[PROCESSING:ord1]
+[22:47:04]   ✓ Bot #4 COMPLETED Order #7 [VIP]
+[22:47:04]   PENDING  : #3(NORMAL) → #6(NORMAL)
+[22:47:04]   COMPLETE : #4, #5, #7
+[22:47:04]   BOTS     : Bot1[PROCESSING:ord2]  Bot4[IDLE]  Bot5[PROCESSING:ord1]
+[22:47:04]   ✓ Bot #5 COMPLETED Order #1 [NORMAL]
+[22:47:04]   PENDING  : #6(NORMAL)
+[22:47:04]   COMPLETE : #4, #5, #7, #1
+[22:47:04]   BOTS     : Bot1[PROCESSING:ord2]  Bot4[PROCESSING:ord3]  Bot5[IDLE]
+[22:47:08]   ✓ Bot #1 COMPLETED Order #2 [NORMAL]
+[22:47:08]   PENDING  : (empty)
+[22:47:08]   COMPLETE : #4, #5, #7, #1, #2
+[22:47:08]   BOTS     : Bot1[IDLE]  Bot4[PROCESSING:ord3]  Bot5[PROCESSING:ord6]
+[22:47:08]   ~ Bot #1 is now IDLE (no pending orders)
+[22:47:14]   ✓ Bot #4 COMPLETED Order #3 [NORMAL]
+[22:47:14]   PENDING  : (empty)
+[22:47:14]   COMPLETE : #4, #5, #7, #1, #2, #3
+[22:47:14]   BOTS     : Bot1[IDLE]  Bot4[IDLE]  Bot5[PROCESSING:ord6]
+[22:47:14]   ~ Bot #4 is now IDLE (no pending orders)
+[22:47:14]   ✓ Bot #5 COMPLETED Order #6 [NORMAL]
+[22:47:14]   PENDING  : (empty)
+[22:47:14]   COMPLETE : #4, #5, #7, #1, #2, #3, #6
+[22:47:14]   BOTS     : Bot1[IDLE]  Bot4[IDLE]  Bot5[IDLE]
+[22:47:14]   ~ Bot #5 is now IDLE (no pending orders)
+[22:47:14] 
+[22:47:14] ═══════════════════════════════════════════════════
+[22:47:14]   SIMULATION COMPLETE
+[22:47:14] ═══════════════════════════════════════════════════
+[22:47:14]   PENDING  : (empty)
+[22:47:14]   COMPLETE : #4, #5, #7, #1, #2, #3, #6
+[22:47:14]   BOTS     : Bot1[IDLE]  Bot4[IDLE]  Bot5[IDLE]
+[22:47:14] 
+[22:47:14]   Order completion timestamps:
+[22:47:14]     Order #4 [VIP] completed at 22:46:48
+[22:47:14]     Order #5 [VIP] completed at 22:46:58
+[22:47:14]     Order #7 [VIP] completed at 22:47:04
+[22:47:14]     Order #1 [NORMAL] completed at 22:47:04
+[22:47:14]     Order #2 [NORMAL] completed at 22:47:08
+[22:47:14]     Order #3 [NORMAL] completed at 22:47:14
+[22:47:14]     Order #6 [NORMAL] completed at 22:47:14
+[22:47:14] 
+[22:47:14] ═══════════════════════════════════════════════════
