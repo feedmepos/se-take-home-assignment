@@ -6,6 +6,7 @@ export interface Order {
   type: OrderType;
   status: OrderStatus;
   createdAt: number;
+  completedAt?: number;
 }
 
 export interface Bot {

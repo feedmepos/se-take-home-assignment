@@ -128,7 +128,7 @@ body {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 2rem;
-  width: 100%;
+  width: 1024px;
 }
 
 @media (max-width: 1024px) {
@@ -304,7 +304,7 @@ body {
   height: 100%;
   background-color: var(--accent-green);
   width: 0%;
-  transition: width 0.5s linear;
+  transition: width 0.1s linear;
 }
 
 /* Empty State */

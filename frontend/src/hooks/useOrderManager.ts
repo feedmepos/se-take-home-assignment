@@ -84,6 +84,7 @@ function reducer(state: State, action: Action): State {
             const order = nextOrders.find((o) => o.id === bot.orderId);
             if (order) {
               order.status = 'COMPLETE';
+              order.completedAt = now;
             }
             bot.orderId = null;
             bot.processingStartTime = null;

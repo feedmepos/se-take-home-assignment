@@ -9,7 +9,12 @@ interface CompleteAreaProps {
 export const CompleteArea: React.FC<CompleteAreaProps> = ({ orders }) => {
   const completeOrders = orders
     .filter((o) => o.status === 'COMPLETE')
-    .sort((a, b) => b.id - a.id); // Newest completed at top
+    .sort((a, b) => {
+      const timeA = a.completedAt || 0;
+      const timeB = b.completedAt || 0;
+      return timeB - timeA;
+    });
+
 
   return (
     <div className="panel">
