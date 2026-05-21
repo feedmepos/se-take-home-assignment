@@ -6,7 +6,7 @@
 echo "Building CLI application..."
 
 # For Go projects:
-# go build -o order-controller ./cmd/main.go
+go build -o order-controller ./cmd/order-controller/main.go
 
 # For Node.js projects:
 # npm install
