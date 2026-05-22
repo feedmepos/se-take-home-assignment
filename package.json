@@ -1,0 +1,13 @@
+{
+  "name": "mcdOrderController",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "scripts": {
+    "build": "bash scripts/build.sh",
+    "test": "bash scripts/test.sh",
+    "start": "bash scripts/run.sh"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}

@@ -11,5 +11,6 @@ echo "Building CLI application..."
 # For Node.js projects:
 # npm install
 # npm run build (if needed)
+npm install
 
 echo "Build completed"

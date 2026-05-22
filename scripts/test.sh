@@ -10,5 +10,6 @@ echo "Running unit tests..."
 
 # For Node.js projects:
 # npm test
+npx jest
 
 echo "Unit tests completed"

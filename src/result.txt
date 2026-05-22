@@ -1,0 +1,28 @@
+McDonald's Order Management System - Simulation Results
+
+[22:15:48] System initialized with 0
+[22:15:48] Added Bot #1
+[22:15:48] New Order NORMAL#001 - Status: PENDING
+[22:15:48] Bot #1 started Order NORMAL#001 Status: PROCESSING
+[22:15:48] New Order VIP#002 - Status: PENDING
+[22:15:48] New Order NORMAL#003 - Status: PENDING
+[22:15:48] New Order VIP#004 - Status: PENDING
+[22:15:48] Added Bot #2
+[22:15:48] Bot #2 started Order VIP#002 Status: PROCESSING
+[22:15:48] New Order NORMAL#005 - Status: PENDING
+[22:15:48] Bot #2 removed — Returning Order VIP#002
+[22:15:58] Order NORMAL#001 - Status: COMPLETED
+[22:15:58] Bot #1 started Order VIP#004 Status: PROCESSING
+[22:16:08] Order VIP#004 - Status: COMPLETED
+[22:16:08] Bot #1 started Order VIP#002 Status: PROCESSING
+[22:16:18] Order VIP#002 - Status: COMPLETED
+[22:16:18] Bot #1 started Order NORMAL#003 Status: PROCESSING
+[22:16:28] Order NORMAL#003 - Status: COMPLETED
+[22:16:28] Bot #1 started Order NORMAL#005 Status: PROCESSING
+[22:16:38] Order NORMAL#005 - Status: COMPLETED
+
+Final Status:
+[22:16:38] - Total Orders Processed: 5 (2 VIP, 3 Normal)
+[22:16:38] - Orders Completed: 5
+[22:16:38] - Active Bots: 1
+[22:16:38] - Pending Orders: 0
