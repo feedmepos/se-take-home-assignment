@@ -1,15 +1,17 @@
 #!/bin/bash
 
-# Build Script
-# This script should contain all compilation steps for your CLI application
-
 echo "Building CLI application..."
 
-# For Go projects:
-# go build -o order-controller ./cmd/main.go
+cd "$(dirname "$0")/.." || exit 1
 
-# For Node.js projects:
-# npm install
-# npm run build (if needed)
+# Build the application
+go build -o order-controller ./cmd/main.go
 
-echo "Build completed"
+
+## Check if the build was successful
+if [ $? -eq 0 ]; then
+    echo "Build successful! Binary created: order-controller"
+else
+    echo "Build failed!"
+    exit 1
+fi

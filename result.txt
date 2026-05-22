@@ -1,0 +1,10 @@
+[17:06:51] McDonald's Order Management System - Simulation Started
+[17:06:51] System initialized with 0 bots
+[17:06:51] Created Normal Order #1 - Status: PENDING
+[17:06:51] Bot #1 created - Status: ACTIVE
+[17:06:51] Bot #1 picked up NORMAL Order #1 - Status: PROCESSING
+[17:06:51] Bot #1 removed - Status: INACTIVE
+[17:06:51] Bot #1 destroyed while processing NORMAL Order #1 - returning to queue
+[17:06:51] Exit command received
+[17:06:51] Initiating graceful shutdown...
+[17:06:53] System shutdown complete

@@ -1,19 +1,21 @@
 #!/bin/bash
 
-# Run Script
-# This script should execute your CLI application and output results to result.txt
-
 echo "Running CLI application..."
 
-# For Go projects:
-# ./order-controller > result.txt
+# Navigate to project root
+cd "$(dirname "$0")/.." || exit 1
 
-# For Node.js projects:
-# node index.js > result.txt
-# or npm start > result.txt
+# Clear previous results
+> scripts/result.txt
 
-# Temporary placeholder - remove this when you implement your CLI
-echo "Added 1 bot" > result.txt
-echo "status: bot: [1], order: []" >> result.txt
+# Check for interactive mode flag
+# ./run.sh -i for interactive mode
+if [ "$1" = "-i" ] || [ "$1" = "--interactive" ]; then
+    echo "Running in interactive mode..."
+    ./order-controller > scripts/result.txt
+else
+    echo "Running in demo mode..."
+    ./order-controller -demo > scripts/result.txt
+fi
 
 echo "CLI application execution completed"
