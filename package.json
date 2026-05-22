@@ -1,0 +1,22 @@
+{
+  "name": "feed-me-order-controller",
+  "version": "1.0.0",
+  "description": "CLI simulation for McDonald's cooking bots order controller",
+  "main": "dist/src/cli.js",
+  "type": "commonjs",
+  "scripts": {
+    "build": "tsc",
+    "start": "npm run build && node dist/src/cli.js",
+    "test": "npm run build && node --test dist/test/orderController.test.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.9.2",
+    "typescript": "^5.9.3"
+  }
+}

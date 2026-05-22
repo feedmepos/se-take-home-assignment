@@ -62,3 +62,20 @@ You must implement **either** frontend or backend components as described below:
 - Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.
 - Utilize coding agent to complete the assignment scope your working hour within 1 hour, do not over engineer it. However, ensure you read and understand what your code doing and apply good engineering practice.
 - Complete the implementation as clean as possible, clean code is a strong plus point, do not bring in all the fancy tech stuff.
+
+### Backend CLI Implementation
+
+This repository now includes a Node.js CLI prototype that simulates the McDonald's order workflow described above.
+
+- `./scripts/build.sh` &mdash; installs dependencies and prepares the CLI.
+- `./scripts/test.sh` &mdash; runs the Node.js unit tests (`node --test`).
+- `./scripts/run.sh` &mdash; executes the simulation and writes the log output to `scripts/result.txt`.
+
+The codebase has been refactored to TypeScript with a small module layout:
+
+- `src/domain` exposes the order/bot types and small helpers for state transitions.
+- `src/services` contains the core `OrderController`.
+- `src/utils` holds the logger that formats timestamps.
+- `src/simulation` wires an example timeline used by the CLI entry point (`src/cli.ts`).
+
+The simulation demonstrates VIP prioritization, bot lifecycle management (add/remove), and 10-second processing cycles with timestamped logs seeded from the current time.

@@ -1,15 +1,14 @@
 #!/bin/bash
 
-# Build Script
-# This script should contain all compilation steps for your CLI application
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="${SCRIPT_DIR}/.."
 
 echo "Building CLI application..."
 
-# For Go projects:
-# go build -o order-controller ./cmd/main.go
-
-# For Node.js projects:
-# npm install
-# npm run build (if needed)
+cd "${PROJECT_ROOT}"
+npm ci
+npm run build >/dev/null
 
 echo "Build completed"
