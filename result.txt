@@ -1,0 +1,35 @@
+
+> feed-me@0.0.1 start:prod
+> node dist/main
+
+[32m[Nest] 184447  - [39m10/27/2025, 12:02:42 PM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 184447  - [39m10/27/2025, 12:02:42 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mLoggerModule dependencies initialized[39m[38;5;3m +6ms[39m
+[32m[Nest] 184447  - [39m10/27/2025, 12:02:42 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mQueueModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 184447  - [39m10/27/2025, 12:02:42 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 184447  - [39m10/27/2025, 12:02:42 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mOrderModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 184447  - [39m10/27/2025, 12:02:42 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mBotModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 184447  - [39m10/27/2025, 12:02:42 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mOrderController {/api/order}:[39m[38;5;3m +2ms[39m
+[32m[Nest] 184447  - [39m10/27/2025, 12:02:42 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/order/normal, POST} route[39m[38;5;3m +2ms[39m
+[32m[Nest] 184447  - [39m10/27/2025, 12:02:42 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/order/vip, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 184447  - [39m10/27/2025, 12:02:42 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/order, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 184447  - [39m10/27/2025, 12:02:42 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/order/:id, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 184447  - [39m10/27/2025, 12:02:42 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mBotController {/api/bot}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 184447  - [39m10/27/2025, 12:02:42 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/bot, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 184447  - [39m10/27/2025, 12:02:42 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/bot, DELETE} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 184447  - [39m10/27/2025, 12:02:42 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/bot, GET} route[39m[38;5;3m +1ms[39m
+McDonald's Order Management System - Simulation Results
+
+[04:02:42] System initialized with 0 bots
+[32m[Nest] 184447  - [39m10/27/2025, 12:02:42 PM [32m    LOG[39m [38;5;3m[NestApplication] [39m[32mNest application successfully started[39m[38;5;3m +7ms[39m
+[04:02:56] Bot #1 created - Status: IDLE
+[04:02:56] Bot #1 is now IDLE - No pending orders
+[04:03:02] Created Normal Order #1 - Status: PENDING
+[04:03:02] Bot #1 picked up Normal Order #1 - Status: PROCESSING
+[04:03:10] Bot #1 destroyed while IDLE
+[04:04:32] Created VIP Order #2 - Status: PENDING
+
+Final Status:
+- Total Orders Processed: 0 (0 VIP, 0 Normal)
+- Orders Completed: 0
+- Bots available: 0
+- Pending Orders: 2
