@@ -1,0 +1,22 @@
+21:29:17 Welcome to McDonald's Order Controller
+21:29:17 Type 'help' for available commands
+> 21:29:17 Created Normal Order #296274551954739200
+> 21:29:17 Created VIP Order #296274551958933504
+> 21:29:17 Added Bot #1
+> 21:29:17 ===== Current Status =====
+21:29:17 Bots: 1
+21:29:17   Bot #1: Processing
+21:29:17 Pending Orders: 1
+21:29:17   Order #296274551954739200 (Normal)
+21:29:17 Complete Orders: 0
+21:29:17 ==========================
+> 21:29:17 Available commands:
+21:29:17  new-normal  - Create a normal order
+21:29:17  new-vip     - Create a VIP order
+21:29:17  +bot        - Add a new bot
+21:29:17  -bot        - Remove a bot
+21:29:17  status      - Show current status
+21:29:17  help        - Show this help message
+21:29:17  exit/quit   - Exit the program
+> 21:29:17 Removed Bot #1 (Order #296274551958933504 returned to queue)
+> Goodbye!

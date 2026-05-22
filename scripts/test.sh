@@ -5,10 +5,24 @@
 
 echo "Running unit tests..."
 
-# For Go projects:
-# go test ./... -v
+# Check if Go is installed
+if ! command -v go &> /dev/null; then
+    echo "Error: Go is not installed or not in PATH"
+    exit 1
+fi
 
-# For Node.js projects:
-# npm test
+# For Go projects:
+# Change to project root directory
+cd "$(dirname "$0")/.."
+
+# Run tests
+go test ./... -v
+
+if [ $? -eq 0 ]; then
+    echo "All tests passed"
+else
+    echo "Some tests failed"
+    exit 1
+fi
 
 echo "Unit tests completed"

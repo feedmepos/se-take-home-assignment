@@ -5,11 +5,32 @@
 
 echo "Building CLI application..."
 
+# Check if Go is installed
+if ! command -v go &> /dev/null; then
+    echo "Error: Go is not installed or not in PATH"
+    exit 1
+fi
+
 # For Go projects:
-# go build -o order-controller ./cmd/main.go
+# Change to project root directory
+cd "$(dirname "$0")/.."
 
-# For Node.js projects:
-# npm install
-# npm run build (if needed)
+# Detect OS and set executable name
+OS=$(uname -s 2>/dev/null || echo "Windows")
+if [ "$OS" = "Linux" ] || [ "$OS" = "Darwin" ]; then
+    EXECUTABLE="./order-controller"
+else
+    EXECUTABLE="./order-controller.exe"
+fi
 
-echo "Build completed"
+go build -o "$EXECUTABLE" ./cmd/main.go
+
+if [ $? -eq 0 ]; then
+    echo "Build completed successfully"
+    echo "Executable: $EXECUTABLE"
+else
+    echo "Build failed"
+    exit 1
+fi
+
+
