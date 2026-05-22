@@ -1,0 +1,61 @@
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Theme Vars */
+  --primary-color: #646cff;
+  --primary-rgb: 100, 108, 255;
+  --secondary-color: #42b883;
+  --vip-color: #ffd700;
+  --vip-rgb: 255, 215, 0;
+  --danger-color: #ff4d4d;
+
+  --background-color: #242424;
+  --surface-card: #2f2f2f;
+  --surface-elevated: #3a3a3a;
+  --border-color: #444;
+
+  --text-primary: rgba(255, 255, 255, 0.87);
+  --text-secondary: rgba(255, 255, 255, 0.6);
+  --text-tertiary: rgba(255, 255, 255, 0.38);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: var(--background-color);
+  color: var(--text-primary);
+}
+
+#app {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+  text-align: center;
+  margin-bottom: 2rem;
+  background: -webkit-linear-gradient(315deg, #42d392 25%, #647eff);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
