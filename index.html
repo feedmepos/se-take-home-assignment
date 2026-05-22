@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+
+    <section class="area">
+      <header>
+        <h2>Pending orders</h2>
+        <button id="addOrder">New Normal Order</button>
+        <button id="addOrderVIP">New VIP Order</button>
+      </header>
+      <section id="pendingArea">
+        <article class="order" id="order-" hidden>
+          <header>📝</header>
+          <span class="order-id"></span>
+          <span class="order-vip" hidden>[VIP]</span>
+        </article>
+      </section>
+    </section>
+
+    <section class="area">
+      <header>
+        <h2>Bots</h2>
+        <button id="addBot">+ Bot</button>
+        <button id="removeBot">- Bot</button>
+      </header>
+      <section id="processingArea">
+        <article class="bot" id="bot-" hidden>
+          <header>
+            <div>🤖</div>
+            <div class="progress-bar"></div>
+          </header>
+          <div class="bot-order"></div>
+          <div class="bot-idle">(Idle)</div>
+        </article>
+      </section>
+    </section>
+
+    <section class="area">
+      <header>
+        <h2>Completed orders</h2>
+      </header>
+      <section id="completedArea">
+      </section>
+    </section>
+
+    <script type="module" src="index.js"></script>
+  </body>
+
+</html>

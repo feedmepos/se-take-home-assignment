@@ -1,0 +1,79 @@
+:root {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  --process-time: 13s;
+}
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+[hidden] { display: none; }
+
+
+/* Areas */
+
+.area {
+  min-height: 20rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background-color: lightcyan;
+  border-radius: 1rem;
+}
+.area > header {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin-bottom: 1rem;
+}
+.area > section {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: .5rem;
+}
+h2 {
+  flex-grow: 1;
+  margin: 0;
+}
+
+/* Order/Bot items */
+
+article {
+  padding: .5rem;
+  border: 1px solid lightgray;
+  border-radius: 8px;
+  text-align: center;
+}
+.order {
+  width: 5rem;
+  background-color: lightyellow;
+}
+.order-vip {
+  font-size: small;
+}
+.bot {
+  --size: 6.5rem;
+  width: var(--size);
+  height: var(--size);
+  background-color: lightpink;
+}
+.bot > header {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: .5rem;
+}
+.bot-order:has(.order) + .bot-idle {
+  display: none;
+}
+.bot-order .order {
+  margin: 0 auto;
+}
+
+.progress-bar {
+  width: 0;
+  height: 10px;
+  background-color: red;
+}
+.bot:has(.order) .progress-bar {
+  transition: width var(--process-time) linear;
+  width: 100%;
+}
