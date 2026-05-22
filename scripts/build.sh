@@ -6,10 +6,16 @@
 echo "Building CLI application..."
 
 # For Go projects:
-# go build -o order-controller ./cmd/main.go
+set -euo pipefail
+ROOT_DIR="$(cd "$(dirname "$0")"/.. && pwd)"
+cd "$ROOT_DIR"
+
+echo "Using Go: $(go version)"
+mkdir -p bin
+go build -o bin/order-controller ./cmd/order-controller
 
 # For Node.js projects:
 # npm install
 # npm run build (if needed)
 
-echo "Build completed"
+echo "Build completed: bin/order-controller"

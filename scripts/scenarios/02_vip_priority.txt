@@ -1,0 +1,10 @@
+# VIP priority: VIP ahead of normals, FIFO inside VIP
+status
+n
+n
+v
+status
+add
+status
+wait 50
+status

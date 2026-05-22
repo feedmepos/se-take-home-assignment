@@ -1,6 +1,7 @@
 name: backend-verify-result
 
 on:
+  workflow_dispatch:
   pull_request:
     types: [ opened, synchronize, reopened, edited ]
     branches: [ main ]
@@ -66,3 +67,4 @@ jobs:
         echo "SUCCESS: scripts/result.txt exists, is not empty, and contains valid timestamps"
         echo "Content of scripts/result.txt:"
         cat scripts/result.txt
+        

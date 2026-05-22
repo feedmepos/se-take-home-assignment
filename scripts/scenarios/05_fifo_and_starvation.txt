@@ -1,0 +1,13 @@
+# FIFO within VIP; normals processed after VIP queue clears (expected starvation while VIP keeps arriving)
+status
+v
+v
+n
+v
+status
+add
+wait 50
+status
+v
+wait 50
+status

@@ -1,0 +1,11 @@
+# Scale up and down bots; latest bot removed; interrupted order requeues to head
+status
+v
+n
+add
+add
+status
+wait 50
+status
+del
+status
