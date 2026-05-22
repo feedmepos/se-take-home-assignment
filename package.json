@@ -1,0 +1,20 @@
+{
+  "name": "feedme-se-takehome",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "rimraf dist && tsc",
+    "start": "node dist/index.js",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "jest": "^30.2.0",
+    "rimraf": "^6.0.1",
+    "ts-jest": "^29.4.4",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "winston": "^3.18.3"
+  }
+}
