@@ -1,26 +1,47 @@
-McDonald's Order Management System - Simulation Results
-
-[14:32:01] System initialized with 0 bots
-[14:32:01] Created Normal Order #1001 - Status: PENDING
-[14:32:02] Created VIP Order #1002 - Status: PENDING
-[14:32:02] Created Normal Order #1003 - Status: PENDING
-[14:32:03] Bot #1 created - Status: ACTIVE
-[14:32:03] Bot #1 picked up VIP Order #1002 - Status: PROCESSING
-[14:32:04] Bot #2 created - Status: ACTIVE
-[14:32:04] Bot #2 picked up Normal Order #1001 - Status: PROCESSING
-[14:32:13] Bot #1 completed VIP Order #1002 - Status: COMPLETE (Processing time: 10s)
-[14:32:13] Bot #1 picked up Normal Order #1003 - Status: PROCESSING
-[14:32:14] Bot #2 completed Normal Order #1001 - Status: COMPLETE (Processing time: 10s)
-[14:32:14] Bot #2 is now IDLE - No pending orders
-[14:32:15] Created VIP Order #1004 - Status: PENDING
-[14:32:15] Bot #2 picked up VIP Order #1004 - Status: PROCESSING
-[14:32:23] Bot #1 completed Normal Order #1003 - Status: COMPLETE (Processing time: 10s)
-[14:32:25] Bot #2 completed VIP Order #1004 - Status: COMPLETE (Processing time: 10s)
-[14:32:25] Bot #2 destroyed while IDLE
-[14:32:26] Bot #1 is now IDLE - No pending orders
-
-Final Status:
-- Total Orders Processed: 4 (2 VIP, 2 Normal)
-- Orders Completed: 4
-- Active Bots: 1
-- Pending Orders: 0
+09:51:22 - 
+09:51:22 - > se-take-home-assignment@1.0.0 dev
+09:51:22 - > nodemon --watch 'src/**' --ext 'js,ts,json' --ignore 'src/**/*.spec.ts' --exec npm start
+09:51:22 - 
+09:51:23 - [33m[nodemon] 2.0.5[39m
+09:51:23 - [33m[nodemon] to restart at any time, enter `rs`[39m
+09:51:23 - [33m[nodemon] watching path(s): src/**[39m
+09:51:23 - [33m[nodemon] watching extensions: js,ts,json[39m
+09:51:23 - [32m[nodemon] starting `npm start`[39m
+09:51:23 - 
+09:51:23 - > se-take-home-assignment@1.0.0 start
+09:51:23 - > ts-node src/server.ts
+09:51:23 - 
+09:51:26 - 📡 Feed Me Service started successfully { port: '8080' }
+09:51:31 - Created crew 1 with idle status 
+09:51:33 - Created crew 2 with idle status 
+09:51:34 - Created crew 3 with idle status 
+09:51:44 - Created normal order f6927592-ed10-46ef-87fc-09f23b56fadd (Queue no #1 - pending) 
+09:51:51 - Created normal order 69b580e7-c324-46cc-876b-c124ca2890de (Queue no #2 - pending) 
+09:51:54 - Created vip order 54435745-1b9c-4fdf-b5c4-87ada5d94777 (Queue no #1 - pending) 
+09:52:01 - Created normal order 6b3f59c9-dd96-40b0-aef7-15ef23123a40 (Queue no #4 - pending) 
+09:52:05 - Created vip order 2f161362-9359-4740-ab9e-7957deadc4ec (Queue no #2 - pending) 
+09:52:29 - Crew 3 start picked up vip order 54435745-1b9c-4fdf-b5c4-87ada5d94777 
+09:52:31 - Crew 2 start picked up vip order 2f161362-9359-4740-ab9e-7957deadc4ec 
+09:52:33 - Crew 1 start picked up normal order f6927592-ed10-46ef-87fc-09f23b56fadd 
+09:52:34 - Successfully process order for 54435745-1b9c-4fdf-b5c4-87ada5d94777 with status complete 
+09:52:34 - Set crew 3 to inactive 
+09:52:35 - None of the crew are available 
+09:52:36 - Successfully process order for 2f161362-9359-4740-ab9e-7957deadc4ec with status complete 
+09:52:36 - Set crew 2 to inactive 
+09:52:38 - Successfully process order for f6927592-ed10-46ef-87fc-09f23b56fadd with status complete 
+09:52:38 - Set crew 1 to inactive 
+09:52:39 - Task 54435745-1b9c-4fdf-b5c4-87ada5d94777 successfully completed 
+09:52:41 - Task 2f161362-9359-4740-ab9e-7957deadc4ec successfully completed 
+09:52:43 - Task f6927592-ed10-46ef-87fc-09f23b56fadd successfully completed 
+09:53:01 - Created crew 4 with idle status 
+09:53:03 - Created crew 5 with idle status 
+09:53:11 - Created crew 6 with idle status 
+09:53:14 - Crew 6 start picked up normal order 69b580e7-c324-46cc-876b-c124ca2890de 
+09:53:15 - Crew 5 start picked up normal order 6b3f59c9-dd96-40b0-aef7-15ef23123a40 
+09:53:19 - Successfully process order for 69b580e7-c324-46cc-876b-c124ca2890de with status complete 
+09:53:19 - Set crew 6 to inactive 
+09:53:20 - Successfully process order for 6b3f59c9-dd96-40b0-aef7-15ef23123a40 with status complete 
+09:53:20 - Set crew 5 to inactive 
+09:53:24 - Task 69b580e7-c324-46cc-876b-c124ca2890de successfully completed 
+09:53:25 - Task 6b3f59c9-dd96-40b0-aef7-15ef23123a40 successfully completed 
+09:53:35 - No pending order found 

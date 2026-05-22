@@ -1,0 +1,29 @@
+# Dependency directories
+node_modules/
+
+# IDE files
+.idea
+.vscode/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Test
+test/coverage
+
+# dotenv environment variables file
+.env
+
+# encryption keys
+*.key
+/*.pem
+
+# MacOs system file
+.DS_Store
+*.mongo
+.editorconfig
+.prettierrc
+
+.werf_secret_key
