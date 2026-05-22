@@ -1,0 +1,27 @@
+node_modules
+.github
+.claude
+
+# Build output
+dist/
+
+# Test coverage
+coverage/
+
+# Environment variables
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*

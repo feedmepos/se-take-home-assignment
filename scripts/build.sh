@@ -3,13 +3,16 @@
 # Build Script
 # This script should contain all compilation steps for your CLI application
 
+set -e  # Exit on error
+
 echo "Building CLI application..."
 
-# For Go projects:
-# go build -o order-controller ./cmd/main.go
+# Install dependencies
+echo "Installing dependencies..."
+npm install
 
-# For Node.js projects:
-# npm install
-# npm run build (if needed)
+# Compile TypeScript to JavaScript
+echo "Compiling TypeScript..."
+npm run build
 
-echo "Build completed"
+echo "Build completed successfully!"
