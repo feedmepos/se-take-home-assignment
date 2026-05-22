@@ -1,0 +1,28 @@
+{
+  "name": "home_assignment",
+  "version": "1.0.0",
+  "description": "Below is a take home assignment before the interview of the position. You are required to\r 1. Understand the situation and use case. You may contact the interviewer for further clarification.\r 2. implement the requirement with **either frontend or backend components**.\r 3. Complete the requirement with **AI** if possible, but perform your own testing.\r 4. Provide documentation for the any part that you think is needed.\r 5. Bring the source code and functioning prototype to the interview session.",
+  "homepage": "",
+  "bugs": {
+    "url": ""
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "license": "ISC",
+  "author": "Harry Loh Jia Zhuan",
+  "type": "module",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+  },
+  "dependencies": {
+    "pino": "^10.1.0",
+    "pino-pretty": "^13.1.2"
+  },
+  "devDependencies": {
+    "jest": "^30.2.0"
+  }
+}

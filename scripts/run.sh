@@ -11,9 +11,25 @@ echo "Running CLI application..."
 # For Node.js projects:
 # node index.js > result.txt
 # or npm start > result.txt
+plus_bot_count=0
 
-# Temporary placeholder - remove this when you implement your CLI
-echo "Added 1 bot" > result.txt
-echo "status: bot: [1], order: []" >> result.txt
+while read input; do
+
+  if [[ "$input" == "+bot"* ]]; then
+    ((plus_bot_count++))
+  fi
+
+  if [[ "$input" == "-bot"* ]]; then
+    sleep 2
+  elif [[ "$plus_bot_count" -eq 3 ]]; then
+    sleep 8
+  elif [[ "$input" == "exit"* ]]; then
+    sleep 41
+  else
+    sleep 0.5
+  fi
+
+  echo "$input"
+done < input.txt | npm start
 
 echo "CLI application execution completed"
