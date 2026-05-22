@@ -9,7 +9,7 @@ echo "Building CLI application..."
 # go build -o order-controller ./cmd/main.go
 
 # For Node.js projects:
-# npm install
+npm install
 # npm run build (if needed)
 
 echo "Build completed"

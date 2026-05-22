@@ -1,0 +1,29 @@
+{
+  "name": "mcd-bot-cli",
+  "version": "1.0.0",
+  "description": "feedme interview question",
+  "keywords": [
+    "feedme",
+    "nodejs",
+    "cli",
+    "vibe-coding-challenge"
+  ],
+  "homepage": "https://github.com/MheadHero/se-take-home-assignment#readme",
+  "bugs": {
+    "url": "https://github.com/MheadHero/se-take-home-assignment/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MheadHero/se-take-home-assignment.git"
+  },
+  "license": "ISC",
+  "author": "MheadHero",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node index.js",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "^30.2.0"
+  }
+}
