@@ -1,5 +1,7 @@
 ## FeedMe Software Engineer Take Home Assignment
+
 Below is a take home assignment before the interview of the position. You are required to
+
 1. Understand the situation and use case. You may contact the interviewer for further clarification.
 2. implement the requirement with **either frontend or backend components**.
 3. Complete the requirement with **AI** if possible, but perform your own testing.
@@ -7,16 +9,20 @@ Below is a take home assignment before the interview of the position. You are re
 5. Bring the source code and functioning prototype to the interview session.
 
 ### Situation
-McDonald is transforming their business during COVID-19. They wish to build the automated cooking bots to reduce workforce and increase their efficiency. As one of the software engineer in the project. You task is to create an order controller which handle the order control flow. 
+
+McDonald is transforming their business during COVID-19. They wish to build the automated cooking bots to reduce workforce and increase their efficiency. As one of the software engineer in the project. You task is to create an order controller which handle the order control flow.
 
 ### User Story
+
 As below is part of the user story:
+
 1. As McDonald's normal customer, after I submitted my order, I wish to see my order flow into "PENDING" area. After the cooking bot process my order, I want to see it flow into to "COMPLETE" area.
-2. As McDonald's VIP member, after I submitted my order, I want my order being process first before all order by normal customer.  However if there's existing order from VIP member, my order should queue behind his/her order.
+2. As McDonald's VIP member, after I submitted my order, I want my order being process first before all order by normal customer. However if there's existing order from VIP member, my order should queue behind his/her order.
 3. As McDonald's manager, I want to increase or decrease number of cooking bot available in my restaurant. When I increase a bot, it should immediately process any pending order. When I decrease a bot, the processing order should remain un-process.
 4. As McDonald bot, it can only pickup and process 1 order at a time, each order required 10 seconds to complete process.
 
 ### Requirements
+
 1. When "New Normal Order" clicked, a new order should show up "PENDING" Area.
 2. When "New VIP Order" clicked, a new order should show up in "PENDING" Area. It should place in-front of all existing "Normal" order but behind of all existing "VIP" order.
 3. The order number should be unique and increasing.
@@ -26,15 +32,18 @@ As below is part of the user story:
 7. No data persistance is needed for this prototype, you may perform all the process inside memory.
 
 ### Functioning Prototype
+
 You must implement **either** frontend or backend components as described below:
 
 #### 1. Frontend
+
 - You are free to use **any framework and programming language** of your choice
 - The UI application must be compiled, deployed and hosted on any publicly accessible web platform
 - Must provide a user interface that demonstrates all the requirements listed above
 - Should allow users to interact with the McDonald's order management system
 
 #### 2. Backend
+
 - You must use **either Go (Golang) or Node.js** for the backend implementation
 - The backend must be a CLI application that can be executed in GitHub Actions
 - Must implement the following scripts in the `script` directory:
@@ -48,6 +57,7 @@ You must implement **either** frontend or backend components as described below:
 - **Note**: An interactive CLI implementation is compulsory for the next round of interview. Candidates should be prepared to demonstrate interactive command handling.
 
 #### Submission Requirements
+
 - Fork this repository and implement your solution with either frontend or backend
 - **Frontend option**: Deploy to a publicly accessible URL using any technology stack
 - **Backend option**: Must be implemented in Go or Node.js and work within the GitHub Actions environment
@@ -59,6 +69,111 @@ You must implement **either** frontend or backend components as described below:
 - Provide documentation for any part that you think is needed
 
 ### Tips on completing this task
+
 - Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.
 - Utilize coding agent to complete the assignment scope your working hour within 1 hour, do not over engineer it. However, ensure you read and understand what your code doing and apply good engineering practice.
 - Complete the implementation as clean as possible, clean code is a strong plus point, do not bring in all the fancy tech stuff.
+
+---
+
+## FeedMe Take Home - Backend (Node.js + TypeScript CLI)
+
+This repository contains my backend (CLI) solution for the FeedMe Software Engineer take-home assignment.
+
+The CLI simulates McDonald's order management system with:
+
+- VIP priority queueing (VIP orders always processed before Normal; FIFO within VIP/Normal)
+- Dynamic bot scaling (+Bot / -Bot)
+- 1 order per bot at a time with 10s processing time
+- Timestamped logs written to `result.txt` (HH:MM:SS format)
+
+---
+
+### Quick Start
+
+#### Requirements
+
+- Node.js (v18+ recommended)
+- npm
+
+Run the following commands to verify and execute the CLI simulation:
+
+```bash
+./scripts/test.sh
+./scripts/build.sh
+./scripts/run.sh
+cat result.txt
+```
+
+The simulation output will be written to:
+
+```bash
+result.txt
+```
+
+---
+
+### Output
+
+All log entries are timestamped in HH:MM:SS format.
+
+The simulation includes a readable timeline and a final summary section (processed orders, completed orders, active bots, pending orders).
+
+#### Example format:
+
+```bash
+McDonald's Order Management System - Simulation Results
+
+[15:51:18] System initialized with 0 bots
+...
+Final Status:
+- Total Orders Processed: 4 (1 VIP, 3 Normal)
+- Orders Completed: 4
+- Active Bots: 1
+- Pending Orders: 0
+```
+
+---
+
+### How It Works (High-Level)
+
+- Orders are placed into an in-memory queue
+- VIP orders are always processed before normal orders
+- Bots pick up orders asynchronously and process them for 10 seconds
+- The core engine emits domain events (e.g. order picked up, completed)
+- The CLI layer listens to these events and renders human-readable logs
+
+This design allows the engine logic to remain independent from
+presentation (CLI output), making it easy to extend to other interfaces
+(e.g. HTTP API or Go implementation).
+
+---
+
+### Notes
+
+- In-memory only (no persistence), as required.
+
+- Event-driven design: the core engine emits domain events; the CLI scenario layer renders those events into human-readable logs.
+
+- Tests use a deterministic/fake clock to avoid flaky timing behavior.
+
+---
+
+### Testing
+
+Unit tests cover:
+
+- VIP queue priority and FIFO ordering
+- Scaling down bots during processing (order returns to PENDING)
+
+```bash
+./scripts/test.sh
+```
+
+## Bonus: Golang Proof of Concept
+
+In addition to the Node.js CLI implementation required by the assignment, this repository includes a small **Golang proof of concept** under `golang/poc`.
+
+The Go version explores how the same **event-driven order controller** and **bot worker model** can be implemented using goroutines, channels, and contexts, while preserving the same priority and lifecycle behavior (VIP-first, FIFO within each group).
+
+This Golang implementation is **not part of the required submission** and **does not affect GitHub Actions or CI**. It is provided purely as a bonus exploration, especially relevant to potential backend migration scenarios.

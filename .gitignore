@@ -1,0 +1,19 @@
+# Node
+node_modules/
+
+# Build output
+dist/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS / Editor
+.DS_Store
+.vscode/*
+!.vscode/settings.json
+
+# Cache
+node_modules/.cache
+baseline-browser-mapping
