@@ -1,15 +1,14 @@
 #!/bin/bash
 
-# Build Script
-# This script should contain all compilation steps for your CLI application
-
+# Build Script for McDonald's Order Management System
 echo "Building CLI application..."
 
-# For Go projects:
-# go build -o order-controller ./cmd/main.go
+# Install dependencies
+echo "Installing dependencies..."
+npm install
 
-# For Node.js projects:
-# npm install
-# npm run build (if needed)
+# Build the NestJS application
+echo "Building NestJS application..."
+npm run build
 
-echo "Build completed"
+echo "Build completed successfully!"

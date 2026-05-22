@@ -1,26 +1,70 @@
-McDonald's Order Management System - Simulation Results
-
-[14:32:01] System initialized with 0 bots
-[14:32:01] Created Normal Order #1001 - Status: PENDING
-[14:32:02] Created VIP Order #1002 - Status: PENDING
-[14:32:02] Created Normal Order #1003 - Status: PENDING
-[14:32:03] Bot #1 created - Status: ACTIVE
-[14:32:03] Bot #1 picked up VIP Order #1002 - Status: PROCESSING
-[14:32:04] Bot #2 created - Status: ACTIVE
-[14:32:04] Bot #2 picked up Normal Order #1001 - Status: PROCESSING
-[14:32:13] Bot #1 completed VIP Order #1002 - Status: COMPLETE (Processing time: 10s)
-[14:32:13] Bot #1 picked up Normal Order #1003 - Status: PROCESSING
-[14:32:14] Bot #2 completed Normal Order #1001 - Status: COMPLETE (Processing time: 10s)
-[14:32:14] Bot #2 is now IDLE - No pending orders
-[14:32:15] Created VIP Order #1004 - Status: PENDING
-[14:32:15] Bot #2 picked up VIP Order #1004 - Status: PROCESSING
-[14:32:23] Bot #1 completed Normal Order #1003 - Status: COMPLETE (Processing time: 10s)
-[14:32:25] Bot #2 completed VIP Order #1004 - Status: COMPLETE (Processing time: 10s)
-[14:32:25] Bot #2 destroyed while IDLE
-[14:32:26] Bot #1 is now IDLE - No pending orders
-
-Final Status:
-- Total Orders Processed: 4 (2 VIP, 2 Normal)
-- Orders Completed: 4
-- Active Bots: 1
-- Pending Orders: 0
+[10:01:29] === MCDONALD'S ORDER SYSTEM SIMULATION ===
+[10:01:29] Starting simulation...
+[10:01:29] 
+--- Step 1: Creating Normal Orders ---
+[10:01:29] New Normal Order #1 created and added to PENDING area
+[10:01:29] New Normal Order #2 created and added to PENDING area
+[10:01:29] New Normal Order #3 created and added to PENDING area
+[10:01:29] 
+--- Step 2: Adding Bot ---
+[10:01:29] Bot #1 added and started processing orders
+[10:01:29] 
+--- Step 3: Creating VIP Order (Priority) ---
+[10:01:29] New VIP Order #4 created and added to PENDING area (priority queue)
+[10:01:29] 
+--- Step 4: Adding Another Bot ---
+[10:01:29] Bot #2 added and started processing orders
+[10:01:29] 
+--- Step 5: Creating More Orders ---
+[10:01:29] New Normal Order #5 created and added to PENDING area
+[10:01:29] New VIP Order #6 created and added to PENDING area (priority queue)
+[10:01:29] 
+--- Step 6: Current Status ---
+[10:01:29] === SYSTEM STATUS ===
+[10:01:29] Orders: 6 total, 4 pending, 2 processing, 0 complete
+[10:01:29] Bots: 2 total, 0 idle, 2 processing
+[10:01:29] Pending Orders: #2(NORMAL), #3(NORMAL), #5(NORMAL), #6(VIP)
+[10:01:29] Processing Orders: #1(NORMAL), #4(VIP)
+[10:01:29] 
+--- Step 7: Removing Bot ---
+[10:01:29] Bot removed (newest bot destroyed)
+[10:01:29] 
+--- Step 8: Final Status ---
+[10:01:29] === SYSTEM STATUS ===
+[10:01:29] Orders: 6 total, 5 pending, 1 processing, 0 complete
+[10:01:29] Bots: 1 total, 0 idle, 1 processing
+[10:01:29] Pending Orders: #2(NORMAL), #3(NORMAL), #4(VIP), #5(NORMAL), #6(VIP)
+[10:01:29] Processing Orders: #1(NORMAL)
+[10:01:29] 
+=== SIMULATION COMPLETE ===
+[10:01:29] Note: Orders will continue processing in background for 10 seconds each
+[10:01:31] 
+=== EDGE CASE TESTING ===
+[10:01:31] 
+--- Test 1: System Integrity Validation ---
+[10:01:31] Order system integrity: VALID
+[10:01:31] Bot system integrity: VALID
+[10:01:31] 
+--- Test 2: Invalid Order Type Handling ---
+[10:01:31] ✓ Correctly handled invalid order type: Invalid order type: INVALID_TYPE
+[10:01:31] 
+--- Test 3: Bot Limit Testing ---
+[10:01:31] ✓ Successfully added multiple bots
+[10:01:31] 
+--- Test 4: Orphaned Timeout Cleanup ---
+[10:01:31] Cleaned up 0 orphaned timeouts
+[10:01:31] 
+--- Test 5: Stuck Order Recovery ---
+[10:01:31] Reset 0 stuck orders
+[10:01:31] 
+=== EDGE CASE TESTING COMPLETE ===
+[10:01:44] === SYSTEM STATUS ===
+[10:01:44] Orders: 6 total, 0 pending, 0 processing, 6 complete
+[10:01:44] Bots: 6 total, 6 idle, 0 processing
+[10:01:44] Completed Orders: #1(NORMAL), #2(NORMAL), #3(NORMAL), #4(VIP), #5(NORMAL), #6(VIP)
+[10:01:44] 
+=== GRACEFUL SHUTDOWN ===
+[10:01:44] Cleaning up resources...
+[10:01:44] ✓ Bot service cleaned up
+[10:01:44] ✓ System integrity verified
+[10:01:44] Shutdown complete

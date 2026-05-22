@@ -1,19 +1,19 @@
 #!/bin/bash
 
-# Run Script
-# This script should execute your CLI application and output results to result.txt
-
+# Run Script for McDonald's Order Management System
 echo "Running CLI application..."
 
-# For Go projects:
-# ./order-controller > result.txt
+# Ensure the application is built
+if [ ! -d "dist" ]; then
+    echo "Application not built. Building now..."
+    npm run build
+fi
 
-# For Node.js projects:
-# node index.js > result.txt
-# or npm start > result.txt
+# Clear any existing result.txt
+rm -f result.txt
 
-# Temporary placeholder - remove this when you implement your CLI
-echo "Added 1 bot" > result.txt
-echo "status: bot: [1], order: []" >> result.txt
+# Run the NestJS CLI application
+echo "Starting McDonald's Order Management System..."
+RUN_MODE=cli npm start
 
 echo "CLI application execution completed"
