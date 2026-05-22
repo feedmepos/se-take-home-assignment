@@ -1,0 +1,12 @@
+<div class="px-4 md:px-8 py-10 min-h-screen bg-slate-50 dark:bg-base-300 font-sans text-base-content antialiased w-full">
+  <div class="w-full max-w-[1400px] mx-auto flex flex-col gap-10">
+    <app-control-panel class="w-full"></app-control-panel>
+
+    <!-- Adding explicit responsive gaps and sizes for all cards -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch w-full" style="min-height: 700px;">
+      <app-order-board class="block h-full w-full"></app-order-board>
+      <app-bot-board class="block h-full w-full"></app-bot-board>
+      <app-complete-board class="block h-full w-full"></app-complete-board>
+    </div>
+  </div>
+</div>
