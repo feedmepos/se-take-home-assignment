@@ -1,14 +1,10 @@
 #!/bin/bash
+set -e
 
-# Unit Test Script
-# This script should contain all unit test execution steps
+echo "Running Go unit tests..."
 
-echo "Running unit tests..."
-
-# For Go projects:
-# go test ./... -v
-
-# For Node.js projects:
-# npm test
+# 执行所有 Go 单元测试
+go test ./... -v
 
 echo "Unit tests completed"
+
