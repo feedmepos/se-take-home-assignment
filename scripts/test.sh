@@ -5,10 +5,10 @@
 
 echo "Running unit tests..."
 
-# For Go projects:
-# go test ./... -v
+# Change to project root directory
+cd "$(dirname "$0")/.."
 
-# For Node.js projects:
-# npm test
+# Run simple test runner
+npm test
 
 echo "Unit tests completed"

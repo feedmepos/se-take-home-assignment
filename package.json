@@ -1,0 +1,23 @@
+{
+  "name": "mcdonalds-order-controller",
+  "version": "1.0.0",
+  "description": "McDonald's Order Controller - Automated Cooking Bot Management System",
+  "main": "src/index.js",
+  "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "interactive": "node src/interactive.js",
+    "test": "node test.js",
+    "build": "echo 'No build step required for Node.js'"
+  },
+  "keywords": [
+    "order-management",
+    "queue",
+    "priority-queue"
+  ],
+  "author": "",
+  "license": "ISC"
+}

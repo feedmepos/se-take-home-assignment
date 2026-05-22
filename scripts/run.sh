@@ -5,15 +5,11 @@
 
 echo "Running CLI application..."
 
-# For Go projects:
-# ./order-controller > result.txt
+# Change to project root directory
+cd "$(dirname "$0")/.."
 
-# For Node.js projects:
-# node index.js > result.txt
-# or npm start > result.txt
-
-# Temporary placeholder - remove this when you implement your CLI
-echo "Added 1 bot" > result.txt
-echo "status: bot: [1], order: []" >> result.txt
+# Run the Node.js CLI application and redirect output to result.txt in scripts directory
+node src/index.js > scripts/result.txt 2>&1
+# node src/index.js --interactive
 
 echo "CLI application execution completed"
