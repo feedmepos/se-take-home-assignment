@@ -1,0 +1,6 @@
+{
+  "buildCommand": "pnpm --filter pos build",
+  "outputDirectory": "pos/.vercel/output",
+  "framework": null,
+  "installCommand": "pnpm install --frozen-lockfile"
+}

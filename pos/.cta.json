@@ -1,0 +1,29 @@
+{
+  "projectName": "pos",
+  "mode": "file-router",
+  "typescript": true,
+  "packageManager": "pnpm",
+  "tailwind": true,
+  "addOnOptions": {
+    "drizzle": {
+      "database": "sqlite"
+    }
+  },
+  "git": true,
+  "version": 1,
+  "framework": "react-cra",
+  "chosenAddOns": [
+    "eslint",
+    "nitro",
+    "start",
+    "better-auth",
+    "store",
+    "tanstack-query",
+    "shadcn",
+    "drizzle",
+    "form",
+    "ai",
+    "compiler",
+    "table"
+  ]
+}

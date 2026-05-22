@@ -1,0 +1,239 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+@custom-variant dark (&:is(.dark *));
+
+/* Custom properties for FeedMe Order Controller */
+:root {
+  /* Status Colors (Light Mode) */
+  --color-pending: oklch(0.65 0.15 85);
+  --color-processing: oklch(0.55 0.18 250);
+  --color-complete: oklch(0.55 0.15 145);
+  --color-vip: oklch(0.60 0.18 85);
+
+  /* Background (Light Mode) */
+  --background: oklch(0.98 0 0);
+  --foreground: oklch(0.15 0.01 285);
+
+  /* Card (Light Mode) */
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.15 0.01 285);
+
+  /* Border (Light Mode) */
+  --border: oklch(0.92 0.01 285);
+  --input: oklch(0.92 0.01 285);
+
+  /* Primary (Light Mode) */
+  --primary: oklch(0.55 0.15 250);
+  --primary-foreground: oklch(0.98 0 0);
+
+  /* Secondary (Light Mode) */
+  --secondary: oklch(0.96 0.01 285);
+  --secondary-foreground: oklch(0.15 0.01 285);
+
+  /* Muted (Light Mode) */
+  --muted: oklch(0.96 0.01 285);
+  --muted-foreground: oklch(0.45 0.01 285);
+
+  /* Accent (Light Mode) */
+  --accent: oklch(0.92 0.02 285);
+  --accent-foreground: oklch(0.15 0.01 285);
+
+  /* Destructive (Light Mode) */
+  --destructive: oklch(0.60 0.20 25);
+  --destructive-foreground: oklch(0.98 0 0);
+
+  /* Ring */
+  --ring: oklch(0.55 0.15 250);
+
+  /* Radius */
+  --radius: 0.75rem;
+
+  /* Glassmorphism */
+  --glass-bg: oklch(1 0 0 / 0.1);
+  --glass-border: oklch(1 0 0 / 0.2);
+  --glass-blur: 12px;
+}
+
+.dark {
+  /* Background (Dark Mode) */
+  --background: oklch(0.15 0.01 285);
+  --foreground: oklch(0.98 0 0);
+
+  /* Card (Dark Mode) */
+  --card: oklch(0.18 0.01 285);
+  --card-foreground: oklch(0.98 0 0);
+
+  /* Border (Dark Mode) */
+  --border: oklch(0.25 0.01 285);
+  --input: oklch(0.25 0.01 285);
+
+  /* Secondary (Dark Mode) */
+  --secondary: oklch(0.25 0.01 285);
+  --secondary-foreground: oklch(0.98 0 0);
+
+  /* Muted (Dark Mode) */
+  --muted: oklch(0.25 0.01 285);
+  --muted-foreground: oklch(0.65 0.01 285);
+
+  /* Accent (Dark Mode) */
+  --accent: oklch(0.35 0.02 285);
+  --accent-foreground: oklch(0.98 0 0);
+
+  /* Glassmorphism (Dark) */
+  --glass-bg: oklch(0 0 0 / 0.3);
+  --glass-border: oklch(1 0 0 / 0.1);
+}
+
+body {
+  @apply m-0;
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code, .font-mono {
+  font-family: 'JetBrains Mono', 'SF Mono', Monaco, 'Cascadia Code', monospace;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+
+  /* Custom Utilities */
+  --bg-glass: var(--glass-bg);
+  --border-glass: var(--glass-border);
+  --blur-glass: var(--glass-blur);
+}
+
+@layer utilities {
+  .glass {
+    background-color: var(--bg-glass);
+    backdrop-filter: blur(var(--blur-glass));
+    border: 1px solid var(--border-glass);
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-br from-foreground to-foreground/50;
+  }
+
+  .text-gradient-primary {
+    @apply bg-clip-text text-transparent bg-gradient-to-br from-primary to-blue-400;
+  }
+
+  .bg-mesh {
+    background-color: var(--background);
+    background-image: 
+      radial-gradient(at 0% 0%, oklch(0.55 0.15 250 / 0.15) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, oklch(0.65 0.15 85 / 0.1) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, oklch(0.55 0.15 145 / 0.1) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, oklch(0.60 0.18 85 / 0.1) 0px, transparent 50%);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom animations for FeedMe */
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px theme('colors.primary');
+  }
+  50% {
+    box-shadow: 0 0 20px theme('colors.primary');
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-out;
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.3s ease-out;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Status-specific animations */
+@keyframes urgency-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+.urgency-high {
+  animation: urgency-pulse 1s ease-in-out infinite;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: theme('colors.muted');
+}
+
+::-webkit-scrollbar-thumb {
+  background: theme('colors.muted-foreground');
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: theme('colors.foreground');
+}

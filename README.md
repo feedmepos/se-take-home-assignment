@@ -62,3 +62,148 @@ You must implement **either** frontend or backend components as described below:
 - Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.
 - Utilize coding agent to complete the assignment scope your working hour within 1 hour, do not over engineer it. However, ensure you read and understand what your code doing and apply good engineering practice.
 - Complete the implementation as clean as possible, clean code is a strong plus point, do not bring in all the fancy tech stuff.
+
+
+
+
+
+## Submission Notes
+
+- Implementation choice: **Frontend** (TanStack Start + React + TypeScript)
+- Public URL: **please ask me via whatsapp/email**
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 20+
+- pnpm (or bun)
+
+### Quick Start (from project root)
+
+**Option 1: Using Make**
+
+```bash
+make dev
+# Opens http://localhost:3000
+```
+
+**Option 2: Using pnpm (workspace)**
+
+```bash
+# Install all dependencies
+pnpm install
+
+# Run development server
+pnpm dev
+# Opens http://localhost:3000
+```
+
+**Option 3: Using bun**
+
+```bash
+cd pos && bun run dev
+```
+
+### Local Setup (from pos directory)
+
+```bash
+cd pos
+pnpm install
+
+# For local development with SQLite (optional)
+pnpm add better-sqlite3 --save-optional
+
+# Run development server
+pnpm dev
+
+# Open http://localhost:3000
+```
+
+### Demo Accounts
+
+| Username | Password | Role |
+|----------|----------|------|
+| normal_user | password123 | NORMAL |
+| vip_user | password123 | VIP |
+| manager | password123 | MANAGER |
+
+## Test Checklist/Results
+
+All requirements have been verified and tested. See `TEST.md` for detailed test results.
+
+![Sample Screenshot](sample.png)
+
+### Key Requirements Verified
+
+- [x] Normal orders appear in PENDING area
+- [x] VIP orders queue before all Normal orders
+- [x] VIP orders queue behind existing VIP orders
+- [x] Order numbers are unique and increasing
+- [x] Bots process orders (10-second timer)
+- [x] Bots become IDLE when no orders pending
+- [x] Bot removal returns in-flight order to PENDING
+- [x] UI displays PENDING/PROCESSING/COMPLETE columns correctly
+
+### Technical Stack
+
+- **Framework**: TanStack Start (React SSR with file-based routing)
+- **UI Library**: shadcn/ui components with Tailwind CSS v4
+- **Database**: Drizzle ORM with Turso (LibSQL) for production
+- **State Management**: TanStack Store for client state, TanStack Query for server state
+- **PWA**: Progressive Web App with offline support (IndexedDB via Dexie.js)
+- **Deployment**: Vercel
+
+### Architecture Highlights
+
+- **UUID7** for all primary keys (time-ordered, conflict-resistant)
+- **Soft Delete** with `deleted_at` timestamp
+- **Foreign Key Cascades**: User delete preserves orders, Bot delete unassigns orders
+- **Backend Bot Processing**: Order completion scheduled via Upstash QStash (10s delay)
+- **Processing Resume**: On startup requests, in-flight orders are resumed and completed/scheduled as needed
+- **Distributed Locking**: Database-level locks (resume_locks table) prevent concurrent recovery operations on single instance
+
+### Scaling Limitations
+
+**⚠️ Horizontal Scaling Not Supported**
+
+This implementation is designed for **single-instance deployment** and does not support horizontal scaling with multiple server instances. Here's why:
+
+**Distributed Lock Mechanism:**
+
+- The `resumeProcessingOrders()` recovery function uses a simple database lock (resume_locks table) with TTL
+- This lock works only for preventing concurrent operations within a single instance
+- With multiple instances, different servers would simultaneously acquire the lock and run duplicate recovery operations
+
+**What Would Be Needed for Horizontal Scaling:**
+
+1. **Redis or similar** distributed cache for cross-instance locking (SET NX with TTL)
+2. **Shared message queue** (RabbitMQ, AWS SQS, etc.) for order distribution instead of polling
+3. **Consensus mechanism** for bot assignment across instances (e.g., lease-based leader election)
+4. **Distributed tracing** to ensure exactly-once processing guarantees
+
+**Current Bottlenecks:**
+
+- All servers poll `GET /api/orders` every 2 seconds (thundering herd on scale)
+- Resume lock only prevents redundant work on same instance
+- Bot assignment via atomic transactions works per-instance only
+- No way to coordinate which instance claims which order across cluster
+
+**Single Instance Guarantees:**
+
+- ✅ No duplicate order processing
+- ✅ No race conditions in bot assignment
+- ✅ Automatic recovery from crashes
+- ✅ Consistent state across all operations
+
+For production multi-instance deployments, recommend implementing a proper job queue system (Bull, Temporal, or similar).
+
+### System Documentation
+
+- **[HOW.md](./HOW.md)**: Technical flow overview with architectural diagrams, user story flows, and file references. Start here for a visual understanding of how the system works without diving into code.
+- **[ORDERS_BOT_QUEUE.md](./ORDERS_BOT_QUEUE.md)**: Comprehensive explanation of the orders → bot queue system, including data structures, assignment flow, recovery logic, stuck bot conditions, client-side state management, and the complete order lifecycle with failure scenarios.
+
+### Environment
+
+- `APP_BASE_URL` is required so QStash can call back into `/api/orders/complete` (use a public URL in dev, e.g. via ngrok).
+- **Offline-First**: Local IndexedDB storage with sync queue for when online

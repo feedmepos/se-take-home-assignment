@@ -1,0 +1,69 @@
+# Environment
+.env
+.env.local
+.env.production
+.env.staging
+
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build outputs
+dist
+dist-ssr
+build
+.next
+out
+.turbo
+
+# TanStack Router
+tsroutes.json
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite-journal
+data
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Testing
+coverage
+.nyc_output
+.vitest
+
+# TypeScript
+*.tsbuildinfo
+
+# IDE & Editor
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea
+*.swp
+*.swo
+*~
+
+# Claude Code
+.claude
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Misc
+.cache
+.temp
+.tmp
+.vercel

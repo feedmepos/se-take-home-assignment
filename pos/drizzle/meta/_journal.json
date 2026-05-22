@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1768988835999,
+      "tag": "0000_silent_silver_surfer",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1769063782322,
+      "tag": "0001_lyrical_madelyne_pryor",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1769072437219,
+      "tag": "0002_colossal_sentinels",
+      "breakpoints": true
+    }
+  ]
+}
