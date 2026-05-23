@@ -36,6 +36,19 @@ export const CompleteArea: React.FC<CompleteAreaProps> = ({ orders }) => {
             <div key={order.id} className={`order-card ${order.type === 'VIP' ? 'vip' : ''}`}>
               <div className="order-info">
                 <span className="order-id">Order #{order.id}</span>
+                {(() => {
+                  if (!order.completedAt) return null;
+                  const dateStr = new Date(order.completedAt).toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "short",
+                    year: "2-digit",
+                  });
+                  const timeStr = new Date(order.completedAt).toLocaleTimeString("en-GB", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  });
+                  return <span className="order-completed-time">Completed at {dateStr} {timeStr}</span>;
+                })()}
                 <span className={`order-type ${order.type === 'VIP' ? 'vip-text' : ''}`}>
                   {order.type === 'VIP' && <Star size={14} />}
                   {order.type}

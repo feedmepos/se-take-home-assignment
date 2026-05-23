@@ -37,6 +37,18 @@ export const PendingArea: React.FC<PendingAreaProps> = ({ orders }) => {
             <div key={order.id} className={`order-card ${order.type === 'VIP' ? 'vip' : ''}`}>
               <div className="order-info">
                 <span className="order-id">Order #{order.id}</span>
+                {(() => {
+                  const createdAt = new Date(order.createdAt).toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "short",
+                    year: "2-digit",
+                  });
+                      const time = new Date(order.createdAt).toLocaleTimeString("en-GB", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      });
+                  return <span>Created at {createdAt} {time}</span>;
+                })()}
                 <span className={`order-type ${order.type === 'VIP' ? 'vip-text' : ''}`}>
                   {order.type === 'VIP' && <Star size={14} />}
                   {order.type}

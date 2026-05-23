@@ -13,4 +13,5 @@ export interface Bot {
   id: number;
   orderId: number | null; // null if IDLE
   processingStartTime: number | null;
+  isVip?: boolean;
 }

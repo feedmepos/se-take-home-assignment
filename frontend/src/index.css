@@ -238,6 +238,12 @@ body {
   color: var(--accent-amber);
 }
 
+.order-completed-time {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  opacity: 0.85;
+}
+
 /* Bot Cards */
 .bot-grid {
   display: grid;
@@ -258,8 +264,42 @@ body {
 }
 
 .bot-card.processing {
-  border-color: var(--accent-green);
+  border-color: var(--accent-blue);
   box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+}
+
+.bot-card.vip {
+  border-color: var(--accent-amber);
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.2);
+}
+
+.bot-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.bot-type-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  display: inline-block;
+  text-align: center;
+}
+
+.bot-type-badge.vip {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: var(--accent-amber);
+  border: 1px solid var(--accent-amber);
+}
+
+.bot-type-badge.normal {
+  background-color: rgba(59, 130, 246, 0.15);
+  color: var(--accent-blue);
+  border: 1px solid var(--accent-blue);
 }
 
 .bot-icon {

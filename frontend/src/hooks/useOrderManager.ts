@@ -10,7 +10,7 @@ interface State {
 
 type Action =
   | { type: 'ADD_ORDER'; payload: { orderType: OrderType } }
-  | { type: 'ADD_BOT' }
+  | { type: 'ADD_BOT'; payload:{ isVip?: boolean } }
   | { type: 'REMOVE_BOT' }
   | { type: 'TICK'; payload: { now: number } };
 
@@ -41,6 +41,7 @@ function reducer(state: State, action: Action): State {
         id: state.nextBotId,
         orderId: null,
         processingStartTime: null,
+        isVip: action.payload.isVip,
       };
       return {
         ...state,
@@ -103,16 +104,24 @@ function reducer(state: State, action: Action): State {
           return a.id - b.id;
         });
 
-      let pendingIndex = 0;
       nextBots.forEach((bot) => {
-        if (bot.orderId === null && pendingIndex < pendingOrders.length) {
-          const order = pendingOrders[pendingIndex];
-          order.status = 'PROCESSING';
-          
-          bot.orderId = order.id;
-          bot.processingStartTime = now;
-          pendingIndex++;
-          stateChanged = true;
+        if (bot.orderId === null && pendingOrders.length > 0) {
+          let orderIndex = -1;
+          if (bot.isVip) {
+            // VIP bot: only takes VIP orders
+            orderIndex = pendingOrders.findIndex((o) => o.type === 'VIP');
+          } else {
+            // Normal bot: can take any order (NORMAL or VIP)
+            orderIndex = 0;
+          }
+          if (orderIndex !== -1) {
+            const order = pendingOrders[orderIndex];
+            order.status = 'PROCESSING';
+            bot.orderId = order.id;
+            bot.processingStartTime = now;
+            pendingOrders.splice(orderIndex, 1);
+            stateChanged = true;
+          }
         }
       });
 
@@ -148,8 +157,8 @@ export function useOrderManager() {
     setTimeout(() => dispatch({ type: 'TICK', payload: { now: Date.now() } }), 0);
   };
 
-  const addBot = () => {
-    dispatch({ type: 'ADD_BOT' });
+  const addBot = (isVip: boolean=false) => {
+    dispatch({ type: 'ADD_BOT', payload: { isVip } });
     setTimeout(() => dispatch({ type: 'TICK', payload: { now: Date.now() } }), 0);
   };
 

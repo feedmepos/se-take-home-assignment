@@ -4,7 +4,8 @@ import type { OrderType } from '../types';
 
 interface ControlPanelProps {
   onAddOrder: (type: OrderType) => void;
-  onAddBot: () => void;
+  // isVip indicates whether the added bot should be a VIP bot
+  onAddBot: (isVip?: boolean) => void;
   onRemoveBot: () => void;
 }
 
@@ -25,9 +26,14 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
         New VIP Order
       </button>
       
-      <button className="btn btn-add-bot" onClick={onAddBot}>
+      <button className="btn btn-add-bot" onClick={() => onAddBot(false)}>
         <Plus size={20} />
         + Bot
+      </button>
+
+      <button className="btn btn-add-bot" onClick={() => onAddBot(true)}>
+        <Plus size={20} />
+        + VIP Bot
       </button>
       
       <button className="btn btn-remove-bot" onClick={onRemoveBot}>

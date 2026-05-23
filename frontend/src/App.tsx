@@ -18,13 +18,13 @@ function App() {
       <main>
         <ControlPanel 
           onAddOrder={addOrder} 
-          onAddBot={addBot} 
+          onAddBot={isVip => addBot(isVip)} 
           onRemoveBot={removeBot} 
         />
         
         <div className="dashboard">
           <PendingArea orders={state.orders} />
-          <BotArea bots={state.bots} />
+          <BotArea bots={state.bots} orders={state.orders} />
           <CompleteArea orders={state.orders} />
         </div>
       </main>
