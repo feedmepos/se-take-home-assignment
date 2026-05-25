@@ -53,6 +53,39 @@ func TestVIPOrdersQueueBeforeNormalOrders(t *testing.T) {
 	}
 }
 
+func TestBotImmediatelyPicksPendingOrder(t *testing.T) {
+	controller := NewController()
+	start := time.Date(2026, 5, 25, 9, 0, 0, 0, time.UTC)
+
+	controller.AddOrder(NormalOrder, start)
+	controller.AddBot(start.Add(time.Second))
+
+	snapshot := controller.Snapshot()
+	if len(snapshot.PendingOrders) != 0 {
+		t.Fatalf("pending orders count = %d, want 0", len(snapshot.PendingOrders))
+	}
+	if len(snapshot.Bots) != 1 {
+		t.Fatalf("bot count = %d, want 1", len(snapshot.Bots))
+	}
+
+	bot := snapshot.Bots[0]
+	if bot.ID != 1 {
+		t.Fatalf("bot ID = %d, want 1", bot.ID)
+	}
+	if bot.Status != BotProcessing {
+		t.Fatalf("bot status = %s, want %s", bot.Status, BotProcessing)
+	}
+	if bot.CurrentOrder == nil {
+		t.Fatal("bot current order is nil, want order #1")
+	}
+	if bot.CurrentOrder.ID != 1 {
+		t.Fatalf("bot current order ID = %d, want 1", bot.CurrentOrder.ID)
+	}
+	if bot.CurrentOrder.Status != Processing {
+		t.Fatalf("bot current order status = %s, want %s", bot.CurrentOrder.Status, Processing)
+	}
+}
+
 func orderIDs(orders []Order) []int {
 	ids := make([]int, len(orders))
 	for index, order := range orders {

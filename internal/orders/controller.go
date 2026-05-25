@@ -20,23 +20,40 @@ const (
 )
 
 type Order struct {
-	ID        int
-	Type      OrderType
-	Status    OrderStatus
-	CreatedAt time.Time
+	ID         int
+	Type       OrderType
+	Status     OrderStatus
+	CreatedAt  time.Time
+	PickedUpAt time.Time
+}
+
+type BotStatus string
+
+const (
+	BotIdle       BotStatus = "IDLE"
+	BotProcessing BotStatus = "PROCESSING"
+)
+
+type Bot struct {
+	ID           int
+	Status       BotStatus
+	CurrentOrder *Order
 }
 
 type Snapshot struct {
 	PendingOrders []Order
+	Bots          []Bot
 }
 
 type OrderController struct {
 	nextOrderID int
+	nextBotID   int
 	pending     []Order
+	bots        []Bot
 }
 
 func NewController() *OrderController {
-	return &OrderController{nextOrderID: 1}
+	return &OrderController{nextOrderID: 1, nextBotID: 1}
 }
 
 func (controller *OrderController) AddOrder(orderType OrderType, at time.Time) []Event {
@@ -49,6 +66,26 @@ func (controller *OrderController) AddOrder(orderType OrderType, at time.Time) [
 	controller.nextOrderID++
 	controller.queuePendingOrder(order)
 
+	return nil
+}
+
+func (controller *OrderController) AddBot(at time.Time) []Event {
+	bot := Bot{
+		ID:     controller.nextBotID,
+		Status: BotIdle,
+	}
+	controller.nextBotID++
+
+	if len(controller.pending) > 0 {
+		order := controller.pending[0]
+		controller.pending = controller.pending[1:]
+		order.Status = Processing
+		order.PickedUpAt = at
+		bot.Status = BotProcessing
+		bot.CurrentOrder = &order
+	}
+
+	controller.bots = append(controller.bots, bot)
 	return nil
 }
 
@@ -82,8 +119,16 @@ func comesBefore(candidate Order, current Order) bool {
 func (controller *OrderController) Snapshot() Snapshot {
 	pending := make([]Order, len(controller.pending))
 	copy(pending, controller.pending)
+	bots := make([]Bot, len(controller.bots))
+	for index, bot := range controller.bots {
+		bots[index] = bot
+		if bot.CurrentOrder != nil {
+			order := *bot.CurrentOrder
+			bots[index].CurrentOrder = &order
+		}
+	}
 
-	return Snapshot{PendingOrders: pending}
+	return Snapshot{PendingOrders: pending, Bots: bots}
 }
 
 type Event struct{}
