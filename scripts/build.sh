@@ -1,15 +1,12 @@
 #!/bin/bash
+# ABOUTME: Builds the order controller CLI binary.
+# ABOUTME: Provides the build entrypoint used by the backend verification workflow.
 
-# Build Script
-# This script should contain all compilation steps for your CLI application
+set -euo pipefail
 
 echo "Building CLI application..."
 
-# For Go projects:
-# go build -o order-controller ./cmd/main.go
-
-# For Node.js projects:
-# npm install
-# npm run build (if needed)
+mkdir -p bin
+go build -o bin/order-controller ./cmd/order-controller
 
 echo "Build completed"

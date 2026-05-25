@@ -1,0 +1,57 @@
+// ABOUTME: Tests CLI-facing demo output for the order controller prototype.
+// ABOUTME: Verifies the generated result text is stable and CI-friendly.
+package app
+
+import (
+	"bytes"
+	"regexp"
+	"strings"
+	"testing"
+	"time"
+)
+
+func TestRunDemoWritesTimestampedResults(t *testing.T) {
+	var output bytes.Buffer
+
+	if err := RunDemo(&output); err != nil {
+		t.Fatalf("RunDemo returned error: %v", err)
+	}
+
+	result := output.String()
+	timestampPattern := regexp.MustCompile(`\[[0-9]{2}:[0-9]{2}:[0-9]{2}\]`)
+	if !timestampPattern.MatchString(result) {
+		t.Fatalf("demo output does not contain HH:MM:SS timestamp: %q", result)
+	}
+
+	requiredText := []string{
+		"McDonald's Order Management System - Simulation Results",
+		"Created Normal Order #1",
+		"Created VIP Order #2",
+		"Bot #1 created",
+		"Bot #2 destroyed",
+		"Final Status:",
+		"Orders Completed: 4",
+	}
+	for _, text := range requiredText {
+		if !strings.Contains(result, text) {
+			t.Fatalf("demo output missing %q in:\n%s", text, result)
+		}
+	}
+}
+
+func TestRunDemoAtUsesProvidedStartTime(t *testing.T) {
+	var output bytes.Buffer
+	start := time.Date(2026, 5, 25, 12, 39, 0, 0, time.UTC)
+
+	if err := RunDemoAt(&output, start); err != nil {
+		t.Fatalf("RunDemoAt returned error: %v", err)
+	}
+
+	result := output.String()
+	if !strings.Contains(result, "[12:39:00] System initialized with 0 bots") {
+		t.Fatalf("demo output does not use provided start time:\n%s", result)
+	}
+	if strings.Contains(result, "[09:00:00] System initialized with 0 bots") {
+		t.Fatalf("demo output still uses hard-coded start time:\n%s", result)
+	}
+}
