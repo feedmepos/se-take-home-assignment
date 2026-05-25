@@ -1,14 +1,11 @@
 #!/bin/bash
+# ABOUTME: Runs the Go test suite for the order controller CLI.
+# ABOUTME: Provides the test entrypoint used by the backend verification workflow.
 
-# Unit Test Script
-# This script should contain all unit test execution steps
+set -euo pipefail
 
 echo "Running unit tests..."
 
-# For Go projects:
-# go test ./... -v
-
-# For Node.js projects:
-# npm test
+go test ./... -v
 
 echo "Unit tests completed"
