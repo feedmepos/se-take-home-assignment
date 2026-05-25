@@ -29,3 +29,34 @@ func TestNormalOrderStartsPending(t *testing.T) {
 		t.Fatalf("order status = %s, want %s", order.Status, Pending)
 	}
 }
+
+func TestVIPOrdersQueueBeforeNormalOrders(t *testing.T) {
+	controller := NewController()
+	start := time.Date(2026, 5, 25, 9, 0, 0, 0, time.UTC)
+
+	controller.AddOrder(NormalOrder, start)
+	controller.AddOrder(VIPOrder, start.Add(time.Second))
+	controller.AddOrder(NormalOrder, start.Add(2*time.Second))
+	controller.AddOrder(VIPOrder, start.Add(3*time.Second))
+
+	snapshot := controller.Snapshot()
+	got := orderIDs(snapshot.PendingOrders)
+	want := []int{2, 4, 1, 3}
+
+	if len(got) != len(want) {
+		t.Fatalf("pending order IDs = %v, want %v", got, want)
+	}
+	for index := range want {
+		if got[index] != want[index] {
+			t.Fatalf("pending order IDs = %v, want %v", got, want)
+		}
+	}
+}
+
+func orderIDs(orders []Order) []int {
+	ids := make([]int, len(orders))
+	for index, order := range orders {
+		ids[index] = order.ID
+	}
+	return ids
+}

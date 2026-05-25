@@ -47,9 +47,36 @@ func (controller *OrderController) AddOrder(orderType OrderType, at time.Time) [
 		CreatedAt: at,
 	}
 	controller.nextOrderID++
-	controller.pending = append(controller.pending, order)
+	controller.queuePendingOrder(order)
 
 	return nil
+}
+
+func (controller *OrderController) queuePendingOrder(order Order) {
+	insertAt := len(controller.pending)
+	for index, pendingOrder := range controller.pending {
+		if comesBefore(order, pendingOrder) {
+			insertAt = index
+			break
+		}
+	}
+
+	controller.pending = append(controller.pending, Order{})
+	copy(controller.pending[insertAt+1:], controller.pending[insertAt:])
+	controller.pending[insertAt] = order
+}
+
+func comesBefore(candidate Order, current Order) bool {
+	if candidate.Type == VIPOrder && current.Type == NormalOrder {
+		return true
+	}
+	if candidate.Type != current.Type {
+		return false
+	}
+	if candidate.CreatedAt.Equal(current.CreatedAt) {
+		return candidate.ID < current.ID
+	}
+	return candidate.CreatedAt.Before(current.CreatedAt)
 }
 
 func (controller *OrderController) Snapshot() Snapshot {
