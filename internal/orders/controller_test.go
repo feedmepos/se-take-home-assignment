@@ -155,6 +155,66 @@ func TestIdleBotPicksNewOrderImmediately(t *testing.T) {
 	}
 }
 
+func TestRemoveNewestIdleBot(t *testing.T) {
+	controller := NewController()
+	start := time.Date(2026, 5, 25, 9, 0, 0, 0, time.UTC)
+
+	controller.AddBot(start)
+	controller.AddBot(start.Add(time.Second))
+	controller.RemoveNewestBot(start.Add(2 * time.Second))
+
+	snapshot := controller.Snapshot()
+	if len(snapshot.Bots) != 1 {
+		t.Fatalf("bot count = %d, want 1", len(snapshot.Bots))
+	}
+	if snapshot.Bots[0].ID != 1 {
+		t.Fatalf("remaining bot ID = %d, want 1", snapshot.Bots[0].ID)
+	}
+}
+
+func TestRemoveNewestProcessingBotReturnsOrderToPending(t *testing.T) {
+	controller := NewController()
+	start := time.Date(2026, 5, 25, 9, 0, 0, 0, time.UTC)
+
+	controller.AddOrder(NormalOrder, start)
+	controller.AddOrder(NormalOrder, start.Add(time.Second))
+	controller.AddBot(start.Add(2 * time.Second))
+	controller.AddBot(start.Add(3 * time.Second))
+
+	controller.RemoveNewestBot(start.Add(4 * time.Second))
+
+	snapshot := controller.Snapshot()
+	if len(snapshot.Bots) != 1 {
+		t.Fatalf("bot count = %d, want 1", len(snapshot.Bots))
+	}
+	if snapshot.Bots[0].ID != 1 {
+		t.Fatalf("remaining bot ID = %d, want 1", snapshot.Bots[0].ID)
+	}
+	gotPending := orderIDs(snapshot.PendingOrders)
+	wantPending := []int{2}
+	if len(gotPending) != len(wantPending) || gotPending[0] != wantPending[0] {
+		t.Fatalf("pending order IDs = %v, want %v", gotPending, wantPending)
+	}
+	if snapshot.PendingOrders[0].Status != Pending {
+		t.Fatalf("returned order status = %s, want %s", snapshot.PendingOrders[0].Status, Pending)
+	}
+
+	controller.AdvanceTo(start.Add(13 * time.Second))
+
+	snapshot = controller.Snapshot()
+	gotCompleted := orderIDs(snapshot.CompletedOrders)
+	wantCompleted := []int{1}
+	if len(gotCompleted) != len(wantCompleted) || gotCompleted[0] != wantCompleted[0] {
+		t.Fatalf("completed order IDs = %v, want %v", gotCompleted, wantCompleted)
+	}
+	if snapshot.Bots[0].CurrentOrder == nil {
+		t.Fatal("remaining bot current order is nil, want order #2")
+	}
+	if snapshot.Bots[0].CurrentOrder.ID != 2 {
+		t.Fatalf("remaining bot current order ID = %d, want 2", snapshot.Bots[0].CurrentOrder.ID)
+	}
+}
+
 func orderIDs(orders []Order) []int {
 	ids := make([]int, len(orders))
 	for index, order := range orders {

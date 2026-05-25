@@ -100,6 +100,26 @@ func (controller *OrderController) AdvanceTo(at time.Time) []Event {
 	return nil
 }
 
+func (controller *OrderController) RemoveNewestBot(_ time.Time) []Event {
+	if len(controller.bots) == 0 {
+		return nil
+	}
+
+	lastIndex := len(controller.bots) - 1
+	removedBot := controller.bots[lastIndex]
+	controller.bots = controller.bots[:lastIndex]
+
+	if removedBot.CurrentOrder != nil {
+		order := *removedBot.CurrentOrder
+		order.Status = Pending
+		order.PickedUpAt = time.Time{}
+		order.CompletedAt = time.Time{}
+		controller.queuePendingOrder(order)
+	}
+
+	return nil
+}
+
 func (controller *OrderController) nextCompletedBot(at time.Time) (int, time.Time, bool) {
 	nextBotIndex := -1
 	var nextCompletedAt time.Time
