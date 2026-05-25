@@ -90,7 +90,7 @@ Command:
 ./bin/order-controller demo
 ```
 
-Demo mode uses virtual time and does not sleep. It prints a deterministic scenario to stdout. `scripts/run.sh` redirects this output to:
+Demo mode uses the current wall-clock time as its starting point, then advances the scenario with virtual time and does not sleep. `scripts/run.sh` redirects this output to:
 
 ```bash
 scripts/result.txt

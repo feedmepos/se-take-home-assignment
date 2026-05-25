@@ -11,7 +11,10 @@ import (
 )
 
 func RunDemo(writer io.Writer) error {
-	start := time.Date(2026, 5, 25, 9, 0, 0, 0, time.UTC)
+	return RunDemoAt(writer, time.Now().Truncate(time.Second))
+}
+
+func RunDemoAt(writer io.Writer, start time.Time) error {
 	controller := orders.NewController()
 
 	if _, err := fmt.Fprintln(writer, "McDonald's Order Management System - Simulation Results"); err != nil {
