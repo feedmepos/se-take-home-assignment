@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>McDonald's Order Controller</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    :root {
+      font-family: Arial, sans-serif;
+      color: #262626;
+      background: #f7f7f7;
+    }
+
+    body {
+      margin: 0;
+      padding: 24px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+
+    button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 0;
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    .app {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .subtitle {
+      margin: 0 0 20px;
+      color: #666;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .normal {
+      background: #2563eb;
+    }
+
+    .vip {
+      background: #dc2626;
+    }
+
+    .add-bot {
+      background: #16a34a;
+    }
+
+    .remove-bot {
+      background: #525252;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .panel {
+      min-height: 220px;
+      border-radius: 12px;
+      background: white;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .card {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+      background: #fafafa;
+    }
+
+    .order-type {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      padding: 3px 8px;
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .order-type.normal-order {
+      background: #2563eb;
+    }
+
+    .order-type.vip-order {
+      background: #dc2626;
+    }
+
+    .status {
+      color: #666;
+      font-size: 13px;
+    }
+
+    .empty {
+      color: #888;
+      font-style: italic;
+    }
+
+    .log-panel {
+      max-height: 260px;
+      overflow: auto;
+    }
+
+    .log-line {
+      margin: 0 0 6px;
+      font-family: Menlo, Consolas, monospace;
+      font-size: 13px;
+    }
+
+    @media (max-width: 800px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const VIP = 'VIP';
+    const NORMAL = 'Normal';
+    const IDLE = 'IDLE';
+    const WORKING = 'WORKING';
+    const PENDING = 'PENDING';
+    const COMPLETE = 'COMPLETE';
+    const VIP_ORDER_CLASS = 'vip-order';
+    const NORMAL_ORDER_CLASS = 'normal-order';
+    const PROCESSING_SECONDS = 10;
+    const PROCESSING_MS = PROCESSING_SECONDS * 1000;
+    const INITIAL_LOG = 'System initialized';
+    const NO_PENDING_ORDERS = 'No pending orders';
+    const NO_BOTS = 'No bots';
+    const NO_COMPLETED_ORDERS = 'No completed orders';
+    const APP_TITLE = "McDonald's Order Controller";
+    const SUBTITLE = `VIP orders are processed before Normal orders. Each bot handles one order every ${PROCESSING_SECONDS} seconds.`;
+    const NEW_NORMAL_ORDER = 'New Normal Order';
+    const NEW_VIP_ORDER = 'New VIP Order';
+    const ADD_BOT = '+ Bot';
+    const REMOVE_BOT = '- Bot';
+    const OPERATION_LOG = 'Operation Log';
+
+    function nowText() {
+      return new Date().toTimeString().slice(0, 8);
+    }
+
+    function createOrder(id, type) {
+      return {
+        id,
+        type,
+        createdAt: nowText()
+      };
+    }
+
+    function App() {
+      // Separate queues keep VIP priority clear and easy to reason about.
+      const [vipQueue, setVipQueue] = React.useState([]);
+      const [normalQueue, setNormalQueue] = React.useState([]);
+      // Bots work like a small thread pool: each bot can process one order at a time.
+      const [bots, setBots] = React.useState([]);
+      const [completedOrders, setCompletedOrders] = React.useState([]);
+      const [logs, setLogs] = React.useState([`[${nowText()}] ${INITIAL_LOG}`]);
+      const [nextOrderId, setNextOrderId] = React.useState(1);
+      const [nextBotId, setNextBotId] = React.useState(1);
+      // Store active timers by bot id so removing a bot can cancel its work.
+      const timersRef = React.useRef(new Map());
+
+      function addLog(message) {
+        setLogs((prev) => [`[${nowText()}] ${message}`, ...prev]);
+      }
+
+      function dispatchOrders() {
+        // Dispatch only when there is pending work. VIP queue is always checked first.
+        if (vipQueue.length === 0 && normalQueue.length === 0) {
+          return;
+        }
+
+        setBots((prevBots) => {
+          const nextVipQueue = [...vipQueue];
+          const nextNormalQueue = [...normalQueue];
+          const nextLogs = [];
+          let changed = false;
+
+          const nextBots = prevBots.map((bot) => {
+            if (bot.status !== IDLE) {
+              return bot;
+            }
+
+            const order = nextVipQueue.shift() || nextNormalQueue.shift();
+            if (!order) {
+              return bot;
+            }
+
+            // Move the idle bot into WORKING state with the selected order.
+
+            changed = true;
+            nextLogs.push(`[${nowText()}] Bot #${bot.id} started ${order.type} Order #${order.id}`);
+            return {
+              ...bot,
+              status: WORKING,
+              order,
+              startedAt: Date.now()
+            };
+          });
+
+          if (!changed) {
+            return prevBots;
+          }
+
+          setVipQueue(nextVipQueue);
+          setNormalQueue(nextNormalQueue);
+          setLogs((prev) => [...nextLogs, ...prev]);
+          return nextBots;
+        });
+      }
+
+      function completeOrder(botId) {
+        // When a timer finishes, complete the current order and free the bot.
+        timersRef.current.delete(botId);
+        setBots((prevBots) => {
+          const bot = prevBots.find((item) => item.id === botId);
+          if (!bot || bot.status !== WORKING || !bot.order) {
+            return prevBots;
+          }
+
+          const completedOrder = {
+            ...bot.order,
+            completedAt: nowText(),
+            botId
+          };
+          setCompletedOrders((prev) => [completedOrder, ...prev]);
+          addLog(`Bot #${botId} completed ${bot.order.type} Order #${bot.order.id}`);
+
+          return prevBots.map((item) => item.id === botId
+            ? { ...item, status: IDLE, order: null, startedAt: null }
+            : item);
+        });
+      }
+
+      React.useEffect(() => {
+        dispatchOrders();
+      }, [vipQueue, normalQueue, bots]);
+
+      React.useEffect(() => {
+        // Start one timer for each working bot that does not already have a timer.
+        bots.forEach((bot) => {
+          if (bot.status === WORKING && !timersRef.current.has(bot.id)) {
+            const timer = setTimeout(() => completeOrder(bot.id), PROCESSING_MS);
+            timersRef.current.set(bot.id, timer);
+          }
+        });
+      }, [bots]);
+
+      React.useEffect(() => {
+        return () => {
+          timersRef.current.forEach((timer) => clearTimeout(timer));
+        };
+      }, []);
+
+      function addOrder(type) {
+        // New orders go to the tail of their own queue to preserve FIFO order.
+        const order = createOrder(nextOrderId, type);
+        setNextOrderId(nextOrderId + 1);
+
+        if (type === VIP) {
+          setVipQueue((prev) => [...prev, order]);
+        } else {
+          setNormalQueue((prev) => [...prev, order]);
+        }
+
+        addLog(`Created ${type} Order #${order.id}`);
+      }
+
+      function addBot() {
+        const bot = {
+          id: nextBotId,
+          status: IDLE,
+          order: null,
+          startedAt: null
+        };
+        setNextBotId(nextBotId + 1);
+        setBots((prev) => [...prev, bot]);
+        addLog(`Created Bot #${bot.id}`);
+      }
+
+      function removeBot() {
+        // The newest bot is always removed first.
+        if (bots.length === 0) {
+          return;
+        }
+
+        const bot = bots[bots.length - 1];
+        setBots((prev) => prev.slice(0, -1));
+
+        if (bot.status === WORKING && bot.order) {
+          // Cancel unfinished work and return the order to the front of its queue.
+          const timer = timersRef.current.get(bot.id);
+          if (timer) {
+            clearTimeout(timer);
+            timersRef.current.delete(bot.id);
+          }
+
+          if (bot.order.type === VIP) {
+            setVipQueue((prev) => [bot.order, ...prev]);
+          } else {
+            setNormalQueue((prev) => [bot.order, ...prev]);
+          }
+          addLog(`Removed Bot #${bot.id}; returned ${bot.order.type} Order #${bot.order.id} to pending`);
+        } else {
+          addLog(`Removed idle Bot #${bot.id}`);
+        }
+      }
+
+      const pendingOrders = [...vipQueue, ...normalQueue];
+
+      return (
+        <main className="app">
+          <h1>{APP_TITLE}</h1>
+          <p className="subtitle">{SUBTITLE}</p>
+
+          <section className="actions">
+            <button className="normal" onClick={() => addOrder(NORMAL)}>{NEW_NORMAL_ORDER}</button>
+            <button className="vip" onClick={() => addOrder(VIP)}>{NEW_VIP_ORDER}</button>
+            <button className="add-bot" onClick={addBot}>{ADD_BOT}</button>
+            <button className="remove-bot" onClick={removeBot} disabled={bots.length === 0}>{REMOVE_BOT}</button>
+          </section>
+
+          <section className="grid">
+            <Panel title={`Pending (${pendingOrders.length})`}>
+              {pendingOrders.length === 0 && <p className="empty">{NO_PENDING_ORDERS}</p>}
+              {pendingOrders.map((order) => <OrderCard key={order.id} order={order} status={PENDING} />)}
+            </Panel>
+
+            <Panel title={`Bots / Processing (${bots.length})`}>
+              {bots.length === 0 && <p className="empty">{NO_BOTS}</p>}
+              {bots.map((bot) => (
+                <div className="card" key={bot.id}>
+                  <div>
+                    <strong>Bot #{bot.id}</strong>
+                    <div className="status">{bot.status}</div>
+                    {bot.order && (
+                      <div className="status">Processing {bot.order.type} Order #{bot.order.id}</div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </Panel>
+
+            <Panel title={`Complete (${completedOrders.length})`}>
+              {completedOrders.length === 0 && <p className="empty">{NO_COMPLETED_ORDERS}</p>}
+              {completedOrders.map((order) => <OrderCard key={`${order.id}-${order.completedAt}`} order={order} status={`${COMPLETE} by Bot #${order.botId}`} />)}
+            </Panel>
+          </section>
+
+          <Panel title={OPERATION_LOG}>
+            <div className="log-panel">
+              {logs.map((line, index) => <p className="log-line" key={`${line}-${index}`}>{line}</p>)}
+            </div>
+          </Panel>
+        </main>
+      );
+    }
+
+    function Panel({ title, children }) {
+      return (
+        <section className="panel">
+          <h2>{title}</h2>
+          {children}
+        </section>
+      );
+    }
+
+    function OrderCard({ order, status }) {
+      const className = order.type === VIP ? VIP_ORDER_CLASS : NORMAL_ORDER_CLASS;
+      return (
+        <div className="card">
+          <div>
+            <strong>Order #{order.id}</strong>
+            <div className="status">{status}</div>
+          </div>
+          <span className={`order-type ${className}`}>{order.type}</span>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
