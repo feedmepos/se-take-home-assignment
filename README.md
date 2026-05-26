@@ -1,3 +1,11 @@
+## 线上地址
+
+- **线上访问地址**：[https://feedme.kitwise.ai/](https://feedme.kitwise.ai/)
+- **Cloudflare 前端部署**：[Pages Dashboard](https://dash.cloudflare.com/bfd5889f00bbcba41c5ef1734abcd8b9/pages/view/se-take-home-assignment)
+- **Railway 后端部署**：[Railway Dashboard](https://railway.com/project/13de01cb-0d22-4303-92fc-740c0ea56ce2/service/a2f06499-6f86-451e-8854-9f6a51b9bb84?environmentId=830a4b9f-cff3-441e-a7ec-e82185262853)
+
+---
+
 ## FeedMe Software Engineer Take Home Assignment
 Below is a take home assignment before the interview of the position. You are required to
 1. Understand the situation and use case. You may contact the interviewer for further clarification.

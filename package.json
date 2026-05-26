@@ -1,0 +1,12 @@
+{
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -n be,fe -c blue,green \"pnpm -F mcdonalds-order-backend dev\" \"pnpm -F frontend dev\"",
+    "build": "pnpm -F mcdonalds-order-backend build && pnpm -F frontend build",
+    "test": "pnpm -F mcdonalds-order-backend test && pnpm -F frontend test",
+    "test:e2e": "pnpm -F frontend test:e2e"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0"
+  }
+}

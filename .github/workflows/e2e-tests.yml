@@ -1,0 +1,44 @@
+name: E2E tests
+
+on:
+  pull_request:
+    branches:
+      - main
+      - 'feature/**'
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: e2e-test-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: '10.14.0'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm -F frontend exec playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        run: pnpm test:e2e
