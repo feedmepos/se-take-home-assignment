@@ -1,0 +1,21 @@
+<main>
+    <section>
+        <button>+ Bot</button>
+        <button>- Bot</button>
+    </section>
+
+    <section>
+        <button (click)="addOrder(OrderTier.Normal)">+ Normal Order</button>
+        <button (click)="addOrder(OrderTier.Vip)">+ VIP Order</button>
+    </section>
+
+    <section>
+        <div>
+            @for (order of allOrders(); track order.id) {
+                <div>{{ order.id }}</div>
+                <div>{{ order.name }}</div>
+                <!-- <div>{{ order.status }}</div> -->
+            }
+        </div>
+    </section>
+</main>
