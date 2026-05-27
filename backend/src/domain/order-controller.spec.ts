@@ -20,3 +20,22 @@ test('VIP is queued ahead of NORMAL but behind an existing VIP', () => {
   ctrl.addOrder('NORMAL');     // #4
   expect(ctrl.snapshot().pending.map((o) => o.id)).toEqual([2, 3, 1, 4]);
 });
+
+test('a bot picks the highest-priority order and completes after 10s', () => {
+  const c = new FakeClock(); const ctrl = new OrderController(c, c);
+  ctrl.addOrder('NORMAL');   // #1
+  ctrl.addOrder('VIP');      // #2
+  ctrl.addBot();             // bot #1 -> should take VIP #2
+  expect(ctrl.snapshot().processing).toEqual([{ order: expect.objectContaining({ id: 2 }), botId: 1 }]);
+  c.advance(DEFAULT_COOK_MS);
+  const snap = ctrl.snapshot();
+  expect(snap.complete.map((o) => o.id)).toContain(2);
+  // then it should pick #1
+  expect(snap.processing[0]!.order.id).toBe(1);
+});
+
+test('bot goes IDLE when no pending orders', () => {
+  const c = new FakeClock(); const ctrl = new OrderController(c, c);
+  const bot = ctrl.addBot();
+  expect(ctrl.snapshot().bots.find((b) => b.id === bot.id)!.status).toBe('IDLE');
+});
