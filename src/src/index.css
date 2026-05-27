@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Aptos", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    min-width: 320px;
+    background: #e0f2fe;
+  }
+
+  body {
+    margin: 0;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  button:focus-visible {
+    outline: 3px solid #18181b;
+    outline-offset: 3px;
+  }
+}
+
+@layer components {
+  .primary-action,
+  .secondary-action {
+    display: inline-flex;
+    min-height: 3.25rem;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: 0.625rem;
+    border-radius: 0.375rem;
+    border: 1px solid #18181b;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 900;
+    transition:
+      transform 160ms ease,
+      box-shadow 160ms ease,
+      background-color 160ms ease;
+  }
+
+  .primary-action {
+    background: #dc2626;
+    color: #fff;
+    box-shadow: 4px 4px 0 #18181b;
+  }
+
+  .vip-action {
+    background: #facc15;
+    color: #18181b;
+  }
+
+  .secondary-action {
+    background: #fff;
+    color: #18181b;
+    box-shadow: 4px 4px 0 #dc2626;
+  }
+
+  .primary-action:hover,
+  .secondary-action:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 #18181b;
+  }
+}
