@@ -4,7 +4,9 @@ import { BotNotFoundError } from '../domain/errors';
 
 function flag(tokens: string[], name: string): string | undefined {
   const i = tokens.indexOf(`--${name}`);
-  return i >= 0 ? tokens[i + 1] : undefined;
+  if (i < 0) return undefined;
+  const val = tokens[i + 1];
+  return val !== undefined && !val.startsWith('--') ? val : '';
 }
 
 function parseType(v: string | undefined): OrderType {
@@ -30,7 +32,12 @@ export function runCommand(ctrl: OrderController, line: string): string {
       }
       case 'del-bot': {
         const idStr = flag(rest, 'id');
-        const b = ctrl.removeBot(idStr !== undefined ? Number(idStr) : undefined);
+        let id: number | undefined;
+        if (idStr !== undefined) {
+          if (!/^\d+$/.test(idStr)) return 'Error: --id must be a number';
+          id = Number(idStr);
+        }
+        const b = ctrl.removeBot(id);
         return `Removed bot #${b.id}`;
       }
       case 'list-orders': {

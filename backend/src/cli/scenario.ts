@@ -10,7 +10,7 @@ async function main(): Promise<void> {
   ctrl.subscribe((e) => console.log(formatEvent(e)));
 
   // Step 1: Queue three orders (1 normal, 1 VIP, 1 normal)
-  console.log('--- Adding orders ---');
+  console.error('--- Adding orders ---');
   runCommand(ctrl, 'add-order --type normal');   // #1
   runCommand(ctrl, 'add-order --type vip');      // #2
   runCommand(ctrl, 'add-order --type normal');   // #3
@@ -18,19 +18,19 @@ async function main(): Promise<void> {
   await sleep(200);
 
   // Step 2: Add two bots — they grab the top two orders by priority (#2 VIP, #1 NORMAL)
-  console.log('--- Adding bots ---');
+  console.error('--- Adding bots ---');
   runCommand(ctrl, 'add-bot');  // bot #1 -> VIP #2
   runCommand(ctrl, 'add-bot');  // bot #2 -> NORMAL #1
 
   // Step 3: After ~5s (mid-cook), remove bot #1 while it is still PROCESSING order #2
   // This triggers OrderRequeued for order #2
   await sleep(5_000);
-  console.log('--- Removing bot #1 mid-cook (expect OrderRequeued) ---');
+  console.error('--- Removing bot #1 mid-cook (expect OrderRequeued) ---');
   runCommand(ctrl, 'del-bot --id 1');
 
   // Step 4: Add another VIP order and a new bot to pick it up
   await sleep(200);
-  console.log('--- Adding VIP order #4 and new bot #3 ---');
+  console.error('--- Adding VIP order #4 and new bot #3 ---');
   runCommand(ctrl, 'add-order --type vip');  // #4
   runCommand(ctrl, 'add-bot');               // bot #3 -> should pick up requeued VIP #2
 
@@ -40,7 +40,13 @@ async function main(): Promise<void> {
   // then bot #3 picks up NORMAL #3, finishes at +10s more
   // order #4 is also queued; we need enough bots or time
   await sleep(25_000);
-  console.log('--- Scenario complete ---');
+
+  // Narration + final summary go to stderr so stdout (-> result.txt) stays a pure event log.
+  const snap = ctrl.snapshot();
+  console.error('--- Scenario complete ---');
+  console.error(
+    `[summary] pending=${snap.pending.length} processing=${snap.processing.length} complete=${snap.complete.length} bots=${snap.bots.length}`,
+  );
   process.exit(0);
 }
 

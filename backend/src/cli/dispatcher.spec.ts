@@ -122,3 +122,24 @@ test('add-order accepts type case-insensitively', () => {
   runCommand(ctrl, 'add-order --type Normal');
   expect(ctrl.listOrders().map((o) => o.type)).toEqual(['VIP', 'NORMAL']);
 });
+
+test('add-order --type with no value is an error and creates no order', () => {
+  const { ctrl } = make();
+  const out = runCommand(ctrl, 'add-order --type');
+  expect(out).toMatch(/error|invalid/i);
+  expect(ctrl.listOrders()).toEqual([]);
+});
+
+test('list-orders --type with no value is an error too', () => {
+  const { ctrl } = make();
+  const out = runCommand(ctrl, 'list-orders --type');
+  expect(out).toMatch(/error|invalid/i);
+});
+
+test('del-bot --id with non-numeric value returns must-be-a-number and removes no bot', () => {
+  const { ctrl } = make();
+  runCommand(ctrl, 'add-bot');
+  const out = runCommand(ctrl, 'del-bot --id abc');
+  expect(out).toMatch(/must be a number/i);
+  expect(ctrl.listBots().map((b) => b.id)).toEqual([1]);
+});
