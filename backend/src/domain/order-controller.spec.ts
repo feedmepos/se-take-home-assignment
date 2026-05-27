@@ -39,3 +39,13 @@ test('bot goes IDLE when no pending orders', () => {
   const bot = ctrl.addBot();
   expect(ctrl.snapshot().bots.find((b) => b.id === bot.id)!.status).toBe('IDLE');
 });
+
+test('two bots added when two orders pending take different orders', () => {
+  const c = new FakeClock(); const ctrl = new OrderController(c, c);
+  ctrl.addOrder('VIP');     // #1
+  ctrl.addOrder('NORMAL');  // #2
+  ctrl.addBot();            // #1
+  ctrl.addBot();            // #2
+  const ids = ctrl.snapshot().processing.map((p) => p.order.id).sort();
+  expect(ids).toEqual([1, 2]);
+});
