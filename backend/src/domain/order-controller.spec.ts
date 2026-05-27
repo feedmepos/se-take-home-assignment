@@ -75,3 +75,13 @@ test('removeBot with unknown id or none throws BotNotFoundError', () => {
   ctrl.addBot();
   expect(() => ctrl.removeBot(99)).toThrow(BotNotFoundError);
 });
+
+test('emits OrderCreated, BotAdded, OrderStarted, OrderCompleted in order', () => {
+  const c = new FakeClock(); const ctrl = new OrderController(c, c);
+  const seen: string[] = [];
+  ctrl.subscribe((e) => seen.push(e.type));
+  ctrl.addOrder('NORMAL'); // OrderCreated
+  ctrl.addBot();           // BotAdded, OrderStarted
+  c.advance(10_000);       // OrderCompleted, then BotIdle (no pending)
+  expect(seen).toEqual(['OrderCreated', 'BotAdded', 'OrderStarted', 'OrderCompleted', 'BotIdle']);
+});
