@@ -18,7 +18,7 @@ export class OrderService {
 
         const newOrder = {
             id: newId,
-            name: `${OrderTier.Normal ? 'Normal' : 'VIP'} Order #${newId}`,
+            name: `${type === OrderTier.Normal ? 'Normal' : 'VIP'} Order #${newId}`,
             tier: type,
             status: OrderStatus.Pending,
         };
