@@ -20,7 +20,10 @@ export function serializeBot(bot: Bot): BotDTO {
 export function serializeSnapshot(snap: StatusSnapshot): StatusDTO {
   return {
     pending: snap.pending.map(serializeOrder),
-    processing: snap.processing.map(({ order, botId }) => ({ order: serializeOrder(order), botId })),
+    processing: snap.processing.map(({ order, botId }) => ({
+      order: serializeOrder(order),
+      botId,
+    })),
     complete: snap.complete.map(serializeOrder),
     bots: snap.bots.map(serializeBot),
   };

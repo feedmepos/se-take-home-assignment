@@ -3,6 +3,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
+import type { OrderDTO, BotDTO, StatusDTO } from '../src/contracts';
 
 async function makeApp(): Promise<INestApplication<App>> {
   const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -18,90 +19,89 @@ async function makeApp(): Promise<INestApplication<App>> {
 describe('Orders API (e2e)', () => {
   let app: INestApplication<App>;
 
-  beforeEach(async () => { app = await makeApp(); });
-  afterEach(async () => { await app.close(); });
+  beforeEach(async () => {
+    app = await makeApp();
+  });
+  afterEach(async () => {
+    await app.close();
+  });
 
   it('POST /api/orders with lowercase type is normalised to VIP → 201', async () => {
     const res = await request(app.getHttpServer())
       .post('/api/orders')
       .send({ type: 'vip' })
       .expect(201);
-    expect(res.body.type).toBe('VIP');
-    expect(typeof res.body.id).toBe('number');
+    const body = res.body as OrderDTO;
+    expect(body.type).toBe('VIP');
+    expect(typeof body.id).toBe('number');
   });
 
   it('POST /api/orders with invalid type → 400', async () => {
-    await request(app.getHttpServer())
-      .post('/api/orders')
-      .send({ type: 'bogus' })
-      .expect(400);
+    await request(app.getHttpServer()).post('/api/orders').send({ type: 'bogus' }).expect(400);
   });
 
   it('GET /api/orders?type=vip → 200 and only VIP orders', async () => {
     await request(app.getHttpServer()).post('/api/orders').send({ type: 'vip' }).expect(201);
     await request(app.getHttpServer()).post('/api/orders').send({ type: 'normal' }).expect(201);
-    const res = await request(app.getHttpServer())
-      .get('/api/orders?type=vip')
-      .expect(200);
-    expect(Array.isArray(res.body)).toBe(true);
-    expect(res.body.length).toBeGreaterThan(0);
-    expect(res.body.every((o: { type: string }) => o.type === 'VIP')).toBe(true);
+    const res = await request(app.getHttpServer()).get('/api/orders?type=vip').expect(200);
+    const body = res.body as OrderDTO[];
+    expect(Array.isArray(body)).toBe(true);
+    expect(body.length).toBeGreaterThan(0);
+    expect(body.every((o) => o.type === 'VIP')).toBe(true);
   });
 
   it('GET /api/orders?type=bogus → 400', async () => {
-    await request(app.getHttpServer())
-      .get('/api/orders?type=bogus')
-      .expect(400);
+    await request(app.getHttpServer()).get('/api/orders?type=bogus').expect(400);
   });
 });
 
 describe('Bots API (e2e)', () => {
   let app: INestApplication<App>;
 
-  beforeEach(async () => { app = await makeApp(); });
-  afterEach(async () => { await app.close(); });
+  beforeEach(async () => {
+    app = await makeApp();
+  });
+  afterEach(async () => {
+    await app.close();
+  });
 
   it('POST /api/bots → 201 with numeric id and IDLE status (no pending orders)', async () => {
-    const res = await request(app.getHttpServer())
-      .post('/api/bots')
-      .expect(201);
-    expect(typeof res.body.id).toBe('number');
-    expect(res.body.status).toBe('IDLE');
+    const res = await request(app.getHttpServer()).post('/api/bots').expect(201);
+    const body = res.body as BotDTO;
+    expect(typeof body.id).toBe('number');
+    expect(body.status).toBe('IDLE');
   });
 
   it('DELETE /api/bots/:id with unknown id → 404', async () => {
-    await request(app.getHttpServer())
-      .delete('/api/bots/9999')
-      .expect(404);
+    await request(app.getHttpServer()).delete('/api/bots/9999').expect(404);
   });
 
   it('DELETE /api/bots when no bots exist → 404', async () => {
-    await request(app.getHttpServer())
-      .delete('/api/bots')
-      .expect(404);
+    await request(app.getHttpServer()).delete('/api/bots').expect(404);
   });
 });
 
 describe('Status API (e2e)', () => {
   let app: INestApplication<App>;
 
-  beforeEach(async () => { app = await makeApp(); });
-  afterEach(async () => { await app.close(); });
+  beforeEach(async () => {
+    app = await makeApp();
+  });
+  afterEach(async () => {
+    await app.close();
+  });
 
   it('GET /api/status → 200 with pending, processing, complete, bots arrays', async () => {
-    const res = await request(app.getHttpServer())
-      .get('/api/status')
-      .expect(200);
-    expect(Array.isArray(res.body.pending)).toBe(true);
-    expect(Array.isArray(res.body.processing)).toBe(true);
-    expect(Array.isArray(res.body.complete)).toBe(true);
-    expect(Array.isArray(res.body.bots)).toBe(true);
+    const res = await request(app.getHttpServer()).get('/api/status').expect(200);
+    const body = res.body as StatusDTO;
+    expect(Array.isArray(body.pending)).toBe(true);
+    expect(Array.isArray(body.processing)).toBe(true);
+    expect(Array.isArray(body.complete)).toBe(true);
+    expect(Array.isArray(body.bots)).toBe(true);
   });
 
   it('GET /api/health → 200 with { status: ok }', async () => {
-    const res = await request(app.getHttpServer())
-      .get('/api/health')
-      .expect(200);
+    const res = await request(app.getHttpServer()).get('/api/health').expect(200);
     expect(res.body).toEqual({ status: 'ok' });
   });
 });

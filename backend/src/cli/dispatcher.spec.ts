@@ -60,7 +60,7 @@ test('list-orders returns JSON', () => {
   const { ctrl } = make();
   runCommand(ctrl, 'add-order --type vip');
   const out = runCommand(ctrl, 'list-orders');
-  const parsed = JSON.parse(out);
+  const parsed = JSON.parse(out) as { type: string }[];
   expect(Array.isArray(parsed)).toBe(true);
   expect(parsed[0].type).toBe('VIP');
 });
@@ -70,22 +70,22 @@ test('list-orders --type filters by type', () => {
   runCommand(ctrl, 'add-order --type vip');
   runCommand(ctrl, 'add-order --type normal');
   const out = runCommand(ctrl, 'list-orders --type vip');
-  const parsed = JSON.parse(out);
-  expect(parsed.every((o: { type: string }) => o.type === 'VIP')).toBe(true);
+  const parsed = JSON.parse(out) as { type: string }[];
+  expect(parsed.every((o) => o.type === 'VIP')).toBe(true);
 });
 
 test('list-bots returns JSON', () => {
   const { ctrl } = make();
   runCommand(ctrl, 'add-bot');
   const out = runCommand(ctrl, 'list-bots');
-  const parsed = JSON.parse(out);
+  const parsed = JSON.parse(out) as unknown[];
   expect(Array.isArray(parsed)).toBe(true);
 });
 
 test('status returns JSON snapshot', () => {
   const { ctrl } = make();
   const out = runCommand(ctrl, 'status');
-  const parsed = JSON.parse(out);
+  const parsed = JSON.parse(out) as Record<string, unknown>;
   expect(parsed).toHaveProperty('pending');
   expect(parsed).toHaveProperty('bots');
 });

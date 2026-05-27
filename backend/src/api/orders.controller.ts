@@ -21,7 +21,7 @@ export class OrdersController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async addOrder(@Body() dto: CreateOrderDto): Promise<OrderDTO> {
+  addOrder(@Body() dto: CreateOrderDto): OrderDTO {
     const order = this.domain.addOrder(dto.type ?? 'NORMAL');
     return serializeOrder(order);
   }

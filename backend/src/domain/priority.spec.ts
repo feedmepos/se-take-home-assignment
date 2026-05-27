@@ -1,8 +1,12 @@
 import { compareOrders } from './priority';
 import { Order } from './types';
 
-const o = (id: number, type: 'NORMAL' | 'VIP'): Order =>
-  ({ id, type, status: 'PENDING', createdAt: new Date() });
+const o = (id: number, type: 'NORMAL' | 'VIP'): Order => ({
+  id,
+  type,
+  status: 'PENDING',
+  createdAt: new Date(),
+});
 
 test('VIP ranks before NORMAL', () => {
   expect(compareOrders(o(5, 'VIP'), o(1, 'NORMAL'))).toBeLessThan(0);
