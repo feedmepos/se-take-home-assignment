@@ -11,10 +11,17 @@
 
     <section>
         <div>
-            @for (order of allOrders(); track order.id) {
-                <div>{{ order.id }}</div>
-                <div>{{ order.name }}</div>
-                <!-- <div>{{ order.status }}</div> -->
+            <h2>{{ ORDER_STATUS_MAP[OrderStatus.Pending].name }} Task(s)</h2>
+            @if (getOrdersByStatus(OrderStatus.Pending).length <= 0) {
+                <small>No pending order.</small>
+            } @else {
+                @for (order of getOrdersByStatus(OrderStatus.Pending); track order.id) {
+                    <div>
+                        <div>{{ order.id }}</div>
+                        <div>{{ order.name }}</div>
+                        <div>{{ ORDER_STATUS_MAP[order.status].name || 'N/A' }}</div>
+                    </div>
+                }
             }
         </div>
     </section>
