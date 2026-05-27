@@ -66,7 +66,7 @@ const HomeBoard = ({ state, now }: HomeBoardProps) => {
           </div>
           <div className="home__stat-content">
             <div className="home__stat-number">{totalBots}</div>
-            <div className="home__stat-label">Idle</div>
+            <div className="home__stat-label">Bots</div>
           </div>
         </div>
       </div>
