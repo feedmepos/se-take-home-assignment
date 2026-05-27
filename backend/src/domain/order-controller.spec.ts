@@ -106,6 +106,15 @@ test('BotIdle is a transition, not emitted per tryAssign for already-idle bots',
   ]);
 });
 
+test('startedAt is set when bot picks order, cleared when order is requeued', () => {
+  const c = new FakeClock(); const ctrl = new OrderController(c, c);
+  ctrl.addOrder('NORMAL');  // #1
+  ctrl.addBot();            // bot #1 takes order #1
+  expect(ctrl.snapshot().processing[0]!.order.startedAt).toBeInstanceOf(Date);
+  ctrl.removeBot(1);        // order #1 requeued
+  expect(ctrl.snapshot().pending[0]!.startedAt).toBeUndefined();
+});
+
 test('removeBot of a non-newest specific id requeues only its order, leaving others processing', () => {
   const c = new FakeClock(); const ctrl = new OrderController(c, c);
   ctrl.addOrder('VIP');     // #1

@@ -51,6 +51,7 @@ export class OrderController {
       const order = this.orders.find((o) => o.id === target.currentOrderId);
       if (order) {
         order.status = 'PENDING';
+        order.startedAt = undefined;
         this.emit({ type: 'OrderRequeued', orderId: order.id, botId: target.id, at: this.clock.now() });
       }
     }
@@ -86,6 +87,7 @@ export class OrderController {
       const next = this.orders.filter((o) => o.status === 'PENDING').sort(compareOrders)[0];
       if (!next) continue;
       next.status = 'PROCESSING';
+      next.startedAt = this.clock.now();
       bot.status = 'PROCESSING';
       bot.currentOrderId = next.id;
       this.emit({ type: 'OrderStarted', orderId: next.id, botId: bot.id, at: this.clock.now() });
