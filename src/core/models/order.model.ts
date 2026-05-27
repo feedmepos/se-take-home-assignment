@@ -4,6 +4,7 @@ export interface IOderRequest {
     name: string;
     tier: OrderTier;
     status: OrderStatus;
+    botId?: number;
 }
 
 export interface IOrderResponse extends IOderRequest {
