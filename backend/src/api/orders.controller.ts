@@ -1,0 +1,42 @@
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  Query,
+  HttpCode,
+  HttpStatus,
+  BadRequestException,
+} from '@nestjs/common';
+import { validate } from 'class-validator';
+import { plainToInstance } from 'class-transformer';
+import { OrderController } from '../domain/order-controller';
+import { CreateOrderDto, OrderTypeQuery } from './dto';
+import { serializeOrder } from './serialize';
+import type { OrderDTO, OrderType } from '../contracts';
+
+@Controller('orders')
+export class OrdersController {
+  constructor(private readonly domain: OrderController) {}
+
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  addOrder(@Body() dto: CreateOrderDto): OrderDTO {
+    const order = this.domain.addOrder(dto.type ?? 'NORMAL');
+    return serializeOrder(order);
+  }
+
+  @Get()
+  async listOrders(@Query('type') rawType?: string): Promise<OrderDTO[]> {
+    let type: OrderType | undefined;
+    if (rawType !== undefined) {
+      const query = plainToInstance(OrderTypeQuery, { type: rawType });
+      const errors = await validate(query);
+      if (errors.length > 0) {
+        throw new BadRequestException('type must be NORMAL or VIP');
+      }
+      type = query.type;
+    }
+    return this.domain.listOrders(type).map(serializeOrder);
+  }
+}
