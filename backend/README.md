@@ -1,98 +1,139 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Order Controller — Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+McDonald's automated cooking-bot order controller. All business logic lives in a
+framework-free TypeScript **domain core** (`src/domain/`); thin adapters wrap it:
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+| Adapter | Entry | Purpose |
+| --- | --- | --- |
+| **CLI scenario runner** | `src/cli/scenario.ts` | Runs a scripted, real-time demo and logs each event to stdout (→ `scripts/result.txt`). The CI artifact. |
+| **Interactive REPL** | `src/cli/interactive.ts` | Same command dispatcher reading from stdin — drive the controller by hand. |
+| **REST + SSE API** | `src/api/` (`src/main.ts`) | HTTP control surface + a live event stream for the React UI. |
 
-## Description
+State is in memory only — no database (the spec allows this). Design rationale lives in
+[`../docs/architecture.md`](../docs/architecture.md), the domain glossary in
+[`../CONTEXT.md`](../CONTEXT.md), and decisions in [`../docs/adr/`](../docs/adr/).
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Project setup
+## Setup
 
 ```bash
-$ npm install
+npm install
 ```
 
-## Compile and run the project
+## CI scripts (run from the repo root)
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+bash scripts/test.sh    # npm ci && npm test && npm run test:e2e   (unit + e2e)
+bash scripts/build.sh   # npm ci && npm run build
+bash scripts/run.sh     # node dist/cli/scenario.js > scripts/result.txt
 ```
 
-## Run tests
+## npm scripts
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm run build      # nest build  -> dist/ (emits dist/main.js AND dist/cli/scenario.js)
+npm test           # unit tests (Jest, fake clock — runs in ms)
+npm run test:e2e   # API e2e tests (supertest)
+npm start          # start the REST/SSE API on :3000
 ```
 
-## Deployment
+## CLI
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### Scenario runner (the `result.txt` generator)
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm run build && node dist/cli/scenario.js > ../scripts/result.txt
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Runs the **real** controller in real time (real `setTimeout`, real 10s cooks).
+Narration goes to stderr; stdout is a pure event log with wall-clock `HH:MM:SS`
+timestamps. The scripted run demonstrates, in order: VIP priority, FIFO within a
+tier, bot pickup, the 10s cook, destroying the **newest** bot mid-cook (requeue to
+the original slot), and a targeted `--id` removal. See the sample below.
 
-## Resources
+### Interactive REPL
 
-Check out a few resources that may come in handy when working with NestJS:
+```bash
+npm run build && node dist/cli/interactive.js
+# or without building:
+npx ts-node src/cli/interactive.ts
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### Command reference (shared by both)
 
-## Support
+| Command | Effect |
+| --- | --- |
+| `add-order [--type normal\|vip]` | Create an order (default `normal`). VIP queues ahead of all normals. |
+| `add-bot` | Add a cooking bot; it immediately picks up the highest-priority pending order. |
+| `del-bot` | Destroy the **newest** bot. If it was cooking, its order returns to PENDING. |
+| `del-bot --id N` | _Extension:_ destroy a **specific** bot by id (same requeue behavior; mirrors `DELETE /bots/:id`). Not used by the demo scenario. |
+| `list-orders [--type normal\|vip]` | Print orders as JSON, optionally filtered by type. |
+| `list-bots` | Print bots as JSON. |
+| `status` | Print the full state snapshot as JSON. |
+| `help` | Show usage. |
+| `exit` | Leave the REPL (interactive only). |
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## REST + SSE API
 
-## Stay in touch
+API is served under the `/api` prefix (the SPA build is served on all other routes).
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+| Method & path | Description |
+| --- | --- |
+| `POST /api/orders` | Create an order. Body: `{ "type": "NORMAL" \| "VIP" }`. |
+| `GET /api/orders[?type=]` | List orders, optionally filtered by type. |
+| `POST /api/bots` | Add a bot. |
+| `DELETE /api/bots` | Destroy the newest bot. |
+| `DELETE /api/bots/:id` | _Extension:_ destroy a specific bot (404 if not found). |
+| `GET /api/status` | Full state snapshot. |
+| `GET /api/events` | **SSE** — pushes the full status snapshot on connect and on every change. |
+| `GET /api/health` | Liveness check. |
 
-## License
+## Expected `scripts/result.txt`
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+`scripts/result.txt` is generated (git-ignored). The committed
+[`../scripts/result.example.txt`](../scripts/result.example.txt) is the
+**employer-provided** sample that defines the expected output format; our output
+matches that format. A run of our scenario looks like:
+
+```
+McDonald's Order Management System - Simulation Results
+
+[..] System initialized with 0 bots
+[..] Created Normal Order #1 - Status: PENDING
+[..] Created VIP Order #2 - Status: PENDING
+[..] Created Normal Order #3 - Status: PENDING
+[..] Bot #1 created - Status: ACTIVE
+[..] Bot #1 picked up VIP Order #2 - Status: PROCESSING        # VIP jumps ahead of #1
+[..] Bot #2 created - Status: ACTIVE
+[..] Bot #2 picked up Normal Order #1 - Status: PROCESSING
+[..] Normal Order #1 returned to PENDING - Status: PENDING     # del-bot (no id): newest bot, mid-cook
+[..] Bot #2 destroyed while PROCESSING
+[..] Bot #3 created - Status: ACTIVE
+[..] Bot #3 picked up Normal Order #1 - Status: PROCESSING     # requeued #1 resumes, before #3
+[..] Bot #1 completed VIP Order #2 - Status: COMPLETE (Processing time: 10s)
+[..] Bot #1 picked up Normal Order #3 - Status: PROCESSING
+[..] Bot #3 completed Normal Order #1 - Status: COMPLETE (Processing time: 10s)
+[..] Bot #3 is now IDLE - No pending orders
+[..] Bot #1 completed Normal Order #3 - Status: COMPLETE (Processing time: 10s)
+[..] Bot #1 is now IDLE - No pending orders
+
+Final Status:
+- Total Orders Processed: 3 (1 VIP, 2 Normal)
+- Orders Completed: 3
+- Active Bots: 2
+- Pending Orders: 0
+```
+
+Unlike the employer's sample (which only destroys an *idle* bot), our scenario
+destroys the newest bot **mid-cook** so the requeue requirement is visibly proven.
+
+## Behavior summary
+
+- **Order types** — `NORMAL` and `VIP`. The PENDING area is ordered by one comparator:
+  *VIP before NORMAL, ties by ascending id.* This yields FIFO within a tier and makes
+  requeue land in the original slot for free.
+- **Bots** — each processes one order at a time; a fixed **10s** cook, measured via an
+  injected clock/scheduler (real `setTimeout` in production, a fake clock in tests).
+- **`del-bot`** — destroys the newest bot; if it was cooking, the order reverts to
+  PENDING (no partial progress) and is re-cooked from scratch on next pickup.
+- **Zero bots** is a valid state: pending orders wait, nothing is dropped. Ids are never
+  reused.

@@ -174,7 +174,7 @@ Single **Cloud Run** service: NestJS serves the API, the SSE stream, and the sta
 
 ## 9. Demo scenario (drives `result.txt`)
 
-A scripted, real-time sequence exercising all 7 requirements, including: create NORMAL + VIP + NORMAL (show priority ordering), add two bots (show VIP picked first), let one complete and pick the next, add a VIP and remove a processing bot (show requeue to original slot), drain to IDLE. Each event is logged with a real `HH:MM:SS` timestamp.
+A scripted, real-time sequence exercising the requirements: create NORMAL + VIP + NORMAL (show VIP priority and FIFO within the normal tier), add two bots (show VIP picked first), destroy the **newest** bot mid-cook with no-id `del-bot` (show requeue to original slot — the README "- Bot" requirement), add a bot that resumes the requeued order *before* the later normal, then let cooks complete and drain to IDLE. Each event is logged with a real `HH:MM:SS` timestamp; the output (header + event log + "Final Status" footer) follows the format of the **employer-provided** `scripts/result.example.txt`. The targeted `del-bot --id N` / `DELETE /bots/:id` path exists as a documented extension but is deliberately kept out of the demo so the artifact maps 1:1 to the spec's requirements.
 
 ## 10. Engineering principles & deliberate non-goals
 
@@ -216,7 +216,7 @@ Levels: domain events at `log`/info; problems at `warn`/`error`. Default to Nest
 
 ## 12. Implementation notes / gotchas
 
-1. **Real-time CI runtime:** `result.txt` is produced by the real CLI honouring real 10s cooks, so the scenario takes ~30–40s in CI (authentic 10s gaps, matching the sample). Deliberate — do not swap in a fake clock to speed it up.
+1. **Real-time CI runtime:** `result.txt` is produced by the real CLI honouring real 10s cooks, so the scenario takes ~22s in CI (authentic 10s gaps, matching the sample). Deliberate — do not swap in a fake clock to speed it up.
 2. **SPA vs API route precedence:** `ServeStaticModule`'s `index.html` fallback must be registered *after* / excluding the API routes, so it doesn't swallow them. The global `/api` prefix cleanly partitions API routes from SPA routes — `ServeStaticModule` serves all non-`/api` paths with no route-collision. Classic single-service footgun, solved by the prefix.
 3. **`DELETE /api/bots` → `404` when empty** is a deliberate choice over an idempotent `204`; be ready to justify it.
 4. **One SSE connection per client**, opened once; the single pinned Cloud Run instance serves all viewers (fine for a demo).

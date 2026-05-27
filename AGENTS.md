@@ -2,6 +2,10 @@
 
 Primary agent-instructions file for this repo. (`CLAUDE.md` imports this via `@AGENTS.md`.)
 
+## Hard rules
+
+- **NEVER overwrite `scripts/result.example.txt`.** It is the employer-provided sample (upstream commit `ce158b7`, authored by FeedMe) and defines the expected output format. It is a spec artifact, not generated output. Our CLI writes to the git-ignored `scripts/result.txt`; match the sample's format there, never edit the sample itself.
+
 ## Agent skills
 
 ### Issue tracker
