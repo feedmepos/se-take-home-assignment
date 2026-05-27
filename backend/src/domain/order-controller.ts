@@ -22,7 +22,7 @@ export class OrderController {
   addOrder(type: OrderType = 'NORMAL'): Order {
     const order: Order = { id: this.nextOrderId++, type, status: 'PENDING', createdAt: this.clock.now() };
     this.orders.push(order);
-    this.emit({ type: 'OrderCreated', order, at: this.clock.now() });
+    this.emit({ type: 'OrderCreated', order: { ...order }, at: this.clock.now() });
     this.tryAssign();
     return order;
   }
@@ -32,6 +32,7 @@ export class OrderController {
     this.bots.push(bot);
     this.emit({ type: 'BotAdded', botId: bot.id, at: this.clock.now() });
     this.tryAssign();
+    if (bot.status === 'IDLE') this.emit({ type: 'BotIdle', botId: bot.id, at: this.clock.now() });
     return bot;
   }
 
@@ -64,11 +65,11 @@ export class OrderController {
   }
 
   snapshot(): StatusSnapshot {
-    const pending = this.orders.filter((o) => o.status === 'PENDING').sort(compareOrders);
+    const pending = this.orders.filter((o) => o.status === 'PENDING').map((o) => ({ ...o })).sort(compareOrders);
     const processing = this.bots
       .filter((b) => b.currentOrderId !== null)
-      .map((b) => ({ order: this.orders.find((o) => o.id === b.currentOrderId)!, botId: b.id }));
-    const complete = this.orders.filter((o) => o.status === 'COMPLETE');
+      .map((b) => ({ order: { ...this.orders.find((o) => o.id === b.currentOrderId)! }, botId: b.id }));
+    const complete = this.orders.filter((o) => o.status === 'COMPLETE').map((o) => ({ ...o }));
     return { pending, processing, complete, bots: [...this.bots] };
   }
 
@@ -83,7 +84,7 @@ export class OrderController {
     for (const bot of this.bots) {
       if (bot.status !== 'IDLE') continue;
       const next = this.orders.filter((o) => o.status === 'PENDING').sort(compareOrders)[0];
-      if (!next) { this.emit({ type: 'BotIdle', botId: bot.id, at: this.clock.now() }); continue; }
+      if (!next) continue;
       next.status = 'PROCESSING';
       bot.status = 'PROCESSING';
       bot.currentOrderId = next.id;
@@ -104,5 +105,6 @@ export class OrderController {
     bot.currentOrderId = null;
     this.emit({ type: 'OrderCompleted', orderId, botId, at: this.clock.now() });
     this.tryAssign();
+    if (bot.status === 'IDLE') this.emit({ type: 'BotIdle', botId: bot.id, at: this.clock.now() });
   }
 }

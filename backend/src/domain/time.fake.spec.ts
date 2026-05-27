@@ -18,3 +18,12 @@ test('cancel prevents the callback', () => {
   clock.advance(2_000);
   expect(fired).toBe(false);
 });
+
+test('advance fires multiple due timers in one call, in chronological order', () => {
+  const clock = new FakeClock(new Date('2025-01-01T00:00:00Z'));
+  const order: string[] = [];
+  clock.schedule(5_000, () => { order.push('a'); });
+  clock.schedule(1_000, () => { order.push('b'); });
+  clock.advance(6_000);
+  expect(order).toEqual(['b', 'a']);
+});

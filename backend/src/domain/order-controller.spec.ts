@@ -85,3 +85,37 @@ test('emits OrderCreated, BotAdded, OrderStarted, OrderCompleted in order', () =
   c.advance(10_000);       // OrderCompleted, then BotIdle (no pending)
   expect(seen).toEqual(['OrderCreated', 'BotAdded', 'OrderStarted', 'OrderCompleted', 'BotIdle']);
 });
+
+test('BotIdle is a transition, not emitted per tryAssign for already-idle bots', () => {
+  const c = new FakeClock(); const ctrl = new OrderController(c, c);
+  ctrl.addOrder('NORMAL');   // #1
+  const events: { type: string; botId?: number }[] = [];
+  ctrl.subscribe((e) => events.push(e as { type: string; botId?: number }));
+  ctrl.addBot();             // bot #1 takes order #1 (PROCESSING) -> no BotIdle
+  ctrl.addBot();             // bot #2 has no order -> exactly one BotIdle for bot #2
+  const idleAfterBots = events.filter((e) => e.type === 'BotIdle');
+  expect(idleAfterBots).toEqual([{ type: 'BotIdle', botId: 2, at: expect.any(Date) }]);
+
+  // Completing order #1 frees bot #1. tryAssign must NOT re-emit BotIdle for the
+  // already-idle bot #2; bot #1 becomes idle exactly once.
+  c.advance(10_000);
+  const allIdle = events.filter((e) => e.type === 'BotIdle');
+  expect(allIdle).toEqual([
+    { type: 'BotIdle', botId: 2, at: expect.any(Date) },
+    { type: 'BotIdle', botId: 1, at: expect.any(Date) },
+  ]);
+});
+
+test('removeBot of a non-newest specific id requeues only its order, leaving others processing', () => {
+  const c = new FakeClock(); const ctrl = new OrderController(c, c);
+  ctrl.addOrder('VIP');     // #1
+  ctrl.addOrder('VIP');     // #2
+  ctrl.addBot();            // bot #1 takes order #1
+  ctrl.addBot();            // bot #2 takes order #2
+  ctrl.removeBot(1);        // remove non-newest bot #1
+
+  const snap = ctrl.snapshot();
+  expect(snap.pending.map((o) => o.id)).toContain(1);          // order #1 back to pending
+  expect(snap.processing).toEqual([{ order: expect.objectContaining({ id: 2 }), botId: 2 }]); // bot #2 unaffected
+  expect(ctrl.listBots().map((b) => b.id)).toEqual([2]);        // bot #1 gone
+});
