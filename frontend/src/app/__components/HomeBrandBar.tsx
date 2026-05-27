@@ -17,7 +17,6 @@ const HomeBrandBar = () => {
       </div>
       <div className="home__brandcopy">
         <Text className="home__brandname">McDonald&apos;s</Text>
-        <Text className="home__brandtag">Feedme SW Assignment</Text>
       </div>
     </div>
   );

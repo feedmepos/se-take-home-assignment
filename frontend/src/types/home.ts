@@ -1,6 +1,7 @@
 export type OrderType = "NORMAL" | "VIP";
 export type OrderStatus = "PENDING" | "PROCESSING" | "COMPLETE";
 export type BotStatus = "IDLE" | "WORKING";
+export type UserRole = "CUSTOMER" | "VIP" | "MANAGER";
 
 export interface Order {
   id: number;

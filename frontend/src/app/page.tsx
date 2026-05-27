@@ -1,14 +1,11 @@
 "use client";
 
 import { useEffect, useReducer, useRef, useState } from "react";
-import { Alert, Badge, Card, Col, Row, Statistic, Typography } from "antd";
+import { Segmented } from "antd";
 
-import { Action, Order, OrderState, OrderType } from "@/types/home";
-import { formatClock } from "@/utils";
+import { Action, Order, OrderState, OrderType, UserRole } from "@/types/home";
 
-import { HomeBoard, HomeBrandBar, HomeFloatActions } from "./__components";
-
-const { Title, Paragraph, Text } = Typography;
+import { HomeBoard, HomeBrandBar, HomeControlPanel } from "./__components";
 const PROCESSING_DURATION_MS = 10_000;
 
 const initialState: OrderState = {
@@ -253,6 +250,7 @@ const reducer = (state: OrderState, action: Action): OrderState => {
 
 const Home = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [role, setRole] = useState<UserRole>("CUSTOMER");
   const [now, setNow] = useState<number | null>(null);
   const timersRef = useRef<Record<number, number>>({});
 
@@ -320,10 +318,6 @@ const Home = () => {
     };
   }, []);
 
-  const workingBots = state.bots.filter(
-    (bot) => bot.status === "WORKING",
-  ).length;
-
   const onAddNormalOrder = () => {
     dispatch({ type: "ADD_ORDER", orderType: "NORMAL", now: Date.now() });
   };
@@ -343,69 +337,32 @@ const Home = () => {
   return (
     <div className="home">
       <div className="home__content">
-        <HomeBrandBar />
+        <div className="home__topbar">
+          <HomeBrandBar />
 
-        <div className="home__hero">
-          <div className="home__hero-copy">
-            <Title level={1} className="home__title">
-              Priority order routing for VIP and normal customers.
-            </Title>
-            <Paragraph className="home__description">
-              A single-screen prototype showing the full order flow inside
-              memory. New orders land in the pending queue, VIP orders stay
-              ahead of normal orders, and bots process one order at a time for
-              10 seconds.
-            </Paragraph>
-          </div>
-
-          <Card className="home__hero-card" variant="borderless">
-            <div className="home__hero-card-top">
-              <Badge status="processing" text="Live in-memory simulation" />
-              <Text className="home__clock">
-                {now === null ? "--:--:--" : formatClock(now)}
-              </Text>
-            </div>
-
-            <Row gutter={[16, 16]}>
-              <Col xs={12} sm={12} md={6}>
-                <Statistic title="Bots" value={state.bots.length} />
-              </Col>
-              <Col xs={12} sm={12} md={6}>
-                <Statistic
-                  title="Pending"
-                  value={state.pendingOrderIds.length}
-                />
-              </Col>
-              <Col xs={12} sm={12} md={6}>
-                <Statistic
-                  title="Complete"
-                  value={state.completeOrderIds.length}
-                />
-              </Col>
-              <Col xs={12} sm={12} md={6}>
-                <Statistic title="Working" value={workingBots} />
-              </Col>
-            </Row>
-          </Card>
+          <Segmented<UserRole>
+            className="home__role-switcher"
+            value={role}
+            onChange={(nextRole) => setRole(nextRole)}
+            options={[
+              { label: "Customer", value: "CUSTOMER" },
+              { label: "VIP", value: "VIP" },
+              { label: "Manager", value: "MANAGER" },
+            ]}
+          />
         </div>
 
-        <Alert
-          className="home__rules"
-          type="info"
-          showIcon
-          message="Queue rules"
-          description="VIP orders are inserted ahead of normal orders, but always behind any VIP orders already waiting. Removing the newest bot requeues its active order back into the pending list."
+        <HomeControlPanel
+          role={role}
+          totalBots={state.bots.length}
+          onAddNormalOrder={onAddNormalOrder}
+          onAddVIPOrder={onAddVIPOrder}
+          onAddBot={onAddBot}
+          onRemoveBot={onRemoveBot}
         />
 
         <HomeBoard state={state} now={now} />
       </div>
-
-      <HomeFloatActions
-        onAddNormalOrder={onAddNormalOrder}
-        onAddVIPOrder={onAddVIPOrder}
-        onAddBot={onAddBot}
-        onRemoveBot={onRemoveBot}
-      />
     </div>
   );
 };
