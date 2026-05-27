@@ -26,5 +26,6 @@ export function serializeSnapshot(snap: StatusSnapshot): StatusDTO {
     })),
     complete: snap.complete.map(serializeOrder),
     bots: snap.bots.map(serializeBot),
+    cookDurationMs: snap.cookMs,
   };
 }

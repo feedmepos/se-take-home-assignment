@@ -30,4 +30,5 @@ export interface StatusSnapshot {
   processing: { order: Order; botId: number }[];
   complete: Order[];
   bots: Bot[];
+  cookMs: number;
 }
