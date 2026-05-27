@@ -10,3 +10,12 @@ export class CreateOrderDto {
   @IsIn(['NORMAL', 'VIP'])
   type?: OrderType;
 }
+
+export class OrderTypeQuery {
+  @IsOptional()
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? value.toUpperCase() : value,
+  )
+  @IsIn(['NORMAL', 'VIP'])
+  type?: OrderType;
+}

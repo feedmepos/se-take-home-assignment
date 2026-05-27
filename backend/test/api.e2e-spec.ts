@@ -36,6 +36,23 @@ describe('Orders API (e2e)', () => {
       .send({ type: 'bogus' })
       .expect(400);
   });
+
+  it('GET /api/orders?type=vip → 200 and only VIP orders', async () => {
+    await request(app.getHttpServer()).post('/api/orders').send({ type: 'vip' }).expect(201);
+    await request(app.getHttpServer()).post('/api/orders').send({ type: 'normal' }).expect(201);
+    const res = await request(app.getHttpServer())
+      .get('/api/orders?type=vip')
+      .expect(200);
+    expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body.length).toBeGreaterThan(0);
+    expect(res.body.every((o: { type: string }) => o.type === 'VIP')).toBe(true);
+  });
+
+  it('GET /api/orders?type=bogus → 400', async () => {
+    await request(app.getHttpServer())
+      .get('/api/orders?type=bogus')
+      .expect(400);
+  });
 });
 
 describe('Bots API (e2e)', () => {
@@ -79,5 +96,12 @@ describe('Status API (e2e)', () => {
     expect(Array.isArray(res.body.processing)).toBe(true);
     expect(Array.isArray(res.body.complete)).toBe(true);
     expect(Array.isArray(res.body.bots)).toBe(true);
+  });
+
+  it('GET /api/health → 200 with { status: ok }', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/api/health')
+      .expect(200);
+    expect(res.body).toEqual({ status: 'ok' });
   });
 });

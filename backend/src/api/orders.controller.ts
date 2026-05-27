@@ -7,28 +7,15 @@ import {
   HttpCode,
   HttpStatus,
   BadRequestException,
-  UseFilters,
 } from '@nestjs/common';
-import { Transform } from 'class-transformer';
-import { IsIn, IsOptional, validate } from 'class-validator';
+import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 import { OrderController } from '../domain/order-controller';
-import { CreateOrderDto } from './dto';
+import { CreateOrderDto, OrderTypeQuery } from './dto';
 import { serializeOrder } from './serialize';
-import { BotNotFoundFilter } from './not-found.filter';
 import type { OrderDTO, OrderType } from '../contracts';
 
-class OrderTypeQuery {
-  @IsOptional()
-  @Transform(({ value }: { value: unknown }) =>
-    typeof value === 'string' ? value.toUpperCase() : value,
-  )
-  @IsIn(['NORMAL', 'VIP'])
-  type?: OrderType;
-}
-
 @Controller('orders')
-@UseFilters(BotNotFoundFilter)
 export class OrdersController {
   constructor(private readonly domain: OrderController) {}
 
