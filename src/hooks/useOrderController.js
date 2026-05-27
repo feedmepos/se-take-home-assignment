@@ -94,9 +94,6 @@ export default function useOrderController() {
   const timersRef = useRef(new Map())
   const stateRef = useRef(state)
 
-  // Keep stateRef in sync every render
-  stateRef.current = state
-
   // Derived: sorted pending orders (VIP first, then FIFO by id)
   const pendingOrders = useMemo(() => {
     return state.orders
@@ -113,6 +110,10 @@ export default function useOrderController() {
       .filter((o) => o.status === 'COMPLETE')
       .sort((a, b) => b.id - a.id)
   }, [state.orders])
+
+  useEffect(() => {
+    stateRef.current = state
+  }, [state])
 
   // Assign pending orders to idle bots
   useEffect(() => {
