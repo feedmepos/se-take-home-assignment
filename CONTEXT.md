@@ -10,7 +10,7 @@ An automated-cooking-bot order controller for a fast-food restaurant. Customers 
 
 | Term | Definition |
 | --- | --- |
-| **Order** | A customer request to be cooked. Has a unique, monotonically increasing **id**, a **type**, and a **status**. |
+| **Order** | A customer request to be cooked. Has a unique, monotonically increasing **id**, a **type**, a **status**, and timestamps (`createdAt`; `startedAt` set when PROCESSING begins, cleared on requeue; `completedAt`). |
 | **Order type** | `NORMAL` or `VIP`. Determines queue priority. Default is `NORMAL`. |
 | **Order status** | `PENDING` → `PROCESSING` → `COMPLETE`. A `PROCESSING` order can revert to `PENDING` if its bot is removed (see **Requeue**). |
 | **Bot** | A cooking worker with a unique, monotonically increasing **id** and a **status**. Processes exactly one order at a time. |

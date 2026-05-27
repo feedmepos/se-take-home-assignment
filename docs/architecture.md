@@ -57,12 +57,14 @@ The **core depends on nothing** — no Nest, no HTTP, no `Date`, no `setTimeout`
 se-take-home-assignment/
 ├── backend/
 │   └── src/
-│       ├── domain/     # pure-TS core + unit tests
-│       ├── api/        # NestJS module: controllers, SSE, DTOs, static serving
-│       └── cli/        # scenario runner + interactive REPL
-├── shared/             # wire-contract types — one source of truth, imported by FE + BE
-├── frontend/           # Vite + React TS
+│       ├── domain/        # pure-TS core + unit tests
+│       ├── api/           # NestJS module: controllers, SSE, DTOs, static serving
+│       ├── cli/           # scenario runner + interactive REPL
+│       └── contracts.ts   # wire types (SSOT), imported by BE (relative) + FE (alias)
+├── frontend/           # Vite + React TS (Phase 5)
 ├── scripts/            # test.sh / build.sh / run.sh
+│   └── result.example.txt  # committed format sample (result.txt is git-ignored)
+├── .gitignore
 ├── docs/
 └── CONTEXT.md
 ```
@@ -74,7 +76,7 @@ type OrderType   = 'NORMAL' | 'VIP';
 type OrderStatus = 'PENDING' | 'PROCESSING' | 'COMPLETE';
 type BotStatus   = 'IDLE' | 'PROCESSING';
 
-interface Order { id: number; type: OrderType; status: OrderStatus; createdAt: Date; completedAt?: Date; }
+interface Order { id: number; type: OrderType; status: OrderStatus; createdAt: Date; startedAt?: Date; completedAt?: Date; }
 interface Bot   { id: number; status: BotStatus; currentOrderId: number | null; }
 ```
 
@@ -124,18 +126,22 @@ interface Scheduler { schedule(delayMs: number, cb: () => void): CancelHandle; }
 
 Commands map 1:1 across CLI and REST (same vocabulary). All optional params have defaults.
 
+API is mounted under a global `/api` prefix; health is `GET /api/health`.
+
 | CLI | REST | Default when omitted |
 | --- | --- | --- |
-| `add-order [--type normal\|vip]` | `POST /orders` `{type?}` | `normal` |
-| `add-bot` | `POST /bots` | — |
-| `del-bot [--id <id>]` | `DELETE /bots/:id` and `DELETE /bots` | newest |
-| `list-orders [--type normal\|vip]` | `GET /orders?type=` | all types |
-| `list-bots` | `GET /bots` | — |
-| `status` | `GET /status` | — (full snapshot / UI bootstrap) |
-| (live updates) | `GET /events` (SSE) | — |
+| `add-order [--type normal\|vip]` | `POST /api/orders` `{type?}` | `normal` |
+| `add-bot` | `POST /api/bots` | — |
+| `del-bot [--id <id>]` | `DELETE /api/bots/:id` and `DELETE /api/bots` | newest |
+| `list-orders [--type normal\|vip]` | `GET /api/orders?type=` | all types |
+| `list-bots` | `GET /api/bots` | — |
+| `status` | `GET /api/status` | — (full snapshot / UI bootstrap) |
+| (live updates) | `GET /api/events` (SSE) | — |
 | `help`, `exit` | — | REPL only |
 
-`DELETE /bots` (no id) is explicitly defined as "remove the newest **one**", not "delete all". `DELETE /bots/:id` with an unknown id, and `DELETE /bots` when no bots exist, both return **404** with a clear message (the CLI prints a friendly "no bot to remove"). Health checks live on `/health` to avoid colliding with `/status`. NestJS uses `ValidationPipe` + DTOs on inputs.
+`DELETE /api/bots` (no id) is explicitly defined as "remove the newest **one**", not "delete all". `DELETE /api/bots/:id` with an unknown id, and `DELETE /api/bots` when no bots exist, both return **404** with a clear message (the CLI prints a friendly "no bot to remove"). NestJS uses `ValidationPipe` + DTOs on inputs.
+
+SSE emits the full `StatusDTO` snapshot on connect and on every domain event; the client replaces state (no delta/patch logic).
 
 ### Backend conventions (NestJS)
 
@@ -195,7 +201,7 @@ A scripted, real-time sequence exercising all 7 requirements, including: create 
 | Order↔bot link | `Bot.currentOrderId` (the reverse is derived) |
 | "What happened" | the domain-event stream (feeds `result.txt`, SSE, and logs) |
 | Command handling | one dispatcher (CLI scenario + REPL); CLI & REST call the same core methods |
-| Wire types | `shared/contracts.ts`, imported by both backend and frontend |
+| Wire types | `backend/src/contracts.ts`, imported by BE (relative) + FE (Vite alias) |
 
 The expansion beyond the README's "~1 hour" suggestion (full-stack + live UI + deploy + docs) is a **deliberate, scoped** choice to stand out — but every added piece is right-sized, and the **backend alone remains a complete, CI-passing submission**. The design aims to stand out by judgment and clarity, not by stacking technology.
 
@@ -211,6 +217,8 @@ Levels: domain events at `log`/info; problems at `warn`/`error`. Default to Nest
 ## 12. Implementation notes / gotchas
 
 1. **Real-time CI runtime:** `result.txt` is produced by the real CLI honouring real 10s cooks, so the scenario takes ~30–40s in CI (authentic 10s gaps, matching the sample). Deliberate — do not swap in a fake clock to speed it up.
-2. **SPA vs API route precedence:** `ServeStaticModule`'s `index.html` fallback must be registered *after* / excluding the API routes (`/orders`, `/bots`, `/events`, `/status`, `/health`), so it doesn't swallow them. Classic single-service footgun.
-3. **`DELETE /bots` → `404` when empty** is a deliberate choice over an idempotent `204`; be ready to justify it.
+2. **SPA vs API route precedence:** `ServeStaticModule`'s `index.html` fallback must be registered *after* / excluding the API routes, so it doesn't swallow them. The global `/api` prefix cleanly partitions API routes from SPA routes — `ServeStaticModule` serves all non-`/api` paths with no route-collision. Classic single-service footgun, solved by the prefix.
+3. **`DELETE /api/bots` → `404` when empty** is a deliberate choice over an idempotent `204`; be ready to justify it.
 4. **One SSE connection per client**, opened once; the single pinned Cloud Run instance serves all viewers (fine for a demo).
+5. **Build MUST stay on `tsc`/`nest build`, NOT webpack:** webpack bundles only `main.ts` and drops `dist/cli/scenario.js`, which `run.sh`/CI runs. Both `dist/main.js` and `dist/cli/scenario.js` must emit.
+6. **`scripts/result.txt` is git-ignored** and regenerated each run; `scripts/result.example.txt` is the committed format sample.

@@ -16,6 +16,7 @@ Configure `--min-instances=1 --max-instances=1` with **CPU always allocated**.
 
 - **No CORS** (UI and API share an origin); one URL to submit.
 - The instance pinning is required because the app relies on background 10s timers and in-memory state — Cloud Run otherwise throttles CPU between requests and may scale to zero or across instances. See [ADR 0001](./0001-in-memory-no-database.md) / [0002](./0002-injected-clock-scheduler.md).
+- The API is mounted under a global `/api` prefix, so `ServeStaticModule` serves the SPA on all non-`/api` routes with no route collision (cleaner than maintaining a path-exclude list).
 - FE and BE deploy together; acceptable at this size.
 
 ## Alternatives rejected
