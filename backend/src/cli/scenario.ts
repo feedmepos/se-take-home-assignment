@@ -1,52 +1,57 @@
 import { OrderController } from '../domain/order-controller';
 import { SystemClock, RealScheduler } from '../domain/time';
 import { runCommand } from './dispatcher';
-import { formatEvent } from './format';
+import { formatEvent, formatInit, formatSummary, REPORT_HEADER } from './format';
 
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
 
 async function main(): Promise<void> {
-  const ctrl = new OrderController(new SystemClock(), new RealScheduler());
+  const clock = new SystemClock();
+  const ctrl = new OrderController(clock, new RealScheduler());
+
+  // The report (header, event log, footer) goes to stdout -> scripts/result.txt,
+  // matching the employer's expected format. Step narration goes to stderr.
+  console.log(REPORT_HEADER);
+  console.log('');
+  console.log(formatInit(clock.now(), 0));
   ctrl.subscribe((e) => console.log(formatEvent(e)));
 
-  // Step 1: Queue three orders (1 normal, 1 VIP, 1 normal)
-  console.error('--- Adding orders ---');
-  runCommand(ctrl, 'add-order --type normal');   // #1
-  runCommand(ctrl, 'add-order --type vip');      // #2
-  runCommand(ctrl, 'add-order --type normal');   // #3
+  // Step 1: Queue three orders. The VIP (#2) jumps ahead of the normals;
+  // within the normal tier, #1 stays ahead of #3 (FIFO by id).
+  console.error('--- Adding orders (normal #1, vip #2, normal #3) ---');
+  runCommand(ctrl, 'add-order --type normal'); // #1
+  runCommand(ctrl, 'add-order --type vip'); //    #2
+  runCommand(ctrl, 'add-order --type normal'); // #3
 
   await sleep(200);
 
-  // Step 2: Add two bots — they grab the top two orders by priority (#2 VIP, #1 NORMAL)
-  console.error('--- Adding bots ---');
-  runCommand(ctrl, 'add-bot');  // bot #1 -> VIP #2
-  runCommand(ctrl, 'add-bot');  // bot #2 -> NORMAL #1
+  // Step 2: Add two bots. Each takes the highest-priority pending order:
+  // bot #1 -> VIP #2, bot #2 -> NORMAL #1. NORMAL #3 keeps waiting.
+  console.error('--- Adding bots #1 and #2 ---');
+  runCommand(ctrl, 'add-bot'); // bot #1 -> VIP #2
+  runCommand(ctrl, 'add-bot'); // bot #2 -> NORMAL #1
 
-  // Step 3: After ~5s (mid-cook), remove bot #1 while it is still PROCESSING order #2
-  // This triggers OrderRequeued for order #2
+  // Step 3: After ~5s (mid-cook), `del-bot` with NO id destroys the NEWEST bot
+  // (#2), which is processing NORMAL #1 (README "- Bot" requirement). Its order
+  // returns to PENDING and is restored to its original slot, ahead of NORMAL #3.
   await sleep(5_000);
-  console.error('--- Removing bot #1 mid-cook (expect OrderRequeued) ---');
-  runCommand(ctrl, 'del-bot --id 1');
+  console.error('--- del-bot (no id): destroy newest bot #2 mid-cook (expect requeue of #1) ---');
+  runCommand(ctrl, 'del-bot');
 
-  // Step 4: Add another VIP order and a new bot to pick it up
+  // Step 4: Add a fresh bot. It resumes the requeued NORMAL #1 BEFORE NORMAL #3,
+  // proving the requeue landed in its original priority slot (not the back).
   await sleep(200);
-  console.error('--- Adding VIP order #4 and new bot #3 ---');
-  runCommand(ctrl, 'add-order --type vip');  // #4
-  runCommand(ctrl, 'add-bot');               // bot #3 -> should pick up requeued VIP #2
+  console.error('--- Adding bot #3 (expect it to resume requeued NORMAL #1, before #3) ---');
+  runCommand(ctrl, 'add-bot'); // bot #3 -> NORMAL #1
 
-  // Step 5: Wait for all cooking to complete (~22s total from here: two 10s cooks remain)
-  // bot #2 finishes order #1 at ~t=10s (it started at t~0, has ~5s left)
-  // bot #3 starts VIP #2 (requeued) and finishes at +10s
-  // then bot #3 picks up NORMAL #3, finishes at +10s more
-  // order #4 is also queued; we need enough bots or time
-  await sleep(25_000);
+  // Step 5: Let every order finish cooking, then drain to IDLE.
+  //   bot #1: VIP #2 done ~t=10s, then NORMAL #3 done ~t=20s
+  //   bot #3: NORMAL #1 done ~t=15s, then idle
+  await sleep(16_000);
 
-  // Narration + final summary go to stderr so stdout (-> result.txt) stays a pure event log.
-  const snap = ctrl.snapshot();
   console.error('--- Scenario complete ---');
-  console.error(
-    `[summary] pending=${snap.pending.length} processing=${snap.processing.length} complete=${snap.complete.length} bots=${snap.bots.length}`,
-  );
+  console.log('');
+  console.log(formatSummary(ctrl.snapshot()));
   process.exit(0);
 }
 
