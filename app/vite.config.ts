@@ -1,0 +1,16 @@
+/// <reference types="vitest" />
+import { defineConfig } from 'vitest/config'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+
+// https://vite.dev/config/
+export default defineConfig({
+  base: '/se-take-home-assignment/',
+  plugins: [react(), tailwindcss()],
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    include: ['src/**/*.test.{ts,tsx}'],
+    setupFiles: './src/test/setup.ts',
+  },
+})
