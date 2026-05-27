@@ -9,6 +9,7 @@ async function makeApp(): Promise<INestApplication<App>> {
     imports: [AppModule],
   }).compile();
   const app = moduleFixture.createNestApplication();
+  app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   await app.init();
   return app;
@@ -20,18 +21,18 @@ describe('Orders API (e2e)', () => {
   beforeEach(async () => { app = await makeApp(); });
   afterEach(async () => { await app.close(); });
 
-  it('POST /orders with lowercase type is normalised to VIP → 201', async () => {
+  it('POST /api/orders with lowercase type is normalised to VIP → 201', async () => {
     const res = await request(app.getHttpServer())
-      .post('/orders')
+      .post('/api/orders')
       .send({ type: 'vip' })
       .expect(201);
     expect(res.body.type).toBe('VIP');
     expect(typeof res.body.id).toBe('number');
   });
 
-  it('POST /orders with invalid type → 400', async () => {
+  it('POST /api/orders with invalid type → 400', async () => {
     await request(app.getHttpServer())
-      .post('/orders')
+      .post('/api/orders')
       .send({ type: 'bogus' })
       .expect(400);
   });
@@ -43,23 +44,23 @@ describe('Bots API (e2e)', () => {
   beforeEach(async () => { app = await makeApp(); });
   afterEach(async () => { await app.close(); });
 
-  it('POST /bots → 201 with numeric id and IDLE status (no pending orders)', async () => {
+  it('POST /api/bots → 201 with numeric id and IDLE status (no pending orders)', async () => {
     const res = await request(app.getHttpServer())
-      .post('/bots')
+      .post('/api/bots')
       .expect(201);
     expect(typeof res.body.id).toBe('number');
     expect(res.body.status).toBe('IDLE');
   });
 
-  it('DELETE /bots/:id with unknown id → 404', async () => {
+  it('DELETE /api/bots/:id with unknown id → 404', async () => {
     await request(app.getHttpServer())
-      .delete('/bots/9999')
+      .delete('/api/bots/9999')
       .expect(404);
   });
 
-  it('DELETE /bots when no bots exist → 404', async () => {
+  it('DELETE /api/bots when no bots exist → 404', async () => {
     await request(app.getHttpServer())
-      .delete('/bots')
+      .delete('/api/bots')
       .expect(404);
   });
 });
@@ -70,9 +71,9 @@ describe('Status API (e2e)', () => {
   beforeEach(async () => { app = await makeApp(); });
   afterEach(async () => { await app.close(); });
 
-  it('GET /status → 200 with pending, processing, complete, bots arrays', async () => {
+  it('GET /api/status → 200 with pending, processing, complete, bots arrays', async () => {
     const res = await request(app.getHttpServer())
-      .get('/status')
+      .get('/api/status')
       .expect(200);
     expect(Array.isArray(res.body.pending)).toBe(true);
     expect(Array.isArray(res.body.processing)).toBe(true);
