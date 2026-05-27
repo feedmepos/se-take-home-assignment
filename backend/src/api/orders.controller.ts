@@ -16,7 +16,7 @@ import { OrderController } from '../domain/order-controller';
 import { CreateOrderDto } from './dto';
 import { serializeOrder } from './serialize';
 import { BotNotFoundFilter } from './not-found.filter';
-import type { OrderDTO, OrderType } from '@shared/contracts';
+import type { OrderDTO, OrderType } from '../contracts';
 
 class OrderTypeQuery {
   @IsOptional()

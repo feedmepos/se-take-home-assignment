@@ -1,5 +1,5 @@
 import type { Order, Bot, StatusSnapshot } from '../domain/types';
-import type { OrderDTO, BotDTO, StatusDTO } from '@shared/contracts';
+import type { OrderDTO, BotDTO, StatusDTO } from '../contracts';
 
 export function serializeOrder(order: Order): OrderDTO {
   const dto: OrderDTO = {

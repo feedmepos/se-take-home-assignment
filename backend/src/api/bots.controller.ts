@@ -11,7 +11,7 @@ import {
 import { OrderController } from '../domain/order-controller';
 import { serializeBot } from './serialize';
 import { BotNotFoundFilter } from './not-found.filter';
-import type { BotDTO } from '@shared/contracts';
+import type { BotDTO } from '../contracts';
 
 @Controller('bots')
 @UseFilters(BotNotFoundFilter)

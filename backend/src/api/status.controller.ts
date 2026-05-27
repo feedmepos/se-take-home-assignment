@@ -1,7 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
 import { OrderController } from '../domain/order-controller';
 import { serializeSnapshot } from './serialize';
-import type { StatusDTO } from '@shared/contracts';
+import type { StatusDTO } from '../contracts';
 
 @Controller()
 export class StatusController {

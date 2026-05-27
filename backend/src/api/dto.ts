@@ -1,6 +1,6 @@
 import { IsIn, IsOptional } from 'class-validator';
 import { Transform } from 'class-transformer';
-import type { OrderType } from '@shared/contracts';
+import type { OrderType } from '../contracts';
 
 export class CreateOrderDto {
   @IsOptional()
