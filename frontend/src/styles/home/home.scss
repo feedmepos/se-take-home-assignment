@@ -1,0 +1,350 @@
+@use "../color.scss" as *;
+@use "../general.scss" as *;
+
+.home {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: to-rem(24px);
+  min-height: 100vh;
+  padding: to-rem(30px) to-rem(20px);
+  color: $text-color;
+  overflow: hidden;
+
+  @media (max-width: 430px) {
+    padding: to-rem(20px) to-rem(10px);
+  }
+
+  .ant-typography {
+    color: inherit;
+  }
+
+  .ant-empty-description {
+    color: $secondary-text-color;
+  }
+
+  &__content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: to-rem(20px);
+    width: 100%;
+    max-width: to-rem(1050px);
+    margin: 0 auto;
+  }
+
+  &__brandbar {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: to-rem(14px);
+    width: fit-content;
+    padding: to-rem(14px) to-rem(16px);
+    border: to-rem(1px) solid rgba($primary, 0.12);
+    border-radius: to-rem(50px);
+    background: rgba($white, 0.8);
+    box-shadow: 0 to-rem(12px) to-rem(28px) rgba($black, 0.08);
+    backdrop-filter: blur(to-rem(18px));
+  }
+
+  &__brandmark {
+    display: grid;
+    place-items: center;
+    width: to-rem(56px);
+    height: to-rem(56px);
+    padding: to-rem(4px);
+  }
+
+  &__brandlogo {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  &__brandlogo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  &__brandcopy {
+    display: flex;
+    flex-direction: column;
+    gap: to-rem(2px);
+  }
+
+  &__brandname {
+    font-family: var(--font-heading), "Helvetica Neue", sans-serif;
+    font-size: to-rem(18px);
+    font-weight: 700;
+    line-height: 1;
+    color: $primary !important;
+  }
+
+  &__brandtag {
+    color: $secondary-text-color;
+    font-size: to-rem(14px);
+  }
+
+  &__title {
+    margin: 0;
+    color: $secondary !important;
+    font-family: var(--font-heading), "Helvetica Neue", sans-serif;
+    font-size: clamp(to-rem(40px), 5vw, to-rem(70px)) !important;
+    line-height: 1;
+  }
+
+  &__description {
+    margin: 0;
+    font-size: to-rem(17px);
+    line-height: 1.75;
+    color: $secondary-text-color;
+  }
+
+  &__hero {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: to-rem(20px);
+    align-items: stretch;
+    width: 100%;
+  }
+
+  &__hero-copy,
+  &__hero-card,
+  &__panel,
+  &__rules {
+    position: relative;
+    z-index: 1;
+    border: to-rem(1px) solid rgba($primary, 0.12);
+    border-radius: to-rem(28px);
+    background: rgba($white, 0.84);
+    box-shadow: 0 to-rem(22px) to-rem(60px) rgba($black, 0.09);
+    backdrop-filter: blur(to-rem(22px));
+  }
+
+  &__hero-copy {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: to-rem(20px);
+    padding: clamp(to-rem(24px), 3vw, to-rem(40px));
+    animation: home-rise 0.8s ease both;
+  }
+
+  &__hero-card {
+    padding: to-rem(24px);
+    animation: home-rise 0.9s ease both;
+  }
+
+  &__hero-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: to-rem(16px);
+    margin-bottom: to-rem(20px);
+  }
+
+  &__clock {
+    color: $secondary-text-color;
+    letter-spacing: to-rem(1px);
+  }
+
+  &__rules {
+    width: 100%;
+    padding: to-rem(16px) to-rem(20px);
+    color: $text-color;
+    animation: home-rise 1s ease both;
+  }
+
+  &__board {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: to-rem(20px);
+    align-items: start;
+    width: 100%;
+  }
+
+  &__panel {
+    overflow: hidden;
+  }
+
+  &__panel--pending {
+    animation: home-rise 1.05s ease both;
+  }
+
+  &__panel--bots {
+    animation: home-rise 1.1s ease both;
+  }
+
+  &__panel--complete {
+    animation: home-rise 1.15s ease both;
+  }
+
+  &__panel-heading {
+    display: flex;
+    flex-direction: column;
+    gap: to-rem(4px);
+  }
+
+  &__panel-title {
+    margin: 0 !important;
+    font-family: var(--font-heading), "Helvetica Neue", sans-serif;
+    color: $secondary !important;
+  }
+
+  &__order-card,
+  &__bot-card {
+    padding: to-rem(14px) to-rem(16px);
+    border-radius: to-rem(20px);
+    border: to-rem(1px) solid rgba($primary, 0.08);
+    background: linear-gradient(
+      135deg,
+      rgba($white, 0.96),
+      rgba($secondary_1, 0.82)
+    );
+    box-shadow: inset 0 to-rem(1px) 0 rgba($white, 0.55);
+  }
+
+  &__order-card--complete {
+    background: linear-gradient(135deg, rgba($safe, 0.12), rgba($white, 0.94));
+  }
+
+  &__order-card-head,
+  &__order-card-footer,
+  &__bot-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: to-rem(16px);
+  }
+
+  &__order-card-footer {
+    margin-top: to-rem(12px);
+  }
+
+  &__bot-body {
+    display: flex;
+    flex-direction: column;
+    gap: to-rem(4px);
+    margin-top: to-rem(12px);
+  }
+
+  &__panel .ant-typography-secondary {
+    color: $secondary-text-color;
+  }
+
+  &__panel .ant-progress {
+    margin-top: to-rem(14px);
+  }
+
+  &__panel .ant-empty {
+    margin: auto;
+    padding: to-rem(32px) 0;
+  }
+
+  &__hero-card .ant-card-body,
+  &__panel .ant-card-body {
+    display: block;
+    padding: 0;
+  }
+
+  &__panel .ant-card-head {
+    border-bottom: none !important;
+    background: rgba($white, 0.95);
+    padding: to-rem(20px) !important;
+  }
+
+  &__panel .ant-card-extra {
+    display: flex;
+    align-items: center;
+  }
+
+  &__panel .ant-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: to-rem(14px);
+    max-height: to-rem(560px);
+    overflow-y: auto;
+    padding: to-rem(24px);
+  }
+
+  &__panel .ant-card-body::-webkit-scrollbar {
+    width: to-rem(8px);
+  }
+
+  &__panel .ant-card-body::-webkit-scrollbar-thumb {
+    border-radius: to-rem(999px);
+    background: rgba($gray, 0.35);
+  }
+
+  &__float-actions {
+    .ant-float-btn {
+      border: to-rem(1px) solid rgba($white, 0.45);
+      background: rgba($primary, 0.8) !important;
+      box-shadow:
+        0 to-rem(16px) to-rem(32px) rgba($primary, 0.26),
+        0 0 to-rem(20px) rgba($primary, 0.2);
+      backdrop-filter: blur(to-rem(16px));
+      transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+    }
+
+    .ant-float-btn:hover,
+    .ant-float-btn:focus-visible {
+      transform: translateY(to-rem(-2px)) scale(1.03);
+      box-shadow:
+        0 to-rem(20px) to-rem(40px) rgba($primary, 0.3),
+        0 0 to-rem(26px) rgba($primary, 0.28);
+    }
+
+    .ant-float-btn-body {
+      color: $white;
+    }
+
+    .ant-image {
+      position: relative;
+      left: to-rem(-3px);
+      width: to-rem(26px) !important;
+      height: to-rem(26px) !important;
+    }
+
+    .ant-float-btn-icon .ant-image,
+    .ant-float-btn-icon img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+  }
+
+  &__hero-card .ant-statistic-title,
+  &__hero-card .ant-statistic-content {
+    color: $secondary;
+  }
+
+  &__hero-card .ant-statistic-title {
+    color: $secondary-text-color;
+  }
+
+  &__hero-card .ant-badge-status-text,
+  &__rules .ant-alert-message,
+  &__rules .ant-alert-description {
+    color: $secondary;
+  }
+}
+
+@keyframes home-rise {
+  from {
+    opacity: 0;
+    transform: translateY(to-rem(18px));
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
