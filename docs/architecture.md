@@ -116,7 +116,7 @@ interface Scheduler { schedule(delayMs: number, cb: () => void): CancelHandle; }
 
 ### Linkage, ids & atomicity
 
-- **The order↔bot link is one-directional.** `Bot.currentOrderId` is the single source of truth; "which bot has order X?" is *derived* when serializing `/status`. There is deliberately no `Order.assignedBotId` — two references could disagree.
+- **The order↔bot link is one-directional.** `Bot.currentOrderId` is the single source of truth; "which bot has order X?" is *derived* when serializing `/api/status`. There is deliberately no `Order.assignedBotId` — two references could disagree.
 - **Cancel handles are not entity state.** The controller holds a `Map<botId, CancelHandle>` for in-flight 10s completions. They can't live on `Bot`, which serializes to JSON/SSE.
 - **IDs come from two monotonic counters** (orders, bots), starting at 1, incremented on creation, **never decremented or reused**. So `newest bot = max active id` (stable under any deletion), and a delete-then-create yields a fresh id — never a revived bot.
 - **Dispatch is atomic.** Core mutations are **synchronous** — no `await` between selecting a `PENDING` order and marking it `PROCESSING`. Node's single thread then guarantees no two bots take the same order, and no delete/create interleaves mid-mutation. `tryAssign()` is idempotent and safe to call after every state change.
@@ -154,7 +154,7 @@ SSE emits the full `StatusDTO` snapshot on connect and on every domain event; th
 ## 6. Frontend
 
 - **One `EventSource`, opened once** in a `useEventSource` hook (cleanup on unmount; the browser auto-reconnects). No duplicate listeners.
-- **`useReducer` is the single store**, seeded from `GET /status`, then patched by SSE events — the server is the source of truth; the client never re-derives business state. No Redux/Zustand/React-Query needed.
+- **`useReducer` is the single store**, seeded from `GET /api/status`, then patched by SSE events — the server is the source of truth; the client never re-derives business state. No Redux/Zustand/React-Query needed.
 - **Derive during render, not in effects.** Counts, groupings, and "is this order processing" are computed from state at render time (no extra renders, no stale effects).
 - **Isolate the per-order countdown.** `remaining = startedAt + duration − now`, ticked inside a small leaf component (or one shared interval), so the 1s tick never re-renders the whole tree.
 - **Conditional rendering with ternaries, not `&&`** — counts can be `0`, and `{count && …}` would render a literal `0`.
@@ -165,7 +165,7 @@ SSE emits the full `StatusDTO` snapshot on connect and on every domain event; th
 ## 7. Testing
 
 - **Unit (core, Jest + FakeClock)**: priority insertion incl. VIP-behind-VIP; unique increasing ids; 10s completion; idle when empty; **requeue restores original slot**; remove-newest semantics; remove specific id. Fast and deterministic.
-- **E2E (NestJS)**: command endpoints, `/status` shape, an SSE smoke test.
+- **E2E (NestJS)**: command endpoints, `/api/status` shape, an SSE smoke test.
 - The pure core is what carries the bulk of coverage — it has no I/O to mock.
 
 ## 8. Deployment
