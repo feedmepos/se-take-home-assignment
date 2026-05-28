@@ -1,4 +1,4 @@
-import { OrderController, DEFAULT_COOK_MS } from './order-controller';
+import { OrderController, DEFAULT_COOK_MS, INITIAL_ORDER_ID } from './order-controller';
 import { FakeClock } from './time.fake';
 import { BotNotFoundError } from './errors';
 
@@ -11,8 +11,8 @@ test('new orders are PENDING with unique increasing ids', () => {
   const { ctrl } = make();
   const a = ctrl.addOrder('NORMAL');
   const b = ctrl.addOrder(); // defaults to NORMAL
-  expect(a.id).toBe(1);
-  expect(b.id).toBe(2);
+  expect(a.id).toBe(INITIAL_ORDER_ID);
+  expect(b.id).toBe(INITIAL_ORDER_ID + 1);
   expect(a.status).toBe('PENDING');
 });
 
@@ -22,7 +22,7 @@ test('VIP is queued ahead of NORMAL but behind an existing VIP', () => {
   ctrl.addOrder('VIP'); // #2
   ctrl.addOrder('VIP'); // #3
   ctrl.addOrder('NORMAL'); // #4
-  expect(ctrl.snapshot().pending.map((o) => o.id)).toEqual([2, 3, 1, 4]);
+  expect(ctrl.snapshot().pending.map((o) => o.id)).toEqual([1002, 1003, 1001, 1004]);
 });
 
 test('a bot picks the highest-priority order and completes after 10s', () => {
@@ -33,13 +33,13 @@ test('a bot picks the highest-priority order and completes after 10s', () => {
   ctrl.addBot(); // bot #1 -> should take VIP #2
   const processing = ctrl.snapshot().processing;
   expect(processing).toHaveLength(1);
-  expect(processing[0]!.order.id).toBe(2);
+  expect(processing[0]!.order.id).toBe(1002);
   expect(processing[0]!.botId).toBe(1);
   c.advance(DEFAULT_COOK_MS);
   const snap = ctrl.snapshot();
-  expect(snap.complete.map((o) => o.id)).toContain(2);
-  // then it should pick #1
-  expect(snap.processing[0]!.order.id).toBe(1);
+  expect(snap.complete.map((o) => o.id)).toContain(1002);
+  // then it should pick #1001
+  expect(snap.processing[0]!.order.id).toBe(1001);
 });
 
 test('bot goes IDLE when no pending orders', () => {
@@ -60,7 +60,7 @@ test('two bots added when two orders pending take different orders', () => {
     .snapshot()
     .processing.map((p) => p.order.id)
     .sort();
-  expect(ids).toEqual([1, 2]);
+  expect(ids).toEqual([1001, 1002]);
 });
 
 test('del-bot (no id) removes the newest bot', () => {
@@ -81,7 +81,7 @@ test('removing a PROCESSING bot requeues its order to its original slot', () => 
   ctrl.addBot(); // #1 takes #1 (PROCESSING)
   ctrl.addOrder('VIP'); // #3 pending
   ctrl.removeBot(1); // #1 requeued
-  expect(ctrl.snapshot().pending.map((o) => o.id)).toEqual([1, 2, 3]); // #1 back at front
+  expect(ctrl.snapshot().pending.map((o) => o.id)).toEqual([1001, 1002, 1003]); // #1001 back at front
   expect(ctrl.snapshot().processing).toEqual([]);
 });
 
@@ -145,9 +145,9 @@ test('removeBot of a non-newest specific id requeues only its order, leaving oth
   ctrl.removeBot(1); // remove non-newest bot #1
 
   const snap = ctrl.snapshot();
-  expect(snap.pending.map((o) => o.id)).toContain(1); // order #1 back to pending
+  expect(snap.pending.map((o) => o.id)).toContain(1001); // order #1001 back to pending
   expect(snap.processing).toHaveLength(1); // bot #2 unaffected
-  expect(snap.processing[0]!.order.id).toBe(2);
+  expect(snap.processing[0]!.order.id).toBe(1002);
   expect(snap.processing[0]!.botId).toBe(2);
   expect(ctrl.listBots().map((b) => b.id)).toEqual([2]); // bot #1 gone
 });

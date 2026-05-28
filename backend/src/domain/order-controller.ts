@@ -4,12 +4,13 @@ import { compareOrders } from './priority';
 import { BotNotFoundError } from './errors';
 
 export const DEFAULT_COOK_MS = 10_000;
+export const INITIAL_ORDER_ID = 1001;
 
 export class OrderController {
   private orders: Order[] = [];
   private bots: Bot[] = [];
   private timers = new Map<number, () => void>(); // botId -> cancel
-  private nextOrderId = 1;
+  private nextOrderId = INITIAL_ORDER_ID;
   private nextBotId = 1;
   private listeners = new Set<(e: DomainEvent) => void>();
 

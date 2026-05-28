@@ -41,15 +41,15 @@ class FakeEventSource implements EventSourceLike {
 // ---------------------------------------------------------------------------
 function makeSnapshot(): StatusDTO {
   return {
-    pending: [{ id: 1, type: 'VIP', status: 'PENDING', createdAt: '2026-01-01T00:00:00.000Z' }],
+    pending: [{ id: 1001, type: 'VIP', status: 'PENDING', createdAt: '2026-01-01T00:00:00.000Z' }],
     processing: [
       {
-        order: { id: 2, type: 'NORMAL', status: 'PROCESSING', createdAt: '2026-01-01T00:00:00.000Z', startedAt: new Date().toISOString() },
+        order: { id: 1002, type: 'NORMAL', status: 'PROCESSING', createdAt: '2026-01-01T00:00:00.000Z', startedAt: new Date().toISOString() },
         botId: 1,
       },
     ],
-    complete: [{ id: 3, type: 'NORMAL', status: 'COMPLETE', createdAt: '2026-01-01T00:00:00.000Z', completedAt: '2026-01-01T00:01:00.000Z' }],
-    bots: [{ id: 1, status: 'PROCESSING', currentOrderId: 2 }],
+    complete: [{ id: 1003, type: 'NORMAL', status: 'COMPLETE', createdAt: '2026-01-01T00:00:00.000Z', completedAt: '2026-01-01T00:01:00.000Z' }],
+    bots: [{ id: 1, status: 'PROCESSING', currentOrderId: 1002 }],
     cookDurationMs: 10_000,
   };
 }
@@ -89,11 +89,11 @@ describe('App integration', () => {
     act(() => { fake.emit(JSON.stringify(makeSnapshot())); });
 
     // VIP pending order (title text — no separate badge)
-    expect(await screen.findByText('VIP Order #1')).toBeInTheDocument();
+    expect(await screen.findByText('VIP Order #1001')).toBeInTheDocument();
     // Bot section
     expect(screen.getByText('Bot #1')).toBeInTheDocument();
-    // Complete section has an order (OrderCard renders "Normal Order #3")
-    expect(screen.getByText('Normal Order #3')).toBeInTheDocument();
+    // Complete section has an order (OrderCard renders "Normal Order #1003")
+    expect(screen.getByText('Normal Order #1003')).toBeInTheDocument();
   });
 
   it('calls fetch POST /api/orders with type VIP on "New VIP Order" click', async () => {
@@ -101,7 +101,7 @@ describe('App integration', () => {
     act(() => { fake.open(); });
     act(() => { fake.emit(JSON.stringify(makeSnapshot())); });
 
-    await screen.findByText('VIP Order #1'); // wait for render
+    await screen.findByText('VIP Order #1001'); // wait for render
     await userEvent.setup().click(screen.getByRole('button', { name: 'New VIP Order' }));
 
     expect(vi.mocked(fetch)).toHaveBeenCalledWith(
@@ -118,7 +118,7 @@ describe('App integration', () => {
     act(() => { fake.open(); });
     act(() => { fake.emit(JSON.stringify(makeSnapshot())); });
 
-    await screen.findByText('VIP Order #1');
+    await screen.findByText('VIP Order #1001');
     await userEvent.setup().click(screen.getByRole('button', { name: '+ Bot' }));
 
     expect(vi.mocked(fetch)).toHaveBeenCalledWith(
@@ -131,7 +131,7 @@ describe('App integration', () => {
     render(<App eventSourceFactory={() => fake} />);
     act(() => { fake.open(); });
     act(() => { fake.emit(JSON.stringify(makeSnapshot())); });
-    await screen.findByText('VIP Order #1');
+    await screen.findByText('VIP Order #1001');
 
     act(() => { fake.fail(); });
     expect(await screen.findByText('Reconnecting…')).toBeInTheDocument();
@@ -141,13 +141,13 @@ describe('App integration', () => {
     render(<App eventSourceFactory={() => fake} />);
     act(() => { fake.open(); });
     act(() => { fake.emit(JSON.stringify(makeSnapshot())); });
-    await screen.findByText('VIP Order #1');
+    await screen.findByText('VIP Order #1001');
 
     // Second frame: pending now empty
     const second: StatusDTO = {
       pending: [],
       processing: [],
-      complete: [{ id: 3, type: 'NORMAL', status: 'COMPLETE', createdAt: '2026-01-01T00:00:00.000Z', completedAt: '2026-01-01T00:01:00.000Z' }],
+      complete: [{ id: 1003, type: 'NORMAL', status: 'COMPLETE', createdAt: '2026-01-01T00:00:00.000Z', completedAt: '2026-01-01T00:01:00.000Z' }],
       bots: [],
       cookDurationMs: 10_000,
     };
