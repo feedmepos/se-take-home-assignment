@@ -55,10 +55,10 @@ update → reconnect path through the injected fake `EventSource` and a mocked `
 ## Build & serve (production)
 
 ```bash
-npm run build    # tsc -b && vite build -> ../frontend-dist
+npm run build    # tsc -b && vite build -> frontend/dist
 ```
 
-The output goes to the repo-root `frontend-dist/`, which the backend's
+The output goes to `frontend/dist/`, which the backend's
 `ServeStaticModule` serves on all non-`/api` routes. In production the **backend serves
 the API, the SSE stream, and this SPA from one origin** — no CORS, one URL (see the
 [architecture doc §8](../docs/architecture.md)).

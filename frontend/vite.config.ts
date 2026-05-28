@@ -8,6 +8,6 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: { alias: { '@contracts': resolve(__dirname, '../backend/src/contracts.ts') } },
   server: { proxy: { '/api': { target: 'http://localhost:3000', changeOrigin: true } } },
-  build: { outDir: '../frontend-dist', emptyOutDir: true },
+  build: { outDir: 'dist' },
   test: { environment: 'jsdom', globals: true, setupFiles: './src/test/setup.ts' },
 });
