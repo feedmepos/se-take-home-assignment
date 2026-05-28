@@ -29,7 +29,7 @@ export function BotList({ bots, processing, cookDurationMs }: BotListProps): Rea
               return (
                 <div key={bot.id} className="card bg-base-200 shadow-xs p-3">
                   <div className="flex justify-between items-center mb-1">
-                    <span className="font-semibold text-sm">Bot #{bot.id}</span>
+                    <span className="font-semibold text-sm text-gray-500">Bot #{bot.id}</span>
                     <StatusBadge status={bot.status} />
                   </div>
                   {entry !== null ? (
