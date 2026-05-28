@@ -1,6 +1,7 @@
 import type { BotDTO, OrderDTO } from '@contracts';
 import { OrderCard } from './OrderCard';
 import { Countdown } from './Countdown';
+import { StatusBadge } from './StatusBadge';
 
 interface BotListProps {
   bots: BotDTO[];
@@ -29,20 +30,19 @@ export function BotList({ bots, processing, cookDurationMs }: BotListProps): Rea
                 <div key={bot.id} className="card bg-base-200 shadow-xs p-3">
                   <div className="flex justify-between items-center mb-1">
                     <span className="font-semibold text-sm">Bot #{bot.id}</span>
-                    {entry !== null ? (
-                      <span className="badge badge-warning badge-sm">
+                    <StatusBadge status={bot.status} />
+                  </div>
+                  {entry !== null ? (
+                    <OrderCard
+                      order={entry.order}
+                      trailing={
                         <Countdown
                           startedAt={entry.order.startedAt!}
                           cookDurationMs={cookDurationMs}
                         />
-                      </span>
-                    ) : null}
-                  </div>
-                  {entry !== null ? (
-                    <OrderCard order={entry.order} />
-                  ) : (
-                    <span className="text-base-content/50 text-xs">Idle</span>
-                  )}
+                      }
+                    />
+                  ) : null}
                 </div>
               );
             })}

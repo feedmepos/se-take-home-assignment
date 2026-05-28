@@ -32,12 +32,30 @@ describe('BotList', () => {
     expect(screen.getByText('Bot #2')).toBeDefined();
   });
 
-  it('shows "Idle" for an IDLE bot', () => {
+  it('shows "Idle" status badge in the bot header for an IDLE bot', () => {
     const bots: BotDTO[] = [
       { id: 1, status: 'IDLE', currentOrderId: null },
     ];
     render(<BotList bots={bots} processing={[]} cookDurationMs={10000} />);
     expect(screen.getByText('Idle')).toBeDefined();
+  });
+
+  it('shows "Cooking" status badge in the bot header for a PROCESSING bot', () => {
+    const now = Date.now();
+    const startedAt = new Date(now - 3000).toISOString();
+    const order: OrderDTO = {
+      id: 5,
+      type: 'NORMAL',
+      status: 'PROCESSING',
+      createdAt: new Date(now - 4000).toISOString(),
+      startedAt,
+    };
+    const bots: BotDTO[] = [
+      { id: 1, status: 'PROCESSING', currentOrderId: 5 },
+    ];
+    const processing = [{ order, botId: 1 }];
+    render(<BotList bots={bots} processing={processing} cookDurationMs={10000} />);
+    expect(screen.getByText('Cooking')).toBeDefined();
   });
 
   it('renders the order for a PROCESSING bot', () => {
@@ -64,7 +82,7 @@ describe('BotList', () => {
     expect(screen.getByText('Normal Order #5')).toBeDefined();
   });
 
-  it('renders a countdown (Ns) for a PROCESSING bot with startedAt', () => {
+  it('renders a countdown (Ns) on the order row for a PROCESSING bot', () => {
     const now = Date.now();
     const startedAt = new Date(now - 3000).toISOString();
 
@@ -82,11 +100,11 @@ describe('BotList', () => {
 
     render(<BotList bots={bots} processing={processing} cookDurationMs={10000} />);
 
-    // Should show a countdown like "7s"
+    // Should show a countdown like "7s" on the order row
     expect(screen.getByText('7s')).toBeDefined();
   });
 
-  it('does NOT show "Idle" for a PROCESSING bot', () => {
+  it('does NOT show "Idle" status for a PROCESSING bot', () => {
     const now = Date.now();
     const startedAt = new Date(now - 3000).toISOString();
 
@@ -110,5 +128,13 @@ describe('BotList', () => {
   it('shows empty message only, no bot cards when bots is empty', () => {
     render(<BotList bots={[]} processing={[]} cookDurationMs={10000} />);
     expect(screen.queryByText(/Bot #/)).toBeNull();
+  });
+
+  it('does not render an order row for an IDLE bot', () => {
+    const bots: BotDTO[] = [
+      { id: 1, status: 'IDLE', currentOrderId: null },
+    ];
+    render(<BotList bots={bots} processing={[]} cookDurationMs={10000} />);
+    expect(screen.queryByText(/Order #/)).toBeNull();
   });
 });

@@ -29,27 +29,30 @@ describe('OrderCard', () => {
     expect(screen.getByText('VIP Order #2')).toBeDefined();
   });
 
-  it('renders a VIP badge containing "VIP" for VIP orders', () => {
+  it('does NOT render a separate "VIP" badge for VIP orders (title carries the label)', () => {
     render(<OrderCard order={vipOrder} />);
-    // There should be a badge element with text "VIP"
-    const badge = screen.getByText('VIP', { selector: '[class*="badge"]' });
-    expect(badge).toBeDefined();
+    // The standalone "VIP" badge is gone — only the full title text "VIP Order #2" appears
+    expect(screen.queryByText('VIP', { selector: '[class*="badge"]' })).toBeNull();
   });
 
-  it('does NOT render a VIP badge for NORMAL orders', () => {
+  it('shows the human-readable status "Pending" for a PENDING order', () => {
     render(<OrderCard order={normalOrder} />);
-    // The "VIP" text from badge should not appear for normal orders
-    const badges = screen.queryAllByText('VIP', { selector: '[class*="badge"]' });
-    expect(badges.length).toBe(0);
+    expect(screen.getByText('Pending')).toBeDefined();
   });
 
-  it('shows the order status text', () => {
-    render(<OrderCard order={normalOrder} />);
-    expect(screen.getByText('PENDING')).toBeDefined();
-  });
-
-  it('shows PROCESSING status for a processing order', () => {
+  it('shows "Cooking" status for a PROCESSING order', () => {
     render(<OrderCard order={vipOrder} />);
-    expect(screen.getByText('PROCESSING')).toBeDefined();
+    expect(screen.getByText('Cooking')).toBeDefined();
+  });
+
+  it('renders trailing node instead of status badge when trailing prop is provided', () => {
+    render(<OrderCard order={normalOrder} trailing={<span>7s</span>} />);
+    expect(screen.getByText('7s')).toBeDefined();
+    expect(screen.queryByText('Pending')).toBeNull();
+  });
+
+  it('renders status badge when trailing prop is omitted', () => {
+    render(<OrderCard order={normalOrder} />);
+    expect(screen.getByText('Pending')).toBeDefined();
   });
 });

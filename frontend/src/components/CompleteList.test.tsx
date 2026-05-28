@@ -23,7 +23,7 @@ const orders: OrderDTO[] = [
 describe('CompleteList', () => {
   it('renders the section title "Complete"', () => {
     render(<CompleteList orders={orders} />);
-    expect(screen.getByText('Complete')).toBeDefined();
+    expect(screen.getByRole('heading', { name: /complete/i })).toBeDefined();
   });
 
   it('renders 2 order cards for 2 completed orders', () => {
@@ -32,10 +32,11 @@ describe('CompleteList', () => {
     expect(screen.getByText('VIP Order #2')).toBeDefined();
   });
 
-  it('renders VIP order with "VIP" badge text', () => {
+  it('renders VIP order title as full text "VIP Order #N" (no separate VIP badge)', () => {
     render(<CompleteList orders={orders} />);
-    const badge = screen.getByText('VIP', { selector: '[class*="badge"]' });
-    expect(badge).toBeDefined();
+    // The VIP label is carried by the full order title, not a separate badge element
+    expect(screen.getByText('VIP Order #2')).toBeDefined();
+    expect(screen.queryByText('VIP', { selector: '[class*="badge"]' })).toBeNull();
   });
 
   it('has an aria-live="polite" region', () => {

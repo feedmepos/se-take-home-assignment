@@ -88,8 +88,8 @@ describe('App integration', () => {
     act(() => { fake.open(); });
     act(() => { fake.emit(JSON.stringify(makeSnapshot())); });
 
-    // VIP pending order (badge text)
-    expect(await screen.findByText('VIP')).toBeInTheDocument();
+    // VIP pending order (title text — no separate badge)
+    expect(await screen.findByText('VIP Order #1')).toBeInTheDocument();
     // Bot section
     expect(screen.getByText('Bot #1')).toBeInTheDocument();
     // Complete section has an order (OrderCard renders "Normal Order #3")
@@ -101,7 +101,7 @@ describe('App integration', () => {
     act(() => { fake.open(); });
     act(() => { fake.emit(JSON.stringify(makeSnapshot())); });
 
-    await screen.findByText('VIP'); // wait for render
+    await screen.findByText('VIP Order #1'); // wait for render
     await userEvent.setup().click(screen.getByRole('button', { name: 'New VIP Order' }));
 
     expect(vi.mocked(fetch)).toHaveBeenCalledWith(
@@ -118,7 +118,7 @@ describe('App integration', () => {
     act(() => { fake.open(); });
     act(() => { fake.emit(JSON.stringify(makeSnapshot())); });
 
-    await screen.findByText('VIP');
+    await screen.findByText('VIP Order #1');
     await userEvent.setup().click(screen.getByRole('button', { name: '+ Bot' }));
 
     expect(vi.mocked(fetch)).toHaveBeenCalledWith(
@@ -131,7 +131,7 @@ describe('App integration', () => {
     render(<App eventSourceFactory={() => fake} />);
     act(() => { fake.open(); });
     act(() => { fake.emit(JSON.stringify(makeSnapshot())); });
-    await screen.findByText('VIP');
+    await screen.findByText('VIP Order #1');
 
     act(() => { fake.fail(); });
     expect(await screen.findByText('Reconnecting…')).toBeInTheDocument();
@@ -141,7 +141,7 @@ describe('App integration', () => {
     render(<App eventSourceFactory={() => fake} />);
     act(() => { fake.open(); });
     act(() => { fake.emit(JSON.stringify(makeSnapshot())); });
-    await screen.findByText('VIP');
+    await screen.findByText('VIP Order #1');
 
     // Second frame: pending now empty
     const second: StatusDTO = {

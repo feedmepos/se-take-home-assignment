@@ -11,7 +11,7 @@ const orders: OrderDTO[] = [
 describe('PendingList', () => {
   it('renders the section title "Pending"', () => {
     render(<PendingList orders={orders} />);
-    expect(screen.getByText('Pending')).toBeDefined();
+    expect(screen.getByRole('heading', { name: /pending/i })).toBeDefined();
   });
 
   it('renders 2 order cards for 2 orders', () => {
@@ -20,11 +20,11 @@ describe('PendingList', () => {
     expect(screen.getByText('VIP Order #2')).toBeDefined();
   });
 
-  it('renders VIP order with "VIP" badge text', () => {
+  it('renders VIP order title as full text "VIP Order #N" (no separate VIP badge)', () => {
     render(<PendingList orders={orders} />);
-    // VIP badge should appear
-    const badge = screen.getByText('VIP', { selector: '[class*="badge"]' });
-    expect(badge).toBeDefined();
+    // The VIP label is carried by the full order title, not a separate badge element
+    expect(screen.getByText('VIP Order #2')).toBeDefined();
+    expect(screen.queryByText('VIP', { selector: '[class*="badge"]' })).toBeNull();
   });
 
   it('renders orders in the given array order (no re-sorting)', () => {
