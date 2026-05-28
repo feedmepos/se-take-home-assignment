@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "skipLibCheck": true,
+    "module": "ESNext",
+    /* NodeNext or Node16 tells TS to look for files using Node rules */
+    "moduleResolution": "NodeNext", 
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["vite.config.ts"] // Only looks at your config files!
+}

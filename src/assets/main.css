@@ -1,0 +1,16 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #f5f3ee;
+  min-height: 100vh;
+  color: #27251f;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
