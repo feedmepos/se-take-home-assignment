@@ -2,7 +2,7 @@
 set -e
 
 # Run Script
-# This script executes the CLI application and outputs results to scripts/result.txt
+# This script executes the CLI application and outputs results to scripts/result.txt and script/result.txt
 
 echo "Running CLI application in simulation mode..."
 mkdir -p scripts
