@@ -1,0 +1,22 @@
+{
+  "name": "mcd-kitchen-chaos-backend",
+  "version": "1.0.0",
+  "description": "McDonald's Kitchen Chaos – Node.js CLI backend",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "simulate": "node src/index.js --simulate",
+    "test": "jest --coverage --forceExit",
+    "test:ci": "jest --ci --coverage --forceExit"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": ["**/tests/**/*.test.js"]
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
