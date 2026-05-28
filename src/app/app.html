@@ -1,7 +1,8 @@
 <main>
     <section>
-        <button>+ Bot</button>
-        <button>- Bot</button>
+        <button (click)="addBot()">+ Bot</button>
+        <button (click)="removeBot()">- Bot</button>
+        <p>Total Bot(s): {{ bots().length }}</p>
     </section>
 
     <section>
@@ -16,6 +17,47 @@
                 <small>No pending order.</small>
             } @else {
                 @for (order of getOrdersByStatus(OrderStatus.Pending); track order.id) {
+                    <div class="flex mt-8">
+                        <div>{{ order.id }}</div>
+                        <div>{{ order.name }}</div>
+                        <div>{{ ORDER_STATUS_MAP[order.status].name || 'N/A' }}</div>
+                    </div>
+                }
+            }
+        </div>
+    </section>
+
+    <section>
+        <div>
+            <h2>{{ ORDER_STATUS_MAP[OrderStatus.InProgress].name }} By Bot</h2>
+            @if (bots().length <= 0) {
+                <small>No bot created.</small>
+            } @else {
+                @for (bot of bots(); track bot.id) {
+                    <div>
+                        <h3>Bot #{{ bot.id }}</h3>
+                        @if (getProcessingOrderByBot(bot.id); as order) {
+                            <div>
+                                <div>{{ order.id }}</div>
+                                <div>{{ order.name }}</div>
+                                <div>{{ ORDER_STATUS_MAP[order.status].name || 'N/A' }}</div>
+                            </div>
+                        } @else {
+                            <small>IDLE</small>
+                        }
+                    </div>
+                }
+            }
+        </div>
+    </section>
+
+    <section>
+        <div>
+            <h2>{{ ORDER_STATUS_MAP[OrderStatus.Complete].name }} Task(s)</h2>
+            @if (getOrdersByStatus(OrderStatus.Complete).length <= 0) {
+                <small>No complete order.</small>
+            } @else {
+                @for (order of getOrdersByStatus(OrderStatus.Complete); track order.id) {
                     <div>
                         <div>{{ order.id }}</div>
                         <div>{{ order.name }}</div>
