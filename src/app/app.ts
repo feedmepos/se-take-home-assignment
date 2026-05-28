@@ -1,14 +1,16 @@
 import { Component, inject } from '@angular/core';
 import { ORDER_STATUS_MAP, OrderStatus, OrderTier } from '../core/constants/order.constants';
-import { OrderService } from '../core/services/order.service';
-import { IOrderResponse } from '../core/models/order.model';
 import { BotStatus } from '../core/models/bot.model';
+import { IOrderResponse } from '../core/models/order.model';
 import { BotService } from '../core/services/bot.service';
+import { OrderService } from '../core/services/order.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
     selector: 'app-root',
     templateUrl: './app.html',
     styleUrl: './app.scss',
+    imports: [CommonModule],
 })
 export class App {
     private orderService = inject(OrderService);
