@@ -1,2 +1,5 @@
 # Binaries
 order-controller
+
+# Local benchmark files
+pkg/controller/benchmark_test.go
