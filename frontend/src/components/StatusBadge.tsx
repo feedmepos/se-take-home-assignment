@@ -9,7 +9,7 @@ function badgeClass(status: AnyStatus): string {
     case 'COMPLETE':
       return 'badge badge-success badge-sm';
     case 'IDLE':
-      return 'badge badge-ghost badge-sm';
+      return 'badge badge-neutral badge-sm';
   }
 }
 
