@@ -1,0 +1,51 @@
+[17:49:57] ── McDonald's Kitchen Chaos – SIMULATION MODE ────
+[17:49:57] Processing time per order: 3s
+[17:49:57] Output file: /Users/huwei/Downloads/code/mcd-kitchen-chaos/result.txt
+[17:49:57] ──────────────────────────────────────────────────
+[17:49:57] ── STATUS ────────────────────────────────────────
+[17:49:57] Queue    (0): empty
+[17:49:57] Bots     (0): none
+[17:49:57] Done     (0): none yet
+[17:49:57] ──────────────────────────────────────────────────
+[17:49:57] 📋 New Normal Order #1 → queue
+[17:49:58] 📋 New Normal Order #2 → queue
+[17:49:58] ⭐ New VIP Order #3 → queue (VIP priority)
+[17:49:58] Bot #1 started processing Order #3 [VIP]
+[17:49:58] Bot #2 started processing Order #1 [NORMAL]
+[17:49:58] ── STATUS ────────────────────────────────────────
+[17:49:58] Queue    (3): #3[vip/processing] → #1[normal/processing] → #2[normal/pending]
+[17:49:58] Bots     (2): Bot#1[working/Ord#3]  Bot#2[working/Ord#1]
+[17:49:58] Done     (0): none yet
+[17:49:58] ──────────────────────────────────────────────────
+[17:50:01] ✅ Order #3 [VIP] completed by Bot #1
+[17:50:01] Bot #1 started processing Order #2 [NORMAL]
+[17:50:01] ✅ Order #1 [NORMAL] completed by Bot #2
+[17:50:02] 📋 New Normal Order #4 → queue
+[17:50:02] Bot #2 started processing Order #4 [NORMAL]
+[17:50:02] ⭐ New VIP Order #5 → queue (VIP priority)
+[17:50:02] ── STATUS ────────────────────────────────────────
+[17:50:02] Queue    (3): #5[vip/pending] → #2[normal/processing] → #4[normal/processing]
+[17:50:02] Bots     (2): Bot#1[working/Ord#2]  Bot#2[working/Ord#4]
+[17:50:02] Done     (2): #3[vip] #1[normal]
+[17:50:02] ──────────────────────────────────────────────────
+[17:50:04] ✅ Order #2 [NORMAL] completed by Bot #1
+[17:50:04] Bot #1 started processing Order #5 [VIP]
+[17:50:05] ✅ Order #4 [NORMAL] completed by Bot #2
+[17:50:06] 🚪 Bot #2 left (was idle)
+[17:50:06] ── STATUS ────────────────────────────────────────
+[17:50:06] Queue    (1): #5[vip/processing]
+[17:50:06] Bots     (1): Bot#1[working/Ord#5]
+[17:50:06] Done     (4): #3[vip] #1[normal] #2[normal] #4[normal]
+[17:50:06] ──────────────────────────────────────────────────
+[17:50:07] ✅ Order #5 [VIP] completed by Bot #1
+[17:50:10] ── STATUS ────────────────────────────────────────
+[17:50:10] Queue    (0): empty
+[17:50:10] Bots     (1): Bot#1[idle]
+[17:50:10] Done     (5): #3[vip] #1[normal] #2[normal] #4[normal] #5[vip]
+[17:50:10] ──────────────────────────────────────────────────
+[17:50:10] ── KITCHEN CLOSED ────────────────────────────────
+[17:50:10] ── STATUS ────────────────────────────────────────
+[17:50:10] Queue    (0): empty
+[17:50:10] Bots     (1): Bot#1[idle]
+[17:50:10] Done     (5): #3[vip] #1[normal] #2[normal] #4[normal] #5[vip]
+[17:50:10] ──────────────────────────────────────────────────
