@@ -1,0 +1,21 @@
+# Keep the build context small and force a clean Linux `npm ci` in the image
+# (never copy host node_modules — they may carry win32-only native binaries).
+**/node_modules
+**/dist
+frontend/dist
+backend/dist
+backend/coverage
+
+# Build/output + VCS + tooling
+.git
+.gitignore
+.github
+.claude
+scripts/result.txt
+**/*.log
+**/.DS_Store
+
+# Docs are not needed in the image
+docs
+*.md
+!backend/README.md
