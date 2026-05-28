@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kitchen Chaos 🍔</title>
+<style>
+/* ─── Variables ─────────────────────────────────────── */
+:root {
+  --bg:        #0d0d1a;
+  --surface:   #13132b;
+  --surface2:  #1a1a38;
+  --border:    #2a2a4a;
+  --text:      #e2e8f0;
+  --muted:     #4a5568;
+  --vip:       #f6c90e;
+  --vip-dim:   rgba(246,201,14,.12);
+  --vip-ring:  rgba(246,201,14,.35);
+  --nor:       #38bdf8;
+  --nor-dim:   rgba(56,189,248,.10);
+  --nor-ring:  rgba(56,189,248,.32);
+  --green:     #4ade80;
+  --red:       #f87171;
+}
+
+/* ─── Reset ─────────────────────────────────────────── */
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'Segoe UI',system-ui,sans-serif;
+  height:100vh;overflow:hidden;
+  display:flex;flex-direction:column;
+  user-select:none;
+}
+
+/* ─── Header ────────────────────────────────────────── */
+header{
+  display:flex;align-items:center;gap:16px;
+  padding:10px 20px;
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;z-index:50;
+}
+.logo{flex:1;line-height:1.2}
+.logo-main{font-size:19px;font-weight:900;letter-spacing:-.5px}
+.logo-main .y{color:var(--vip)}
+.logo-sub{font-size:10px;color:var(--muted);letter-spacing:.5px;margin-top:1px}
+.stats{display:flex;gap:20px;font-size:11px;color:var(--muted)}
+.sv{display:block;font-size:18px;font-weight:900;color:var(--text);line-height:1}
+.controls{display:flex;gap:7px}
+button{
+  padding:8px 13px;border:none;border-radius:8px;
+  font-weight:800;font-size:12px;cursor:pointer;
+  font-family:inherit;letter-spacing:.3px;
+  transition:transform .1s,filter .15s;
+}
+button:hover{filter:brightness(1.1)}
+button:active{transform:scale(.93)}
+.bo {background:var(--nor);   color:#06101c}
+.bv {background:var(--vip);   color:#0d0a00}
+.ba {background:var(--green); color:#051a0a}
+.br {background:var(--red);   color:#1a0505}
+
+/* ─── Layout ────────────────────────────────────────── */
+.main{display:flex;flex:1;overflow:hidden}
+
+/* ─── Left Panel ────────────────────────────────────── */
+.panel{
+  width:228px;flex-shrink:0;
+  background:var(--surface);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.pblock{padding:12px;display:flex;flex-direction:column;overflow:hidden}
+.pblock.pend{flex:1}
+.pblock.done{flex:0 0 auto;max-height:150px;border-top:1px solid var(--border)}
+.plabel{
+  font-size:10px;font-weight:700;letter-spacing:1.8px;
+  text-transform:uppercase;color:var(--muted);
+  margin-bottom:8px;flex-shrink:0;
+  display:flex;align-items:center;gap:6px;
+}
+.cnt{
+  background:var(--border);color:var(--text);
+  border-radius:10px;padding:1px 7px;font-size:10px;
+}
+
+/* ─── Order cards ───────────────────────────────────── */
+.olist{display:flex;flex-direction:column;gap:5px;overflow-y:auto;flex:1}
+.olist::-webkit-scrollbar{width:3px}
+.olist::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+.ocard{
+  border-radius:10px;padding:10px 11px;
+  border:1.5px solid;position:relative;overflow:hidden;
+}
+.ocard.vip{background:var(--vip-dim);border-color:var(--vip-ring)}
+.ocard.nor{background:var(--nor-dim);border-color:var(--nor-ring)}
+.ocard.proc.vip{box-shadow:0 0 14px rgba(246,201,14,.18)}
+.ocard.proc.nor{box-shadow:0 0 14px rgba(56,189,248,.16)}
+
+/* shimmer on VIP */
+.ocard.vip::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(105deg,transparent 40%,rgba(246,201,14,.07) 50%,transparent 60%);
+  animation:shimmer 3s linear infinite;
+}
+@keyframes shimmer{from{transform:translateX(-200%)}to{transform:translateX(400%)}}
+
+@keyframes card-in{
+  from{opacity:0;transform:translateX(-18px) scale(.9)}
+  to  {opacity:1;transform:none}
+}
+.card-in{animation:card-in .28s cubic-bezier(.34,1.56,.64,1) both}
+
+.ctop{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3px}
+.cid{font-size:15px;font-weight:900;line-height:1}
+.cid.vip{color:var(--vip)}.cid.nor{color:var(--nor)}
+.ctag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px}
+.ctag.vip{background:rgba(246,201,14,.18);color:var(--vip)}
+.ctag.nor{background:rgba(56,189,248,.15);color:var(--nor)}
+.cage{font-size:10px;color:var(--muted)}
+.cbot{font-size:10px;color:var(--text);margin-top:4px;display:none}
+.cprog{height:3px;background:rgba(255,255,255,.07);border-radius:2px;margin-top:7px;overflow:hidden;display:none}
+.cpfill{height:100%;border-radius:2px;transition:width .1s linear}
+.vip .cpfill{background:var(--vip)}.nor .cpfill{background:var(--nor)}
+
+/* ─── Completed chips ───────────────────────────────── */
+.chips{display:flex;flex-wrap:wrap;gap:4px;overflow-y:auto}
+.chip{
+  font-size:10px;font-weight:700;padding:3px 8px;
+  border-radius:20px;border:1px solid;
+  animation:chipin .3s ease both;
+}
+.chip.vip{background:rgba(246,201,14,.12);border-color:rgba(246,201,14,.35);color:var(--vip)}
+.chip.nor{background:rgba(56,189,248,.09);border-color:rgba(56,189,248,.30);color:var(--nor)}
+@keyframes chipin{from{opacity:0;transform:scale(0)}to{opacity:1;transform:scale(1)}}
+
+/* ─── Kitchen scene ─────────────────────────────────── */
+.kitchen{
+  flex:1;position:relative;overflow:hidden;
+  background-color:#0e0e22;
+  background-image:
+    linear-gradient(45deg,#13132e 25%,transparent 25%),
+    linear-gradient(-45deg,#13132e 25%,transparent 25%),
+    linear-gradient(45deg,transparent 75%,#13132e 75%),
+    linear-gradient(-45deg,transparent 75%,#13132e 75%);
+  background-size:44px 44px;
+  background-position:0 0,0 22px,22px -22px,-22px 0;
+}
+
+/* light pools from ceiling */
+.kitchen::before{
+  content:'';position:absolute;inset:0;pointer-events:none;z-index:1;
+  background:
+    radial-gradient(ellipse 220px 140px at 18% 44%,rgba(255,230,120,.05) 0%,transparent 70%),
+    radial-gradient(ellipse 220px 140px at 50% 44%,rgba(255,230,120,.05) 0%,transparent 70%),
+    radial-gradient(ellipse 220px 140px at 82% 44%,rgba(255,230,120,.05) 0%,transparent 70%);
+}
+
+/* ─── Counter top ───────────────────────────────────── */
+.ktopbar{
+  position:absolute;top:0;left:0;right:0;height:92px;
+  background:linear-gradient(to bottom,#1e0f05 0%,#2e1a0c 55%,#3c2210 100%);
+  border-bottom:5px solid #5a3215;
+  display:flex;align-items:center;justify-content:space-around;
+  padding:0 28px;z-index:10;
+}
+.ktopbar::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:rgba(255,210,120,.12)}
+/* ceiling lamps */
+.ktopbar::after{
+  content:'';position:absolute;top:-24px;left:0;right:0;height:24px;
+  background:var(--bg);
+  border-bottom:4px solid #222240;
+}
+
+.stn{
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:9px 18px;
+  background:rgba(0,0,0,.4);border-radius:9px;
+  border:1px solid rgba(255,255,255,.06);
+  position:relative;
+}
+.stn-ico{font-size:23px;line-height:1}
+.stn-lbl{font-size:9px;font-weight:700;letter-spacing:1.2px;color:rgba(255,255,255,.35);text-transform:uppercase}
+.stn-glow{
+  position:absolute;bottom:-12px;left:50%;transform:translateX(-50%);
+  width:56px;height:22px;border-radius:50%;filter:blur(10px);opacity:.5;
+  animation:gp 2.5s ease-in-out infinite;
+}
+@keyframes gp{0%,100%{opacity:.25}50%{opacity:.65}}
+
+/* ─── Serving bar ───────────────────────────────────── */
+.kbot{
+  position:absolute;bottom:0;left:0;right:0;height:52px;
+  background:var(--surface);border-top:2px solid var(--border);
+  display:flex;align-items:center;justify-content:center;z-index:10;
+}
+.kbot-lbl{font-size:9px;font-weight:700;letter-spacing:3px;color:var(--muted);text-transform:uppercase}
+
+/* ─── Bot character ─────────────────────────────────── */
+.bot{
+  position:absolute;display:flex;flex-direction:column;
+  align-items:center;width:62px;z-index:20;
+  transition:left .7s cubic-bezier(.25,1,.5,1),top .7s cubic-bezier(.25,1,.5,1);
+}
+
+@keyframes bpopin{
+  0%  {opacity:0;transform:translateY(50px) scale(.5)}
+  70% {transform:translateY(-10px) scale(1.12)}
+  100%{opacity:1;transform:none}
+}
+.bpopin{animation:bpopin .55s cubic-bezier(.34,1.56,.64,1) both}
+
+@keyframes bidle{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+.bidle{animation:bidle 1.9s ease-in-out infinite}
+
+@keyframes bwork{
+  0%,100%{transform:translateX(0) rotate(0)}
+  20%{transform:translateX(-2px) rotate(-3deg)}
+  50%{transform:translateX(2px) rotate(3deg)}
+  80%{transform:translateX(-1px) rotate(-2deg)}
+}
+.bwork{animation:bwork .4s ease-in-out infinite}
+
+/* hat */
+.bhat{display:flex;flex-direction:column;align-items:center;margin-bottom:-1px}
+.bhat-puff{
+  width:27px;height:15px;background:#f0f0f0;border-radius:50% 50% 0 0;
+  box-shadow:0 -2px 6px rgba(255,255,255,.2);
+}
+.bhat-band{
+  width:40px;height:21px;background:white;border-radius:4px 4px 0 0;
+  display:flex;align-items:center;justify-content:center;overflow:hidden;
+}
+.bhat-stripe{width:100%;height:5px}
+
+/* head */
+.bhead{
+  width:48px;height:44px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;line-height:1;
+  box-shadow:0 5px 18px rgba(0,0,0,.55),inset 0 -3px 8px rgba(0,0,0,.25);
+  position:relative;z-index:2;
+}
+
+/* body */
+.bbody{
+  width:44px;height:28px;border-radius:7px 7px 5px 5px;
+  margin-top:2px;position:relative;overflow:hidden;
+  box-shadow:0 4px 12px rgba(0,0,0,.45);
+}
+.bapron{
+  position:absolute;bottom:0;left:50%;transform:translateX(-50%);
+  width:28px;height:20px;background:rgba(255,255,255,.28);border-radius:0 0 5px 5px;
+}
+
+/* legs */
+.blegs{display:flex;gap:8px;margin-top:3px}
+.bleg{width:12px;height:18px;border-radius:4px;background:rgba(0,0,0,.45)}
+
+/* shadow */
+.bot::after{
+  content:'';position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);
+  width:44px;height:10px;border-radius:50%;background:rgba(0,0,0,.45);filter:blur(5px);
+}
+
+/* name tag */
+.bname{
+  font-size:10px;font-weight:800;margin-top:6px;
+  text-shadow:0 1px 5px rgba(0,0,0,.9);white-space:nowrap;
+}
+
+/* steam */
+.bsteam{
+  position:absolute;top:-32px;left:50%;transform:translateX(-50%);
+  display:none;gap:4px;pointer-events:none;
+}
+.sdot{
+  width:8px;height:8px;border-radius:50%;
+  background:rgba(255,255,255,.22);animation:sup 1.3s ease-out infinite;
+}
+.sdot:nth-child(2){animation-delay:.43s}
+.sdot:nth-child(3){animation-delay:.87s}
+@keyframes sup{0%{opacity:.8;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-24px) scale(.3)}}
+
+/* ticket floating above bot */
+.bticket{
+  position:absolute;top:-46px;left:50%;transform:translateX(-50%);
+  background:rgba(5,5,20,.85);border:1.5px solid;border-radius:7px;
+  padding:3px 9px;font-size:11px;font-weight:800;
+  white-space:nowrap;display:none;
+}
+
+/* ─── Empty hint ────────────────────────────────────── */
+.ehint{
+  position:absolute;bottom:80px;left:50%;transform:translateX(-50%);
+  text-align:center;color:var(--muted);font-size:12px;
+  pointer-events:none;line-height:1.8;
+}
+
+/* ─── Toast ─────────────────────────────────────────── */
+.tbox{
+  position:fixed;bottom:70px;right:16px;
+  display:flex;flex-direction:column-reverse;gap:6px;
+  z-index:999;pointer-events:none;
+}
+@keyframes tin {from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
+@keyframes tout{from{opacity:1}to{opacity:0;transform:translateX(14px)}}
+.toast{
+  background:var(--surface2);border:1px solid var(--border);
+  border-left:3px solid;border-radius:10px;
+  padding:8px 13px;font-size:12px;font-weight:600;
+  box-shadow:0 8px 28px rgba(0,0,0,.55);
+  animation:tin .22s ease both;
+}
+.toast.out{animation:tout .22s ease both}
+
+/* ─── Confetti ──────────────────────────────────────── */
+@keyframes cf{
+  0%  {opacity:1;transform:translate(0,0) rotate(0) scale(1)}
+  100%{opacity:0;transform:translate(var(--tx),var(--ty)) rotate(var(--r)) scale(.2)}
+}
+.cf{
+  position:fixed;width:8px;height:8px;border-radius:2px;
+  pointer-events:none;z-index:9999;
+  animation:cf var(--d,0.8s) ease-out var(--dl,0s) both;
+}
+
+/* ─── VIP flash banner ──────────────────────────────── */
+@keyframes vipflash{
+  0%,100%{opacity:0}
+  15%,85%{opacity:1}
+}
+.vipbanner{
+  position:fixed;top:54px;left:50%;transform:translateX(-50%);
+  background:linear-gradient(135deg,#7c5800,#c8940a,#7c5800);
+  color:#fff9e0;font-size:13px;font-weight:900;letter-spacing:1px;
+  padding:8px 24px;border-radius:20px;
+  box-shadow:0 0 30px rgba(246,201,14,.5);
+  animation:vipflash .6s ease both;
+  pointer-events:none;z-index:999;
+}
+</style>
+</head>
+<body>
+
+<!-- ─── Header ──────────────────────────────────── -->
+<header>
+  <div class="logo">
+    <div class="logo-main">🍔 <span class="y">Kitchen</span> Chaos</div>
+    <div class="logo-sub">McDonald's · Bot Kitchen</div>
+  </div>
+  <div class="stats">
+    <div><span class="sv" id="s-pend">0</span>待处理</div>
+    <div><span class="sv" id="s-bots">0</span>机器人</div>
+    <div><span class="sv" id="s-done">0</span>已完成</div>
+  </div>
+  <div class="controls">
+    <button class="bo" onclick="addOrder('nor')">📋 普通订单</button>
+    <button class="bv" onclick="addOrder('vip')">👑 VIP 订单</button>
+    <button class="ba" onclick="addBot()">🤖 +Bot</button>
+    <button class="br" onclick="removeBot()">💨 −Bot</button>
+  </div>
+</header>
+
+<!-- ─── Main ─────────────────────────────────────── -->
+<div class="main">
+
+  <!-- Left panel -->
+  <div class="panel">
+    <div class="pblock pend">
+      <div class="plabel">📋 待处理 <span class="cnt" id="pc">0</span></div>
+      <div class="olist" id="olist"></div>
+    </div>
+    <div class="pblock done">
+      <div class="plabel">✅ 已完成 <span class="cnt" id="dc">0</span></div>
+      <div class="chips" id="chips"></div>
+    </div>
+  </div>
+
+  <!-- Kitchen -->
+  <div class="kitchen" id="kitchen">
+
+    <!-- Top counter -->
+    <div class="ktopbar">
+      <div class="stn" id="stn-0">
+        <div class="stn-ico">🔥</div><div class="stn-lbl">Grill</div>
+        <div class="stn-glow" style="background:#ff6b35"></div>
+      </div>
+      <div class="stn" id="stn-1">
+        <div class="stn-ico">🍟</div><div class="stn-lbl">Fryer</div>
+        <div class="stn-glow" style="background:#f6c90e"></div>
+      </div>
+      <div class="stn" id="stn-2">
+        <div class="stn-ico">🥤</div><div class="stn-lbl">Drinks</div>
+        <div class="stn-glow" style="background:#38bdf8"></div>
+      </div>
+      <div class="stn" id="stn-3">
+        <div class="stn-ico">📦</div><div class="stn-lbl">Pack</div>
+        <div class="stn-glow" style="background:#c084fc"></div>
+      </div>
+    </div>
+
+    <!-- Serving bar -->
+    <div class="kbot">
+      <div class="kbot-lbl">⬆&nbsp;&nbsp;Serving Window&nbsp;&nbsp;⬆</div>
+    </div>
+
+    <!-- Empty hint -->
+    <div class="ehint" id="ehint">
+      厨房空空如也<br>
+      点 🤖 +Bot 召唤厨师
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="tbox" id="tbox"></div>
+
+<script>
+'use strict';
+
+// ─── Config ─────────────────────────────────────────────────────────
+const COOK_MS  = 10_000;
+const TICK_MS  = 80;
+const MAX_BOTS = 5;
+
+const COLORS  = ['#f472b6','#60a5fa','#a78bfa','#fb923c','#4ade80'];
+const FACES   = ['😤','🤖','👨‍🍳','🧑‍🍳','👩‍🍳'];
+const NAMES   = ['Boty','Beep','Chef-X','Zippy','Robo-G'];
+
+// Idle positions (% of kitchen w/h), anchor = centre-bottom of char
+const IDLE = [
+  {x:10,y:64},{x:28,y:70},{x:48,y:64},{x:67,y:70},{x:85,y:64}
+];
+// Work positions (just below each station)
+const WORK_X = [10, 31, 55, 77]; // % x centres for 4 stations
+
+// ─── State ──────────────────────────────────────────────────────────
+let orders   = [];   // {id,type,status,botId,createdAt,startedAt,progress}
+let bots     = [];   // {id,color,face,name,status,orderId,el,timer,slot}
+let done     = [];   // completed order objects
+let oc = 0, bc = 0; // counters
+
+// ─── Order logic ─────────────────────────────────────────────────────
+function addOrder(type) {
+  const o = {
+    id: ++oc, type,
+    status: 'pending',
+    botId: null,
+    createdAt: Date.now(),
+    startedAt: null,
+    progress: 0,
+  };
+
+  if (type === 'vip') {
+    // after last VIP
+    let idx = -1;
+    orders.forEach((x,i) => { if (x.type === 'vip') idx = i; });
+    orders.splice(idx + 1, 0, o);
+    flashVIP(o.id);
+  } else {
+    orders.push(o);
+  }
+
+  render();
+  toast(
+    `${type==='vip'?'👑 VIP':'📋'} 新订单 <b>#${o.id}</b> 入队`,
+    type==='vip' ? '#f6c90e' : '#38bdf8'
+  );
+
+  // Wake up an idle bot
+  const idle = bots.find(b => b.status === 'idle');
+  if (idle) setTimeout(() => pickOrder(idle), 180);
+}
+
+function returnToQueue(order) {
+  order.status    = 'pending';
+  order.botId     = null;
+  order.startedAt = null;
+  order.progress  = 0;
+  // order already in orders[], just reset fields
+  // re-sort so VIPs are still first
+  orders = [
+    ...orders.filter(o => o.type === 'vip'),
+    ...orders.filter(o => o.type === 'nor'),
+  ];
+}
+
+// ─── Bot logic ────────────────────────────────────────────────────────
+function addBot() {
+  if (bots.length >= MAX_BOTS) { toast('⚠️ 最多 5 个机器人', '#f87171'); return; }
+  const ci = bc % MAX_BOTS;
+  const b  = {
+    id: ++bc,
+    color: COLORS[ci], face: FACES[ci], name: NAMES[ci],
+    status: 'idle', orderId: null, el: null, timer: null,
+    slot: bots.length,
+  };
+  bots.push(b);
+  spawnBot(b);
+  updateStats();
+  updateHint();
+  toast(`🤖 <b>${b.name}</b> 入场！`, b.color);
+  setTimeout(() => {
+    const p = orders.find(o => o.status === 'pending');
+    if (p) pickOrder(b);
+  }, 650);
+}
+
+function removeBot() {
+  if (!bots.length) { toast('⚠️ 没有机器人', '#f87171'); return; }
+  const b = bots[bots.length - 1];
+
+  if (b.timer) { clearInterval(b.timer); b.timer = null; }
+
+  if (b.orderId !== null) {
+    const o = orders.find(x => x.id === b.orderId);
+    if (o) {
+      returnToQueue(o);
+      toast(`↩️ 订单 <b>#${o.id}</b> 退回待处理`, '#fbbf24');
+    }
+  }
+
+  toast(`💨 <b>${b.name}</b> 离开`, '#f87171');
+  b.el?.remove();
+  bots.pop();
+  bots.forEach((x, i) => { x.slot = i; }); // re-slot
+
+  render();
+  updateStats();
+  updateHint();
+}
+
+function pickOrder(bot) {
+  if (bot.status !== 'idle') return;
+  const o = orders.find(x => x.status === 'pending');
+  if (!o) return;
+
+  o.status    = 'processing';
+  o.botId     = bot.id;
+  o.startedAt = Date.now();
+  o.progress  = 0;
+
+  bot.status  = 'working';
+  bot.orderId = o.id;
+
+  moveToStation(bot);
+  setAnim(bot, 'work');
+  showTicket(bot, o);
+  render();
+
+  bot.timer = setInterval(() => {
+    o.progress = Math.min(100, (Date.now() - o.startedAt) / COOK_MS * 100);
+    // Update just the progress fill (no full re-render)
+    const fill = document.querySelector(`[data-oid="${o.id}"] .cpfill`);
+    if (fill) fill.style.width = o.progress.toFixed(1) + '%';
+
+    if (o.progress >= 100) {
+      clearInterval(bot.timer); bot.timer = null;
+      finishOrder(bot, o);
+    }
+  }, TICK_MS);
+}
+
+function finishOrder(bot, o) {
+  orders = orders.filter(x => x.id !== o.id);
+  done.push(o);
+
+  bot.status  = 'idle';
+  bot.orderId = null;
+  moveToIdle(bot);
+  setAnim(bot, 'idle');
+  hideTicket(bot);
+
+  render();
+  addChip(o);
+  updateStats();
+  doConfetti(bot.color, bot.el);
+  toast(`✅ 订单 <b>#${o.id}</b> 完成！`, '#4ade80');
+
+  // Pick next
+  setTimeout(() => {
+    const p = orders.find(x => x.status === 'pending');
+    if (p) pickOrder(bot);
+  }, 380);
+}
+
+// ─── Bot DOM ──────────────────────────────────────────────────────────
+function spawnBot(b) {
+  const k   = document.getElementById('kitchen');
+  const pos = idlePos(b.slot);
+  const el  = document.createElement('div');
+  el.className = 'bot bpopin';
+  el.id = `bot-${b.id}`;
+  el.style.left = pos.x + 'px';
+  el.style.top  = pos.y + 'px';
+
+  el.innerHTML = `
+    <div class="bhat">
+      <div class="bhat-puff"></div>
+      <div class="bhat-band"><div class="bhat-stripe" style="background:${b.color}"></div></div>
+    </div>
+    <div class="bhead" style="background:${b.color}">${b.face}</div>
+    <div class="bbody" style="background:${b.color}"><div class="bapron"></div></div>
+    <div class="blegs"><div class="bleg"></div><div class="bleg"></div></div>
+    <div class="bname" style="color:${b.color}">${b.name}</div>
+    <div class="bsteam" id="st-${b.id}">
+      <div class="sdot"></div><div class="sdot"></div><div class="sdot"></div>
+    </div>
+    <div class="bticket" id="tk-${b.id}"></div>
+  `;
+
+  k.appendChild(el);
+  b.el = el;
+  setTimeout(() => { el.classList.remove('bpopin'); setAnim(b, 'idle'); }, 620);
+}
+
+function idlePos(slot) {
+  const k  = document.getElementById('kitchen');
+  const kw = k.offsetWidth, kh = k.offsetHeight;
+  const p  = IDLE[slot] || IDLE[0];
+  return { x: kw * p.x / 100 - 31, y: kh * p.y / 100 - 52 };
+}
+
+function stationPos(slot) {
+  const k    = document.getElementById('kitchen');
+  const kw   = k.offsetWidth, kh = k.offsetHeight;
+  const sIdx = slot % 4;
+  // Try to align with actual station element
+  const sEl  = document.getElementById(`stn-${sIdx}`);
+  if (sEl) {
+    const sr = sEl.getBoundingClientRect();
+    const kr = k.getBoundingClientRect();
+    return { x: sr.left - kr.left + sr.width / 2 - 31, y: sr.bottom - kr.top + 6 };
+  }
+  return { x: kw * WORK_X[sIdx] / 100 - 31, y: kh * 0.29 };
+}
+
+function moveToStation(b) {
+  const p = stationPos(b.slot);
+  b.el.style.left = p.x + 'px';
+  b.el.style.top  = p.y + 'px';
+}
+
+function moveToIdle(b) {
+  const p = idlePos(b.slot);
+  b.el.style.left = p.x + 'px';
+  b.el.style.top  = p.y + 'px';
+}
+
+function setAnim(b, mode) {
+  if (!b.el) return;
+  b.el.classList.remove('bidle', 'bwork');
+  const st = document.getElementById(`st-${b.id}`);
+  if (mode === 'idle') {
+    b.el.classList.add('bidle');
+    if (st) st.style.display = 'none';
+  } else {
+    b.el.classList.add('bwork');
+    if (st) st.style.display = 'flex';
+  }
+}
+
+function showTicket(b, o) {
+  const t = document.getElementById(`tk-${b.id}`);
+  if (!t) return;
+  t.style.display      = 'block';
+  t.style.borderColor  = o.type === 'vip' ? '#f6c90e' : '#38bdf8';
+  t.style.color        = o.type === 'vip' ? '#f6c90e' : '#38bdf8';
+  t.textContent = (o.type === 'vip' ? '👑 ' : '') + `#${o.id}`;
+}
+
+function hideTicket(b) {
+  const t = document.getElementById(`tk-${b.id}`);
+  if (t) t.style.display = 'none';
+}
+
+// ─── Render ───────────────────────────────────────────────────────────
+function render() {
+  const list = document.getElementById('olist');
+  const existing = {};
+  list.querySelectorAll('[data-oid]').forEach(el => { existing[el.dataset.oid] = el; });
+
+  const live = new Set(orders.map(o => String(o.id)));
+  Object.keys(existing).forEach(id => { if (!live.has(id)) existing[id].remove(); });
+
+  orders.forEach((o, i) => {
+    let el = existing[String(o.id)];
+    if (!el) {
+      el = makeCard(o);
+      el.classList.add('card-in');
+      const ref = list.children[i];
+      ref ? list.insertBefore(el, ref) : list.appendChild(el);
+    } else {
+      patchCard(el, o);
+      const ref = list.children[i];
+      if (ref && ref !== el) list.insertBefore(el, ref);
+      else if (!ref) list.appendChild(el);
+    }
+  });
+
+  document.getElementById('pc').textContent =
+    orders.filter(o => o.status === 'pending').length;
+}
+
+function makeCard(o) {
+  const el = document.createElement('div');
+  el.className  = `ocard ${o.type}`;
+  el.dataset.oid = o.id;
+  el.innerHTML = cardHTML(o);
+  return el;
+}
+
+function patchCard(el, o) {
+  el.className = `ocard ${o.type}${o.status === 'processing' ? ' proc' : ''}`;
+  const cbot  = el.querySelector('.cbot');
+  const cprog = el.querySelector('.cprog');
+  const pfill = el.querySelector('.cpfill');
+  if (o.status === 'processing') {
+    const b = bots.find(x => x.id === o.botId);
+    cbot.style.display  = 'block';
+    cbot.textContent    = `🤖 ${b ? b.name : 'Bot'} 正在烹饪…`;
+    cprog.style.display = 'block';
+    pfill.style.width   = o.progress.toFixed(1) + '%';
+  } else {
+    cbot.style.display  = 'none';
+    cprog.style.display = 'none';
+  }
+}
+
+function cardHTML(o) {
+  const bot = o.status === 'processing' ? bots.find(b => b.id === o.botId) : null;
+  return `
+    <div class="ctop">
+      <div class="cid ${o.type}">${o.type==='vip'?'👑 ':''}#${o.id}</div>
+      <div class="ctag ${o.type}">${o.type==='vip'?'VIP':'Normal'}</div>
+    </div>
+    <div class="cage" data-ct="${o.createdAt}">刚刚</div>
+    <div class="cbot" style="display:${bot?'block':'none'}">${bot?`🤖 ${bot.name} 正在烹饪…`:''}</div>
+    <div class="cprog" style="display:${bot?'block':'none'}">
+      <div class="cpfill" style="width:${o.progress.toFixed(1)}%"></div>
+    </div>
+  `;
+}
+
+function addChip(o) {
+  const c = document.createElement('div');
+  c.className = `chip ${o.type}`;
+  c.textContent = (o.type === 'vip' ? '👑 ' : '') + `#${o.id}`;
+  document.getElementById('chips').prepend(c);
+  document.getElementById('dc').textContent = done.length;
+}
+
+// ─── Stats / hint ─────────────────────────────────────────────────────
+function updateStats() {
+  document.getElementById('s-pend').textContent = orders.filter(o=>o.status==='pending').length;
+  document.getElementById('s-bots').textContent = bots.length;
+  document.getElementById('s-done').textContent = done.length;
+}
+
+function updateHint() {
+  document.getElementById('ehint').style.display = bots.length ? 'none' : 'block';
+}
+
+// Age ticker (1s, just touches .cage elements, no full re-render)
+setInterval(() => {
+  const now = Date.now();
+  document.querySelectorAll('[data-ct]').forEach(el => {
+    const s = Math.floor((now - Number(el.dataset.ct)) / 1000);
+    el.textContent = s < 60 ? `${s}s 前` : `${Math.floor(s/60)}m${s%60}s 前`;
+  });
+}, 1000);
+
+// ─── Effects ───────────────────────────────────────────────────────────
+function toast(html, color = '#e2e8f0') {
+  const box = document.getElementById('tbox');
+  const el  = document.createElement('div');
+  el.className = 'toast';
+  el.style.borderLeftColor = color;
+  el.innerHTML = html;
+  box.appendChild(el);
+  setTimeout(() => {
+    el.classList.add('out');
+    el.addEventListener('animationend', () => el.remove(), {once:true});
+  }, 2700);
+}
+
+function doConfetti(color, anchor) {
+  let cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+  if (anchor) {
+    const r = anchor.getBoundingClientRect();
+    cx = r.left + r.width / 2; cy = r.top + r.height / 2;
+  }
+  const palette = [color,'#fff','#f6c90e','#38bdf8','#4ade80','#f472b6'];
+  for (let i = 0; i < 26; i++) {
+    const bit  = document.createElement('div');
+    bit.className = 'cf';
+    const ang  = Math.random() * Math.PI * 2;
+    const dist = 55 + Math.random() * 95;
+    bit.style.cssText = `
+      left:${cx}px;top:${cy}px;
+      background:${palette[i%palette.length]};
+      border-radius:${Math.random()>.5?'50%':'2px'};
+      --tx:${Math.cos(ang)*dist}px;
+      --ty:${Math.sin(ang)*dist}px;
+      --r:${Math.random()*720-360}deg;
+      --d:${.65+Math.random()*.45}s;
+      --dl:${Math.random()*.14}s;
+    `;
+    document.body.appendChild(bit);
+    bit.addEventListener('animationend', () => bit.remove(), {once:true});
+  }
+}
+
+function flashVIP(id) {
+  const b = document.createElement('div');
+  b.className = 'vipbanner';
+  b.textContent = `👑 VIP 订单 #${id} 优先入队！`;
+  document.body.appendChild(b);
+  setTimeout(() => b.remove(), 1600);
+}
+
+// ─── Init ──────────────────────────────────────────────────────────────
+updateStats();
+updateHint();
+</script>
+</body>
+</html>
