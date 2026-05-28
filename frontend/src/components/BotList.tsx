@@ -43,7 +43,7 @@ export function BotList({ bots, processing, cookDurationMs }: BotListProps): Rea
                       }
                     />
                   ) : (
-                    <p className="text-base-content/50 text-sm italic py-1">No order queued</p>
+                    <p className="text-base-content/50 text-sm py-1">No order queued</p>
                   )}
                 </div>
               );

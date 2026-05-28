@@ -1,5 +1,4 @@
 import type { OrderDTO } from '@contracts';
-import { StatusBadge } from './StatusBadge';
 
 interface OrderCardProps {
   order: OrderDTO;
@@ -14,14 +13,13 @@ export function OrderCard({ order, trailing }: OrderCardProps): React.ReactEleme
       ? 'font-bold text-sm text-amber-600'
       : 'font-medium text-sm';
 
+  // No status badge here: the Kanban column (Pending / Complete) already encodes
+  // the order's status. The optional trailing slot carries the countdown in the
+  // Bots column. Bot Idle/Processing state still uses StatusBadge (it has no column).
   return (
     <div className="flex justify-between items-center gap-2 py-1">
       <span className={titleClass}>{label}</span>
-      {trailing !== undefined ? (
-        trailing
-      ) : (
-        <StatusBadge status={order.status} />
-      )}
+      {trailing !== undefined ? trailing : null}
     </div>
   );
 }

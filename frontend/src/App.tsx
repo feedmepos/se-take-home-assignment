@@ -20,12 +20,12 @@ export default function App({ eventSourceFactory }: AppProps): React.ReactElemen
       ? 'Reconnecting…'
       : 'Connecting…';
 
-  const indicatorClass =
+  const dotClass =
     status === 'connected'
-      ? 'badge badge-success'
+      ? 'bg-success'
       : status === 'reconnecting'
-      ? 'badge badge-warning'
-      : 'badge badge-ghost';
+      ? 'bg-warning'
+      : 'bg-gray-300';
 
   function handleNewNormal(): void {
     newOrder('NORMAL').catch((err: unknown) => console.error(err));
@@ -49,7 +49,13 @@ export default function App({ eventSourceFactory }: AppProps): React.ReactElemen
       <header className="bg-primary text-primary-content px-4 py-3 flex items-center gap-3 shadow-md shrink-0">
         <img src={archesUrl} alt="McDonald's golden arches" className="h-8 w-8 shrink-0" />
         <h1 className="text-xl font-bold tracking-tight">McDonald's Order Controller</h1>
-        <span className={`${indicatorClass} ml-auto`}>{indicatorLabel}</span>
+        <span className="ml-auto flex items-center gap-2 text-sm font-medium text-white">
+          <span
+            className={`inline-block h-2 w-2 rounded-full ${dotClass}`}
+            aria-hidden="true"
+          />
+          {indicatorLabel}
+        </span>
       </header>
 
       {snapshot === null ? (

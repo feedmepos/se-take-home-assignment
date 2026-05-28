@@ -35,24 +35,14 @@ describe('OrderCard', () => {
     expect(screen.queryByText('VIP', { selector: '[class*="badge"]' })).toBeNull();
   });
 
-  it('shows the human-readable status "Pending" for a PENDING order', () => {
-    render(<OrderCard order={normalOrder} />);
-    expect(screen.getByText('Pending')).toBeDefined();
-  });
-
-  it('shows "Processing" status for a PROCESSING order', () => {
-    render(<OrderCard order={vipOrder} />);
-    expect(screen.getByText('Processing')).toBeDefined();
-  });
-
-  it('renders trailing node instead of status badge when trailing prop is provided', () => {
+  it('renders the trailing node when provided (e.g. a countdown)', () => {
     render(<OrderCard order={normalOrder} trailing={<span>7s</span>} />);
     expect(screen.getByText('7s')).toBeDefined();
-    expect(screen.queryByText('Pending')).toBeNull();
   });
 
-  it('renders status badge when trailing prop is omitted', () => {
+  it('renders only the title, no status badge, when trailing is omitted (the Kanban column encodes status)', () => {
     render(<OrderCard order={normalOrder} />);
-    expect(screen.getByText('Pending')).toBeDefined();
+    expect(screen.getByText('Normal Order #1')).toBeDefined();
+    expect(screen.queryByText('Pending')).toBeNull();
   });
 });
