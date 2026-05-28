@@ -186,10 +186,11 @@ A scripted, real-time sequence exercising the requirements while staying close t
 | --- | --- |
 | Database / ORM / Redis | Req 7 is in-memory; the data is ephemeral |
 | WebSockets / message queue / microservices | traffic is push-only; SSE + one service suffice |
-| Redux / Zustand / React Query | `useReducer` + SSE is enough; fewer dependencies |
+| Redux / Zustand / React Query | `useState` + SSE is enough; fewer dependencies |
 | GraphQL | a handful of REST endpoints is simpler |
 | CQRS / event-sourcing / DDD aggregates | the event stream is a simple in-process emitter, not an architecture |
 | Auth / multi-tenancy / persistence | out of scope for a prototype |
+| Rate limiting / DoS protection | no DB or sensitive state; abuse only affects an ephemeral demo instance — security matched to the threat model |
 
 **Single sources of truth (DRY).** Each concept is defined in exactly one place; everything else derives from or references it:
 
