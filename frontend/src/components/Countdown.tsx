@@ -27,5 +27,5 @@ export function Countdown({ startedAt, cookDurationMs }: CountdownProps): React.
     };
   }, [startedAt, cookDurationMs]);
 
-  return <span>{remaining}s</span>;
+  return <span className="font-semibold tabular-nums text-base-content/70">{remaining}s</span>;
 }

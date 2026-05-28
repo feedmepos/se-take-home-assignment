@@ -40,7 +40,7 @@ describe('BotList', () => {
     expect(screen.getByText('Idle')).toBeDefined();
   });
 
-  it('shows "Cooking" status badge in the bot header for a PROCESSING bot', () => {
+  it('shows "Processing" status badge in the bot header for a PROCESSING bot', () => {
     const now = Date.now();
     const startedAt = new Date(now - 3000).toISOString();
     const order: OrderDTO = {
@@ -55,7 +55,7 @@ describe('BotList', () => {
     ];
     const processing = [{ order, botId: 1 }];
     render(<BotList bots={bots} processing={processing} cookDurationMs={10000} />);
-    expect(screen.getByText('Cooking')).toBeDefined();
+    expect(screen.getByText('Processing')).toBeDefined();
   });
 
   it('renders the order for a PROCESSING bot', () => {
@@ -136,5 +136,13 @@ describe('BotList', () => {
     ];
     render(<BotList bots={bots} processing={[]} cookDurationMs={10000} />);
     expect(screen.queryByText(/Order #/)).toBeNull();
+  });
+
+  it('shows "No order queued" placeholder for an IDLE bot', () => {
+    const bots: BotDTO[] = [
+      { id: 1, status: 'IDLE', currentOrderId: null },
+    ];
+    render(<BotList bots={bots} processing={[]} cookDurationMs={10000} />);
+    expect(screen.getByText('No order queued')).toBeDefined();
   });
 });

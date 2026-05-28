@@ -7,7 +7,7 @@ export function humanizeStatus(status: AnyStatus): string {
     case 'PENDING':
       return 'Pending';
     case 'PROCESSING':
-      return 'Cooking';
+      return 'Processing';
     case 'COMPLETE':
       return 'Complete';
     case 'IDLE':

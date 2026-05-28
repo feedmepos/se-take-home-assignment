@@ -18,7 +18,7 @@ export function OrderCard({ order, trailing }: OrderCardProps): React.ReactEleme
     <div className="flex justify-between items-center gap-2 py-1">
       <span className={titleClass}>{label}</span>
       {trailing !== undefined ? (
-        <span className="badge badge-warning badge-sm shrink-0">{trailing}</span>
+        trailing
       ) : (
         <StatusBadge status={order.status} />
       )}

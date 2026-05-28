@@ -8,8 +8,8 @@ describe('humanizeStatus', () => {
     expect(humanizeStatus('PENDING')).toBe('Pending');
   });
 
-  it('maps PROCESSING → "Cooking"', () => {
-    expect(humanizeStatus('PROCESSING')).toBe('Cooking');
+  it('maps PROCESSING → "Processing"', () => {
+    expect(humanizeStatus('PROCESSING')).toBe('Processing');
   });
 
   it('maps COMPLETE → "Complete"', () => {
@@ -27,9 +27,9 @@ describe('StatusBadge', () => {
     expect(screen.getByText('Pending')).toBeDefined();
   });
 
-  it('renders "Cooking" for PROCESSING status', () => {
+  it('renders "Processing" for PROCESSING status', () => {
     render(<StatusBadge status="PROCESSING" />);
-    expect(screen.getByText('Cooking')).toBeDefined();
+    expect(screen.getByText('Processing')).toBeDefined();
   });
 
   it('renders "Complete" for COMPLETE status', () => {

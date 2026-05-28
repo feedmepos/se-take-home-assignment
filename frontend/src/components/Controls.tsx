@@ -14,7 +14,7 @@ export function Controls({
   return (
     <div className="flex flex-wrap gap-2">
       <button
-        className="btn btn-neutral"
+        className="btn btn-info"
         onClick={onNewNormal}
       >
         New Normal Order
@@ -26,7 +26,7 @@ export function Controls({
         New VIP Order
       </button>
       <button
-        className="btn btn-neutral"
+        className="btn btn-success"
         onClick={onAddBot}
       >
         + Bot

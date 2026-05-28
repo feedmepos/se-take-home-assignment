@@ -40,9 +40,9 @@ describe('OrderCard', () => {
     expect(screen.getByText('Pending')).toBeDefined();
   });
 
-  it('shows "Cooking" status for a PROCESSING order', () => {
+  it('shows "Processing" status for a PROCESSING order', () => {
     render(<OrderCard order={vipOrder} />);
-    expect(screen.getByText('Cooking')).toBeDefined();
+    expect(screen.getByText('Processing')).toBeDefined();
   });
 
   it('renders trailing node instead of status badge when trailing prop is provided', () => {
