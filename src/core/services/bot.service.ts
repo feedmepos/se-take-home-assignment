@@ -7,13 +7,13 @@ import { OrderService } from './order.service';
 })
 export class BotService {
     private orderService = inject(OrderService);
-    private nextBotId = 1;
 
     bots = signal<IBotResponse[]>([]);
 
     addBot(): void {
+        const lastBot = this.bots()[this.bots().length - 1];
         const newBot = {
-            id: this.nextBotId++,
+            id: lastBot ? lastBot.id + 1 : 1,
             status: BotStatus.Idle,
         };
 
