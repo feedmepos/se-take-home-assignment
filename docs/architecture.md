@@ -135,8 +135,8 @@ API is mounted under a global `/api` prefix; health is `GET /api/health`.
 | `del-bot [--id <id>]` | `DELETE /api/bots/:id` and `DELETE /api/bots` | newest |
 | `list-orders [--type normal\|vip]` | `GET /api/orders?type=` | all types |
 | `list-bots` | `GET /api/bots` | — |
-| `status` | `GET /api/status` | — (full snapshot / UI bootstrap) |
-| (live updates) | `GET /api/events` (SSE) | — |
+| `status` | `GET /api/status` | — (full snapshot; REST only — the UI bootstraps from the first SSE frame) |
+| (live updates) | `GET /api/events` (SSE) | — (full snapshot on connect, then on every change) |
 | `help`, `exit` | — | REPL only |
 
 `DELETE /api/bots` (no id) is explicitly defined as "remove the newest **one**", not "delete all". `DELETE /api/bots/:id` with an unknown id, and `DELETE /api/bots` when no bots exist, both return **404** with a clear message (the CLI prints a friendly "no bot to remove"). NestJS uses `ValidationPipe` + DTOs on inputs.
