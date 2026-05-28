@@ -260,3 +260,216 @@ func TestTimestampFormatting(t *testing.T) {
 		}
 	}
 }
+
+// TestOrderIDIncrement verifies Requirement 3: The order number should be unique and increasing.
+func TestOrderIDIncrement(t *testing.T) {
+	d := NewDispatcher(5 * time.Millisecond)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	go d.Start(ctx)
+
+	// Add 5 orders of mixed types
+	d.AddOrder(OrderNormal)
+	d.AddOrder(OrderVIP)
+	d.AddOrder(OrderNormal)
+	d.AddOrder(OrderVIP)
+	d.AddOrder(OrderNormal)
+
+	// Wait for all 5 orders to register
+	ok := waitForStatus(d, func() bool {
+		_, pending, _, _ := d.GetStatus()
+		return len(pending) == 5
+	}, 50*time.Millisecond)
+	if !ok {
+		t.Fatalf("Failed to register 5 orders")
+	}
+
+	_, pending, _, _ := d.GetStatus()
+	// Because of sorting, VIPs will be first: [1002 (VIP), 1004 (VIP), 1001 (Normal), 1003 (Normal), 1005 (Normal)]
+	// Let's assert all generated IDs are strictly unique and range from 1001 to 1005
+	idMap := make(map[int]bool)
+	for _, o := range pending {
+		if o.ID < 1001 || o.ID > 1005 {
+			t.Errorf("Expected ID between 1001 and 1005, got %d", o.ID)
+		}
+		idMap[o.ID] = true
+	}
+	if len(idMap) != 5 {
+		t.Errorf("Expected 5 unique IDs, got %d", len(idMap))
+	}
+}
+
+// TestBotIdleStateTransition verifies Requirement 5: Bot becomes IDLE if no orders, starts processing on new order.
+func TestBotIdleStateTransition(t *testing.T) {
+	d := NewDispatcher(10 * time.Millisecond)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	go d.Start(ctx)
+
+	// Scale up to 1 bot. Since no orders exist, it should become IDLE immediately.
+	d.ScaleUp()
+
+	// Wait for bot to register and be IDLE
+	ok := waitForStatus(d, func() bool {
+		activeBots, pending, processing, _ := d.GetStatus()
+		return activeBots == 1 && len(pending) == 0 && len(processing) == 0
+	}, 50*time.Millisecond)
+	if !ok {
+		t.Fatalf("Bot did not register or did not become IDLE")
+	}
+
+	// Add an order. The IDLE bot should immediately wake up and start processing it.
+	d.AddOrder(OrderNormal)
+
+	// Wait for processing
+	ok = waitForStatus(d, func() bool {
+		_, _, processing, _ := d.GetStatus()
+		return len(processing) == 1 && processing[0].ID == 1001
+	}, 50*time.Millisecond)
+	if !ok {
+		t.Fatalf("IDLE bot failed to pick up the new order")
+	}
+}
+
+// TestScaleDownNewestBot verifies Requirement 6: When '- Bot' clicked, the newest bot should be destroyed.
+func TestScaleDownNewestBot(t *testing.T) {
+	d := NewDispatcher(100 * time.Millisecond)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	go d.Start(ctx)
+
+	// Scale up 3 times to spawn Bot 1, Bot 2, Bot 3
+	d.ScaleUp()
+	d.ScaleUp()
+	d.ScaleUp()
+
+	// Wait for all 3 bots to be active
+	ok := waitForStatus(d, func() bool {
+		activeBots, _, _, _ := d.GetStatus()
+		return activeBots == 3
+	}, 50*time.Millisecond)
+	if !ok {
+		t.Fatalf("Failed to spawn 3 active bots")
+	}
+
+	// Scale down. This should destroy Bot 3 (newest).
+	d.ScaleDown()
+
+	// Wait for 2 bots.
+	ok = waitForStatus(d, func() bool {
+		activeBots, _, _, _ := d.GetStatus()
+		return activeBots == 2
+	}, 50*time.Millisecond)
+	if !ok {
+		t.Fatalf("Failed to scale down to 2 bots")
+	}
+
+	// Verify that Bot 3 is gone, but Bot 1 and Bot 2 remain.
+	d.statusMu.RLock()
+	bots := d.botList
+	d.statusMu.RUnlock()
+
+	hasBot1 := false
+	hasBot2 := false
+	hasBot3 := false
+	for _, b := range bots {
+		if b.ID == 1 {
+			hasBot1 = true
+		}
+		if b.ID == 2 {
+			hasBot2 = true
+		}
+		if b.ID == 3 {
+			hasBot3 = true
+		}
+	}
+	if !hasBot1 || !hasBot2 || hasBot3 {
+		t.Errorf("Expected bots 1 and 2 to remain, and bot 3 to be destroyed. Got Bot1: %v, Bot2: %v, Bot3: %v", hasBot1, hasBot2, hasBot3)
+	}
+
+	// Scale down again. This should destroy Bot 2.
+	d.ScaleDown()
+
+	ok = waitForStatus(d, func() bool {
+		activeBots, _, _, _ := d.GetStatus()
+		return activeBots == 1
+	}, 50*time.Millisecond)
+	if !ok {
+		t.Fatalf("Failed to scale down to 1 bot")
+	}
+
+	d.statusMu.RLock()
+	bots = d.botList
+	d.statusMu.RUnlock()
+
+	hasBot1 = false
+	hasBot2 = false
+	for _, b := range bots {
+		if b.ID == 1 {
+			hasBot1 = true
+		}
+		if b.ID == 2 {
+			hasBot2 = true
+		}
+	}
+	if !hasBot1 || hasBot2 {
+		t.Errorf("Expected bot 1 to remain and bot 2 to be destroyed. Got Bot1: %v, Bot2: %v", hasBot1, hasBot2)
+	}
+}
+
+// TestMultiBotLoadBalancing verifies concurrency load balancing and scheduling rules across multiple bots.
+func TestMultiBotLoadBalancing(t *testing.T) {
+	// 25ms cook duration
+	d := NewDispatcher(25 * time.Millisecond)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	go d.Start(ctx)
+
+	// Add 2 VIP and 2 Normal orders
+	d.AddOrder(OrderNormal) // 1001
+	d.AddOrder(OrderVIP)    // 1002
+	d.AddOrder(OrderNormal) // 1003
+	d.AddOrder(OrderVIP)    // 1004
+
+	// Wait for all 4 orders to register
+	ok := waitForStatus(d, func() bool {
+		_, pending, _, _ := d.GetStatus()
+		return len(pending) == 4
+	}, 50*time.Millisecond)
+	if !ok {
+		t.Fatalf("Orders failed to register")
+	}
+
+	// Scale up to 2 bots. They should immediately pick up the 2 VIP orders (1002 and 1004).
+	d.ScaleUp()
+	d.ScaleUp()
+
+	// Wait for bots to process VIP orders, leaving Normal orders pending
+	ok = waitForStatus(d, func() bool {
+		activeBots, pending, processing, _ := d.GetStatus()
+		return activeBots == 2 && len(processing) == 2 && len(pending) == 2 &&
+			(processing[0].ID == 1002 || processing[0].ID == 1004) &&
+			(processing[1].ID == 1002 || processing[1].ID == 1004) &&
+			pending[0].ID == 1001 && pending[1].ID == 1003
+	}, 50*time.Millisecond)
+	if !ok {
+		_, pending, processing, _ := d.GetStatus()
+		t.Fatalf("Expected 2 bots processing VIP orders 1002/1004 and 2 Normal pending. Proc: %v, Pend: %v", processing, pending)
+	}
+
+	// Wait for VIP orders to complete and bots to pick up Normal orders
+	ok = waitForStatus(d, func() bool {
+		_, pending, processing, completed := d.GetStatus()
+		return len(completed) == 2 && len(processing) == 2 && len(pending) == 0 &&
+			(completed[0].ID == 1002 || completed[0].ID == 1004) &&
+			(processing[0].ID == 1001 || processing[0].ID == 1003)
+	}, 100*time.Millisecond)
+	if !ok {
+		_, pending, processing, completed := d.GetStatus()
+		t.Fatalf("Expected VIP completed and Normal processing. Proc: %v, Pend: %v, Comp: %v", processing, pending, completed)
+	}
+}
