@@ -118,7 +118,7 @@ interface Scheduler { schedule(delayMs: number, cb: () => void): CancelHandle; }
 
 - **The order↔bot link is one-directional.** `Bot.currentOrderId` is the single source of truth; "which bot has order X?" is *derived* when serializing `/api/status`. There is deliberately no `Order.assignedBotId` — two references could disagree.
 - **Cancel handles are not entity state.** The controller holds a `Map<botId, CancelHandle>` for in-flight 10s completions. They can't live on `Bot`, which serializes to JSON/SSE.
-- **IDs come from two monotonic counters** (orders, bots), starting at 1, incremented on creation, **never decremented or reused**. So `newest bot = max active id` (stable under any deletion), and a delete-then-create yields a fresh id — never a revived bot.
+- **IDs come from two monotonic counters** (orders start at 1001 to match the employer sample; bots start at 1), incremented on creation, **never decremented or reused**. So `newest bot = max active id` (stable under any deletion), and a delete-then-create yields a fresh id — never a revived bot.
 - **Dispatch is atomic.** Core mutations are **synchronous** — no `await` between selecting a `PENDING` order and marking it `PROCESSING`. Node's single thread then guarantees no two bots take the same order, and no delete/create interleaves mid-mutation. `tryAssign()` is idempotent and safe to call after every state change.
 - **Zero bots is a valid state.** With no bots, `PENDING` orders simply wait (and a just-removed processing bot's order is requeued, never dropped). The next `add-bot` runs `tryAssign()` and drains the queue.
 
@@ -154,13 +154,13 @@ SSE emits the full `StatusDTO` snapshot on connect and on every domain event; th
 ## 6. Frontend
 
 - **One `EventSource`, opened once** in a `useEventSource` hook (cleanup on unmount; the browser auto-reconnects). No duplicate listeners.
-- **`useReducer` is the single store**, seeded from `GET /api/status`, then patched by SSE events — the server is the source of truth; the client never re-derives business state. No Redux/Zustand/React-Query needed.
+- **`useState<StatusDTO | null>` is the single store**, populated by the initial SSE frame and then replaced wholesale by each later SSE snapshot — the server is the source of truth; the client never patches or re-derives business state. No Redux/Zustand/React-Query needed.
 - **Derive during render, not in effects.** Counts, groupings, and "is this order processing" are computed from state at render time (no extra renders, no stale effects).
 - **Isolate the per-order countdown.** `remaining = startedAt + duration − now`, ticked inside a small leaf component (or one shared interval), so the 1s tick never re-renders the whole tree.
 - **Conditional rendering with ternaries, not `&&`** — counts can be `0`, and `{count && …}` would render a literal `0`.
 - **No components defined inside components**; typed props throughout; strict TS, no `any`.
 - **Accessible real-time UI:** semantic `<button>`s and `aria-live="polite"` on the PENDING/COMPLETE regions so updates are announced — a cheap standout that shows care.
-- **Layout:** **PENDING** area (priority-ordered, VIP badged) and **COMPLETE** area per the README; `PROCESSING` orders render attached to the bot cooking them with a countdown. Controls: New Normal / New VIP / +Bot / −Bot. Plain CSS / CSS modules — clean visual design over a heavy UI library.
+- **Layout:** **PENDING** area (priority-ordered, VIP-labelled) and **COMPLETE** area per the README; `PROCESSING` orders render attached to the bot cooking them with a countdown. Controls: New Normal / New VIP / +Bot / −Bot. Tailwind + DaisyUI keep the UI small and readable without a heavy app framework.
 
 ## 7. Testing
 
@@ -174,7 +174,7 @@ Single **Cloud Run** service: NestJS serves the API, the SSE stream, and the sta
 
 ## 9. Demo scenario (drives `result.txt`)
 
-A scripted, real-time sequence exercising the requirements while staying close to the employer sample: create NORMAL + VIP + NORMAL, add two bots, let the first wave complete, add VIP #4, then destroy the newest **idle** bot. One extra NORMAL order is then added to demonstrate the README's destroy-while-processing case: the newest bot is removed mid-cook, the order returns to PENDING, a new bot picks it up, and it completes after a fresh 10 seconds. Each event is logged with a real `HH:MM:SS` timestamp; the output (header + event log + "Final Status" footer) follows the format of the **employer-provided** `scripts/result.example.txt`. The targeted `del-bot --id N` / `DELETE /bots/:id` path exists as a documented extension but is deliberately kept out of the demo so the artifact maps cleanly to the spec's requirements.
+A scripted, real-time sequence exercising the requirements while staying close to the employer sample: create NORMAL + VIP + NORMAL, add two bots, let the first wave complete, add VIP #1004, then destroy the newest **idle** bot. One extra NORMAL order is then added to demonstrate the README's destroy-while-processing case: the newest bot is removed mid-cook, the order returns to PENDING, a new bot picks it up, and it completes after a fresh 10 seconds. Each event is logged with a real `HH:MM:SS` timestamp; the output (header + event log + "Final Status" footer) follows the format of the **employer-provided** `scripts/result.example.txt`. The targeted `del-bot --id N` / `DELETE /bots/:id` path exists as a documented extension but is deliberately kept out of the demo so the artifact maps cleanly to the spec's requirements.
 
 ## 10. Engineering principles & deliberate non-goals
 
