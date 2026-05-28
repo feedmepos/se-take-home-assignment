@@ -12,7 +12,7 @@ export enum OrderTier {
 }
 
 export const ORDER_STATUS_MAP: Record<OrderStatus, IEnumMap> = {
-    [OrderStatus.Pending]: { name: 'Pending' },
-    [OrderStatus.InProgress]: { name: 'In Progress' },
-    [OrderStatus.Complete]: { name: 'Complete' },
+    [OrderStatus.Pending]: { name: 'Pending', cssClass: 'pending' },
+    [OrderStatus.InProgress]: { name: 'In Progress', cssClass: 'in-progress' },
+    [OrderStatus.Complete]: { name: 'Complete', cssClass: 'complete' },
 };

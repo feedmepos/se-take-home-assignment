@@ -1,70 +1,74 @@
-<main>
+<main class="p-8">
     <section>
-        <button (click)="addBot()">+ Bot</button>
-        <button (click)="removeBot()">- Bot</button>
-        <p>Total Bot(s): {{ bots().length }}</p>
+        <button class="block bg-yellow-200" (click)="addOrder(OrderTier.Vip)">New VIP Order</button>
+        <button class="block bg-green-200 mt-4" (click)="addOrder(OrderTier.Normal)">
+            New Normal Order
+        </button>
     </section>
 
-    <section>
-        <button (click)="addOrder(OrderTier.Normal)">+ Normal Order</button>
-        <button (click)="addOrder(OrderTier.Vip)">+ VIP Order</button>
+    <section class="mt-8">
+        <button class="bg-blue-200" (click)="addBot()">+ Bot</button>
+        <button class="bg-red-200 ml-4" (click)="removeBot()">- Bot</button>
     </section>
 
-    <section>
-        <div>
+    <section class="list-groups grid-cols-2 mt-16">
+        <div class="list-group">
             <h2>{{ ORDER_STATUS_MAP[OrderStatus.Pending].name }} Task(s)</h2>
             @if (getOrdersByStatus(OrderStatus.Pending).length <= 0) {
                 <small>No pending order.</small>
             } @else {
-                @for (order of getOrdersByStatus(OrderStatus.Pending); track order.id) {
-                    <div class="flex mt-8">
-                        <div>{{ order.id }}</div>
-                        <div>{{ order.name }}</div>
-                        <div>{{ ORDER_STATUS_MAP[order.status].name || 'N/A' }}</div>
-                    </div>
-                }
-            }
-        </div>
-    </section>
-
-    <section>
-        <div>
-            <h2>{{ ORDER_STATUS_MAP[OrderStatus.InProgress].name }} By Bot</h2>
-            @if (bots().length <= 0) {
-                <small>No bot created.</small>
-            } @else {
-                @for (bot of bots(); track bot.id) {
-                    <div>
-                        <h3>Bot #{{ bot.id }}</h3>
-                        @if (getProcessingOrderByBot(bot.id); as order) {
-                            <div>
-                                <div>{{ order.id }}</div>
-                                <div>{{ order.name }}</div>
-                                <div>{{ ORDER_STATUS_MAP[order.status].name || 'N/A' }}</div>
+                <div class="items">
+                    @for (order of getOrdersByStatus(OrderStatus.Pending); track order.id) {
+                        <div class="item">
+                            <div>{{ order.name }}</div>
+                            <div class="status" [ngClass]="ORDER_STATUS_MAP[order.status].cssClass">
+                                {{ ORDER_STATUS_MAP[order.status].name || 'N/A' }}
                             </div>
-                        } @else {
-                            <small>IDLE</small>
-                        }
-                    </div>
-                }
+                        </div>
+                    }
+                </div>
             }
         </div>
-    </section>
 
-    <section>
-        <div>
+        <div class="list-group">
             <h2>{{ ORDER_STATUS_MAP[OrderStatus.Complete].name }} Task(s)</h2>
             @if (getOrdersByStatus(OrderStatus.Complete).length <= 0) {
                 <small>No complete order.</small>
             } @else {
-                @for (order of getOrdersByStatus(OrderStatus.Complete); track order.id) {
-                    <div>
-                        <div>{{ order.id }}</div>
-                        <div>{{ order.name }}</div>
-                        <div>{{ ORDER_STATUS_MAP[order.status].name || 'N/A' }}</div>
-                    </div>
-                }
+                <div class="items">
+                    @for (order of getOrdersByStatus(OrderStatus.Complete); track order.id) {
+                        <div class="item">
+                            <div>{{ order.name }}</div>
+                            <div class="status" [ngClass]="ORDER_STATUS_MAP[order.status].cssClass">
+                                {{ ORDER_STATUS_MAP[order.status].name || 'N/A' }}
+                            </div>
+                        </div>
+                    }
+                </div>
             }
         </div>
+    </section>
+
+    <section class="list-groups grid-cols-4 bots mt-16">
+        @for (bot of bots(); track bot.id) {
+            <div class="list-group">
+                <h2>
+                    Bot {{ bot.id }}
+
+                    @if (!getProcessingOrderByBot(bot.id)) {
+                        <span class="text-base text-blue-800 ml-2">IDLE</span>
+                    }
+                </h2>
+
+                @if (getProcessingOrderByBot(bot.id); as order) {
+                    <div class="item flex-grow">
+                        <div>{{ order.name }}</div>
+                        <div class="status" [ngClass]="ORDER_STATUS_MAP[order.status].cssClass">
+                            {{ ORDER_STATUS_MAP[order.status].name || 'N/A' }}
+                        </div>
+                    </div>
+                }
+            </div>
+        }
     </section>
 </main>
