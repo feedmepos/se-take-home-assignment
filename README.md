@@ -1,64 +1,193 @@
-## FeedMe Software Engineer Take Home Assignment
-Below is a take home assignment before the interview of the position. You are required to
-1. Understand the situation and use case. You may contact the interviewer for further clarification.
-2. implement the requirement with **either frontend or backend components**.
-3. Complete the requirement with **AI** if possible, but perform your own testing.
-4. Provide documentation for the any part that you think is needed.
-5. Bring the source code and functioning prototype to the interview session.
+# McDonald's Order Controller
 
-### Situation
-McDonald is transforming their business during COVID-19. They wish to build the automated cooking bots to reduce workforce and increase their efficiency. As one of the software engineer in the project. You task is to create an order controller which handle the order control flow. 
+Submission for the FeedMe POS Senior Software Engineer take-home assessment.
 
-### User Story
-As below is part of the user story:
-1. As McDonald's normal customer, after I submitted my order, I wish to see my order flow into "PENDING" area. After the cooking bot process my order, I want to see it flow into to "COMPLETE" area.
-2. As McDonald's VIP member, after I submitted my order, I want my order being process first before all order by normal customer.  However if there's existing order from VIP member, my order should queue behind his/her order.
-3. As McDonald's manager, I want to increase or decrease number of cooking bot available in my restaurant. When I increase a bot, it should immediately process any pending order. When I decrease a bot, the processing order should remain un-process.
-4. As McDonald bot, it can only pickup and process 1 order at a time, each order required 10 seconds to complete process.
+This repository implements the order controller in both requested forms:
 
-### Requirements
-1. When "New Normal Order" clicked, a new order should show up "PENDING" Area.
-2. When "New VIP Order" clicked, a new order should show up in "PENDING" Area. It should place in-front of all existing "Normal" order but behind of all existing "VIP" order.
-3. The order number should be unique and increasing.
-4. When "+ Bot" clicked, a bot should be created and start processing the order inside "PENDING" area. after 10 seconds picking up the order, the order should move to "COMPLETE" area. Then the bot should start processing another order if there is any left in "PENDING" area.
-5. If there is no more order in the "PENDING" area, the bot should become IDLE until a new order come in.
-6. When "- Bot" clicked, the newest bot should be destroyed. If the bot is processing an order, it should also stop the process. The order should return to its original position in the "PENDING" area (maintaining VIP/Normal order priority).
-7. No data persistance is needed for this prototype, you may perform all the process inside memory.
+- **Backend / CLI**: Node.js + NestJS + TypeScript, executable by the provided GitHub Actions workflow.
+- **Frontend / UI**: React + TypeScript + Vite, backed by the same in-memory order controller through REST + Server-Sent Events.
 
-### Functioning Prototype
-You must implement **either** frontend or backend components as described below:
+The business state is intentionally in memory only. No database is required for this prototype.
 
-#### 1. Frontend
-- You are free to use **any framework and programming language** of your choice
-- The UI application must be compiled, deployed and hosted on any publicly accessible web platform
-- Must provide a user interface that demonstrates all the requirements listed above
-- Should allow users to interact with the McDonald's order management system
+## Requirements covered
 
-#### 2. Backend
-- You must use **either Go (Golang) or Node.js** for the backend implementation
-- The backend must be a CLI application that can be executed in GitHub Actions
-- Must implement the following scripts in the `script` directory:
-  - `test.sh`: Contains unit test execution steps
-  - `build.sh`: Contains compilation steps for the CLI application
-  - `run.sh`: Contains execution steps that run the CLI application
-- The CLI application result must be printed to `result.txt`
-- The `result.txt` output must include timestamps in `HH:MM:SS` format to track order completion times
-- Must follow **GitHub Flow**: Create a Pull Request with your changes to this repository
-- Ensure all GitHub Action checks pass successfully
-- **Note**: An interactive CLI implementation is compulsory for the next round of interview. Candidates should be prepared to demonstrate interactive command handling.
+| Requirement | Implementation |
+| --- | --- |
+| Normal order enters `PENDING` | `POST /api/orders`, CLI `add-order --type normal`, UI `New Normal Order` |
+| VIP order queues ahead of normal orders | Shared domain comparator: VIP first, FIFO by id within each tier |
+| Unique increasing order numbers | Monotonic order ids starting at `1001` |
+| `+ Bot` starts work immediately | `addBot()` creates an idle bot and immediately assigns the highest-priority pending order |
+| Each bot cooks one order for 10 seconds | Real scheduler in runtime, fake clock in unit tests |
+| Idle bots wait for the next order | Assignment runs after every order/bot change |
+| `- Bot` destroys newest bot | CLI `del-bot`, UI `- Bot`, API `DELETE /api/bots` |
+| Destroying a processing bot requeues its order | Timer is cancelled, order returns to `PENDING`, priority ordering is preserved |
 
-#### Submission Requirements
-- Fork this repository and implement your solution with either frontend or backend
-- **Frontend option**: Deploy to a publicly accessible URL using any technology stack
-- **Backend option**: Must be implemented in Go or Node.js and work within the GitHub Actions environment
-  - Follow GitHub Flow process with Pull Request submission
-  - All tests in `test.sh` must pass
-  - The `result.txt` file must contain meaningful output from your CLI application
-  - All output must include timestamps in `HH:MM:SS` format to track order completion times
-  - Submit a Pull Request and ensure the `backend-verify-result` workflow passes
-- Provide documentation for any part that you think is needed
+## Quick start
 
-### Tips on completing this task
-- Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.
-- Utilize coding agent to complete the assignment scope your working hour within 1 hour, do not over engineer it. However, ensure you read and understand what your code doing and apply good engineering practice.
-- Complete the implementation as clean as possible, clean code is a strong plus point, do not bring in all the fancy tech stuff.
+From the repository root, these are the backend assessment scripts expected by the
+provided GitHub Actions workflow:
+
+```bash
+bash scripts/test.sh
+bash scripts/build.sh
+bash scripts/run.sh
+```
+
+`scripts/run.sh` writes the CLI scenario output to:
+
+```text
+scripts/result.txt
+```
+
+The committed `scripts/result.example.txt` shows the expected output shape. A fresh `result.txt` is generated on every run and includes `HH:MM:SS` timestamps for the order/bot events.
+
+## Backend CLI
+
+The backend lives in `backend/`.
+
+```bash
+cd backend
+npm install
+npm run build
+node dist/cli/scenario.js
+```
+
+Interactive CLI for the interview round:
+
+```bash
+cd backend
+npm run build
+node dist/cli/interactive.js
+```
+
+Available commands:
+
+```text
+add-order [--type normal|vip]
+add-bot
+del-bot
+del-bot --id N
+list-orders [--type normal|vip]
+list-bots
+status
+help
+exit
+```
+
+The `--id` delete path is a small extension for API/UI debugging. The required `del-bot` behavior still removes the newest bot.
+
+## Frontend UI
+
+The frontend lives in `frontend/`.
+
+For local development, run the backend API and Vite separately:
+
+```bash
+cd backend
+npm install
+npm start
+```
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open the Vite URL, usually:
+
+```text
+http://localhost:5173
+```
+
+For production-style local serving:
+
+```bash
+cd frontend
+npm install
+npm run build
+
+cd ../backend
+npm install
+npm run build
+cd ..
+
+cd backend
+npm run start:prod
+```
+
+Then open:
+
+```text
+http://localhost:3000
+```
+
+The NestJS app serves the built React app from `frontend/dist` and exposes the API under `/api`.
+
+## API
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| `POST` | `/api/orders` | Create an order, body `{ "type": "NORMAL" }` or `{ "type": "VIP" }` |
+| `GET` | `/api/orders?type=VIP` | List orders, optionally filtered |
+| `POST` | `/api/bots` | Add a bot |
+| `GET` | `/api/bots` | List bots |
+| `DELETE` | `/api/bots` | Remove the newest bot |
+| `DELETE` | `/api/bots/:id` | Remove a specific bot |
+| `GET` | `/api/status` | Full state snapshot |
+| `GET` | `/api/events` | SSE stream of full state snapshots |
+| `GET` | `/api/health` | Health check |
+
+## Testing
+
+Backend contract scripts:
+
+```bash
+bash scripts/test.sh
+bash scripts/build.sh
+bash scripts/run.sh
+node scripts/stress-check.js
+```
+
+Frontend CI is covered separately by `.github/workflows/frontend-verify.yml`
+(`npm ci`, lint, tests, and build).
+
+Backend checks:
+
+```bash
+cd backend
+npm run typecheck
+npm test
+npm run test:e2e
+```
+
+Frontend checks:
+
+```bash
+cd frontend
+npm run lint
+npm test
+npm run build
+```
+
+Additional stress coverage:
+
+```bash
+node scripts/stress-check.js
+```
+
+The stress script covers high-throughput draining, requeue under load, microtask-level command bursts, and an API concurrency smoke test.
+
+## Documentation
+
+- Backend details: `backend/README.md`
+- Frontend details: `frontend/README.md`
+- Architecture notes: `docs/architecture.md`
+- Stress/concurrency notes: `docs/stress-and-concurrency-testing.md`
+- Decision records: `docs/adr/`
+
+## Design notes
+
+The core order controller is framework-free TypeScript under `backend/src/domain/`. CLI, REST/SSE, and React all use the same domain behavior, so the UI is not a separate simulation.
+
+The frontend keeps no business state. It sends REST commands, listens to `GET /api/events`, and replaces its view with each full server snapshot. This avoids duplicated queueing, timing, or bot-assignment logic in the browser.
