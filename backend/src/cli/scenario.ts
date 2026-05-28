@@ -55,7 +55,9 @@ async function main(): Promise<void> {
   console.error('--- Adding extra normal order #1005 for processing-destroy case ---');
   runCommand(ctrl, 'add-order --type normal'); // #1005, bot #1 picks it up
   await sleep(1_000);
-  console.error('--- del-bot (no id): destroy newest bot #1 mid-cook (expect requeue of #1005) ---');
+  console.error(
+    '--- del-bot (no id): destroy newest bot #1 mid-cook (expect requeue of #1005) ---',
+  );
   runCommand(ctrl, 'del-bot');
   await sleep(1_000);
   console.error('--- Adding bot #3 to finish requeued order #1005 ---');
