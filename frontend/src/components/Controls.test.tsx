@@ -14,13 +14,13 @@ describe('Controls', () => {
       />,
     );
 
-    expect(screen.getByRole('button', { name: 'New Normal Order' })).toBeDefined();
+    expect(screen.getByRole('button', { name: 'New Order' })).toBeDefined();
     expect(screen.getByRole('button', { name: 'New VIP Order' })).toBeDefined();
     expect(screen.getByRole('button', { name: '+ Bot' })).toBeDefined();
     expect(screen.getByRole('button', { name: '- Bot' })).toBeDefined();
   });
 
-  it('calls onNewNormal exactly once when "New Normal Order" is clicked', async () => {
+  it('calls onNewNormal exactly once when "New Order" is clicked', async () => {
     const user = userEvent.setup();
     const onNewNormal = vi.fn();
 
@@ -33,7 +33,7 @@ describe('Controls', () => {
       />,
     );
 
-    await user.click(screen.getByRole('button', { name: 'New Normal Order' }));
+    await user.click(screen.getByRole('button', { name: 'New Order' }));
     expect(onNewNormal).toHaveBeenCalledOnce();
   });
 

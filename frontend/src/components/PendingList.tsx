@@ -9,7 +9,7 @@ export function PendingList({ orders }: PendingListProps): React.ReactElement {
   return (
     <section className="h-full flex flex-col min-h-0 bg-base-100 rounded-box shadow-sm">
       <h2 className="text-sm font-bold uppercase tracking-wide px-4 pt-4 pb-2 border-b border-base-300 shrink-0">
-        Pending <span className="badge badge-sm ml-1">{orders.length}</span>
+        Pending <span className="badge badge-info badge-sm ml-1">{orders.length}</span>
       </h2>
       <div
         aria-live="polite"

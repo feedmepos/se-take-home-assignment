@@ -17,7 +17,7 @@ export function Controls({
         className="btn btn-info"
         onClick={onNewNormal}
       >
-        New Normal Order
+        New Order
       </button>
       <button
         className="btn btn-secondary"
