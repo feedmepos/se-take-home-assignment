@@ -56,4 +56,51 @@ describe('CompleteList', () => {
     render(<CompleteList orders={orders} />);
     expect(screen.queryByText('No completed orders')).toBeNull();
   });
+
+  it('renders newer completed order before older one (newest-first sort)', () => {
+    const olderFirst: OrderDTO[] = [
+      {
+        id: 10,
+        type: 'NORMAL',
+        status: 'COMPLETE',
+        createdAt: '2026-05-28T00:00:00.000Z',
+        completedAt: '2026-05-28T00:01:00.000Z', // older
+      },
+      {
+        id: 20,
+        type: 'VIP',
+        status: 'COMPLETE',
+        createdAt: '2026-05-28T00:00:05.000Z',
+        completedAt: '2026-05-28T00:02:00.000Z', // newer
+      },
+    ];
+    render(<CompleteList orders={olderFirst} />);
+    const cards = screen.getAllByText(/Order #/);
+    // Newer (id 20, completedAt 00:02) must appear first in the DOM
+    expect(cards[0].textContent).toContain('20');
+    expect(cards[1].textContent).toContain('10');
+  });
+
+  it('does not mutate the prop array when sorting', () => {
+    const input: OrderDTO[] = [
+      {
+        id: 1,
+        type: 'NORMAL',
+        status: 'COMPLETE',
+        createdAt: '2026-05-28T00:00:00.000Z',
+        completedAt: '2026-05-28T00:01:00.000Z',
+      },
+      {
+        id: 2,
+        type: 'VIP',
+        status: 'COMPLETE',
+        createdAt: '2026-05-28T00:00:05.000Z',
+        completedAt: '2026-05-28T00:02:00.000Z',
+      },
+    ];
+    const originalFirstId = input[0].id;
+    render(<CompleteList orders={input} />);
+    // The original array must remain in its original order
+    expect(input[0].id).toBe(originalFirstId);
+  });
 });

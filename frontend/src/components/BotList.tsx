@@ -11,11 +11,11 @@ interface BotListProps {
 
 export function BotList({ bots, processing, cookDurationMs }: BotListProps): React.ReactElement {
   return (
-    <section className="bg-base-100 rounded-box shadow-sm flex flex-col">
+    <section className="h-full flex flex-col min-h-0 bg-base-100 rounded-box shadow-sm">
       <h2 className="text-sm font-bold uppercase tracking-wide px-4 pt-4 pb-2 border-b border-base-300 shrink-0">
         Bots <span className="badge badge-sm ml-1">{bots.length}</span>
       </h2>
-      <div className="overflow-y-auto max-h-[calc(100vh-16rem)] px-3 py-2">
+      <div className="flex-1 min-h-0 overflow-y-auto px-3 py-2">
         {bots.length === 0 ? (
           <p className="text-base-content/50 text-sm py-4 text-center">No bots</p>
         ) : (

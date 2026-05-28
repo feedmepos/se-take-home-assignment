@@ -44,9 +44,9 @@ export default function App({ eventSourceFactory }: AppProps): React.ReactElemen
   }
 
   return (
-    <div className="min-h-screen bg-base-200">
+    <div className="flex flex-col h-screen bg-base-200">
       {/* Brand header */}
-      <header className="bg-primary text-primary-content px-4 py-3 flex items-center gap-3 shadow-md">
+      <header className="bg-primary text-primary-content px-4 py-3 flex items-center gap-3 shadow-md shrink-0">
         <img src={archesUrl} alt="McDonald's golden arches" className="h-8 w-8 shrink-0" />
         <h1 className="text-xl font-bold tracking-tight">McDonald's Order Controller</h1>
         <span className={`${indicatorClass} ml-auto`}>{indicatorLabel}</span>
@@ -55,9 +55,9 @@ export default function App({ eventSourceFactory }: AppProps): React.ReactElemen
       {snapshot === null ? (
         <div className="text-base-content/50 text-center py-16">Connecting…</div>
       ) : (
-        <div className="p-4 flex flex-col gap-4">
+        <div className="flex flex-col flex-1 min-h-0 p-4 gap-4">
           {/* Controls bar */}
-          <div className="bg-base-100 rounded-box shadow-sm p-3">
+          <div className="bg-base-100 rounded-box shadow-sm p-3 shrink-0">
             <Controls
               onNewNormal={handleNewNormal}
               onNewVip={handleNewVip}
@@ -66,8 +66,8 @@ export default function App({ eventSourceFactory }: AppProps): React.ReactElemen
             />
           </div>
 
-          {/* Three-column grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
+          {/* Three-column grid — fills remaining height */}
+          <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-3 gap-4">
             <PendingList orders={snapshot.pending} />
             <BotList
               bots={snapshot.bots}
