@@ -91,7 +91,7 @@ export class OrderController {
         botId: b.id,
       }));
     const complete = this.orders.filter((o) => o.status === 'COMPLETE').map((o) => ({ ...o }));
-    return { pending, processing, complete, bots: [...this.bots] };
+    return { pending, processing, complete, bots: [...this.bots], cookMs: this.cookMs };
   }
 
   subscribe(listener: (e: DomainEvent) => void): () => void {

@@ -22,6 +22,7 @@ export interface StatusDTO {
   processing: { order: OrderDTO; botId: number }[];
   complete: OrderDTO[];
   bots: BotDTO[];
+  cookDurationMs: number;
 }
 
 export interface CreateOrderBody {

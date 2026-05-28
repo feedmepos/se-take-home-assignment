@@ -98,6 +98,7 @@ describe('Status API (e2e)', () => {
     expect(Array.isArray(body.processing)).toBe(true);
     expect(Array.isArray(body.complete)).toBe(true);
     expect(Array.isArray(body.bots)).toBe(true);
+    expect(body.cookDurationMs).toBe(10000);
   });
 
   it('GET /api/health → 200 with { status: ok }', async () => {
