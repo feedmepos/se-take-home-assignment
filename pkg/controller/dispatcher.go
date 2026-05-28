@@ -35,10 +35,11 @@ type Dispatcher struct {
 	cookDuration time.Duration
 
 	// Thread-safe stats/logs (for external CLI and status checks)
-	statusMu  sync.RWMutex
-	allOrders map[int]*Order
-	botList   []*Bot
-	logBuffer []string
+	statusMu     sync.RWMutex
+	allOrders    map[int]*Order
+	botList      []*Bot
+	logBuffer    []string
+	OnLogWritten func()
 }
 
 func NewDispatcher(cookDuration time.Duration) *Dispatcher {
@@ -249,8 +250,13 @@ func (d *Dispatcher) Log(format string, args ...interface{}) {
 	d.logBuffer = append(d.logBuffer, logMsg)
 	d.statusMu.Unlock()
 
-	// Also print to console
-	fmt.Println(logMsg)
+	// If a custom callback is provided (e.g. for split-screen dashboard), call it.
+	// Otherwise, print directly to the console.
+	if d.OnLogWritten != nil {
+		d.OnLogWritten()
+	} else {
+		fmt.Println(logMsg)
+	}
 }
 
 func (d *Dispatcher) updateOrderState(order *Order) {

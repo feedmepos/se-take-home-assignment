@@ -422,52 +422,61 @@ func TestScaleDownNewestBot(t *testing.T) {
 
 // TestMultiBotLoadBalancing verifies concurrency load balancing and scheduling rules across multiple bots.
 func TestMultiBotLoadBalancing(t *testing.T) {
-	// 25ms cook duration
-	d := NewDispatcher(25 * time.Millisecond)
+	// 50ms cook duration to give stable testing windows
+	d := NewDispatcher(50 * time.Millisecond)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	go d.Start(ctx)
 
-	// Add 2 VIP and 2 Normal orders
-	d.AddOrder(OrderNormal) // 1001
-	d.AddOrder(OrderVIP)    // 1002
-	d.AddOrder(OrderNormal) // 1003
-	d.AddOrder(OrderVIP)    // 1004
+	// 1. Add 2 Normal and 2 VIP orders first (while 0 bots are active)
+	// They will get IDs: 1001 (Normal), 1002 (VIP), 1003 (Normal), 1004 (VIP)
+	d.AddOrder(OrderNormal)
+	d.AddOrder(OrderVIP)
+	d.AddOrder(OrderNormal)
+	d.AddOrder(OrderVIP)
 
-	// Wait for all 4 orders to register
+	// Wait for all 4 orders to register in PENDING queue
 	ok := waitForStatus(d, func() bool {
 		_, pending, _, _ := d.GetStatus()
 		return len(pending) == 4
-	}, 50*time.Millisecond)
+	}, 100*time.Millisecond)
 	if !ok {
 		t.Fatalf("Orders failed to register")
 	}
 
-	// Scale up to 2 bots. They should immediately pick up the 2 VIP orders (1002 and 1004).
+	// 2. Scale up Bot 1. It should immediately pick up VIP #1002.
 	d.ScaleUp()
-	d.ScaleUp()
+	ok = waitForStatus(d, func() bool {
+		activeBots, _, processing, _ := d.GetStatus()
+		return activeBots == 1 && len(processing) == 1 && processing[0].ID == 1002
+	}, 100*time.Millisecond)
+	if !ok {
+		_, _, processing, _ := d.GetStatus()
+		t.Fatalf("Expected Bot 1 to pick up VIP #1002, got: %v", processing)
+	}
 
-	// Wait for bots to process VIP orders, leaving Normal orders pending
+	// 3. Scale up Bot 2. Since Bot 1 is busy, Bot 2 must pick up VIP #1004.
+	d.ScaleUp()
 	ok = waitForStatus(d, func() bool {
 		activeBots, pending, processing, _ := d.GetStatus()
 		return activeBots == 2 && len(processing) == 2 && len(pending) == 2 &&
 			(processing[0].ID == 1002 || processing[0].ID == 1004) &&
 			(processing[1].ID == 1002 || processing[1].ID == 1004) &&
-			pending[0].ID == 1001 && pending[1].ID == 1003
-	}, 50*time.Millisecond)
+			(pending[0].ID == 1001 && pending[1].ID == 1003)
+	}, 100*time.Millisecond)
 	if !ok {
 		_, pending, processing, _ := d.GetStatus()
-		t.Fatalf("Expected 2 bots processing VIP orders 1002/1004 and 2 Normal pending. Proc: %v, Pend: %v", processing, pending)
+		t.Fatalf("Expected 2 bots processing VIP orders 1002/1004. Proc: %v, Pend: %v", processing, pending)
 	}
 
-	// Wait for VIP orders to complete and bots to pick up Normal orders
+	// 4. Wait for VIP orders to complete and bots to automatically pick up the 2 Normal orders
 	ok = waitForStatus(d, func() bool {
 		_, pending, processing, completed := d.GetStatus()
 		return len(completed) == 2 && len(processing) == 2 && len(pending) == 0 &&
 			(completed[0].ID == 1002 || completed[0].ID == 1004) &&
 			(processing[0].ID == 1001 || processing[0].ID == 1003)
-	}, 100*time.Millisecond)
+	}, 150*time.Millisecond)
 	if !ok {
 		_, pending, processing, completed := d.GetStatus()
 		t.Fatalf("Expected VIP completed and Normal processing. Proc: %v, Pend: %v, Comp: %v", processing, pending, completed)

@@ -122,15 +122,26 @@ func runSimulation() {
 }
 
 func runInteractiveCLI() {
-	fmt.Print(colorMagenta + banner + colorReset)
-	fmt.Println("Type 'help' to see available commands.")
-	fmt.Println("Starting central dispatcher with 10s cook duration...")
+	// Initialize terminal layout: Clear screen and split it
+	// We set the scrolling region from Row 21 to the bottom.
+	// The top 20 rows are reserved for the static live dashboard.
+	fmt.Print("\033[2J")     // Clear screen
+	fmt.Print("\033[21;r")    // Set scrolling margin (Row 21 to bottom)
+	fmt.Print("\033[21;1H")   // Position cursor at Row 21
 
 	d := controller.NewDispatcher(10 * time.Second)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	// Redraw dashboard whenever dispatcher logs events
+	d.OnLogWritten = func() {
+		drawDashboard(d)
+	}
+
 	go d.Start(ctx)
+
+	// Initial render
+	drawDashboard(d)
 
 	reader := bufio.NewReader(os.Stdin)
 	for {
@@ -146,6 +157,10 @@ func runInteractiveCLI() {
 
 		switch cmd {
 		case "exit", "quit", "q":
+			// Reset terminal scrolling region and clear screen before exiting
+			fmt.Print("\033[r")
+			fmt.Print("\033[2J")
+			fmt.Print("\033[1;1H")
 			fmt.Println("Shutting down McDonald's Cooking Bot Simulation. Goodbye!")
 			d.Stop()
 			return
@@ -155,25 +170,23 @@ func runInteractiveCLI() {
 
 		case "normal", "n", "add normal":
 			d.AddOrder(controller.OrderNormal)
-			fmt.Printf("%s[SYSTEM]%s Request sent: Create Normal Order\n", colorGreen, colorReset)
 
 		case "vip", "v", "add vip":
 			d.AddOrder(controller.OrderVIP)
-			fmt.Printf("%s[SYSTEM]%s Request sent: Create VIP Order\n", colorGreen, colorReset)
 
 		case "+", "+ bot", "add bot":
 			d.ScaleUp()
-			fmt.Printf("%s[SYSTEM]%s Request sent: Spawn Bot\n", colorGreen, colorReset)
 
 		case "-", "- bot", "remove bot":
 			d.ScaleDown()
-			fmt.Printf("%s[SYSTEM]%s Request sent: Remove Newest Bot\n", colorGreen, colorReset)
 
 		case "status", "s":
-			printInteractiveStatus(d)
+			// Redundant now that it's live, but keeps the command working
+			d.Log("System status checked by user")
 
 		case "logs", "l":
-			fmt.Println(colorBold + "--- System Logs ---" + colorReset)
+			// Redundant now that logs are live, but lists them in scrolling area
+			fmt.Println(colorBold + "--- Past System Logs ---" + colorReset)
 			for _, logLine := range d.GetLogs() {
 				fmt.Println(logLine)
 			}
@@ -184,75 +197,80 @@ func runInteractiveCLI() {
 	}
 }
 
+func drawDashboard(d *controller.Dispatcher) {
+	// Save cursor position
+	fmt.Print("\033[s")
+
+	// Move cursor to Row 1, Col 1 (outside scrolling region)
+	fmt.Print("\033[1;1H")
+
+	// Get latest system state
+	activeBots, pending, processing, completed := d.GetStatus()
+
+	// 1. Header Banner
+	fmt.Print("\033[K" + colorBold + colorMagenta + "  === McDonald's Cooking Bot Simulation - Live Dashboard ===" + colorReset + "\n")
+	fmt.Printf("\033[K  Active Bots: %d | Pending: %d | Cooking: %d | Completed: %d\n", activeBots, len(pending), len(processing), len(completed))
+	fmt.Print("\033[K----------------------------------------------------------------------\n")
+
+	// 2. Pending Queue (shows top 3 items)
+	fmt.Print("\033[K" + colorBold + "PENDING QUEUE:" + colorReset + "\n")
+	for i := 0; i < 3; i++ {
+		if i < len(pending) {
+			o := pending[i]
+			typeColor := colorCyan
+			if o.Type == controller.OrderVIP {
+				typeColor = colorBold + colorYellow
+			}
+			fmt.Printf("\033[K  - Order #%d [%s%s%s]\n", o.ID, typeColor, o.Type, colorReset)
+		} else {
+			fmt.Print("\033[K\n")
+		}
+	}
+
+	// 3. Cooking in Progress (shows top 3 items)
+	fmt.Print("\033[K\n" + colorBold + "COOKING IN PROGRESS:" + colorReset + "\n")
+	for i := 0; i < 3; i++ {
+		if i < len(processing) {
+			o := processing[i]
+			typeColor := colorCyan
+			if o.Type == controller.OrderVIP {
+				typeColor = colorBold + colorYellow
+			}
+			fmt.Printf("\033[K  - Order #%d [%s%s%s] -> COOKING\n", o.ID, typeColor, o.Type, colorReset)
+		} else {
+			fmt.Print("\033[K\n")
+		}
+	}
+
+	// 4. Recent Logs (shows last 5 lines)
+	fmt.Print("\033[K\n" + colorBold + "RECENT EVENT LOGS (Live):" + colorReset + "\n")
+	logs := d.GetLogs()
+	start := len(logs) - 5
+	if start < 0 {
+		start = 0
+	}
+	for i := 0; i < 5; i++ {
+		logIdx := start + i
+		if logIdx < len(logs) {
+			fmt.Printf("\033[K  %s\n", logs[logIdx])
+		} else {
+			fmt.Print("\033[K\n")
+		}
+	}
+
+	fmt.Print("\033[K======================================================================\n")
+
+	// Restore cursor back to user prompt
+	fmt.Print("\033[u")
+}
+
 func printHelp() {
 	fmt.Println(colorBold + "Available Commands:" + colorReset)
 	fmt.Printf("  %-20s Create a new Normal order (PENDING)\n", colorCyan+"normal / n"+colorReset)
 	fmt.Printf("  %-20s Create a new VIP order (PENDING)\n", colorCyan+"vip / v"+colorReset)
 	fmt.Printf("  %-20s Spawn a new bot to cook orders\n", colorCyan+"+ / add bot"+colorReset)
 	fmt.Printf("  %-20s Destroy the newest bot (aborts active cooking if busy)\n", colorCyan+"- / remove bot"+colorReset)
-	fmt.Printf("  %-20s Display current status of all orders and bots\n", colorCyan+"status / s"+colorReset)
-	fmt.Printf("  %-20s Print full transaction logs with HH:MM:SS timestamps\n", colorCyan+"logs / l"+colorReset)
+	fmt.Printf("  %-20s Print past system logs in scrolling buffer\n", colorCyan+"logs / l"+colorReset)
 	fmt.Printf("  %-20s Print this help menu\n", colorCyan+"help / h"+colorReset)
 	fmt.Printf("  %-20s Exit the application\n", colorCyan+"exit / q"+colorReset)
-}
-
-func printInteractiveStatus(d *controller.Dispatcher) {
-	activeBots, pending, processing, completed := d.GetStatus()
-
-	fmt.Println()
-	fmt.Println(colorBold + "==================================================" + colorReset)
-	fmt.Printf("%s[SYSTEM STATE]%s\n", colorBold+colorMagenta, colorReset)
-	fmt.Printf("  Active Bots:       %d\n", activeBots)
-	fmt.Printf("  Pending Orders:    %d\n", len(pending))
-	fmt.Printf("  Processing Orders: %d\n", len(processing))
-	fmt.Printf("  Completed Orders:  %d\n", len(completed))
-	fmt.Println(colorBold + "--------------------------------------------------" + colorReset)
-
-	// 1. Pending List
-	fmt.Println(colorBold + "PENDING AREA:" + colorReset)
-	if len(pending) == 0 {
-		fmt.Printf("  %s(No pending orders)%s\n", colorGray, colorReset)
-	} else {
-		for _, o := range pending {
-			typeColor := colorCyan
-			if o.Type == controller.OrderVIP {
-				typeColor = colorBold + colorYellow
-			}
-			fmt.Printf("  - Order #%d [%s%s%s]\n", o.ID, typeColor, o.Type, colorReset)
-		}
-	}
-
-	// 2. Processing List
-	fmt.Println("\n" + colorBold + "PROCESSING (COOKING):" + colorReset)
-	if len(processing) == 0 {
-		fmt.Printf("  %s(No active cooking processes)%s\n", colorGray, colorReset)
-	} else {
-		for _, o := range processing {
-			typeColor := colorCyan
-			if o.Type == controller.OrderVIP {
-				typeColor = colorBold + colorYellow
-			}
-			fmt.Printf("  - Order #%d [%s%s%s] -> COOKING\n", o.ID, typeColor, o.Type, colorReset)
-		}
-	}
-
-	// 3. Completed List
-	fmt.Println("\n" + colorBold + "COMPLETE AREA:" + colorReset)
-	if len(completed) == 0 {
-		fmt.Printf("  %s(No completed orders yet)%s\n", colorGray, colorReset)
-	} else {
-		// Just show the last 5 completed to save space
-		startIdx := 0
-		if len(completed) > 5 {
-			startIdx = len(completed) - 5
-		}
-		for i := startIdx; i < len(completed); i++ {
-			o := completed[i]
-			fmt.Printf("  - %sOrder #%d [%s]%s\n", colorGreen, o.ID, o.Type, colorReset)
-		}
-		if len(completed) > 5 {
-			fmt.Printf("  %s... and %d more completed orders%s\n", colorGray, len(completed)-5, colorReset)
-		}
-	}
-	fmt.Println(colorBold + "==================================================" + colorReset)
 }
