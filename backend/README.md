@@ -47,8 +47,9 @@ npm run build && node dist/cli/scenario.js > ../scripts/result.txt
 Runs the **real** controller in real time (real `setTimeout`, real 10s cooks).
 Narration goes to stderr; stdout is a pure event log with wall-clock `HH:MM:SS`
 timestamps. The scripted run demonstrates, in order: VIP priority, FIFO within a
-tier, bot pickup, the 10s cook, destroying the **newest** bot mid-cook (requeue to
-the original slot), and a targeted `--id` removal. See the sample below.
+tier, bot pickup, the 10s cook, destroying the **newest idle** bot like the
+employer sample, then an extra destroy-while-processing segment proving requeue.
+See the sample below.
 
 ### Interactive REPL
 
@@ -105,26 +106,46 @@ McDonald's Order Management System - Simulation Results
 [..] Bot #1 picked up VIP Order #2 - Status: PROCESSING        # VIP jumps ahead of #1
 [..] Bot #2 created - Status: ACTIVE
 [..] Bot #2 picked up Normal Order #1 - Status: PROCESSING
-[..] Normal Order #1 returned to PENDING - Status: PENDING     # del-bot (no id): newest bot, mid-cook
-[..] Bot #2 destroyed while PROCESSING
-[..] Bot #3 created - Status: ACTIVE
-[..] Bot #3 picked up Normal Order #1 - Status: PROCESSING     # requeued #1 resumes, before #3
 [..] Bot #1 completed VIP Order #2 - Status: COMPLETE (Processing time: 10s)
 [..] Bot #1 picked up Normal Order #3 - Status: PROCESSING
-[..] Bot #3 completed Normal Order #1 - Status: COMPLETE (Processing time: 10s)
-[..] Bot #3 is now IDLE - No pending orders
+[..] Bot #2 completed Normal Order #1 - Status: COMPLETE (Processing time: 10s)
+[..] Bot #2 is now IDLE - No pending orders
+[..] Created VIP Order #4 - Status: PENDING
+[..] Bot #2 picked up VIP Order #4 - Status: PROCESSING
 [..] Bot #1 completed Normal Order #3 - Status: COMPLETE (Processing time: 10s)
 [..] Bot #1 is now IDLE - No pending orders
+[..] Bot #2 completed VIP Order #4 - Status: COMPLETE (Processing time: 10s)
+[..] Bot #2 is now IDLE - No pending orders
+[..] Bot #2 destroyed while IDLE
+[..] Created Normal Order #5 - Status: PENDING
+[..] Bot #1 picked up Normal Order #5 - Status: PROCESSING
+[..] Normal Order #5 returned to PENDING - Status: PENDING     # del-bot (no id): newest bot, mid-cook
+[..] Bot #1 destroyed while PROCESSING
+[..] Bot #3 created - Status: ACTIVE
+[..] Bot #3 picked up Normal Order #5 - Status: PROCESSING
+[..] Bot #3 completed Normal Order #5 - Status: COMPLETE (Processing time: 10s)
+[..] Bot #3 is now IDLE - No pending orders
 
 Final Status:
-- Total Orders Processed: 3 (1 VIP, 2 Normal)
-- Orders Completed: 3
-- Active Bots: 2
+- Total Orders Processed: 5 (2 VIP, 3 Normal)
+- Orders Completed: 5
+- Active Bots: 1
 - Pending Orders: 0
 ```
 
-Unlike the employer's sample (which only destroys an *idle* bot), our scenario
-destroys the newest bot **mid-cook** so the requeue requirement is visibly proven.
+The first part stays close to the employer's sample, including destroying an idle
+bot. The final extra order destroys the newest bot **mid-cook** so the requeue
+requirement is visibly proven.
+
+## Additional stress checks
+
+Optional stress and concurrency checks are documented in
+[`../docs/stress-and-concurrency-testing.md`](../docs/stress-and-concurrency-testing.md).
+Run them after a build with:
+
+```bash
+node scripts/stress-check.js
+```
 
 ## Behavior summary
 
