@@ -9,6 +9,14 @@ This repository implements the order controller in both requested forms:
 
 The business state is intentionally in memory only. No database is required for this prototype.
 
+## Live app
+
+The deployed UI is available at:
+
+```text
+https://jvloo-feedme-assessment-wrzf3oy5ba-as.a.run.app/
+```
+
 ## Requirements covered
 
 | Requirement | Implementation |
