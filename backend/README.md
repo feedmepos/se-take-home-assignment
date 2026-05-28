@@ -22,7 +22,7 @@ npm install
 ## CI scripts (run from the repo root)
 
 ```bash
-bash scripts/test.sh    # npm ci && npm test && npm run test:e2e   (unit + e2e)
+bash scripts/test.sh    # npm ci && npm run typecheck && npm test && npm run test:e2e  (typecheck + unit + e2e)
 bash scripts/build.sh   # npm ci && npm run build
 bash scripts/run.sh     # node dist/cli/scenario.js > scripts/result.txt
 ```
@@ -99,31 +99,31 @@ matches that format. A run of our scenario looks like:
 McDonald's Order Management System - Simulation Results
 
 [..] System initialized with 0 bots
-[..] Created Normal Order #1 - Status: PENDING
-[..] Created VIP Order #2 - Status: PENDING
-[..] Created Normal Order #3 - Status: PENDING
+[..] Created Normal Order #1001 - Status: PENDING
+[..] Created VIP Order #1002 - Status: PENDING
+[..] Created Normal Order #1003 - Status: PENDING
 [..] Bot #1 created - Status: ACTIVE
-[..] Bot #1 picked up VIP Order #2 - Status: PROCESSING        # VIP jumps ahead of #1
+[..] Bot #1 picked up VIP Order #1002 - Status: PROCESSING     # VIP jumps ahead of #1001
 [..] Bot #2 created - Status: ACTIVE
-[..] Bot #2 picked up Normal Order #1 - Status: PROCESSING
-[..] Bot #1 completed VIP Order #2 - Status: COMPLETE (Processing time: 10s)
-[..] Bot #1 picked up Normal Order #3 - Status: PROCESSING
-[..] Bot #2 completed Normal Order #1 - Status: COMPLETE (Processing time: 10s)
+[..] Bot #2 picked up Normal Order #1001 - Status: PROCESSING
+[..] Bot #1 completed VIP Order #1002 - Status: COMPLETE (Processing time: 10s)
+[..] Bot #1 picked up Normal Order #1003 - Status: PROCESSING
+[..] Bot #2 completed Normal Order #1001 - Status: COMPLETE (Processing time: 10s)
 [..] Bot #2 is now IDLE - No pending orders
-[..] Created VIP Order #4 - Status: PENDING
-[..] Bot #2 picked up VIP Order #4 - Status: PROCESSING
-[..] Bot #1 completed Normal Order #3 - Status: COMPLETE (Processing time: 10s)
+[..] Created VIP Order #1004 - Status: PENDING
+[..] Bot #2 picked up VIP Order #1004 - Status: PROCESSING
+[..] Bot #1 completed Normal Order #1003 - Status: COMPLETE (Processing time: 10s)
 [..] Bot #1 is now IDLE - No pending orders
-[..] Bot #2 completed VIP Order #4 - Status: COMPLETE (Processing time: 10s)
+[..] Bot #2 completed VIP Order #1004 - Status: COMPLETE (Processing time: 10s)
 [..] Bot #2 is now IDLE - No pending orders
 [..] Bot #2 destroyed while IDLE
-[..] Created Normal Order #5 - Status: PENDING
-[..] Bot #1 picked up Normal Order #5 - Status: PROCESSING
-[..] Normal Order #5 returned to PENDING - Status: PENDING     # del-bot (no id): newest bot, mid-cook
+[..] Created Normal Order #1005 - Status: PENDING
+[..] Bot #1 picked up Normal Order #1005 - Status: PROCESSING
+[..] Normal Order #1005 returned to PENDING - Status: PENDING  # del-bot (no id): newest bot, mid-cook
 [..] Bot #1 destroyed while PROCESSING
 [..] Bot #3 created - Status: ACTIVE
-[..] Bot #3 picked up Normal Order #5 - Status: PROCESSING
-[..] Bot #3 completed Normal Order #5 - Status: COMPLETE (Processing time: 10s)
+[..] Bot #3 picked up Normal Order #1005 - Status: PROCESSING
+[..] Bot #3 completed Normal Order #1005 - Status: COMPLETE (Processing time: 10s)
 [..] Bot #3 is now IDLE - No pending orders
 
 Final Status:

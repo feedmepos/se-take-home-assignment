@@ -23,7 +23,7 @@ test('add-order returns confirmation with order id and type', () => {
   const { ctrl } = make();
   const out = runCommand(ctrl, 'add-order --type vip');
   expect(out).toMatch(/VIP/);
-  expect(out).toMatch(/#1/);
+  expect(out).toMatch(/#1001/);
 });
 
 test('add-bot returns confirmation with bot id', () => {
@@ -62,7 +62,7 @@ test('list-orders returns JSON', () => {
   const out = runCommand(ctrl, 'list-orders');
   const parsed = JSON.parse(out) as { type: string }[];
   expect(Array.isArray(parsed)).toBe(true);
-  expect(parsed[0].type).toBe('VIP');
+  expect(parsed[0]!.type).toBe('VIP');
 });
 
 test('list-orders --type filters by type', () => {

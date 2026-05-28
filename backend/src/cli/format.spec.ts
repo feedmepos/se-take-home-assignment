@@ -116,6 +116,7 @@ test('summary tallies orders by type, completion, bots, and pending', () => {
     processing: [{ order: order({ id: 2, type: 'VIP', status: 'PROCESSING' }), botId: 1 }],
     complete: [order({ id: 3, type: 'VIP', status: 'COMPLETE' })],
     bots: [{ id: 1, status: 'PROCESSING', currentOrderId: 2 }],
+    cookMs: 10_000,
   };
   const out = formatSummary(snap);
   expect(out).toContain('Total Orders Processed: 3 (2 VIP, 1 Normal)');
