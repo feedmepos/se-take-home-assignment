@@ -1,0 +1,10 @@
+# Binaries
+order-controller
+
+# Local benchmark files
+pkg/controller/benchmark_test.go
+
+# OS files
+.DS_Store
+**/.DS_Store
+
