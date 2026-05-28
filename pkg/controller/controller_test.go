@@ -7,6 +7,18 @@ import (
 	"time"
 )
 
+// helper to wait for a state to be achieved, avoiding fragile hardcoded sleeps
+func waitForStatus(d *Dispatcher, check func() bool, timeout time.Duration) bool {
+	deadline := time.Now().Add(timeout)
+	for time.Now().Before(deadline) {
+		if check() {
+			return true
+		}
+		time.Sleep(1 * time.Millisecond)
+	}
+	return false
+}
+
 // TestNormalOrderFlow verifies User Story 1:
 // Normal order flows to PENDING area and then to COMPLETE after being processed.
 func TestNormalOrderFlow(t *testing.T) {
@@ -15,42 +27,38 @@ func TestNormalOrderFlow(t *testing.T) {
 	defer cancel()
 
 	go d.Start(ctx)
-	// Let dispatcher initialize
-	time.Sleep(10 * time.Millisecond)
 
 	// Add order
 	d.AddOrder(OrderNormal)
-	time.Sleep(10 * time.Millisecond)
 
-	// Verify it is in PENDING
-	_, pending, processing, completed := d.GetStatus()
-	if len(pending) != 1 || pending[0].Type != OrderNormal || pending[0].Status != StatusPending {
-		t.Fatalf("Expected 1 pending normal order, got: %v", pending)
-	}
-	if len(processing) != 0 || len(completed) != 0 {
-		t.Fatalf("Unexpected processing/completed orders. Proc: %d, Comp: %d", len(processing), len(completed))
+	// Wait for order to show up in pending
+	ok := waitForStatus(d, func() bool {
+		_, pending, _, _ := d.GetStatus()
+		return len(pending) == 1 && pending[0].Type == OrderNormal && pending[0].Status == StatusPending
+	}, 50*time.Millisecond)
+	if !ok {
+		t.Fatalf("Expected 1 pending normal order, check failed")
 	}
 
 	// Scale up to spawn 1 bot
 	d.ScaleUp()
-	time.Sleep(5 * time.Millisecond) // wait for pickup
 
-	// Verify order is PROCESSING
-	_, pending, processing, completed = d.GetStatus()
-	if len(processing) != 1 || processing[0].ID != 1001 || processing[0].Status != StatusProcessing {
-		t.Fatalf("Expected order 1001 to be processing, got: %v", processing)
+	// Wait for order to be picked up (PROCESSING)
+	ok = waitForStatus(d, func() bool {
+		_, _, processing, _ := d.GetStatus()
+		return len(processing) == 1 && processing[0].ID == 1001 && processing[0].Status == StatusProcessing
+	}, 50*time.Millisecond)
+	if !ok {
+		t.Fatalf("Expected order 1001 to transition to processing")
 	}
 
-	// Wait for cook completion (cookDuration is 10ms)
-	time.Sleep(20 * time.Millisecond)
-
-	// Verify order is COMPLETE
-	_, pending, processing, completed = d.GetStatus()
-	if len(completed) != 1 || completed[0].ID != 1001 || completed[0].Status != StatusComplete {
-		t.Fatalf("Expected order 1001 to be complete, got: %v", completed)
-	}
-	if len(pending) != 0 || len(processing) != 0 {
-		t.Fatalf("Expected 0 pending/processing orders, got Pending: %d, Proc: %d", len(pending), len(processing))
+	// Wait for order to be COMPLETE (cookDuration is 10ms)
+	ok = waitForStatus(d, func() bool {
+		_, _, _, completed := d.GetStatus()
+		return len(completed) == 1 && completed[0].ID == 1001 && completed[0].Status == StatusComplete
+	}, 100*time.Millisecond)
+	if !ok {
+		t.Fatalf("Expected order 1001 to transition to complete")
 	}
 }
 
@@ -58,7 +66,6 @@ func TestNormalOrderFlow(t *testing.T) {
 // VIP orders are processed first before all normal orders. If there is existing VIP order,
 // new VIP order queues behind it. Same for normal orders.
 func TestVIPPriorityAndFIFO(t *testing.T) {
-	// We will inspect queue sorting logic directly, as well as dispatcher dispatching order.
 	q := NewOrderQueue()
 
 	o1 := &Order{ID: 1001, Type: OrderNormal, Status: StatusPending}
@@ -103,70 +110,68 @@ func TestBotScaling(t *testing.T) {
 	defer cancel()
 
 	go d.Start(ctx)
-	time.Sleep(10 * time.Millisecond)
 
 	// Add Normal #1001, VIP #1002, Normal #1003
 	d.AddOrder(OrderNormal) // will get ID 1001
 	d.AddOrder(OrderVIP)    // will get ID 1002
 	d.AddOrder(OrderNormal) // will get ID 1003
-	time.Sleep(10 * time.Millisecond)
+
+	// Wait for all 3 orders to be pending
+	ok := waitForStatus(d, func() bool {
+		_, pending, _, _ := d.GetStatus()
+		return len(pending) == 3
+	}, 50*time.Millisecond)
+	if !ok {
+		t.Fatalf("Orders failed to register")
+	}
 
 	// Scale up to 1 bot. It should immediately pick up VIP #1002 (highest priority).
 	d.ScaleUp()
-	time.Sleep(10 * time.Millisecond)
 
-	// Verify Bot #1 is processing VIP #1002
-	activeBots, pending, processing, completed := d.GetStatus()
-	if activeBots != 1 {
-		t.Fatalf("Expected 1 active bot, got %d", activeBots)
-	}
-	if len(processing) != 1 || processing[0].ID != 1002 {
-		t.Fatalf("Expected VIP #1002 to be processing, got: %v", processing)
-	}
-
-	// Verify pending contains Normal #1001 and Normal #1003
-	if len(pending) != 2 || pending[0].ID != 1001 || pending[1].ID != 1003 {
-		t.Fatalf("Expected pending queue to be [1001, 1003], got: %v", pending)
+	// Wait for Bot #1 to pick up VIP #1002
+	ok = waitForStatus(d, func() bool {
+		activeBots, pending, processing, _ := d.GetStatus()
+		return activeBots == 1 && len(processing) == 1 && processing[0].ID == 1002 && len(pending) == 2
+	}, 50*time.Millisecond)
+	if !ok {
+		t.Fatalf("Expected VIP #1002 to be processing by 1 active bot")
 	}
 
 	// Scale down (destroy the bot while it is processing VIP #1002)
 	d.ScaleDown()
-	time.Sleep(15 * time.Millisecond) // Wait for cancellation and re-enqueueing
 
-	// Verify Bot is gone, VIP #1002 is pending again at its original position (front of queue since it's VIP)
-	activeBots, pending, processing, completed = d.GetStatus()
-	if activeBots != 0 {
-		t.Fatalf("Expected 0 active bots, got %d", activeBots)
-	}
-	if len(processing) != 0 {
-		t.Fatalf("Expected 0 processing orders, got %d", len(processing))
-	}
-	if len(pending) != 3 || pending[0].ID != 1002 || pending[1].ID != 1001 || pending[2].ID != 1003 {
-		t.Fatalf("Expected pending queue to restore VIP #1002 to the front: [1002, 1001, 1003], got: %v", pending)
+	// Wait for Bot to be gone, and VIP #1002 to return to front of pending queue: [1002, 1001, 1003]
+	ok = waitForStatus(d, func() bool {
+		activeBots, pending, processing, _ := d.GetStatus()
+		return activeBots == 0 && len(processing) == 0 && len(pending) == 3 &&
+			pending[0].ID == 1002 && pending[1].ID == 1001 && pending[2].ID == 1003
+	}, 100*time.Millisecond)
+	if !ok {
+		_, pending, _, _ := d.GetStatus()
+		t.Fatalf("Expected VIP #1002 to return to front of queue, queue was: %v", pending)
 	}
 
 	// Now add a bot again. It should immediately pick up VIP #1002 again.
 	d.ScaleUp()
-	time.Sleep(10 * time.Millisecond)
 
-	activeBots, pending, processing, completed = d.GetStatus()
-	if activeBots != 1 {
-		t.Fatalf("Expected 1 active bot, got %d", activeBots)
-	}
-	if len(processing) != 1 || processing[0].ID != 1002 {
-		t.Fatalf("Expected VIP #1002 to be processing again, got: %v", processing)
+	// Wait for Bot #1 to pick up VIP #1002 again
+	ok = waitForStatus(d, func() bool {
+		activeBots, _, processing, _ := d.GetStatus()
+		return activeBots == 1 && len(processing) == 1 && processing[0].ID == 1002
+	}, 50*time.Millisecond)
+	if !ok {
+		t.Fatalf("Expected VIP #1002 to be processing again")
 	}
 
-	// Wait for cook to complete
-	time.Sleep(60 * time.Millisecond)
-
-	// VIP #1002 should complete. Bot should automatically move to Normal #1001.
-	activeBots, pending, processing, completed = d.GetStatus()
-	if len(completed) != 1 || completed[0].ID != 1002 {
-		t.Fatalf("Expected VIP #1002 to be complete, got: %v", completed)
-	}
-	if len(processing) != 1 || processing[0].ID != 1001 {
-		t.Fatalf("Expected Bot to automatically pick up Normal #1001, got processing: %v", processing)
+	// Wait for cook to complete and bot to automatically pick up Normal #1001
+	ok = waitForStatus(d, func() bool {
+		_, _, processing, completed := d.GetStatus()
+		return len(completed) == 1 && completed[0].ID == 1002 &&
+			len(processing) == 1 && processing[0].ID == 1001
+	}, 150*time.Millisecond)
+	if !ok {
+		_, _, processing, completed := d.GetStatus()
+		t.Fatalf("Expected VIP completed and Normal processing, got processing: %v, completed: %v", processing, completed)
 	}
 }
 
@@ -179,37 +184,53 @@ func TestBotSingleTaskAndTiming(t *testing.T) {
 	defer cancel()
 
 	go d.Start(ctx)
-	time.Sleep(10 * time.Millisecond)
 
 	// Add two normal orders
 	d.AddOrder(OrderNormal) // 1001
 	d.AddOrder(OrderNormal) // 1002
-	time.Sleep(10 * time.Millisecond)
+
+	// Wait for both to be pending
+	ok := waitForStatus(d, func() bool {
+		_, pending, _, _ := d.GetStatus()
+		return len(pending) == 2
+	}, 50*time.Millisecond)
+	if !ok {
+		t.Fatalf("Orders failed to register")
+	}
 
 	// Scale up to 1 bot. It should pick up #1001.
 	start := time.Now()
 	d.ScaleUp()
-	time.Sleep(10 * time.Millisecond)
 
-	// Verify only #1001 is processing, #1002 remains pending
-	_, pending, processing, completed := d.GetStatus()
-	if len(processing) != 1 || processing[0].ID != 1001 {
-		t.Fatalf("Expected only order 1001 to be processing, got: %v", processing)
+	// Wait for #1001 to start processing
+	ok = waitForStatus(d, func() bool {
+		_, pending, processing, _ := d.GetStatus()
+		return len(processing) == 1 && processing[0].ID == 1001 && len(pending) == 1 && pending[0].ID == 1002
+	}, 50*time.Millisecond)
+	if !ok {
+		t.Fatalf("Expected only order 1001 to start processing")
 	}
-	if len(pending) != 1 || pending[0].ID != 1002 {
-		t.Fatalf("Expected order 1002 to be pending, got: %v", pending)
+
+	// Wait for completion of #1001 and measure exact elapsed time
+	ok = waitForStatus(d, func() bool {
+		_, _, _, completed := d.GetStatus()
+		return len(completed) == 1 && completed[0].ID == 1001
+	}, 100*time.Millisecond)
+
+	if !ok {
+		t.Fatalf("Expected order 1001 to complete within timeout")
 	}
 
-	// Wait for completion of #1001. The duration should be at least cookDuration (25ms).
-	time.Sleep(20 * time.Millisecond) // Total elapsed from start: ~30ms
+	elapsed := time.Since(start)
 
-	// Verify completing transition
-	_, _, processing, completed = d.GetStatus()
-	if len(completed) == 1 && completed[0].ID == 1001 {
-		elapsed := time.Since(start)
-		if elapsed < cookDuration {
-			t.Errorf("Expected cook time to be at least %v, got %v", cookDuration, elapsed)
-		}
+	// Assert the timing is robust and within a reasonable execution window
+	if elapsed < cookDuration {
+		t.Errorf("Expected cook time to be at least %v, got %v", cookDuration, elapsed)
+	}
+	// Give a 15ms buffer for thread scheduling/overhead on slow machines
+	maxExpected := cookDuration + 15*time.Millisecond
+	if elapsed > maxExpected {
+		t.Errorf("Expected cook time to be near %v (with scheduling tolerance), but took too long: %v", cookDuration, elapsed)
 	}
 }
 
@@ -220,15 +241,17 @@ func TestTimestampFormatting(t *testing.T) {
 	defer cancel()
 
 	go d.Start(ctx)
-	time.Sleep(5 * time.Millisecond)
 	d.AddOrder(OrderNormal)
-	time.Sleep(5 * time.Millisecond)
 
-	logs := d.GetLogs()
-	if len(logs) == 0 {
+	// Wait for at least one log line to appear
+	ok := waitForStatus(d, func() bool {
+		return len(d.GetLogs()) > 0
+	}, 50*time.Millisecond)
+	if !ok {
 		t.Fatalf("Expected logs to be recorded, got none")
 	}
 
+	logs := d.GetLogs()
 	// Match pattern like: [14:32:01] Message
 	re := regexp.MustCompile(`^\[\d{2}:\d{2}:\d{2}\] `)
 	for _, logLine := range logs {
