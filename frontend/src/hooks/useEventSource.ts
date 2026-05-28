@@ -11,10 +11,16 @@ export interface EventSourceLike {
   close(): void;
 }
 
+// Stable module-level default so the effect dependency is referentially constant
+// across renders. An inline default arrow would be a new function each render,
+// re-triggering the effect and tearing down / reopening the EventSource on every
+// render — an infinite reconnect loop once the first snapshot arrives.
+const defaultFactory = (url: string): EventSourceLike =>
+  new EventSource(url) as unknown as EventSourceLike;
+
 export function useEventSource(
   url: string,
-  factory: (url: string) => EventSourceLike = (u) =>
-    new EventSource(u) as unknown as EventSourceLike,
+  factory: (url: string) => EventSourceLike = defaultFactory,
 ): { snapshot: StatusDTO | null; status: ConnectionStatus } {
   const [snapshot, setSnapshot] = useState<StatusDTO | null>(null);
   const [status, setStatus] = useState<ConnectionStatus>('connecting');

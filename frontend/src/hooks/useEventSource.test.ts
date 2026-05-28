@@ -119,4 +119,31 @@ describe('useEventSource', () => {
     unmount();
     expect(fake.closed).toBe(true);
   });
+
+  // Regression: the default factory must be referentially stable so the effect
+  // does not re-run on every render. An unstable default reopened the connection
+  // each render → an infinite reconnect loop in production. This test exercises
+  // the DEFAULT path (no injected factory), which the tests above never did.
+  it('using the default factory, does not recreate the connection on re-render', () => {
+    let constructCount = 0;
+    class MockEventSource {
+      onopen: ((ev: unknown) => void) | null = null;
+      onmessage: ((ev: { data: string }) => void) | null = null;
+      onerror: ((ev: unknown) => void) | null = null;
+      close(): void {}
+      constructor(_url: string) {
+        constructCount++;
+      }
+    }
+    vi.stubGlobal('EventSource', MockEventSource);
+    try {
+      const { rerender } = renderHook(() => useEventSource('/api/events'));
+      expect(constructCount).toBe(1);
+      rerender();
+      rerender();
+      expect(constructCount).toBe(1);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
 });
