@@ -4,6 +4,7 @@ import { Controls } from './components/Controls';
 import { PendingList } from './components/PendingList';
 import { BotList } from './components/BotList';
 import { CompleteList } from './components/CompleteList';
+import archesUrl from './assets/arches.svg';
 
 interface AppProps {
   eventSourceFactory?: (url: string) => EventSourceLike;
@@ -43,17 +44,20 @@ export default function App({ eventSourceFactory }: AppProps): React.ReactElemen
   }
 
   return (
-    <div className="min-h-screen bg-base-200 p-4">
-      <header className="flex items-center gap-3 mb-6">
-        <h1 className="text-2xl font-bold">McDonald's Order Controller</h1>
-        <span className={indicatorClass}>{indicatorLabel}</span>
+    <div className="min-h-screen bg-base-200">
+      {/* Brand header */}
+      <header className="bg-primary text-primary-content px-4 py-3 flex items-center gap-3 shadow-md">
+        <img src={archesUrl} alt="McDonald's golden arches" className="h-8 w-8 shrink-0" />
+        <h1 className="text-xl font-bold tracking-tight">McDonald's Order Controller</h1>
+        <span className={`${indicatorClass} ml-auto`}>{indicatorLabel}</span>
       </header>
 
       {snapshot === null ? (
         <div className="text-base-content/50 text-center py-16">Connecting…</div>
       ) : (
-        <div>
-          <div className="mb-4">
+        <div className="p-4 flex flex-col gap-4">
+          {/* Controls bar */}
+          <div className="bg-base-100 rounded-box shadow-sm p-3">
             <Controls
               onNewNormal={handleNewNormal}
               onNewVip={handleNewVip}
@@ -61,7 +65,9 @@ export default function App({ eventSourceFactory }: AppProps): React.ReactElemen
               onDelBot={handleDelBot}
             />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+          {/* Three-column grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
             <PendingList orders={snapshot.pending} />
             <BotList
               bots={snapshot.bots}
