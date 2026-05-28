@@ -76,6 +76,24 @@ describe('Bots API (e2e)', () => {
     await request(app.getHttpServer()).delete('/api/bots/9999').expect(404);
   });
 
+  it('DELETE /api/bots/:id with malformed id → 400 and does not remove bot', async () => {
+    await request(app.getHttpServer()).post('/api/bots').expect(201);
+    await request(app.getHttpServer()).delete('/api/bots/1abc').expect(400);
+
+    const res = await request(app.getHttpServer()).get('/api/bots').expect(200);
+    const body = res.body as BotDTO[];
+    expect(body.map((b) => b.id)).toEqual([1]);
+  });
+
+  it('DELETE /api/bots/:id with decimal id → 400 and does not remove bot', async () => {
+    await request(app.getHttpServer()).post('/api/bots').expect(201);
+    await request(app.getHttpServer()).delete('/api/bots/1.5').expect(400);
+
+    const res = await request(app.getHttpServer()).get('/api/bots').expect(200);
+    const body = res.body as BotDTO[];
+    expect(body.map((b) => b.id)).toEqual([1]);
+  });
+
   it('DELETE /api/bots when no bots exist → 404', async () => {
     await request(app.getHttpServer()).delete('/api/bots').expect(404);
   });

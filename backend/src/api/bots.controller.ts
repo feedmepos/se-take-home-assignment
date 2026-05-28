@@ -7,6 +7,7 @@ import {
   HttpCode,
   HttpStatus,
   UseFilters,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { OrderController } from '../domain/order-controller';
 import { serializeBot } from './serialize';
@@ -30,9 +31,8 @@ export class BotsController {
   }
 
   @Delete(':id')
-  removeBot(@Param('id') id: string): BotDTO {
-    const numId = parseInt(id, 10);
-    return serializeBot(this.domain.removeBot(numId));
+  removeBot(@Param('id', ParseIntPipe) id: number): BotDTO {
+    return serializeBot(this.domain.removeBot(id));
   }
 
   @Delete()
