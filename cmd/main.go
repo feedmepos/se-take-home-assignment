@@ -123,11 +123,11 @@ func runSimulation() {
 
 func runInteractiveCLI() {
 	// Initialize terminal layout: Clear screen and split it
-	// We set the scrolling region from Row 21 to the bottom.
-	// The top 20 rows are reserved for the static live dashboard.
+	// We set the scrolling region from Row 37 to the bottom.
+	// The top 36 rows are reserved for the static live dashboard.
 	fmt.Print("\033[2J")     // Clear screen
-	fmt.Print("\033[21;r")    // Set scrolling margin (Row 21 to bottom)
-	fmt.Print("\033[21;1H")   // Position cursor at Row 21
+	fmt.Print("\033[37;r")    // Set scrolling margin (Row 37 to bottom)
+	fmt.Print("\033[37;1H")   // Position cursor at Row 37
 
 	d := controller.NewDispatcher(10 * time.Second)
 	ctx, cancel := context.WithCancel(context.Background())
@@ -207,14 +207,14 @@ func drawDashboard(d *controller.Dispatcher) {
 	// Get latest system state
 	activeBots, pending, processing, completed := d.GetStatus()
 
-	// 1. Header Banner
+	// 1. Header Banner (3 lines)
 	fmt.Print("\033[K" + colorBold + colorMagenta + "  === McDonald's Cooking Bot Simulation - Live Dashboard ===" + colorReset + "\n")
 	fmt.Printf("\033[K  Active Bots: %d | Pending: %d | Cooking: %d | Completed: %d\n", activeBots, len(pending), len(processing), len(completed))
 	fmt.Print("\033[K----------------------------------------------------------------------\n")
 
-	// 2. Pending Queue (shows top 3 items)
-	fmt.Print("\033[K" + colorBold + "PENDING QUEUE:" + colorReset + "\n")
-	for i := 0; i < 3; i++ {
+	// 2. Pending Queue (shows top 10 items) (11 lines total)
+	fmt.Print("\033[K" + colorBold + "PENDING QUEUE (Top 10):" + colorReset + "\n")
+	for i := 0; i < 10; i++ {
 		if i < len(pending) {
 			o := pending[i]
 			typeColor := colorCyan
@@ -227,9 +227,9 @@ func drawDashboard(d *controller.Dispatcher) {
 		}
 	}
 
-	// 3. Cooking in Progress (shows top 3 items)
-	fmt.Print("\033[K\n" + colorBold + "COOKING IN PROGRESS:" + colorReset + "\n")
-	for i := 0; i < 3; i++ {
+	// 3. Cooking in Progress (shows top 10 items) (11 lines total)
+	fmt.Print("\033[K\n" + colorBold + "COOKING IN PROGRESS (Top 10):" + colorReset + "\n")
+	for i := 0; i < 10; i++ {
 		if i < len(processing) {
 			o := processing[i]
 			typeColor := colorCyan
@@ -242,14 +242,14 @@ func drawDashboard(d *controller.Dispatcher) {
 		}
 	}
 
-	// 4. Recent Logs (shows last 5 lines)
+	// 4. Recent Logs (shows last 8 lines) (9 lines total)
 	fmt.Print("\033[K\n" + colorBold + "RECENT EVENT LOGS (Live):" + colorReset + "\n")
 	logs := d.GetLogs()
-	start := len(logs) - 5
+	start := len(logs) - 8
 	if start < 0 {
 		start = 0
 	}
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 8; i++ {
 		logIdx := start + i
 		if logIdx < len(logs) {
 			fmt.Printf("\033[K  %s\n", logs[logIdx])
