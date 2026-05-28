@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
@@ -77,7 +77,7 @@ describe('App integration', () => {
     expect(screen.getAllByText('Connecting…').length).toBeGreaterThanOrEqual(2);
 
     // After open: status=connected → indicator "Live"; snapshot still null → placeholder still visible
-    fake.open();
+    act(() => { fake.open(); });
     expect(await screen.findByText('Live')).toBeInTheDocument();
     // snapshot is still null — connecting placeholder still visible
     expect(screen.getByText('Connecting…')).toBeInTheDocument();
@@ -85,8 +85,8 @@ describe('App integration', () => {
 
   it('renders pending/bot/complete areas after receiving a snapshot', async () => {
     render(<App eventSourceFactory={() => fake} />);
-    fake.open();
-    fake.emit(JSON.stringify(makeSnapshot()));
+    act(() => { fake.open(); });
+    act(() => { fake.emit(JSON.stringify(makeSnapshot())); });
 
     // VIP pending order (badge text)
     expect(await screen.findByText('VIP')).toBeInTheDocument();
@@ -98,8 +98,8 @@ describe('App integration', () => {
 
   it('calls fetch POST /api/orders with type VIP on "New VIP Order" click', async () => {
     render(<App eventSourceFactory={() => fake} />);
-    fake.open();
-    fake.emit(JSON.stringify(makeSnapshot()));
+    act(() => { fake.open(); });
+    act(() => { fake.emit(JSON.stringify(makeSnapshot())); });
 
     await screen.findByText('VIP'); // wait for render
     await userEvent.setup().click(screen.getByRole('button', { name: 'New VIP Order' }));
@@ -115,8 +115,8 @@ describe('App integration', () => {
 
   it('calls fetch POST /api/bots on "+ Bot" click', async () => {
     render(<App eventSourceFactory={() => fake} />);
-    fake.open();
-    fake.emit(JSON.stringify(makeSnapshot()));
+    act(() => { fake.open(); });
+    act(() => { fake.emit(JSON.stringify(makeSnapshot())); });
 
     await screen.findByText('VIP');
     await userEvent.setup().click(screen.getByRole('button', { name: '+ Bot' }));
@@ -129,18 +129,18 @@ describe('App integration', () => {
 
   it('shows "Reconnecting…" indicator after connection failure', async () => {
     render(<App eventSourceFactory={() => fake} />);
-    fake.open();
-    fake.emit(JSON.stringify(makeSnapshot()));
+    act(() => { fake.open(); });
+    act(() => { fake.emit(JSON.stringify(makeSnapshot())); });
     await screen.findByText('VIP');
 
-    fake.fail();
+    act(() => { fake.fail(); });
     expect(await screen.findByText('Reconnecting…')).toBeInTheDocument();
   });
 
   it('replaces rendered state when a second frame arrives (full-replace)', async () => {
     render(<App eventSourceFactory={() => fake} />);
-    fake.open();
-    fake.emit(JSON.stringify(makeSnapshot()));
+    act(() => { fake.open(); });
+    act(() => { fake.emit(JSON.stringify(makeSnapshot())); });
     await screen.findByText('VIP');
 
     // Second frame: pending now empty
@@ -151,7 +151,7 @@ describe('App integration', () => {
       bots: [],
       cookDurationMs: 10_000,
     };
-    fake.emit(JSON.stringify(second));
+    act(() => { fake.emit(JSON.stringify(second)); });
 
     expect(await screen.findByText('No pending orders')).toBeInTheDocument();
   });
