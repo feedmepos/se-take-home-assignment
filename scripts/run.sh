@@ -6,7 +6,5 @@ set -e
 
 echo "Running CLI application in simulation mode..."
 mkdir -p scripts
-mkdir -p script
 ./order-controller -simulate > scripts/result.txt
-cp scripts/result.txt script/result.txt
 echo "CLI application execution completed"
