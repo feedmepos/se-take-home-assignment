@@ -41,6 +41,15 @@ describe('BotService', () => {
         expect(orderService.allOrders()[0].status).toBe(OrderStatus.Complete);
     }));
 
+    it('should create new bot id from the last active bot id', () => {
+        botService.addBot();
+        botService.addBot();
+        botService.removeBot();
+        botService.addBot();
+
+        expect(botService.bots().map((bot) => bot.id)).toEqual([1, 2]);
+    });
+
     it('should return a stopped bot order to pending priority', fakeAsync(() => {
         orderService.addOrder(OrderTier.Normal);
         orderService.addOrder(OrderTier.Normal);

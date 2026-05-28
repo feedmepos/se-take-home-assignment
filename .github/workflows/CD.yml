@@ -1,37 +1,37 @@
 name: Deploy to Vercel
 
 on:
-    push:
-        branches:
-            - "main"
+  push:
+    branches:
+      - "main"
 
 jobs:
-    deploy-to-vercel:
-        runs-on: ubuntu-latest
+  deploy-to-vercel:
+    runs-on: ubuntu-latest
 
-        steps:
-            - name: Checkout repository code
-              uses: actions/checkout@v6
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v6
 
-            - name: Set up Node.js environment
-              uses: actions/setup-node@v6
-              with:
-                  node-version: "24"
+      - name: Set up Node.js environment
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
 
-            - name: Install packages
-              run: npm ci
+      - name: Install packages
+        run: npm ci
 
-            - name: Install Vercel
-              run: npm i --global vercel
+      - name: Install Vercel
+        run: npm i --global vercel
 
-            - name: Run build
-              run: npm run build:prod
+      - name: Run build
+        run: npm run build:prod
 
-            - name: Copy Vercel configuration file into Build Output
-              run: cp vercel.json ./dist/se-take-home-assignment/browser
+      - name: Copy Vercel configuration file into Build Output
+        run: cp vercel.json ./dist/se-take-home-assignment/browser
 
-            - name: Deploy build to Vercel
-              run: vercel deploy ./dist/se-take-home-assignment/browser --token=${{ secrets.VERCEL_TOKEN }}
-              env:
-                  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-                  VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      - name: Deploy build to Vercel
+        run: vercel deploy ./dist/se-take-home-assignment/browser --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
