@@ -1,64 +1,242 @@
-## FeedMe Software Engineer Take Home Assignment
-Below is a take home assignment before the interview of the position. You are required to
-1. Understand the situation and use case. You may contact the interviewer for further clarification.
-2. implement the requirement with **either frontend or backend components**.
-3. Complete the requirement with **AI** if possible, but perform your own testing.
-4. Provide documentation for the any part that you think is needed.
-5. Bring the source code and functioning prototype to the interview session.
+# FeedMe - McDonald's Automated Order Management System
 
-### Situation
-McDonald is transforming their business during COVID-19. They wish to build the automated cooking bots to reduce workforce and increase their efficiency. As one of the software engineer in the project. You task is to create an order controller which handle the order control flow. 
+## Overview
 
-### User Story
-As below is part of the user story:
-1. As McDonald's normal customer, after I submitted my order, I wish to see my order flow into "PENDING" area. After the cooking bot process my order, I want to see it flow into to "COMPLETE" area.
-2. As McDonald's VIP member, after I submitted my order, I want my order being process first before all order by normal customer.  However if there's existing order from VIP member, my order should queue behind his/her order.
-3. As McDonald's manager, I want to increase or decrease number of cooking bot available in my restaurant. When I increase a bot, it should immediately process any pending order. When I decrease a bot, the processing order should remain un-process.
-4. As McDonald bot, it can only pickup and process 1 order at a time, each order required 10 seconds to complete process.
+FeedMe is a Flutter-based frontend solution for managing automated cooking bot operations in a McDonald's restaurant. The application demonstrates a complete order management system with priority-based queue handling, bot resource management, and real-time order tracking.
 
-### Requirements
-1. When "New Normal Order" clicked, a new order should show up "PENDING" Area.
-2. When "New VIP Order" clicked, a new order should show up in "PENDING" Area. It should place in-front of all existing "Normal" order but behind of all existing "VIP" order.
-3. The order number should be unique and increasing.
-4. When "+ Bot" clicked, a bot should be created and start processing the order inside "PENDING" area. after 10 seconds picking up the order, the order should move to "COMPLETE" area. Then the bot should start processing another order if there is any left in "PENDING" area.
-5. If there is no more order in the "PENDING" area, the bot should become IDLE until a new order come in.
-6. When "- Bot" clicked, the newest bot should be destroyed. If the bot is processing an order, it should also stop the process. The order should return to its original position in the "PENDING" area (maintaining VIP/Normal order priority).
-7. No data persistance is needed for this prototype, you may perform all the process inside memory.
+## Project Structure
 
-### Functioning Prototype
-You must implement **either** frontend or backend components as described below:
+```
+lib/
+├── main.dart                 # App entry point
+├── app.dart                  # Material app configuration
+├── models/
+│   └── order.dart           # Order and Bot data models
+├── services/
+│   └── order_controller.dart # Business logic & state management
+└── screens/
+    ├── home_screen.dart     # Main UI screen
+    └── widgets/
+        ├── order_card.dart  # Order display component
+        └── bot_status.dart  # Bot status display component
+```
 
-#### 1. Frontend
-- You are free to use **any framework and programming language** of your choice
-- The UI application must be compiled, deployed and hosted on any publicly accessible web platform
-- Must provide a user interface that demonstrates all the requirements listed above
-- Should allow users to interact with the McDonald's order management system
+## Key Features
 
-#### 2. Backend
-- You must use **either Go (Golang) or Node.js** for the backend implementation
-- The backend must be a CLI application that can be executed in GitHub Actions
-- Must implement the following scripts in the `script` directory:
-  - `test.sh`: Contains unit test execution steps
-  - `build.sh`: Contains compilation steps for the CLI application
-  - `run.sh`: Contains execution steps that run the CLI application
-- The CLI application result must be printed to `result.txt`
-- The `result.txt` output must include timestamps in `HH:MM:SS` format to track order completion times
-- Must follow **GitHub Flow**: Create a Pull Request with your changes to this repository
-- Ensure all GitHub Action checks pass successfully
-- **Note**: An interactive CLI implementation is compulsory for the next round of interview. Candidates should be prepared to demonstrate interactive command handling.
+### 1. **Order Management**
+- **Normal Orders**: Standard customers' orders processed in FIFO manner
+- **VIP Orders**: Priority processing (VIP orders processed before normal orders)
+- **Order States**: PENDING → COMPLETE
+- **Unique Ordering**: Orders maintain VIP-first priority while respecting insertion order within priority level
 
-#### Submission Requirements
-- Fork this repository and implement your solution with either frontend or backend
-- **Frontend option**: Deploy to a publicly accessible URL using any technology stack
-- **Backend option**: Must be implemented in Go or Node.js and work within the GitHub Actions environment
-  - Follow GitHub Flow process with Pull Request submission
-  - All tests in `test.sh` must pass
-  - The `result.txt` file must contain meaningful output from your CLI application
-  - All output must include timestamps in `HH:MM:SS` format to track order completion times
-  - Submit a Pull Request and ensure the `backend-verify-result` workflow passes
-- Provide documentation for any part that you think is needed
+### 2. **Bot Management**
+- **Add Bot**: Create new bot instantly (begins processing immediately if orders pending)
+- **Remove Bot**: Removes newest bot (returns active order to PENDING queue)
+- **Processing Time**: Each order takes exactly 10 seconds
+- **Idle State**: Bots become IDLE when no orders available
 
-### Tips on completing this task
-- Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.
-- Utilize coding agent to complete the assignment scope your working hour within 1 hour, do not over engineer it. However, ensure you read and understand what your code doing and apply good engineering practice.
-- Complete the implementation as clean as possible, clean code is a strong plus point, do not bring in all the fancy tech stuff.
+### 3. **Real-time UI Updates**
+- Live order queue display (Pending & Complete areas)
+- Bot status visualization with processing indicators
+- Statistics dashboard (total orders, pending count, active bots)
+- Timestamp tracking for order creation and completion
+
+### 4. **State Management**
+- Provider pattern for reactive UI updates
+- OrderController manages all business logic
+- In-memory data persistence (no database needed)
+
+## Requirements Met
+
+✅ **New Normal Order** - Adds order to pending queue  
+✅ **New VIP Order** - Adds VIP order with priority (before all normal, after existing VIP)  
+✅ **Unique Order ID** - Auto-incrementing order IDs  
+✅ **Bot Processing** - Processes orders in 10-second intervals  
+✅ **Bot Addition** - Immediately begins processing pending orders  
+✅ **Bot Removal** - Newest bot removed; active order returns to queue with priority preserved  
+✅ **Order Priority** - VIP orders always processed before normal orders  
+✅ **Timestamps** - Shows creation and completion times in HH:MM:SS format  
+
+## How to Run
+
+### Prerequisites
+- Flutter SDK (3.0.0 or higher)
+- iOS (iOS 11+) or Android (API 21+) device/emulator
+
+### Installation & Execution
+
+```bash
+# Navigate to project directory
+cd /Users/nabila/Documents/Personal_Projects/Mobile/FeedMe
+
+# Install dependencies
+flutter pub get
+
+# Run the app (for web)
+flutter run -d chrome
+
+# Or for mobile emulator
+flutter run
+
+# To build for release
+flutter build web    # For web deployment
+flutter build ios    # For iOS
+flutter build apk    # For Android
+```
+
+## Usage Guide
+
+### Creating Orders
+1. Click **"New Normal Order"** button to add a normal customer order
+2. Click **"New VIP Order"** button to add a VIP member order
+   - VIP orders appear before all normal orders but after existing VIP orders
+
+### Managing Bots
+1. Click **"+ Bot"** to create a new cooking bot
+   - Bot automatically starts processing next pending order
+2. Click **"- Bot"** to remove the newest bot
+   - If bot is processing an order, that order returns to pending queue
+
+### Monitoring
+- **PENDING ORDERS**: Shows orders waiting to be processed
+- **COMPLETE ORDERS**: Shows finished orders with completion timestamps
+- **Status Panel**: Shows number of active bots and processing status
+
+## Technical Details
+
+### Order Priority Algorithm
+
+```
+When adding VIP order:
+1. Find insertion point: after all existing VIP orders
+2. If found VIP orders: insert after the last VIP order
+3. Otherwise: insert at beginning
+
+When returning order to queue (bot removal):
+- Preserve original priority type (VIP/Normal)
+- Insert at correct position based on type and order
+```
+
+### Bot Processing Cycle
+
+```
+1. Bot checks for pending orders
+2. If pending orders exist:
+   - Pick first order from queue
+   - Mark as processing
+   - Start 10-second timer
+3. On completion:
+   - Move order to complete
+   - Mark order with completion timestamp
+   - Check for next pending order
+4. Loop until no pending orders (becomes IDLE)
+```
+
+### Data Models
+
+#### Order
+```dart
+- id: int (unique, auto-increment)
+- type: OrderType (NORMAL or VIP)
+- status: OrderStatus (PENDING or COMPLETE)
+- createdAt: DateTime
+- completedAt: DateTime? (null if not completed)
+```
+
+#### Bot
+```dart
+- id: int (unique, auto-increment)
+- currentOrder: Order? (active order, null if IDLE)
+- isIdle: bool
+- processingStartedAt: DateTime?
+```
+
+## Code Quality & Best Practices
+
+✅ **Clean Code**: Single responsibility principle for each component  
+✅ **Reactive UI**: Provider pattern for state management  
+✅ **Type Safety**: Full null safety with Dart  
+✅ **Modularity**: Separated models, services, and UI layers  
+✅ **Documentation**: Clear comments and self-documenting code  
+✅ **Error Handling**: Graceful handling of edge cases (empty queues, bot removal)  
+
+## Testing Scenarios
+
+### Scenario 1: Basic Order Processing
+1. Create 3 normal orders
+2. Add 1 bot
+3. Verify: Orders move to COMPLETE in FIFO order with 10-second intervals
+4. Check: Timestamps increment correctly
+
+### Scenario 2: VIP Priority
+1. Create normal order #1
+2. Create VIP order #1
+3. Create normal order #2
+4. Add 1 bot
+5. Verify: VIP order processes first, then normal orders in order
+
+### Scenario 3: Multiple Bots
+1. Create 5 orders (mix of VIP and normal)
+2. Add 3 bots
+3. Verify: 3 orders process simultaneously
+4. Check: 4th and 5th orders start when any bot completes
+
+### Scenario 4: Bot Removal
+1. Create 2 orders
+2. Add 1 bot (processing order 1)
+3. Create order 3
+4. Remove bot (order 1 returns to pending)
+5. Add 1 bot
+6. Verify: Bot processes order 1 again with priority preserved
+
+### Scenario 5: VIP Queue Management
+1. Create normal order #1
+2. Add 1 bot (processing order 1)
+3. Create VIP order #1
+4. Create VIP order #2
+5. Create normal order #2
+6. Remove bot (order 1 returns)
+7. Add bot
+8. Verify processing order: Normal #1 → VIP #1 → VIP #2 → Normal #2
+
+## Deployment
+
+### For Web Deployment
+```bash
+# Build web version
+flutter build web
+
+# Deploy to Firebase Hosting
+firebase deploy
+
+# Or use any static hosting (Vercel, Netlify, GitHub Pages)
+```
+
+### For Mobile Deployment
+- iOS: Build and deploy via TestFlight or App Store
+- Android: Build APK/AAB and deploy via Google Play Store
+
+## Future Enhancements
+
+- Database persistence (Firebase, SQLite)
+- Multi-restaurant management
+- Advanced scheduling algorithms
+- Analytics & reporting dashboard
+- Push notifications for order completion
+- Customer tracking system
+- Integration with POS system
+
+## Support & Questions
+
+For clarifications during the interview:
+- The algorithm prioritizes VIP orders globally while maintaining queue order within each priority level
+- Bot removal instantly stops processing; the order is returned to the queue
+- All timestamps use 24-hour HH:MM:SS format
+- No external APIs are called; everything runs in-memory
+
+---
+
+**Project Completion Date**: May 29, 2026  
+**Framework**: Flutter 3.0+  
+**State Management**: Provider 6.0+  
+**Development Time**: ~1 hour (optimized implementation)
