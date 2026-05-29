@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "types": [
+      "node"
+    ],
+    "paths": {
+      "@feedme/core": [
+        "./packages/core/src/index.ts"
+      ]
+    }
+  }
+}
