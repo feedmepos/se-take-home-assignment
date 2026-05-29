@@ -1,14 +1,12 @@
 #!/bin/bash
+set -euo pipefail
 
-# Unit Test Script
-# This script should contain all unit test execution steps
+ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
-echo "Running unit tests..."
+cd "$ROOT_DIR"
 
-# For Go projects:
-# go test ./... -v
+if [ ! -d node_modules ]; then
+  npm install
+fi
 
-# For Node.js projects:
-# npm test
-
-echo "Unit tests completed"
+npm test

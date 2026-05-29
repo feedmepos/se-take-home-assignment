@@ -1,0 +1,17 @@
+schema: spec-driven
+
+context: |
+  Tech stack: TypeScript, Node.js, Fastify, React, Vite, Vitest.
+  Repository layout: npm workspaces with packages/core, packages/cli, packages/api, packages/web.
+  Domain: McDonald's order controller prototype with in-memory state only.
+  Process: spec-first delivery using OpenSpec, then implementation, tests, and demo scripts.
+  Frontend direction: single-page unified console with explicit Customer Actions and Manager Actions.
+  Backend direction: one shared domain core reused by CLI, API, and test harnesses.
+
+rules:
+  proposal:
+    - Keep the proposal focused on business need, delivery scope, and non-goals.
+  design:
+    - Capture shared core boundaries, public interfaces, and time simulation strategy.
+  tasks:
+    - Break work into independently verifiable slices.

@@ -1,0 +1,7 @@
+- [x] Update repository OpenSpec context and add the fullstack order controller change artifacts.
+- [x] Scaffold npm workspace, TypeScript config, and shared development tooling.
+- [x] Implement the shared order controller core with fake time support and unit tests.
+- [x] Implement the CLI scripted demo and interactive commands, and wire `scripts/*.sh`.
+- [x] Implement the Fastify API with SSE snapshots and integration tests.
+- [x] Implement the React/Vite unified console with tests for rendering and live updates.
+- [x] Refresh repository documentation and verify the main test/build/run flows.

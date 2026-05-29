@@ -1,64 +1,139 @@
-## FeedMe Software Engineer Take Home Assignment
-Below is a take home assignment before the interview of the position. You are required to
-1. Understand the situation and use case. You may contact the interviewer for further clarification.
-2. implement the requirement with **either frontend or backend components**.
-3. Complete the requirement with **AI** if possible, but perform your own testing.
-4. Provide documentation for the any part that you think is needed.
-5. Bring the source code and functioning prototype to the interview session.
+# FeedMe Fullstack Order Controller
 
-### Situation
-McDonald is transforming their business during COVID-19. They wish to build the automated cooking bots to reduce workforce and increase their efficiency. As one of the software engineer in the project. You task is to create an order controller which handle the order control flow. 
+This repository contains a complete TypeScript + Node.js solution for the FeedMe take-home assignment. The implementation keeps one shared order controller core and reuses it across a CLI, a Fastify API, and a React/Vite unified console.
 
-### User Story
-As below is part of the user story:
-1. As McDonald's normal customer, after I submitted my order, I wish to see my order flow into "PENDING" area. After the cooking bot process my order, I want to see it flow into to "COMPLETE" area.
-2. As McDonald's VIP member, after I submitted my order, I want my order being process first before all order by normal customer.  However if there's existing order from VIP member, my order should queue behind his/her order.
-3. As McDonald's manager, I want to increase or decrease number of cooking bot available in my restaurant. When I increase a bot, it should immediately process any pending order. When I decrease a bot, the processing order should remain un-process.
-4. As McDonald bot, it can only pickup and process 1 order at a time, each order required 10 seconds to complete process.
+## What is included
+- `packages/core`: shared domain logic, fake scheduler, metrics, and event stream
+- `packages/cli`: scripted demo mode and interactive CLI mode
+- `packages/api`: Fastify API with `GET /state`, `POST /orders`, `POST /bots`, `DELETE /bots/latest`, and `GET /events` SSE
+- `packages/web`: React/Vite single-page console with explicit Customer Actions and Manager Actions
+- `openspec/changes/add-fullstack-order-controller`: spec-first change artifacts for this implementation
 
-### Requirements
-1. When "New Normal Order" clicked, a new order should show up "PENDING" Area.
-2. When "New VIP Order" clicked, a new order should show up in "PENDING" Area. It should place in-front of all existing "Normal" order but behind of all existing "VIP" order.
-3. The order number should be unique and increasing.
-4. When "+ Bot" clicked, a bot should be created and start processing the order inside "PENDING" area. after 10 seconds picking up the order, the order should move to "COMPLETE" area. Then the bot should start processing another order if there is any left in "PENDING" area.
-5. If there is no more order in the "PENDING" area, the bot should become IDLE until a new order come in.
-6. When "- Bot" clicked, the newest bot should be destroyed. If the bot is processing an order, it should also stop the process. The order should return to its original position in the "PENDING" area (maintaining VIP/Normal order priority).
-7. No data persistance is needed for this prototype, you may perform all the process inside memory.
+## Key product choices
+- One unified console instead of separate customer and manager apps
+- Backend remains the source of truth; the frontend never reimplements queue rules
+- VIP orders always stay behind existing VIP orders and ahead of all pending normal orders
+- Removing the newest bot cancels its in-flight work and requeues the order
+- Metrics stay lightweight and in-memory: queue counts, bot counts, VIP/normal mix, average processing time, utilization, and completion rate
 
-### Functioning Prototype
-You must implement **either** frontend or backend components as described below:
+## Local development
+### Install
+```bash
+npm install
+```
 
-#### 1. Frontend
-- You are free to use **any framework and programming language** of your choice
-- The UI application must be compiled, deployed and hosted on any publicly accessible web platform
-- Must provide a user interface that demonstrates all the requirements listed above
-- Should allow users to interact with the McDonald's order management system
+### Run tests
+```bash
+npm test
+```
 
-#### 2. Backend
-- You must use **either Go (Golang) or Node.js** for the backend implementation
-- The backend must be a CLI application that can be executed in GitHub Actions
-- Must implement the following scripts in the `script` directory:
-  - `test.sh`: Contains unit test execution steps
-  - `build.sh`: Contains compilation steps for the CLI application
-  - `run.sh`: Contains execution steps that run the CLI application
-- The CLI application result must be printed to `result.txt`
-- The `result.txt` output must include timestamps in `HH:MM:SS` format to track order completion times
-- Must follow **GitHub Flow**: Create a Pull Request with your changes to this repository
-- Ensure all GitHub Action checks pass successfully
-- **Note**: An interactive CLI implementation is compulsory for the next round of interview. Candidates should be prepared to demonstrate interactive command handling.
+### Run type checks
+```bash
+npm run lint
+```
 
-#### Submission Requirements
-- Fork this repository and implement your solution with either frontend or backend
-- **Frontend option**: Deploy to a publicly accessible URL using any technology stack
-- **Backend option**: Must be implemented in Go or Node.js and work within the GitHub Actions environment
-  - Follow GitHub Flow process with Pull Request submission
-  - All tests in `test.sh` must pass
-  - The `result.txt` file must contain meaningful output from your CLI application
-  - All output must include timestamps in `HH:MM:SS` format to track order completion times
-  - Submit a Pull Request and ensure the `backend-verify-result` workflow passes
-- Provide documentation for any part that you think is needed
+### Build everything
+```bash
+npm run build
+```
 
-### Tips on completing this task
-- Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.
-- Utilize coding agent to complete the assignment scope your working hour within 1 hour, do not over engineer it. However, ensure you read and understand what your code doing and apply good engineering practice.
-- Complete the implementation as clean as possible, clean code is a strong plus point, do not bring in all the fancy tech stuff.
+### Generate the CLI demo output
+```bash
+npm run demo
+```
+
+### Run the interactive CLI
+```bash
+npm run cli:interactive
+```
+
+### Start the API locally
+```bash
+npm run dev:api
+```
+
+### Start the web console locally
+```bash
+npm run dev:web
+```
+
+By default the web app connects to `http://localhost:3001`. Override that with `VITE_API_BASE_URL`.
+
+## Repository scripts
+- `scripts/test.sh`: installs dependencies when needed and runs `npm test`
+- `scripts/build.sh`: installs dependencies when needed and runs the full build
+- `scripts/run.sh`: generates `scripts/result.txt` from the scripted CLI demo
+
+These scripts are the entrypoints used by the GitHub Actions verification workflow.
+
+## CLI behavior
+The CLI supports two modes:
+
+- `demo`: deterministic scripted run for CI and `scripts/result.txt`
+- `interactive`: manual commands for the interview demo
+
+Interactive commands:
+```text
+normal
+vip
+bot:add
+bot:remove
+status
+events
+help
+exit
+```
+
+## API contract
+- `GET /health`
+- `GET /state`
+- `POST /orders` with `{ "priority": "normal" | "vip" }`
+- `POST /bots`
+- `DELETE /bots/latest`
+- `GET /events` using Server-Sent Events
+
+`GET /state` and SSE snapshots include:
+- pending orders
+- processing orders
+- completed orders
+- bot state
+- server time
+- lightweight metrics
+
+## Frontend organization
+The unified console is a single-page control surface with:
+- top overview banner
+- explicit `Customer Actions` section
+- explicit `Manager Actions` section
+- metrics grid
+- `Bots`, `Pending`, `Processing`, and `Complete` columns
+- details drawer for orders and bots
+- event timeline
+- connection status feedback
+
+## Testing strategy
+- Core unit tests verify queueing, dispatch, cancellation, and metrics
+- API tests verify snapshot access and error handling
+- Web tests verify the console layout, action wiring, and live SSE-driven updates
+
+## Deployment notes
+This repo is ready for:
+- Vercel frontend deployment using `packages/web`
+- Render API deployment using `npm run build` and `npm run start:api`
+
+Environment variable for the web app:
+```bash
+VITE_API_BASE_URL=https://your-api-domain.example.com
+```
+
+## Design tradeoffs
+- In-memory state only, matching the assignment
+- SSE instead of WebSocket, because the UI only needs server-to-client streaming
+- Shared domain core to keep CLI, API, and UI behavior consistent
+
+## Verification summary
+- `openspec validate add-fullstack-order-controller --strict`
+- `npm test`
+- `npm run lint`
+- `npm run build`
+- `./scripts/run.sh`

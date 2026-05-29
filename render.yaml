@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: feedme-order-controller-api
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:api
+    plan: free
