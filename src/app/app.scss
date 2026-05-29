@@ -1,0 +1,43 @@
+button {
+    @apply rounded-lg py-2 px-4 font-medium min-w-40;
+}
+
+.list-groups {
+    @apply grid gap-8 h-96;
+
+    .list-group {
+        @apply flex flex-col h-[inherit] shadow-lg rounded-xl p-4;
+
+        .items {
+            @apply flex flex-col gap-4 flex-grow overflow-y-auto pt-6;
+        }
+
+        .item {
+            @apply flex items-center gap-4;
+        }
+
+        h2 {
+            @apply font-medium text-2xl flex-shrink-0;
+        }
+
+        .status {
+            @apply rounded-3xl py-2 px-4;
+
+            &.pending {
+                @apply bg-red-200 text-red-800;
+            }
+
+            &.in-progress {
+                @apply bg-yellow-200 text-yellow-800;
+            }
+
+            &.complete {
+                @apply bg-green-200 text-green-800;
+            }
+        }
+    }
+
+    &.bots {
+        @apply h-fit;
+    }
+}
