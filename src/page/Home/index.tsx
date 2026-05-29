@@ -7,7 +7,7 @@ import './Home.css';
  */
 const Home: React.FC = () => {
   const { orders, completedOrders, bots, addOrder, addBot, removeBot } = useOrderSystem();
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(() => Date.now());
 
   // 每 100ms 更新一次当前时间，用于进度条展示
   useEffect(() => {
