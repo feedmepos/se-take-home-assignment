@@ -8,17 +8,17 @@ import './App.css';
  */
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/feed-me">
       <div className="app-root">
         <Routes>
           {/* 根路径重定向到 /feed-me */}
-          <Route path="/" element={<Navigate to="/feed-me" replace />} />
+          <Route path="/" element={<Home />} />
           
-          {/* 订单管理系统主页 */}
-          <Route path="/feed-me" element={<Home />} />
+          {/* 兼容旧的完整路径跳转 */}
+          <Route path="/feed-me" element={<Navigate to="/" replace />} />
           
           {/* 404 处理 */}
-          <Route path="*" element={<Navigate to="/feed-me" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
     </BrowserRouter>
