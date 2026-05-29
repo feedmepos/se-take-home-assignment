@@ -14,133 +14,76 @@ class OrderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isVIP = order.type == OrderType.vip;
-    
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-      elevation: isVIP ? 3 : 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-        side: BorderSide(
-          color: isVIP ? Colors.purple : Colors.grey.shade300,
-          width: isVIP ? 2 : 1,
-        ),
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
+    final isComplete = order.status == OrderStatus.complete;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
           color: isVIP
-              ? Colors.purple.withOpacity(0.05)
-              : Colors.blue.withOpacity(0.02),
+              ? const Color(0xFF9B59B6).withOpacity(0.4)
+              : Colors.grey.shade200,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 8,
           children: [
-            // Header with Order ID and Type
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        order.displayId,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Text(
-                        '#$index in queue',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey.shade600,
-                        ),
-                      ),
-                    ],
+                Text(
+                  order.displayId,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isVIP ? Colors.purple : Colors.blue,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Text(
-                    order.typeLabel,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 11,
-                    ),
-                  ),
-                ),
+                const SizedBox(width: 8),
+                _TypeBadge(isVIP: isVIP),
+                const Spacer(),
+                _StatusBadge(isComplete: isComplete),
               ],
             ),
-
-            // Status and Timeline
             Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 4,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Status: ${order.status.name.toUpperCase()}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: order.status == OrderStatus.complete
-                              ? Colors.green
-                              : Colors.orange,
-                        ),
-                      ),
-                    ],
+              height: 1,
+              color: Colors.grey.shade100,
+            ),
+            Row(
+              children: [
+                _TimeItem(
+                  icon: Icons.schedule_rounded,
+                  label: 'Created',
+                  time: order.createdTimeString,
+                  color: Colors.grey.shade600,
+                ),
+                if (isComplete) ...[
+                  const SizedBox(width: 12),
+                  _TimeItem(
+                    icon: Icons.check_circle_outline_rounded,
+                    label: 'Done',
+                    time: order.completedTimeString,
+                    color: const Color(0xFF34C759),
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Created: ${order.createdTimeString}',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.grey.shade600,
-                        ),
-                      ),
-                      if (order.status == OrderStatus.complete)
-                        Text(
-                          'Completed: ${order.completedTimeString}',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.green.shade600,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                    ],
+                  const SizedBox(width: 12),
+                  _TimeItem(
+                    icon: Icons.timer_outlined,
+                    label: 'Duration',
+                    time: _duration(order.createdAt, order.completedAt!),
+                    color: const Color(0xFF007AFF),
                   ),
-                  if (order.status == OrderStatus.complete)
-                    Text(
-                      'Processing time: ${_calculateDuration(order.createdAt, order.completedAt!)}',
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: Colors.grey.shade600,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
                 ],
-              ),
+              ],
             ),
           ],
         ),
@@ -148,8 +91,118 @@ class OrderCard extends StatelessWidget {
     );
   }
 
-  String _calculateDuration(DateTime start, DateTime end) {
-    final duration = end.difference(start);
-    return '${duration.inSeconds}s';
+  String _duration(DateTime start, DateTime end) {
+    return '${end.difference(start).inSeconds}s';
+  }
+}
+
+class _TypeBadge extends StatelessWidget {
+  final bool isVIP;
+  const _TypeBadge({required this.isVIP});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+      decoration: BoxDecoration(
+        color: isVIP
+            ? const Color(0xFF9B59B6).withOpacity(0.12)
+            : const Color(0xFF007AFF).withOpacity(0.10),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 3,
+        children: [
+          Icon(
+            isVIP ? Icons.star_rounded : Icons.person_rounded,
+            size: 10,
+            color: isVIP ? const Color(0xFF9B59B6) : const Color(0xFF007AFF),
+          ),
+          Text(
+            isVIP ? 'VIP' : 'Normal',
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color:
+                  isVIP ? const Color(0xFF9B59B6) : const Color(0xFF007AFF),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatusBadge extends StatelessWidget {
+  final bool isComplete;
+  const _StatusBadge({required this.isComplete});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: isComplete
+            ? const Color(0xFF34C759).withOpacity(0.12)
+            : const Color(0xFFFF9500).withOpacity(0.12),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        isComplete ? 'Complete' : 'Pending',
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+          color: isComplete
+              ? const Color(0xFF34C759)
+              : const Color(0xFFFF9500),
+        ),
+      ),
+    );
+  }
+}
+
+class _TimeItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String time;
+  final Color color;
+
+  const _TimeItem({
+    required this.icon,
+    required this.label,
+    required this.time,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      spacing: 4,
+      children: [
+        Icon(icon, size: 11, color: color),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 9,
+                color: Colors.grey.shade400,
+              ),
+            ),
+            Text(
+              time,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
   }
 }
