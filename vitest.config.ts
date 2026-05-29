@@ -9,16 +9,19 @@ import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import path from "node:path";
 
+const resolve = {
+  alias: {
+    "@feedme/core": path.resolve(__dirname, "packages/core/src/index.ts"),
+  },
+};
+
 export default defineConfig({
   plugins: [react()],
-  resolve: {
-    alias: {
-      "@feedme/core": path.resolve(__dirname, "packages/core/src/index.ts"),
-    },
-  },
+  resolve,
   test: {
     projects: [
       {
+        resolve,
         test: {
           name: "node",
           environment: "node",
@@ -28,6 +31,7 @@ export default defineConfig({
         },
       },
       {
+        resolve,
         test: {
           name: "web",
           environment: "jsdom",
