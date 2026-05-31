@@ -1,0 +1,100 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #f5f5f5;
+  font-family: "Times New Roman", Times, serif;
+}
+
+.container {
+  width: 1300px;
+  margin: auto;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.controls {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+button {
+  padding: 10px 29px;
+  border: none;
+  cursor: pointer;
+  background: #1976d2;
+  color: white;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+button:hover {
+  opacity: 0.8;
+}
+
+.status {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+.dashboard {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.bar {
+  flex: 1;
+  background: white;
+  border-radius: 5px;
+  padding: 20px;
+  min-height: 250px;
+}
+
+.bar h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.card {
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  color: white;
+  font-weight: bold;
+}
+
+.VIP {
+  background-color: gold;
+}
+
+.NORMAL {
+  background-color: silver;
+}
+
+.completed {
+  background-color: green;
+}
+
+.bots {
+  margin-top: 20px;
+}
+
+.bot-card {
+  background: white;
+  padding: 10px;
+  border-radius: 5px;
+  margin-top: 10px;
+}
