@@ -1,58 +1,94 @@
 const readline = require('readline');
 const OrderController = require('../controllers/order-controller');
 
+// ANSI escape codes for coloring (safe and zero-dependency)
+const COLORS = {
+  reset: '\x1b[0m',
+  bold: '\x1b[1m',
+  dim: '\x1b[2m',
+  red: '\x1b[31m',
+  green: '\x1b[32m',
+  yellow: '\x1b[33m',
+  blue: '\x1b[34m',
+  magenta: '\x1b[35m',
+  cyan: '\x1b[36m',
+};
+
 function getTimestamp() {
   const now = new Date();
-  console.log(now.getHours(), now.getMinutes(), now.getSeconds());
   return [now.getHours(), now.getMinutes(), now.getSeconds()]
     .map((n) => String(n).padStart(2, '0'))
     .join(':');
 }
-
-const controller = new OrderController({
-  processingTime: 10000,
-  onLog: (message) => console.log(`[${getTimestamp()}] ${message}`),
-});
 
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
 });
 
+const controller = new OrderController({
+  processingTime: 10000,
+  onLog: (message) => {
+    // Determine color based on message content
+    let coloredMessage = message;
+    if (message.includes('completed')) {
+      coloredMessage = `${COLORS.green}${message}${COLORS.reset}`;
+    } else if (message.includes('picked up') || message.includes('processing')) {
+      coloredMessage = `${COLORS.yellow}${message}${COLORS.reset}`;
+    } else if (message.includes('created') || message.includes('Bot #')) {
+      coloredMessage = `${COLORS.cyan}${message}${COLORS.reset}`;
+    } else if (message.includes('destroyed') || message.includes('removed')) {
+      coloredMessage = `${COLORS.red}${message}${COLORS.reset}`;
+    }
+
+    console.log(`[${getTimestamp()}] ${coloredMessage}`);
+  },
+});
+
 function printStatus() {
   const status = controller.getStatus();
-  console.log('\n========== Current Status ==========');
+  console.log(`\n${COLORS.bold}${COLORS.cyan}========== Current Status ==========${COLORS.reset}`);
 
-  console.log(`\nBots (${status.totalBots}):`);
+  console.log(`\n${COLORS.bold}Bots (${status.totalBots}):${COLORS.reset}`);
   if (status.bots.length === 0) {
-    console.log('  (none)');
+    console.log(`  ${COLORS.dim}(none)${COLORS.reset}`);
   }
   status.bots.forEach((bot) => {
-    const detail = bot.currentOrder ? `Processing Order #${bot.currentOrder}` : '';
-    console.log(`  Bot #${bot.id}: ${bot.status} ${detail}`);
+    const detail = bot.currentOrder 
+      ? `${COLORS.yellow}Processing Order #${bot.currentOrder}${COLORS.reset}` 
+      : `${COLORS.dim}Idle${COLORS.reset}`;
+    console.log(`  Bot #${bot.id}: ${COLORS.bold}${bot.status}${COLORS.reset} - ${detail}`);
   });
 
-  console.log(`\nPending Orders (${status.totalPending}):`);
+  console.log(`\n${COLORS.bold}Pending Orders (${status.totalPending}):${COLORS.reset}`);
   if (status.pendingOrders.length === 0) {
-    console.log('  (none)');
+    console.log(`  ${COLORS.dim}(none)${COLORS.reset}`);
   }
   status.pendingOrders.forEach((order) => {
-    console.log(`  Order #${order.id} [${order.type}]`);
+    const typeColor = order.type === 'VIP' ? COLORS.yellow : COLORS.reset;
+    console.log(`  Order #${order.id} [${typeColor}${order.type}${COLORS.reset}]`);
   });
 
-  console.log(`\nCompleted Orders (${status.totalCompleted}):`);
+  console.log(`\n${COLORS.bold}Completed Orders (${status.totalCompleted}):${COLORS.reset}`);
   if (status.completedOrders.length === 0) {
-    console.log('  (none)');
+    console.log(`  ${COLORS.dim}(none)${COLORS.reset}`);
   }
   status.completedOrders.forEach((order) => {
-    console.log(`  Order #${order.id} [${order.type}]`);
+    const typeColor = order.type === 'VIP' ? COLORS.yellow : COLORS.reset;
+    console.log(`  Order #${order.id} [${typeColor}${order.type}${COLORS.reset}] - ${COLORS.green}COMPLETE${COLORS.reset}`);
   });
 
-  console.log('====================================\n');
+  console.log(`\n${COLORS.bold}${COLORS.cyan}====================================${COLORS.reset}\n`);
 }
 
 function showMenu() {
-  console.log("--- McDonald's Order Controller ---");
+  const status = controller.getStatus();
+  console.log(`\n${COLORS.bold}${COLORS.cyan}--- McDonald's Order Controller ---${COLORS.reset}`);
+  console.log(
+    `${COLORS.dim}[Active Bots: ${COLORS.cyan}${status.totalBots}${COLORS.dim} | ` +
+    `Pending Orders: ${COLORS.yellow}${status.totalPending}${COLORS.dim} | ` +
+    `Completed: ${COLORS.green}${status.totalCompleted}${COLORS.dim}]${COLORS.reset}`
+  );
   console.log('1. New Normal Order');
   console.log('2. New VIP Order');
   console.log('3. + Bot  (Add Bot)');
@@ -82,16 +118,17 @@ function handleInput(input) {
       printStatus();
       break;
     case 'q':
-      console.log('Thank you for using the McDonald\'s Order Management System, Goodbye!');
+      console.log(`\n${COLORS.green}Thank you for using the McDonald's Order Management System. Goodbye!${COLORS.reset}`);
       rl.close();
       process.exit(0);
       return;
     default:
-      console.log('Invalid option. Please try again.');
+      console.log(`${COLORS.red}Invalid option. Please try again.${COLORS.reset}`);
   }
 
   showMenu();
 }
 
-console.log(`[${getTimestamp()}] McDonald's Order Management System - Interactive Mode\n`);
+// Initial start
+console.log(`${COLORS.bold}${COLORS.green}[${getTimestamp()}] McDonald's Order Management System - Interactive Mode${COLORS.reset}\n`);
 showMenu();
