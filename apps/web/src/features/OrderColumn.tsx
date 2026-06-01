@@ -17,7 +17,7 @@ interface OrderColumnProps {
 
 const dotClass: Record<Accent, string> = {
   gold: 'bg-gold',
-  plain: 'bg-white/30',
+  plain: 'bg-fg/30',
   mint: 'bg-mint',
 };
 
@@ -31,15 +31,13 @@ export function OrderColumn({
   emptyHint,
 }: OrderColumnProps): JSX.Element {
   return (
-    <section className="flex min-h-[20rem] flex-col rounded-3xl border border-white/6 bg-ink-800/60 p-3">
+    <section className="flex min-h-[20rem] flex-col rounded-3xl border border-line/6 bg-panel/60 p-3">
       <div className="mb-3 flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
           <span className={`h-2 w-2 rounded-full ${dotClass[accent]}`} />
-          <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-white/60">
-            {title}
-          </h2>
+          <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-fg/60">{title}</h2>
         </div>
-        <span className="font-mono text-xs text-white/40">{orders.length}</span>
+        <span className="font-mono text-xs text-fg/40">{orders.length}</span>
       </div>
 
       <div className="flex flex-1 flex-col gap-2.5">
@@ -66,9 +64,9 @@ function EmptyState({ hint }: { hint: string }): ReactNode {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="grid flex-1 place-items-center rounded-2xl border border-dashed border-white/8 py-10 text-center"
+      className="grid flex-1 place-items-center rounded-2xl border border-dashed border-line/10 py-10 text-center"
     >
-      <p className="text-xs font-medium uppercase tracking-[0.18em] text-white/25">{hint}</p>
+      <p className="text-xs font-medium uppercase tracking-[0.18em] text-fg/30">{hint}</p>
     </motion.div>
   );
 }

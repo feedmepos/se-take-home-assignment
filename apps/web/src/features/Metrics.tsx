@@ -7,11 +7,10 @@ interface StatProps {
 }
 
 function Stat({ label, value, accent = 'neutral' }: StatProps): JSX.Element {
-  const valueColor =
-    accent === 'gold' ? 'text-gold' : accent === 'mint' ? 'text-mint' : 'text-white';
+  const valueColor = accent === 'gold' ? 'text-gold' : accent === 'mint' ? 'text-mint' : 'text-fg';
   return (
-    <div className="grain-card rounded-2xl border border-white/8 bg-ink-700 px-4 py-3.5">
-      <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-white/40">{label}</p>
+    <div className="grain-card rounded-2xl border border-line/8 bg-surface px-4 py-3.5">
+      <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-fg/40">{label}</p>
       <p className={`mt-1 font-mono text-3xl font-semibold tabular-nums ${valueColor}`}>
         {String(value).padStart(2, '0')}
       </p>

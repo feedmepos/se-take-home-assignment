@@ -30,27 +30,22 @@ export function OrderCard({ order, startedAt, now, botId }: OrderCardProps): JSX
         'grain-card relative overflow-hidden rounded-2xl border p-4',
         isVip
           ? 'border-gold/25 bg-[linear-gradient(135deg,rgba(255,199,44,0.10),rgba(255,199,44,0.02))] shadow-[0_10px_30px_-18px_rgba(255,199,44,0.5)]'
-          : 'border-white/8 bg-ink-700 shadow-card',
+          : 'border-line/8 bg-surface shadow-card',
       ].join(' ')}
     >
       {/* 左侧优先级强调条 */}
       <span
-        className={[
-          'absolute inset-y-0 left-0 w-1',
-          isVip ? 'bg-gold' : 'bg-white/10',
-        ].join(' ')}
+        className={['absolute inset-y-0 left-0 w-1', isVip ? 'bg-gold' : 'bg-fg/10'].join(' ')}
       />
 
       <header className="flex items-center justify-between gap-3">
-        <span className="font-mono text-xl font-medium tracking-tight text-white">
-          #{order.id}
-        </span>
+        <span className="font-mono text-xl font-medium tracking-tight text-fg">#{order.id}</span>
         <span
           className={[
             'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider',
             isVip
               ? 'bg-gold/15 text-gold ring-1 ring-gold/30'
-              : 'bg-white/8 text-white/55 ring-1 ring-white/10',
+              : 'bg-fg/8 text-fg/60 ring-1 ring-line/10',
           ].join(' ')}
         >
           {isVip && <span aria-hidden>✦</span>}
@@ -60,18 +55,16 @@ export function OrderCard({ order, startedAt, now, botId }: OrderCardProps): JSX
 
       <div className="mt-4">
         {order.status === OrderStatus.PENDING && (
-          <p className="text-xs font-medium uppercase tracking-[0.2em] text-white/35">
-            In queue
-          </p>
+          <p className="text-xs font-medium uppercase tracking-[0.2em] text-fg/40">In queue</p>
         )}
 
         {order.status === OrderStatus.PROCESSING && (
           <div>
             <div className="mb-2 flex items-center justify-between text-[11px] font-medium uppercase tracking-wider">
               <span className="text-gold">{botId ? `Bot #${botId}` : 'Cooking'}</span>
-              <span className="font-mono text-white/55">{secondsLeft}s left</span>
+              <span className="font-mono text-fg/55">{secondsLeft}s left</span>
             </div>
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/8">
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-fg/10">
               <motion.div
                 className="h-full rounded-full bg-gradient-to-r from-gold-deep via-gold to-gold-soft"
                 animate={{ width: `${progress * 100}%` }}
@@ -87,7 +80,7 @@ export function OrderCard({ order, startedAt, now, botId }: OrderCardProps): JSX
               <span aria-hidden>✓</span> Complete
             </span>
             {order.completedAt && (
-              <span className="font-mono text-white/35">{formatTime(order.completedAt)}</span>
+              <span className="font-mono text-fg/40">{formatTime(order.completedAt)}</span>
             )}
           </div>
         )}

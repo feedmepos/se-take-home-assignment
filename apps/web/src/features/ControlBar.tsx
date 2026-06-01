@@ -13,7 +13,7 @@ interface ActionButtonProps {
 
 const variantClass: Record<Variant, string> = {
   vip: 'border-transparent bg-gradient-to-b from-gold-soft to-gold-deep text-ink-900 shadow-glow',
-  normal: 'border-white/12 bg-ink-600 text-white hover:border-white/25',
+  normal: 'border-line/12 bg-surface-2 text-fg hover:border-line/25',
   add: 'border-mint/30 bg-mint/10 text-mint hover:bg-mint/15',
   remove: 'border-ember/30 bg-ember/10 text-ember hover:bg-ember/15',
 };
@@ -47,7 +47,7 @@ function ActionButton({ label, hint, variant, onClick }: ActionButtonProps): JSX
       <span
         className={[
           'text-[11px] font-medium',
-          variant === 'vip' ? 'text-ink-900/70' : 'text-white/40',
+          variant === 'vip' ? 'text-ink-900/70' : 'text-fg/40',
         ].join(' ')}
       >
         {hint}

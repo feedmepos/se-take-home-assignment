@@ -15,7 +15,7 @@ export function App(): JSX.Element {
       <ControlBar />
       <OrderBoard />
       <BotPanel />
-      <footer className="pt-2 text-center text-[11px] font-medium uppercase tracking-[0.2em] text-white/20">
+      <footer className="pt-2 text-center text-[11px] font-medium uppercase tracking-[0.2em] text-fg/30">
         Each bot cooks one order in 10 seconds · VIP orders jump the queue
       </footer>
     </div>

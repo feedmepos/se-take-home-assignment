@@ -9,16 +9,16 @@ export function BotPanel(): JSX.Element {
   const startedAt = useKitchenStore((s) => s.startedAt);
 
   return (
-    <section className="rounded-3xl border border-white/6 bg-ink-800/60 p-4">
+    <section className="rounded-3xl border border-line/6 bg-panel/60 p-4">
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-white/60">
+        <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-fg/60">
           Cooking Bots
         </h2>
-        <span className="font-mono text-xs text-white/40">{bots.length} active</span>
+        <span className="font-mono text-xs text-fg/40">{bots.length} active</span>
       </div>
 
       {bots.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-white/8 py-6 text-center text-xs font-medium uppercase tracking-[0.18em] text-white/25">
+        <p className="rounded-2xl border border-dashed border-line/10 py-6 text-center text-xs font-medium uppercase tracking-[0.18em] text-fg/30">
           No bots — add one to start cooking
         </p>
       ) : (
