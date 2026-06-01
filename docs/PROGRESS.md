@@ -18,7 +18,7 @@
 - ✅ pnpm workspaces monorepo 初始化(国内镜像源 .npmrc)
 - ✅ tsconfig.base / ESLint(flat config)/ Prettier / tsup 构建
 - ⬜ Husky pre-commit(留待 M6)
-- ⬜ 接通 CI 脚本(build/test/run + result.txt)→ M3 完成
+- ✅ 接通 CI 脚本(build/test/run + result.txt,本地 test.sh 全绿)
 
 ## M2 领域核心 + 单测(TDD)✅ 41 tests passing
 - ✅ types(枚举 + PROCESSING_DURATION_MS)
@@ -31,10 +31,11 @@
 - ✅ 全 user story 单测(优先级 / 并发 / 删 Bot 退回 / 唯一递增 / IDLE / 计时器取消 / 事件序列)
 - ✅ typecheck 干净 + tsup 构建产物 + lint 通过
 
-## M3 CLI(result.txt)
-- ⬜ 复用 core 跑预设场景
-- ⬜ 事件 → 带 HH:MM:SS 的日志行
-- ⬜ run.sh 接通,result.txt 通过 CI 校验
+## M3 CLI(result.txt)✅ 11 tests passing
+- ✅ 复用 core 跑预设场景(simulation.ts,FakeClock 瞬时 + 真实基准时间戳)
+- ✅ 事件 → 带 HH:MM:SS 的日志行(renderer.ts,TDD)
+- ✅ run.sh 接通,result.txt 通过 CI 时间戳校验
+- ✅ 场景覆盖:VIP 优先 / 并发 / 删 bot 退回 / 退回订单被接手 / 完成统计
 
 ## M4 后端服务
 - ⬜ Fastify + REST 命令路由

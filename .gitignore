@@ -9,3 +9,6 @@ coverage/
 .vite/
 *.tsbuildinfo
 pnpm-lock.yaml.bak
+
+# local registry mirror (not committed; CI uses default registry)
+.npmrc
