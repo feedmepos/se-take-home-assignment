@@ -1,37 +1,13 @@
-import { useEffect, useReducer, useState } from 'react'
-
-type OrderType = 'VIP' | 'NORMAL'
-type BotStatus = 'IDLE' | 'PROCESSING'
-
-type Order = {
-  id: number
-  type: OrderType
-}
-
-type CompletedOrder = Order & {
-  completedAt: number
-}
-
-type Bot = {
-  id: number
-  status: BotStatus
-  currentOrder: Order | null
-  startedAt: number | null
-}
-
-type State = {
-  nextOrderId: number
-  nextBotId: number
-  pendingOrders: Order[]
-  completedOrders: CompletedOrder[]
-  bots: Bot[]
-}
-
-type Action =
-  | { type: 'ADD_ORDER'; orderType: OrderType }
-  | { type: 'ADD_BOT' }
-  | { type: 'REMOVE_BOT' }
-  | { type: 'PROCESS_TICK'; now: number }
+import { type ReactNode, useEffect, useReducer, useState } from 'react'
+import { ActionPanel } from './components/ActionPanel'
+import { RoleTabs } from './components/RoleTabs'
+import {
+  BotIcon,
+  CompletedIcon,
+  ProcessingIcon,
+  QueueIcon,
+} from './components/icons/UiIcons'
+import type { Action, Bot, Order, OrderType, RoleTab, State } from './types'
 
 const PROCESS_TIME_MS = 10_000
 
@@ -48,15 +24,14 @@ const formatClockTime = (timestamp: number): string =>
 
 const getPriorityRank = (type: OrderType): number => (type === 'VIP' ? 0 : 1)
 
-const insertWithPriority = (queue: Order[], order: Order): Order[] => {
-  return [...queue, order].sort((a, b) => {
+const insertWithPriority = (queue: Order[], order: Order): Order[] =>
+  [...queue, order].sort((a, b) => {
     const byPriority = getPriorityRank(a.type) - getPriorityRank(b.type)
     if (byPriority !== 0) {
       return byPriority
     }
     return a.id - b.id
   })
-}
 
 const assignPendingOrders = (state: State): State => {
   if (state.pendingOrders.length === 0 || state.bots.length === 0) {
@@ -114,18 +89,17 @@ const reducer = (state: State, action: Action): State => {
 
       const newestBot = state.bots[state.bots.length - 1]
       const remainingBots = state.bots.slice(0, -1)
-
       let pendingOrders = [...state.pendingOrders]
+
       if (newestBot.currentOrder) {
         pendingOrders = insertWithPriority(pendingOrders, newestBot.currentOrder)
       }
 
-      const nextState: State = {
+      return assignPendingOrders({
         ...state,
         bots: remainingBots,
         pendingOrders,
-      }
-      return assignPendingOrders(nextState)
+      })
     }
     case 'PROCESS_TICK': {
       const completedBots = state.bots.filter(
@@ -140,26 +114,23 @@ const reducer = (state: State, action: Action): State => {
         return state
       }
 
-      const completedOrderIds = new Set(completedBots.map((bot) => bot.id))
-      const completedOrders = completedBots
-        .map((bot) => ({
-          ...bot.currentOrder!,
-          completedAt: action.now,
-        }))
-        .filter(Boolean)
+      const completedBotIds = new Set(completedBots.map((bot) => bot.id))
+      const completedOrders = completedBots.map((bot) => ({
+        ...bot.currentOrder!,
+        completedAt: action.now,
+      }))
 
       const nextBots = state.bots.map((bot): Bot =>
-        completedOrderIds.has(bot.id)
+        completedBotIds.has(bot.id)
           ? { ...bot, status: 'IDLE', currentOrder: null, startedAt: null }
           : bot,
       )
 
-      const nextState = {
+      return assignPendingOrders({
         ...state,
         bots: nextBots,
         completedOrders: [...state.completedOrders, ...completedOrders],
-      }
-      return assignPendingOrders(nextState)
+      })
     }
     default:
       return state
@@ -169,19 +140,20 @@ const reducer = (state: State, action: Action): State => {
 function App() {
   const [state, dispatch] = useReducer(reducer, undefined, createInitialState)
   const [now, setNow] = useState(() => Date.now())
+  const [activeTab, setActiveTab] = useState<RoleTab>('CUSTOMER')
 
   useEffect(() => {
     const runTick = () => dispatch({ type: 'PROCESS_TICK', now: Date.now() })
     const intervalId = window.setInterval(runTick, 500)
-    const onVisibilityOrFocus = () => runTick()
+    const onFocusOrVisibility = () => runTick()
 
-    window.addEventListener('focus', onVisibilityOrFocus)
-    document.addEventListener('visibilitychange', onVisibilityOrFocus)
+    window.addEventListener('focus', onFocusOrVisibility)
+    document.addEventListener('visibilitychange', onFocusOrVisibility)
 
     return () => {
       window.clearInterval(intervalId)
-      window.removeEventListener('focus', onVisibilityOrFocus)
-      document.removeEventListener('visibilitychange', onVisibilityOrFocus)
+      window.removeEventListener('focus', onFocusOrVisibility)
+      document.removeEventListener('visibilitychange', onFocusOrVisibility)
     }
   }, [])
 
@@ -190,70 +162,54 @@ function App() {
     return () => window.clearInterval(intervalId)
   }, [])
 
+  const processingCount = state.bots.filter((bot) => bot.status === 'PROCESSING').length
+
   return (
     <main className="min-h-screen bg-slate-100 text-slate-900">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
         <header className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-          <h1 className="text-2xl font-bold tracking-tight">McDonald Order Controller</h1>
-          <p className="mt-2 text-sm text-slate-600">
-            VIP orders are always queued before normal orders. Each bot processes one order in 10 seconds.
-          </p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <button
-              type="button"
-              className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700"
-              onClick={() => dispatch({ type: 'ADD_ORDER', orderType: 'NORMAL' })}
-            >
-              New Normal Order
-            </button>
-            <button
-              type="button"
-              className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-amber-400"
-              onClick={() => dispatch({ type: 'ADD_ORDER', orderType: 'VIP' })}
-            >
-              New VIP Order
-            </button>
-            <button
-              type="button"
-              className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500"
-              onClick={() => dispatch({ type: 'ADD_BOT' })}
-            >
-              + Bot
-            </button>
-            <button
-              type="button"
-              className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-500"
-              onClick={() => dispatch({ type: 'REMOVE_BOT' })}
-            >
-              - Bot
-            </button>
+          <div className="flex items-center gap-3">
+            <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#da291c]">
+              <span className="text-xl font-black leading-none text-[#ffbc0d]">M</span>
+            </div>
+            <h1 className="text-2xl font-bold tracking-tight">McDonald Order Controller</h1>
           </div>
+          <p className="mt-2 text-sm text-slate-600">
+            Prototype mode: switch role tabs to control actions, while the board stays shared.
+          </p>
+          <RoleTabs activeTab={activeTab} onChange={setActiveTab} />
+          <ActionPanel activeTab={activeTab} dispatch={dispatch} />
         </header>
 
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-            <p className="text-xs uppercase tracking-wide text-slate-500">Bots</p>
-            <p className="mt-1 text-2xl font-semibold">{state.bots.length}</p>
-          </div>
-          <div className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-            <p className="text-xs uppercase tracking-wide text-slate-500">Processing</p>
-            <p className="mt-1 text-2xl font-semibold">
-              {state.bots.filter((bot) => bot.status === 'PROCESSING').length}
-            </p>
-          </div>
-          <div className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-            <p className="text-xs uppercase tracking-wide text-slate-500">Pending</p>
-            <p className="mt-1 text-2xl font-semibold">{state.pendingOrders.length}</p>
-          </div>
-          <div className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-            <p className="text-xs uppercase tracking-wide text-slate-500">Complete</p>
-            <p className="mt-1 text-2xl font-semibold">{state.completedOrders.length}</p>
-          </div>
+          <StatCard
+            label="Bots"
+            value={state.bots.length}
+            icon={<BotIcon className="h-4 w-4 text-amber-500" />}
+          />
+          <StatCard
+            label="Processing"
+            value={processingCount}
+            icon={<ProcessingIcon className="h-4 w-4" />}
+          />
+          <StatCard
+            label="Pending"
+            value={state.pendingOrders.length}
+            icon={<QueueIcon className="h-4 w-4 text-rose-600" />}
+          />
+          <StatCard
+            label="Complete"
+            value={state.completedOrders.length}
+            icon={<CompletedIcon className="h-4 w-4 text-emerald-600" />}
+          />
         </section>
 
         <section className="grid gap-6 lg:grid-cols-3">
           <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-            <h2 className="text-lg font-semibold">Pending</h2>
+            <h2 className="flex items-center gap-2 text-lg font-semibold">
+              <QueueIcon className="h-5 w-5 text-rose-600" />
+              Pending
+            </h2>
             <ul className="mt-4 space-y-2">
               {state.pendingOrders.length === 0 && (
                 <li className="rounded-lg border border-dashed border-slate-300 p-3 text-sm text-slate-500">
@@ -266,22 +222,17 @@ function App() {
                   className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 p-3"
                 >
                   <span className="text-sm font-medium">Order #{order.id}</span>
-                  <span
-                    className={`rounded-full px-2 py-1 text-xs font-semibold ${
-                      order.type === 'VIP'
-                        ? 'bg-amber-100 text-amber-800'
-                        : 'bg-slate-200 text-slate-700'
-                    }`}
-                  >
-                    {order.type}
-                  </span>
+                  <OrderTypeBadge type={order.type} />
                 </li>
               ))}
             </ul>
           </div>
 
           <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-            <h2 className="text-lg font-semibold">Bots</h2>
+            <h2 className="flex items-center gap-2 text-lg font-semibold">
+              <BotIcon className="h-5 w-5 text-amber-500" />
+              Bots
+            </h2>
             <ul className="mt-4 space-y-2">
               {state.bots.length === 0 && (
                 <li className="rounded-lg border border-dashed border-slate-300 p-3 text-sm text-slate-500">
@@ -289,10 +240,7 @@ function App() {
                 </li>
               )}
               {state.bots.map((bot) => (
-                <li
-                  key={bot.id}
-                  className="rounded-lg border border-slate-200 bg-slate-50 p-3"
-                >
+                <li key={bot.id} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-semibold">Bot #{bot.id}</span>
                     <span
@@ -312,10 +260,12 @@ function App() {
                   )}
                   {bot.status === 'PROCESSING' && bot.startedAt !== null && (
                     <p className="mt-1 text-xs font-medium text-blue-700">
-                      {`Completes in ${Math.max(
+                      Completes in{' '}
+                      {Math.max(
                         0,
                         Math.ceil((PROCESS_TIME_MS - (now - bot.startedAt)) / 1000),
-                      )}s`}
+                      )}
+                      s
                     </p>
                   )}
                 </li>
@@ -324,7 +274,10 @@ function App() {
           </div>
 
           <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-            <h2 className="text-lg font-semibold">Complete</h2>
+            <h2 className="flex items-center gap-2 text-lg font-semibold">
+              <CompletedIcon className="h-5 w-5 text-emerald-600" />
+              Complete
+            </h2>
             <ul className="mt-4 space-y-2">
               {state.completedOrders.length === 0 && (
                 <li className="rounded-lg border border-dashed border-slate-300 p-3 text-sm text-slate-500">
@@ -332,21 +285,10 @@ function App() {
                 </li>
               )}
               {state.completedOrders.map((order) => (
-                <li
-                  key={order.id}
-                  className="rounded-lg border border-slate-200 bg-slate-50 p-3"
-                >
+                <li key={order.id} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Order #{order.id}</span>
-                    <span
-                      className={`rounded-full px-2 py-1 text-xs font-semibold ${
-                        order.type === 'VIP'
-                          ? 'bg-amber-100 text-amber-800'
-                          : 'bg-slate-200 text-slate-700'
-                      }`}
-                    >
-                      {order.type}
-                    </span>
+                    <OrderTypeBadge type={order.type} />
                   </div>
                   <p className="mt-1 text-xs text-slate-500">
                     Completed at {formatClockTime(order.completedAt)}
@@ -358,6 +300,38 @@ function App() {
         </section>
       </div>
     </main>
+  )
+}
+
+function OrderTypeBadge({ type }: { type: OrderType }) {
+  return (
+    <span
+      className={`rounded-full px-2 py-1 text-xs font-semibold ${
+        type === 'VIP' ? 'bg-amber-100 text-amber-800' : 'bg-slate-200 text-slate-700'
+      }`}
+    >
+      {type}
+    </span>
+  )
+}
+
+function StatCard({
+  label,
+  value,
+  icon,
+}: {
+  label: string
+  value: number
+  icon?: ReactNode
+}) {
+  return (
+    <div className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+      <p className="inline-flex items-center gap-1 text-xs uppercase tracking-wide text-slate-500">
+        {icon}
+        {label}
+      </p>
+      <p className="mt-1 text-2xl font-semibold">{value}</p>
+    </div>
   )
 }
 
