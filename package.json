@@ -1,0 +1,14 @@
+{
+  "name": "mcdonalds-order-controller",
+  "version": "1.0.0",
+  "description": "McDonald's Automated Order Management CLI Application",
+  "main": "src/cli/simulation.js",
+  "scripts": {
+    "start": "node src/cli/simulation.js",
+    "interactive": "node src/cli/interactive.js",
+    "test": "jest --verbose"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}
