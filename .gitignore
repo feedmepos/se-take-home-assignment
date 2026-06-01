@@ -12,3 +12,7 @@ pnpm-lock.yaml.bak
 
 # local registry mirror (not committed; CI uses default registry)
 .npmrc
+
+# deploy artifacts (built locally, uploaded manually to BaoTa)
+dist-deploy/
+*.zip
