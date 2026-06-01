@@ -4,7 +4,7 @@ A standalone frontend simulation of an in-store order controller used to model q
 
 This project is intentionally in-memory only (no backend, no API, no persistence) and is designed for fast manual testing of order flow logic.
 
-Live demo: `https://your-demo-url-here` (update this URL after deployment).
+Live demo: `[https://your-demo-url-here](https://frontend-mdkitchen-keith.vercel.app/)` (update this URL after deployment).
 
 ## Features
 - Create `Normal` and `VIP` orders.
