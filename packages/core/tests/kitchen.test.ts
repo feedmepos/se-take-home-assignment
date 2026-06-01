@@ -172,6 +172,37 @@ describe('Kitchen — bot removal (requeue with preserved priority)', () => {
   });
 });
 
+describe('Kitchen — state snapshot', () => {
+  it('reflects pending, processing, complete orders and bots', () => {
+    const { clock, kitchen } = setup(1);
+    const pendingOnly = kitchen.createOrder(OrderType.NORMAL);
+    const processing = kitchen.createOrder(OrderType.VIP);
+    const bot = kitchen.addBot(); // picks up the VIP (higher priority)
+
+    let snap = kitchen.snapshot();
+    expect(snap.pending.map((o) => o.id)).toEqual([pendingOnly.id]);
+    expect(snap.processing.map((o) => o.id)).toEqual([processing.id]);
+    expect(snap.complete).toEqual([]);
+    expect(snap.bots).toEqual([
+      { id: bot.id, status: BotStatus.PROCESSING, currentOrderId: processing.id },
+    ]);
+
+    clock.advance(PROCESSING_DURATION_MS);
+    snap = kitchen.snapshot();
+    expect(snap.complete.map((o) => o.id)).toEqual([processing.id]);
+    expect(snap.processing.map((o) => o.id)).toEqual([pendingOnly.id]);
+    expect(snap.bots[0]?.currentOrderId).toBe(pendingOnly.id);
+  });
+
+  it('exposes an idle bot with no current order in the snapshot', () => {
+    const { kitchen } = setup();
+    const bot = kitchen.addBot();
+    const snap = kitchen.snapshot();
+    expect(snap.processing).toEqual([]);
+    expect(snap.bots).toEqual([{ id: bot.id, status: BotStatus.IDLE, currentOrderId: null }]);
+  });
+});
+
 describe('Kitchen — domain events', () => {
   it('emits creation, pickup and completion events in order', () => {
     const { clock, kitchen } = setup(1001);

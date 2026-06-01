@@ -7,6 +7,6 @@ describe('deriveWsUrl', () => {
   });
 
   it('maps https to wss', () => {
-    expect(deriveWsUrl('https://api.magicyyds.com')).toBe('wss://api.magicyyds.com/ws');
+    expect(deriveWsUrl('https://api.demo.magicyyds.com')).toBe('wss://api.demo.magicyyds.com/ws');
   });
 });

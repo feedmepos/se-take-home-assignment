@@ -22,29 +22,29 @@
 
 ## 2. 需求映射(User Story → 设计落点)
 
-| # | 需求 | 设计落点 |
-|---|------|---------|
-| 1 | 普通订单进入 PENDING | `Kitchen.createOrder(NORMAL)` → `OrderQueue.enqueue` |
-| 2 | VIP 订单排在普通订单前、已有 VIP 后 | `OrderQueue` 优先级:VIP 段 + NORMAL 段,各自 FIFO |
-| 3 | 订单号唯一且递增 | `Kitchen` 内单调自增序列发号 |
-| 4 | Bot 处理 10s → COMPLETE → 取下一单 | `Bot` + `Clock` 计时;完成后触发再调度 |
-| 5 | 队列空时 Bot 进入 IDLE 等待 | `Kitchen.dispatch()` 找不到订单则 Bot 置 IDLE |
-| 6 | 删 Bot 取最新;处理中订单退回保持优先级 | `Kitchen.removeBot()` 弹出最新 Bot,正在处理的订单 `requeue` 回原优先级段头部 |
-| 7 | 无持久化,纯内存 | 全部状态在内存对象图中,无 DB |
+| #   | 需求                                   | 设计落点                                                                     |
+| --- | -------------------------------------- | ---------------------------------------------------------------------------- |
+| 1   | 普通订单进入 PENDING                   | `Kitchen.createOrder(NORMAL)` → `OrderQueue.enqueue`                         |
+| 2   | VIP 订单排在普通订单前、已有 VIP 后    | `OrderQueue` 优先级:VIP 段 + NORMAL 段,各自 FIFO                             |
+| 3   | 订单号唯一且递增                       | `Kitchen` 内单调自增序列发号                                                 |
+| 4   | Bot 处理 10s → COMPLETE → 取下一单     | `Bot` + `Clock` 计时;完成后触发再调度                                        |
+| 5   | 队列空时 Bot 进入 IDLE 等待            | `Kitchen.dispatch()` 找不到订单则 Bot 置 IDLE                                |
+| 6   | 删 Bot 取最新;处理中订单退回保持优先级 | `Kitchen.removeBot()` 弹出最新 Bot,正在处理的订单 `requeue` 回原优先级段头部 |
+| 7   | 无持久化,纯内存                        | 全部状态在内存对象图中,无 DB                                                 |
 
 ---
 
 ## 3. 技术选型
 
-| 维度 | 选型 | 理由 |
-|------|------|------|
-| 语言 | TypeScript(strict) | 类型安全、即文档、前后端共享类型 |
-| 仓库 | pnpm workspaces monorepo | 核心逻辑一处编写,三处复用 |
-| 后端 | Fastify + `ws`(原生 WebSocket) | 轻量高性能,WS 实时推送状态 |
-| 前端 | React 18 + Vite + Zustand + TailwindCSS | 构建快、状态管理轻、UI 可定制 |
-| 测试 | Vitest + React Testing Library | 全栈统一,支持虚拟时钟 |
-| 质量 | ESLint + Prettier + TS strict + Husky | 提交前强制门槛 |
-| 部署 | 宝塔面板(HTML 项目 + Node 项目 + Nginx 反代) | 贴合现有阿里云环境,无需 Docker |
+| 维度 | 选型                                         | 理由                             |
+| ---- | -------------------------------------------- | -------------------------------- |
+| 语言 | TypeScript(strict)                           | 类型安全、即文档、前后端共享类型 |
+| 仓库 | pnpm workspaces monorepo                     | 核心逻辑一处编写,三处复用        |
+| 后端 | Fastify + `ws`(原生 WebSocket)               | 轻量高性能,WS 实时推送状态       |
+| 前端 | React 18 + Vite + Zustand + TailwindCSS      | 构建快、状态管理轻、UI 可定制    |
+| 测试 | Vitest + React Testing Library               | 全栈统一,支持虚拟时钟            |
+| 质量 | ESLint + Prettier + TS strict + Husky        | 提交前强制门槛                   |
+| 部署 | 宝塔面板(HTML 项目 + Node 项目 + Nginx 反代) | 贴合现有阿里云环境,无需 Docker   |
 
 ---
 
@@ -113,9 +113,19 @@ se-take-home-assignment/
 ### 5.1 类型定义(`types.ts`)
 
 ```ts
-export enum OrderType   { NORMAL = 'NORMAL', VIP = 'VIP' }
-export enum OrderStatus { PENDING = 'PENDING', PROCESSING = 'PROCESSING', COMPLETE = 'COMPLETE' }
-export enum BotStatus   { IDLE = 'IDLE', PROCESSING = 'PROCESSING' }
+export enum OrderType {
+  NORMAL = 'NORMAL',
+  VIP = 'VIP',
+}
+export enum OrderStatus {
+  PENDING = 'PENDING',
+  PROCESSING = 'PROCESSING',
+  COMPLETE = 'COMPLETE',
+}
+export enum BotStatus {
+  IDLE = 'IDLE',
+  PROCESSING = 'PROCESSING',
+}
 ```
 
 ### 5.2 `Order`(实体)
@@ -143,11 +153,13 @@ export enum BotStatus   { IDLE = 'IDLE', PROCESSING = 'PROCESSING' }
 系统唯一对外入口,持有 `OrderQueue` + `Bot[]` + `Clock` + `EventEmitter`。
 
 **命令方法:**
+
 - `createOrder(type): Order` —— 发号(单调递增)、入队、发 `OrderCreated`、触发 `dispatch()`。
 - `addBot(): Bot` —— 新建 Bot 入列、发 `BotAdded`、触发 `dispatch()`。
 - `removeBot(): void` —— 弹出**最新**(数组尾)Bot;若其处理中,`abort()` 得到订单并 `requeue` 回原优先级、订单状态回 PENDING;发 `BotRemoved`。
 
 **内部调度 `dispatch()`:**
+
 - 遍历 IDLE Bot,从队列 `dequeue` 分配;订单置 PROCESSING、发 `OrderPickedUp`;通过 `Clock.setTimeout(10s)` 安排完成。
 - 完成回调:订单置 COMPLETE、发 `OrderCompleted`、Bot 置 IDLE、再次 `dispatch()`。
 - 队列空 → IDLE Bot 保持等待(需求 5)。
@@ -162,6 +174,7 @@ interface Clock {
   setTimeout(fn: () => void, ms: number): CancelHandle;
 }
 ```
+
 - `RealClock`:封装真实 `setTimeout`(生产用,真 10s)。
 - `FakeClock`:手动 `advance(ms)` 推进虚拟时间并同步触发到期回调 —— 单测中瞬时验证 10s 行为,确定、无 flaky。
 
@@ -170,7 +183,9 @@ interface Clock {
 ```
 OrderCreated | OrderPickedUp | OrderCompleted | OrderRequeued | BotAdded | BotRemoved
 ```
+
 事件携带时间戳 + 载荷。**同一事件流,两种消费者:**
+
 - `server` → 转 WS 消息推给前端。
 - `cli` → 转 `result.txt` 日志行(带 HH:MM:SS,满足 CI)。
 
@@ -189,6 +204,7 @@ OrderCreated | OrderPickedUp | OrderCompleted | OrderRequeued | BotAdded | BotRe
 │ Infrastructure config / logger / clock 实现     │ 技术细节
 └─────────────────────────────────────────────┘
 ```
+
 依赖方向自上而下,Domain 不依赖任何上层 —— 依赖倒置。
 
 ---
@@ -196,17 +212,20 @@ OrderCreated | OrderPickedUp | OrderCompleted | OrderRequeued | BotAdded | BotRe
 ## 7. 通信协议(WebSocket 为主 + REST 命令)
 
 **REST(命令,幂等触发):**
+
 - `POST /api/orders` body `{ type: 'NORMAL' | 'VIP' }`
 - `POST /api/bots`(增加 bot)
 - `DELETE /api/bots`(删除最新 bot)
 - `GET /api/state`(首次拉取全量快照)
 
 **WebSocket(状态推送):** 连接后 server 先推全量 `state` 快照,之后每次领域事件推增量/全量:
+
 ```jsonc
 // server → client
 { "type": "STATE", "payload": { "pending": [...], "processing": [...], "complete": [...], "bots": [...] } }
 { "type": "EVENT", "payload": { "kind": "OrderCompleted", "ts": "14:32:13", "orderId": 1002 } }
 ```
+
 > 命令也可走 WS,但用 REST 触发 + WS 单向推送,职责更清晰、易测。
 
 Nginx 反代需放行 WS 升级头(见部署章节)。
@@ -220,6 +239,7 @@ Nginx 反代需放行 WS 升级头(见部署章节)。
 **状态流:** WS 推送 → service 解析 → 写入 Zustand store → 组件订阅渲染。组件不含业务规则,只渲染 + 发命令。
 
 **核心界面区块:**
+
 - 顶部 `ControlBar`:New Normal / New VIP / + Bot / − Bot 四个操作按钮 + 计数指标。
 - `OrderBoard`:PENDING / PROCESSING / COMPLETE 三列看板;VIP 订单高亮标记;卡片含订单号、类型、状态、计时进度。
 - `BotPanel`:Bot 列表,显示 IDLE/PROCESSING 及当前处理订单 + 剩余倒计时。
@@ -231,11 +251,11 @@ Nginx 反代需放行 WS 升级头(见部署章节)。
 
 ## 9. 测试策略
 
-| 层 | 工具 | 重点 |
-|----|------|------|
+| 层         | 工具               | 重点                                                                                             |
+| ---------- | ------------------ | ------------------------------------------------------------------------------------------------ |
 | core(重点) | Vitest + FakeClock | 全部 user story:优先级、并发多 Bot、删 Bot 退回、唯一递增 id、队列空 IDLE。瞬时推进 10s,确定性。 |
-| server | Vitest | 命令 → 状态 → 事件广播的集成验证 |
-| web | Vitest + RTL | store reducer、关键组件渲染、ws 消息处理 |
+| server     | Vitest             | 命令 → 状态 → 事件广播的集成验证                                                                 |
+| web        | Vitest + RTL       | store reducer、关键组件渲染、ws 消息处理                                                         |
 
 覆盖率门槛纳入 CI(core 目标 ≥ 90%)。
 
@@ -258,18 +278,20 @@ Nginx 反代需放行 WS 升级头(见部署章节)。
 
 ## 11. 部署方案(宝塔面板 / 阿里云)
 
-服务器:`116.62.13.104`,宝塔面板。域名:`h5.magicyyds.com`(前端)、`api.magicyyds.com`(后端)。
+服务器:`116.62.13.104`,宝塔面板。域名:`demo.magicyyds.com`(前端)、`api.demo.magicyyds.com`(后端)。
 
-**前端(h5.magicyyds.com — HTML 项目):**
+**前端(demo.magicyyds.com — HTML 项目):**
+
 1. 本地 `pnpm --filter web build` 产出 `apps/web/dist`。
-2. 上传 `dist` 到 `/www/wwwroot/h5.magicyyds.com`。
+2. 上传 `dist` 到 `/www/wwwroot/demo.magicyyds.com`。
 3. 宝塔 HTML 项目伺服;SPA 需配置 fallback 到 `index.html`。
-4. 前端环境变量指向 `wss://api.magicyyds.com`。
+4. 前端环境变量指向 `wss://api.demo.magicyyds.com`。
 
-**后端(api.magicyyds.com — Node 项目):**
+**后端(api.demo.magicyyds.com — Node 项目):**
+
 1. `pnpm --filter server build` 产出 `apps/server/dist`。
 2. 宝塔「Node 项目」加载,PM2 守护,监听本地端口(如 `3001`)。
-3. 宝塔为 `api.magicyyds.com` 配反向代理 → `127.0.0.1:3001`,**加 WebSocket 升级头**:
+3. 宝塔为 `api.demo.magicyyds.com` 配反向代理 → `127.0.0.1:3001`,**加 WebSocket 升级头**:
    ```nginx
    proxy_http_version 1.1;
    proxy_set_header Upgrade $http_upgrade;
