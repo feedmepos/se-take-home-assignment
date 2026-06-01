@@ -15,20 +15,21 @@
 - ✅ 建立进度跟踪文档
 
 ## M1 工程脚手架
-- ⬜ pnpm workspaces monorepo 初始化
-- ⬜ tsconfig.base / ESLint / Prettier
-- ⬜ Husky pre-commit
-- ⬜ 接通 CI 脚本(build/test/run + result.txt 空实现先绿)
+- ✅ pnpm workspaces monorepo 初始化(国内镜像源 .npmrc)
+- ✅ tsconfig.base / ESLint(flat config)/ Prettier / tsup 构建
+- ⬜ Husky pre-commit(留待 M6)
+- ⬜ 接通 CI 脚本(build/test/run + result.txt)→ M3 完成
 
-## M2 领域核心 + 单测(TDD)
-- ⬜ types(枚举)
-- ⬜ Clock(RealClock / FakeClock)
-- ⬜ Order 实体
-- ⬜ Bot 实体
-- ⬜ OrderQueue(优先级 + requeue)
-- ⬜ Kitchen 聚合根(createOrder/addBot/removeBot/dispatch)
-- ⬜ 领域事件
-- ⬜ 全 user story 单测(优先级 / 并发 / 删 Bot 退回 / 唯一递增 / IDLE)
+## M2 领域核心 + 单测(TDD)✅ 41 tests passing
+- ✅ types(枚举 + PROCESSING_DURATION_MS)
+- ✅ Clock(RealClock / FakeClock,支持回调内再注册定时器)
+- ✅ Order 实体(受控状态迁移)
+- ✅ Bot 实体(assign/finish/abort)
+- ✅ OrderQueue(VIP/普通双段优先级 + requeue 退回保序)
+- ✅ Kitchen 聚合根(createOrder/addBot/removeBot/dispatch/complete + 全量快照)
+- ✅ 领域事件 + snapshot 类型
+- ✅ 全 user story 单测(优先级 / 并发 / 删 Bot 退回 / 唯一递增 / IDLE / 计时器取消 / 事件序列)
+- ✅ typecheck 干净 + tsup 构建产物 + lint 通过
 
 ## M3 CLI(result.txt)
 - ⬜ 复用 core 跑预设场景
