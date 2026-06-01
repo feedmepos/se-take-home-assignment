@@ -7,3 +7,4 @@ export * from './models/Bot';
 export * from './services/OrderQueue';
 export * from './services/Kitchen';
 export * from './events/DomainEvent';
+export * from './protocol';

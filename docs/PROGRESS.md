@@ -37,11 +37,13 @@
 - ✅ run.sh 接通,result.txt 通过 CI 时间戳校验
 - ✅ 场景覆盖:VIP 优先 / 并发 / 删 bot 退回 / 退回订单被接手 / 完成统计
 
-## M4 后端服务
-- ⬜ Fastify + REST 命令路由
-- ⬜ WS gateway(全量快照 + 事件推送)
-- ⬜ KitchenService 用例编排 + 事件广播
-- ⬜ 集成测试
+## M4 后端服务 ✅ 12 tests passing
+- ✅ Fastify + REST 命令路由(orders/bots/state,非法类型 400)
+- ✅ WS gateway(连接推全量快照 + 每事件推 EVENT+STATE)
+- ✅ KitchenService 用例编排(注入 Clock,默认 RealClock)
+- ✅ config(端口/host 环境变量)
+- ✅ 集成测试(fastify inject + 真实 WS 客户端)+ 手动 curl 冒烟通过
+- ✅ 共享 WS 协议类型(core/protocol.ts)
 
 ## M5 前端(UI)
 - ⬜ Vite + React + Tailwind + Zustand 脚手架
