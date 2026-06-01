@@ -45,12 +45,16 @@
 - ✅ 集成测试(fastify inject + 真实 WS 客户端)+ 手动 curl 冒烟通过
 - ✅ 共享 WS 协议类型(core/protocol.ts)
 
-## M5 前端(UI)
-- ⬜ Vite + React + Tailwind + Zustand 脚手架
-- ⬜ useWebSocket / ws+rest service
-- ⬜ ControlBar / OrderBoard / BotPanel(frontend-design skill)
-- ⬜ 处理中进度条 + 动效
-- ⬜ 前端单测
+## M5 前端(UI)✅ 14 tests passing
+- ✅ Vite + React + Tailwind + Zustand + framer-motion 脚手架
+- ✅ 自托管字体(@fontsource,避免国内访问 Google Fonts 问题)
+- ✅ WS 连接(自动重连)+ REST service + Zustand store
+- ✅ Header / Metrics / ControlBar / OrderBoard(三列)/ BotPanel
+- ✅ 处理中 10s 进度条 + bot cooking 进度环 + 卡片流转动效(frontend-design skill)
+- ✅ 「厨房指挥中心」深色金调美学,VIP 金色高亮
+- ✅ 前端单测(config/store/OrderCard/ControlBar)
+- ✅ Playwright 视觉验证通过(processing 进度条、VIP 优先、bot 状态)
+- ✅ .env.production 指向 api.magicyyds.com
 
 ## M6 打磨与上线
 - ⬜ 覆盖率门槛
