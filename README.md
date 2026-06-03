@@ -1,64 +1,185 @@
-## FeedMe Software Engineer Take Home Assignment
-Below is a take home assignment before the interview of the position. You are required to
-1. Understand the situation and use case. You may contact the interviewer for further clarification.
-2. implement the requirement with **either frontend or backend components**.
-3. Complete the requirement with **AI** if possible, but perform your own testing.
-4. Provide documentation for the any part that you think is needed.
-5. Bring the source code and functioning prototype to the interview session.
+# McDonald's Order System
 
-### Situation
-McDonald is transforming their business during COVID-19. They wish to build the automated cooking bots to reduce workforce and increase their efficiency. As one of the software engineer in the project. You task is to create an order controller which handle the order control flow. 
+McDonald is transforming their business during COVID-19. They wish to build the automated cooking bots to reduce workforce and increase their efficiency. Therefore, a application is created on browser-based simulation of a fast-food order kitchen: enqueue normal and VIP orders, assign them to cooking bots, and track progress from pending through completed.
 
-### User Story
-As below is part of the user story:
-1. As McDonald's normal customer, after I submitted my order, I wish to see my order flow into "PENDING" area. After the cooking bot process my order, I want to see it flow into to "COMPLETE" area.
-2. As McDonald's VIP member, after I submitted my order, I want my order being process first before all order by normal customer.  However if there's existing order from VIP member, my order should queue behind his/her order.
-3. As McDonald's manager, I want to increase or decrease number of cooking bot available in my restaurant. When I increase a bot, it should immediately process any pending order. When I decrease a bot, the processing order should remain un-process.
-4. As McDonald bot, it can only pickup and process 1 order at a time, each order required 10 seconds to complete process.
+**Developed by Jack Tiew**
 
-### Requirements
-1. When "New Normal Order" clicked, a new order should show up "PENDING" Area.
-2. When "New VIP Order" clicked, a new order should show up in "PENDING" Area. It should place in-front of all existing "Normal" order but behind of all existing "VIP" order.
-3. The order number should be unique and increasing.
-4. When "+ Bot" clicked, a bot should be created and start processing the order inside "PENDING" area. after 10 seconds picking up the order, the order should move to "COMPLETE" area. Then the bot should start processing another order if there is any left in "PENDING" area.
-5. If there is no more order in the "PENDING" area, the bot should become IDLE until a new order come in.
-6. When "- Bot" clicked, the newest bot should be destroyed. If the bot is processing an order, it should also stop the process. The order should return to its original position in the "PENDING" area (maintaining VIP/Normal order priority).
-7. No data persistance is needed for this prototype, you may perform all the process inside memory.
+---
 
-### Functioning Prototype
-You must implement **either** frontend or backend components as described below:
+## Table of contents
 
-#### 1. Frontend
-- You are free to use **any framework and programming language** of your choice
-- The UI application must be compiled, deployed and hosted on any publicly accessible web platform
-- Must provide a user interface that demonstrates all the requirements listed above
-- Should allow users to interact with the McDonald's order management system
+- [Project overview](#project-overview)
+- [Features](#features)
+- [How it works](#how-it-works)
+- [Project structure](#project-structure)
+- [Tech stack](#tech-stack)
+- [Prerequisites](#prerequisites)
+- [How to compile and run](#how-to-compile-and-run)
+- [Available scripts](#available-scripts)
 
-#### 2. Backend
-- You must use **either Go (Golang) or Node.js** for the backend implementation
-- The backend must be a CLI application that can be executed in GitHub Actions
-- Must implement the following scripts in the `script` directory:
-  - `test.sh`: Contains unit test execution steps
-  - `build.sh`: Contains compilation steps for the CLI application
-  - `run.sh`: Contains execution steps that run the CLI application
-- The CLI application result must be printed to `result.txt`
-- The `result.txt` output must include timestamps in `HH:MM:SS` format to track order completion times
-- Must follow **GitHub Flow**: Create a Pull Request with your changes to this repository
-- Ensure all GitHub Action checks pass successfully
-- **Note**: An interactive CLI implementation is compulsory for the next round of interview. Candidates should be prepared to demonstrate interactive command handling.
+---
 
-#### Submission Requirements
-- Fork this repository and implement your solution with either frontend or backend
-- **Frontend option**: Deploy to a publicly accessible URL using any technology stack
-- **Backend option**: Must be implemented in Go or Node.js and work within the GitHub Actions environment
-  - Follow GitHub Flow process with Pull Request submission
-  - All tests in `test.sh` must pass
-  - The `result.txt` file must contain meaningful output from your CLI application
-  - All output must include timestamps in `HH:MM:SS` format to track order completion times
-  - Submit a Pull Request and ensure the `backend-verify-result` workflow passes
-- Provide documentation for any part that you think is needed
+## Project overview
 
-### Tips on completing this task
-- Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.
-- Utilize coding agent to complete the assignment scope your working hour within 1 hour, do not over engineer it. However, ensure you read and understand what your code doing and apply good engineering practice.
-- Complete the implementation as clean as possible, clean code is a strong plus point, do not bring in all the fancy tech stuff.
+This application is a **Software Engineer take-home assignment** built as a single-page React app. It models a simplified McDonald's-style kitchen:
+
+- Staff can place **Normal** or **VIP** orders.
+- **Cooking bots** pull work from a shared pending queue and cook each order for a fixed duration (10 seconds).
+- The UI shows three live columns: **Pending**, **Cooking Bots**, and **Completed**.
+
+All state lives in memory in the browser. Refreshing the page resets orders and bots. There is no backend, database, or persistence layer.
+
+---
+
+## Features
+
+- **Order types** — Normal and VIP orders with distinct badges and enqueue rules.
+- **VIP priority** — VIP orders are served before normal orders. New VIPs are inserted after existing VIPs and before any normals.
+- **Cooking bots** — Add or remove bots (removal affects the most recently added bot). Idle bots automatically pick up the next pending order.
+- **Fixed cook time** — Each order takes 10 seconds (`PROCESS_TIME_MS`). Progress bars and countdowns use the same constant.
+- **Bot removal handling** — If a bot is removed while cooking, its order returns to the pending queue with correct VIP/normal placement.
+- **Live header clock** — Current date and time in the header.
+
+---
+
+## How it works
+
+### State management
+
+Business logic is centralized in a custom React hook, [`src/hooks/useOrderController.js`](src/hooks/useOrderController.js). It uses:
+
+- **`useState`** — Single in-memory store: orders map, pending queue, completed queue, and bot list.
+- **`useRef`** — Cooking timers (`setTimeout`) and a stable reference for recursive completion callbacks.
+- **Pure helpers** — Queue insertion, bot assignment, order completion, and restore-on-bot-remove.
+
+This is **local React state** (not Redux, Zustand, or a server cache like Redis).
+
+### Order flow
+
+1. User clicks **Normal** or **VIP** → order is created and added to `pendingQueue`.
+2. Any **idle bot** takes the front of `pendingQueue` (VIPs are always ahead of normals).
+3. After **10 seconds**, the order moves to **Completed** and the bot becomes idle again.
+4. Idle bots immediately try to take the next pending order.
+
+### UI layout
+
+| Area             | Role                                                   |
+| ---------------- | ------------------------------------------------------ |
+| Header           | Branding and live date/time                            |
+| Action bar       | New order buttons, active bot controls, cook-time info |
+| Pending column   | Orders waiting for a bot                               |
+| Cooking column   | Bots and in-progress orders with progress              |
+| Completed column | Finished orders                                        |
+
+---
+
+## Project structure
+
+```
+src/
+├── pages/
+│   ├── App.jsx          # Root layout and hook wiring
+│   └── App.css
+├── hooks/
+│   ├── useOrderController.js   # Core domain logic
+│   ├── useLiveClock.js
+│   └── useNowTick.js
+├── utils/
+│   ├── cookingProgress.js      # Progress % and seconds remaining
+│   └── orderTime.js            # Time formatting
+├── components/
+│   ├── Header/
+│   ├── Actions/                # Action bar, new orders, bots, cook time
+│   └── Orders/
+│       ├── Pending/
+│       ├── Cooking/
+│       └── Completed/
+└── assets/                     # PNG icons and SVGs (via vite-plugin-svgr)
+```
+
+---
+
+## Tech stack
+
+| Category          | Library                                                                             | Version (installed) |
+| ----------------- | ----------------------------------------------------------------------------------- | ------------------- |
+| UI                | [React](https://react.dev/)                                                         | 19.2.7              |
+| DOM               | [react-dom](https://react.dev/)                                                     | 19.2.7              |
+| Build tool        | [Vite](https://vite.dev/)                                                           | 8.0.16              |
+| React in Vite     | [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react)                 | 6.0.2               |
+| SVG as components | [vite-plugin-svgr](https://github.com/vitejs/vite-plugin-svgr)                      | 5.2.0               |
+| Linting           | [ESLint](https://eslint.org/)                                                       | 10.3.0              |
+| ESLint configs    | `eslint-plugin-react-hooks`, `eslint-plugin-react-refresh`, `@eslint/js`, `globals` | See `package.json`  |
+| Types (dev)       | `@types/react`, `@types/react-dom`                                                  | 19.x                |
+
+**Runtime:** Modern evergreen browser with ES modules support.
+
+**Language:** JavaScript (JSX), no TypeScript application code.
+
+---
+
+## Prerequisites
+
+- **Node.js** 20+ recommended (18+ should work with Vite 8)
+- **npm** (comes with Node.js)
+
+---
+
+## How to compile and run
+
+### 1. Install dependencies
+
+From the project root:
+
+```bash
+npm install
+```
+
+### 2. Run in development (hot reload)
+
+```bash
+npm run dev
+```
+
+Open the URL shown in the terminal (typically `http://localhost:5173`).
+
+### 3. Production build (compile)
+
+```bash
+npm run build
+```
+
+Output is written to the `dist/` folder.
+
+### 4. Preview the production build locally
+
+```bash
+npm run preview
+```
+
+Serves the compiled `dist/` app for a quick smoke test before deployment.
+
+### 5. Lint (optional)
+
+```bash
+npm run lint
+```
+
+---
+
+## Available scripts
+
+| Script    | Command           | Description                    |
+| --------- | ----------------- | ------------------------------ |
+| `dev`     | `npm run dev`     | Start Vite dev server with HMR |
+| `build`   | `npm run build`   | Production build to `dist/`    |
+| `preview` | `npm run preview` | Serve `dist/` locally          |
+| `lint`    | `npm run lint`    | Run ESLint on the project      |
+
+---
+
+## Notes for reviewers
+
+- **VIP queue rule:** Pending queue order is always “all VIPs first (FIFO among VIPs), then all normals (FIFO among normals).”
+- **No bot cap:** You can add as many bots as needed; the UI shows active vs total bots.
+- **Timers:** Cooking completion uses `setTimeout` per bot; timers are cleared on unmount and when a bot is removed.

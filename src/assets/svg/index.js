@@ -1,0 +1,11 @@
+export { default as BagIcon } from './bag.svg?react';
+export { default as StarIcon } from './star.svg?react';
+export { default as BotIcon } from './bot.svg?react';
+export { default as ClockIcon } from './clock.svg?react';
+export { default as BurgerIcon } from './burger.svg?react';
+export { default as CheckIcon } from './check.svg?react';
+export { default as InfoIcon } from './info.svg?react';
+export { default as UserIcon } from './user.svg?react';
+export { default as ChevronDownIcon } from './chevron-down.svg?react';
+export { default as NoteIcon } from './note.svg?react';
+export { default as ReceiptIcon } from './receipt.svg?react';
