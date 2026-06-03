@@ -1,5 +1,5 @@
 import { useOrderController } from '../hooks/useOrderController';
-import ActionBar from '../components/actions/ActionBar';
+import ActionBar from '../components/Actions/ActionBar';
 import Header from '../components/Header/Header';
 import CompletedOrdersPanel from '../components/Orders/Completed/CompletedOrdersPanel';
 import CookingBotsPanel from '../components/Orders/Cooking/CookingBotsPanel';
