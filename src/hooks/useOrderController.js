@@ -6,14 +6,15 @@ const createInitialState = () => {
 	return {
 		nextOrderNumber: 1,
 		nextBotId: 1,
-		orders: {},
+		orders: [],
 		pendingQueue: [],
 		completeQueue: [],
 		bots: [],
 	};
 };
 
-const insertVipIntoQueue = (pendingQueue, orders, orderId) => {
+// Can use for restore normal order as well
+const insertAfterVips = (pendingQueue, orders, orderId) => {
 	let insertAt = 0;
 	for (let i = 0; i < pendingQueue.length; i++) {
 		if (orders[pendingQueue[i]].type === 'vip') {
@@ -23,14 +24,14 @@ const insertVipIntoQueue = (pendingQueue, orders, orderId) => {
 	pendingQueue.splice(insertAt, 0, orderId);
 };
 
-const insertNormalIntoQueue = (pendingQueue, orders, orderId) => {
-	let insertAt = 0;
+const restoreVipToQueue = (pendingQueue, orders, orderId) => {
 	for (let i = 0; i < pendingQueue.length; i++) {
 		if (orders[pendingQueue[i]].type === 'vip') {
-			insertAt = i + 1;
+			pendingQueue.splice(i, 0, orderId);
+			return;
 		}
 	}
-	pendingQueue.splice(insertAt, 0, orderId);
+	pendingQueue.splice(0, 0, orderId);
 };
 
 const assignWorkToIdleBots = (draft, onProcessComplete) => {
@@ -86,9 +87,9 @@ const restoreOrderToPending = (draft, orderId) => {
 	delete order.botId;
 
 	if (order.type === 'vip') {
-		insertVipIntoQueue(draft.pendingQueue, draft.orders, orderId);
+		restoreVipToQueue(draft.pendingQueue, draft.orders, orderId);
 	} else {
-		insertNormalIntoQueue(draft.pendingQueue, draft.orders, orderId);
+		insertAfterVips(draft.pendingQueue, draft.orders, orderId);
 	}
 };
 
@@ -158,7 +159,7 @@ export const useOrderController = () => {
 				status: 'pending',
 				createdAt: Date.now(),
 			};
-			insertVipIntoQueue(draft.pendingQueue, draft.orders, id);
+			insertAfterVips(draft.pendingQueue, draft.orders, id);
 			assignWorkToIdleBots(draft, scheduleComplete);
 			return draft;
 		});
