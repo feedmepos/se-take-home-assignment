@@ -1,5 +1,44 @@
 # McDonald's 订单控制器 — 操作说明
 
+## 启动方式
+
+### 方法一：go run（不需要编译，直接运行）
+
+```bash
+# 交互模式
+go run ./cmd/main.go
+
+# 模拟模式
+go run ./cmd/main.go --simulate
+```
+
+`go run` 自动编译并运行，不生成二进制文件，用完即清理。适合快速试用。
+
+### 方法二：编译后运行（生成可执行文件）
+
+```bash
+# 先编译
+go build -o order-controller ./cmd/main.go
+
+# 交互模式
+./order-controller
+
+# 模拟模式
+./order-controller --simulate > scripts/result.txt
+```
+
+编译后的 `order-controller` 是独立二进制文件，不依赖 Go 环境，可随时运行。
+
+### 方法三：使用脚本（一键流水线）
+
+```bash
+./scripts/run.sh
+```
+
+自动执行 `build.sh` → 编译 → 模拟运行 → 输出到 `result.txt`。
+
+---
+
 ## 模式
 
 ### 交互模式（终端运行）
