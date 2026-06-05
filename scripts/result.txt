@@ -1,0 +1,23 @@
+[16:45:05] System initialized with 0 bots
+[16:45:05] Normal Order #1001 added → PENDING
+[16:45:06] VIP Order #1002 added → PENDING
+[16:45:07] Normal Order #1003 added → PENDING
+[16:45:08] Bot #1 created → PROCESSING VIP Order #1002
+[16:45:09] Bot #2 created → PROCESSING Normal Order #1001
+[16:45:18] Bot #1 completed VIP Order #1002 → COMPLETE
+[16:45:18] Bot #1 started Normal Order #1003 → PROCESSING
+[16:45:19] Bot #2 completed Normal Order #1001 → COMPLETE
+[16:45:19] Bot #2 is now IDLE — no pending orders
+[16:45:20] VIP Order #1004 added → PENDING
+[16:45:20] Bot #2 started VIP Order #1004 → PROCESSING
+[16:45:28] Bot #1 completed Normal Order #1003 → COMPLETE
+[16:45:28] Bot #1 is now IDLE — no pending orders
+[16:45:30] Bot #2 completed VIP Order #1004 → COMPLETE
+[16:45:31] Bot #2 removed (was idle)
+[16:45:31] Bot #1 removed (was idle)
+
+Final Status:
+- Total Orders: 4 (2 VIP, 2 Normal)
+- Completed: 4
+- Active Bots: 0
+- Pending: 0
