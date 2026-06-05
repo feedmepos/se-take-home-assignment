@@ -11,6 +11,7 @@ export function createInitialState(): AppState {
   return {
     nextOrderId: INITIAL_ORDER_ID,
     nextBotId: 1,
+    nextLogId: 1,
     vipQueue: [],
     normalQueue: [],
     bots: [],
@@ -24,8 +25,17 @@ function formatTime(date: Date): string {
 }
 
 function appendLog(state: AppState, message: string, now = new Date()): AppState {
-  const entry: LogEntry = { time: formatTime(now), message };
-  return { ...state, eventLog: [...state.eventLog, entry] };
+  const entry: LogEntry = {
+    id: state.nextLogId,
+    time: formatTime(now),
+    message,
+  };
+
+  return {
+    ...state,
+    nextLogId: state.nextLogId + 1,
+    eventLog: [...state.eventLog, entry],
+  };
 }
 
 function orderLabel(order: Order): string {
@@ -120,7 +130,7 @@ export function addBot(state: AppState, now = new Date()): AppState {
 
   let next = appendLog(
     { ...state, nextBotId: state.nextBotId + 1, bots: [...state.bots, bot] },
-    `Bot #${botId} created - Status: ACTIVE`,
+    `Bot #${botId} created - Status: IDLE`,
     now,
   );
 
@@ -204,7 +214,7 @@ export function removeBot(state: AppState, now = new Date()): AppState {
     bots: next.bots.filter((bot) => bot.id !== newestBot.id),
   };
 
-  return next;
+  return assignIdleBots(next, now);
 }
 
 export function getRemainingMs(bot: Bot, now = Date.now()): number {

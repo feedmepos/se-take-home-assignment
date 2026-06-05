@@ -1,5 +1,6 @@
 import type { AppState, Order, OrderType, QueuePosition } from './types';
 
+/** Merge VIP + Normal queues for display (VIP always shown first). */
 export function getPendingOrders(state: AppState): Order[] {
   return [...state.vipQueue, ...state.normalQueue];
 }
@@ -8,6 +9,7 @@ export function hasPendingOrders(state: AppState): boolean {
   return state.vipQueue.length > 0 || state.normalQueue.length > 0;
 }
 
+/** VIP orders append to vipQueue; Normal orders append to normalQueue. */
 export function enqueueOrder(state: AppState, type: OrderType, id: number): AppState {
   const order: Order = { id, type, status: 'PENDING' };
 
@@ -18,6 +20,10 @@ export function enqueueOrder(state: AppState, type: OrderType, id: number): AppS
   return { ...state, normalQueue: [...state.normalQueue, order] };
 }
 
+/**
+ * Pick the next order: always drain vipQueue first, then normalQueue.
+ * Each sub-queue is FIFO among orders of the same type.
+ */
 export function dequeueNextOrder(state: AppState): {
   state: AppState;
   order: Order | null;
@@ -46,6 +52,7 @@ export function dequeueNextOrder(state: AppState): {
   return { state, order: null, savedPosition: null };
 }
 
+/** Re-insert a cancelled order back into its original sub-queue position. */
 export function restoreOrderToQueue(state: AppState, order: Order): AppState {
   const position = order.savedQueuePosition;
   if (!position) {

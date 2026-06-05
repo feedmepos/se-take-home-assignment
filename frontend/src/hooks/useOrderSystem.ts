@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import {
   addBot,
   addOrder,
@@ -15,8 +15,7 @@ type Action =
   | { type: 'NEW_VIP_ORDER' }
   | { type: 'ADD_BOT' }
   | { type: 'REMOVE_BOT' }
-  | { type: 'ORDER_COMPLETE'; botId: number; orderId: number }
-  | { type: 'TICK' };
+  | { type: 'ORDER_COMPLETE'; botId: number; orderId: number };
 
 function reducer(state: AppState, action: Action): AppState {
   const now = new Date();
@@ -39,8 +38,8 @@ function reducer(state: AppState, action: Action): AppState {
 
 export function useOrderSystem() {
   const [state, dispatch] = useReducer(reducer, undefined, createInitialState);
+  const [now, setNow] = useState(() => Date.now());
   const timersRef = useRef<Map<number, number>>(new Map());
-  const [, setTick] = useReducer((value: number) => value + 1, 0);
 
   const clearBotTimer = useCallback((botId: number) => {
     const timerId = timersRef.current.get(botId);
@@ -103,8 +102,7 @@ export function useOrderSystem() {
     }
 
     const intervalId = window.setInterval(() => {
-      dispatch({ type: 'TICK' });
-      setTick();
+      setNow(Date.now());
     }, 100);
 
     return () => window.clearInterval(intervalId);
@@ -119,23 +117,41 @@ export function useOrderSystem() {
     };
   }, []);
 
-  const botProgress = state.bots.map((bot) => ({
-    botId: bot.id,
-    remainingMs: getRemainingMs(bot),
-    progress:
-      bot.status === 'PROCESSING' && bot.currentOrder
-        ? 1 - getRemainingMs(bot) / PROCESSING_TIME_MS
-        : 0,
-  }));
+  const botProgress = useMemo(
+    () =>
+      state.bots.map((bot) => {
+        const remainingMs = getRemainingMs(bot, now);
+
+        return {
+          botId: bot.id,
+          remainingMs,
+          progress:
+            bot.status === 'PROCESSING' && bot.currentOrder
+              ? 1 - remainingMs / PROCESSING_TIME_MS
+              : 0,
+        };
+      }),
+    [state.bots, now],
+  );
+
+  const newNormalOrder = useCallback(() => dispatch({ type: 'NEW_NORMAL_ORDER' }), []);
+  const newVipOrder = useCallback(() => dispatch({ type: 'NEW_VIP_ORDER' }), []);
+  const addBotAction = useCallback(() => dispatch({ type: 'ADD_BOT' }), []);
+  const removeBotAction = useCallback(() => dispatch({ type: 'REMOVE_BOT' }), []);
+
+  const actions = useMemo(
+    () => ({
+      newNormalOrder,
+      newVipOrder,
+      addBot: addBotAction,
+      removeBot: removeBotAction,
+    }),
+    [newNormalOrder, newVipOrder, addBotAction, removeBotAction],
+  );
 
   return {
     state,
     botProgress,
-    actions: {
-      newNormalOrder: () => dispatch({ type: 'NEW_NORMAL_ORDER' }),
-      newVipOrder: () => dispatch({ type: 'NEW_VIP_ORDER' }),
-      addBot: () => dispatch({ type: 'ADD_BOT' }),
-      removeBot: () => dispatch({ type: 'REMOVE_BOT' }),
-    },
+    actions,
   };
 }

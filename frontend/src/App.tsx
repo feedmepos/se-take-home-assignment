@@ -1,7 +1,8 @@
-import { BotCard } from './components/BotCard';
+import { useMemo } from 'react';
 import { ControlPanel } from './components/ControlPanel';
 import { EventLog } from './components/EventLog';
 import { OrderArea } from './components/OrderArea';
+import { ProcessingArea } from './components/ProcessingArea';
 import { getPendingOrders } from './domain/queue';
 import { useOrderSystem } from './hooks/useOrderSystem';
 import './App.css';
@@ -10,8 +11,9 @@ function App() {
   const { state, botProgress, actions } = useOrderSystem();
   const pendingOrders = getPendingOrders(state);
 
-  const progressByBotId = new Map(
-    botProgress.map((item) => [item.botId, item]),
+  const progressByBotId = useMemo(
+    () => new Map(botProgress.map((item) => [item.botId, item])),
+    [botProgress],
   );
 
   return (
@@ -55,29 +57,7 @@ function App() {
           emptyMessage="No orders waiting. Create a normal or VIP order to get started."
         />
 
-        <section className="area area--bots">
-          <header className="area__header">
-            <h2>Processing</h2>
-            <span className="area__count">{state.bots.length}</span>
-          </header>
-          <div className="area__content area__content--bots">
-            {state.bots.length === 0 ? (
-              <p className="area__empty">No bots available. Click + Bot to add one.</p>
-            ) : (
-              state.bots.map((bot) => {
-                const progress = progressByBotId.get(bot.id);
-                return (
-                  <BotCard
-                    key={bot.id}
-                    bot={bot}
-                    remainingMs={progress?.remainingMs ?? 0}
-                    progress={progress?.progress ?? 0}
-                  />
-                );
-              })
-            )}
-          </div>
-        </section>
+        <ProcessingArea bots={state.bots} progressByBotId={progressByBotId} />
 
         <OrderArea
           title="Complete"

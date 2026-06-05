@@ -22,6 +22,7 @@ export interface Bot {
 }
 
 export interface LogEntry {
+  id: number;
   time: string;
   message: string;
 }
@@ -29,6 +30,7 @@ export interface LogEntry {
 export interface AppState {
   nextOrderId: number;
   nextBotId: number;
+  nextLogId: number;
   vipQueue: Order[];
   normalQueue: Order[];
   bots: Bot[];

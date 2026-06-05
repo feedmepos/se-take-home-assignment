@@ -1,4 +1,4 @@
-import type { Bot, Order } from '../domain/types';
+import type { Bot } from '../domain/types';
 import { OrderCard } from './OrderCard';
 
 interface BotCardProps {
@@ -12,7 +12,7 @@ function formatSeconds(ms: number): number {
 }
 
 export function BotCard({ bot, remainingMs, progress }: BotCardProps) {
-  const isProcessing = bot.status === 'PROCESSING' && bot.currentOrder;
+  const order = bot.currentOrder;
 
   return (
     <article className={`bot-card bot-card--${bot.status.toLowerCase()}`}>
@@ -21,10 +21,17 @@ export function BotCard({ bot, remainingMs, progress }: BotCardProps) {
         <span className="bot-card__status">{bot.status}</span>
       </div>
 
-      {isProcessing ? (
+      {order ? (
         <div className="bot-card__processing">
-          <OrderCard order={bot.currentOrder as Order} />
-          <div className="bot-card__progress">
+          <OrderCard order={order} />
+          <div
+            className="bot-card__progress"
+            role="progressbar"
+            aria-valuenow={Math.round(progress * 100)}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label={`Bot ${bot.id} processing order ${order.id}`}
+          >
             <div
               className="bot-card__progress-bar"
               style={{ width: `${Math.min(progress * 100, 100)}%` }}

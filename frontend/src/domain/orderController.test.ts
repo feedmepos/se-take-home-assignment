@@ -84,6 +84,21 @@ describe('orderController', () => {
     ]);
   });
 
+  it('assigns idle bots after removing a processing bot', () => {
+    let state = addBot(createInitialState());
+    state = addBot(state);
+    state = addOrder(state, 'VIP');
+    state = addOrder(state, 'NORMAL');
+    state = completeOrder(state, 1, INITIAL_ORDER_ID);
+    state = removeBot(state);
+
+    expect(state.bots).toHaveLength(1);
+    expect(state.bots[0].id).toBe(1);
+    expect(state.bots[0].status).toBe('PROCESSING');
+    expect(state.bots[0].currentOrder?.type).toBe('NORMAL');
+    expect(getPendingOrders(state)).toHaveLength(0);
+  });
+
   it('removes the newest bot when multiple bots exist', () => {
     let state = addBot(createInitialState());
     state = addBot(state);
