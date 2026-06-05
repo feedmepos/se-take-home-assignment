@@ -1,4 +1,23 @@
 ## FeedMe Software Engineer Take Home Assignment
+
+### Solution (Frontend)
+
+This repository includes a **React + Vite + TypeScript** frontend implementation in the [`frontend/`](./frontend/) directory.
+
+**Quick start:**
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+See [`frontend/README.md`](./frontend/README.md) for architecture, testing, and deployment instructions.
+
+**Live demo:** https://huanglotus.github.io/se-take-home-assignment/
+
+---
+
 Below is a take home assignment before the interview of the position. You are required to
 1. Understand the situation and use case. You may contact the interviewer for further clarification.
 2. implement the requirement with **either frontend or backend components**.
