@@ -6,6 +6,6 @@ cd "$ROOT_DIR"
 
 echo "Running CLI application..."
 
-./order-controller > scripts/result.txt
+./order-controller --simulate > scripts/result.txt
 
 echo "CLI application execution completed"
