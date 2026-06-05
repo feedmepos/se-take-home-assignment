@@ -1,0 +1,9 @@
+# Build artifacts
+order-controller
+
+# IDE
+.idea/
+.vscode/
+
+# Worktree
+.claude/
