@@ -1,0 +1,21 @@
+{
+  "name": "mcdonalds-order-management",
+  "version": "1.0.0",
+  "description": "McDonald's Order Management CLI",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "demo": "node dist/index.js --demo",
+    "test": "jest",
+    "dev": "ts-node src/index.ts"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/node": "^22.0.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.0"
+  }
+}
