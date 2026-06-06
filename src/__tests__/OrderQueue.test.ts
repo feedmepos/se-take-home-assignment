@@ -53,6 +53,22 @@ describe('OrderQueue', () => {
     expect(queue.size()).toBe(1);
   });
 
+  it('requeue restores order to front of its sub-queue', () => {
+    queue.enqueue(makeOrder(1001, false));
+    queue.enqueue(makeOrder(1002, false));
+    const returned = makeOrder(1000, false);
+    queue.requeue(returned);
+    expect(queue.dequeue()?.id).toBe(1000);
+  });
+
+  it('requeue restores VIP order to front of VIP sub-queue', () => {
+    queue.enqueue(makeOrder(1001, true));
+    queue.enqueue(makeOrder(1002, true));
+    const returned = makeOrder(1000, true);
+    queue.requeue(returned);
+    expect(queue.dequeue()?.id).toBe(1000);
+  });
+
   it('getAll returns VIP orders first', () => {
     queue.enqueue(makeOrder(1001, false));
     queue.enqueue(makeOrder(1002, true));

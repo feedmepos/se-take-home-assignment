@@ -37,7 +37,7 @@ export class BotManager {
 
     if (bot.currentOrder) {
       bot.currentOrder.status = 'PENDING';
-      this.queue.enqueue(bot.currentOrder);
+      this.queue.requeue(bot.currentOrder);
       this.logger.log(`Bot #${bot.id} destroyed - Order #${bot.currentOrder.id} returned to queue`);
     } else {
       this.logger.log(`Bot #${bot.id} destroyed while IDLE`);

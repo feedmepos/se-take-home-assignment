@@ -22,6 +22,14 @@ export class OrderQueue {
     return this.vipQueue.length + this.normalQueue.length;
   }
 
+  requeue(order: Order): void {
+    if (order.isVip) {
+      this.vipQueue.unshift(order);
+    } else {
+      this.normalQueue.unshift(order);
+    }
+  }
+
   getAll(): Order[] {
     return [...this.vipQueue, ...this.normalQueue];
   }
