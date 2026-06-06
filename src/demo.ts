@@ -24,37 +24,38 @@ export async function runDemo(): Promise<void> {
     botManager.tryAssignToIdleBots();
   }
 
-  // Demo sequence mirrors the example result.txt
-  addOrder(false); // Normal #1
-  addOrder(false); // Normal #2
-  addOrder(true);  // VIP #3
+  // Two bots, mixed orders — VIP should be picked first
+  botManager.addBot(); // Bot #1
+  botManager.addBot(); // Bot #2
 
-  await delay(200);
-  botManager.addBot(); // Bot #1 → picks up VIP #3
-  await delay(200);
-  botManager.addBot(); // Bot #2 → picks up Normal #1
+  addOrder(false); // Normal #1001 → Bot #1
+  addOrder(true);  // VIP   #1002 → Bot #2 (VIP priority, but both bots grabbed immediately)
+  addOrder(false); // Normal #1003 → queued
+  addOrder(true);  // VIP   #1004 → queued ahead of #1003
 
-  // Wait for first processing round to complete
-  await delay(processingTimeMs + 1000);
+  // Remove Bot #2 mid-processing — its order should return to front of queue
+  await delay(Math.floor(processingTimeMs / 2));
+  botManager.removeBot();
 
-  addOrder(true); // VIP #4 → idle bot picks it up
+  // Wait for remaining bot to finish the current round
+  await delay(processingTimeMs + 500);
 
-  // Wait for second round
-  await delay(processingTimeMs + 1000);
+  // Add a new normal order to show idle bot picks it up immediately
+  addOrder(false); // Normal #1005
 
-  botManager.removeBot(); // Remove last bot (LIFO) — should be IDLE
-  await delay(300);
+  await delay(processingTimeMs + 500);
+
+  botManager.drainAll();
 
   const completed = allOrders.filter(o => o.status === 'COMPLETE');
   logger.writeFinalStatus({
-    totalOrders: completed.length,
-    vipOrders: completed.filter(o => o.isVip).length,
-    normalOrders: completed.filter(o => !o.isVip).length,
+    totalOrders: allOrders.length,
+    vipOrders: allOrders.filter(o => o.isVip).length,
+    normalOrders: allOrders.filter(o => !o.isVip).length,
     completedOrders: completed.length,
     activeBots: botManager.getBotCount(),
     pendingOrders: queue.size(),
   });
 
-  botManager.drainAll();
   process.exit(0);
 }
