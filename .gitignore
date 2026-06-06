@@ -1,0 +1,4 @@
+node_modules/
+.claude/
+dist/
+scripts/result.txt
