@@ -1,0 +1,17 @@
+{
+  "name": "mcd-order-controller",
+  "version": "1.0.0",
+  "description": "McDonald's automated cooking-bot order controller (Node.js + TypeScript CLI)",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "npm run build && node --test \"dist/**/*.test.js\"",
+    "start": "node dist/index.js",
+    "cli": "node dist/cli.js"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0"
+  }
+}
