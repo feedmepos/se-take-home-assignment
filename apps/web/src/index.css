@@ -1,0 +1,112 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* 深色主题(默认)。语义令牌为空格分隔的 RGB 通道,供 Tailwind alpha 使用。 */
+  :root,
+  .dark {
+    color-scheme: dark;
+    --bg: 10 10 12; /* #0a0a0c */
+    --surface: 22 22 27; /* #16161b */
+    --surface-2: 29 29 36; /* #1d1d24 */
+    --panel: 16 16 19; /* #101013 */
+    --fg: 233 233 236; /* #e9e9ec */
+    --line: 255 255 255; /* 浅色叠加(边框/微填充) */
+    --scrollbar-thumb: 38 38 47;
+    --scrollbar-thumb-hover: 58 58 70;
+    --glow-gold: 0.12;
+    --glow-ember: 0.08;
+    --noise-opacity: 0.04;
+    --selection-fg: 255 255 255;
+  }
+
+  /* 亮色主题:同一套令牌翻转,保持金调指挥中心气质。 */
+  .light {
+    color-scheme: light;
+    --bg: 244 245 248; /* 柔和米白 */
+    --surface: 255 255 255; /* 纯白卡片 */
+    --surface-2: 247 248 251;
+    --panel: 255 255 255;
+    --fg: 23 24 31; /* 近黑文字 */
+    --line: 17 18 27; /* 深色叠加(边框/微填充) */
+    --scrollbar-thumb: 205 208 216;
+    --scrollbar-thumb-hover: 180 184 194;
+    --glow-gold: 0.16;
+    --glow-ember: 0.05;
+    --noise-opacity: 0.02;
+    --selection-fg: 23 24 31;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background-color: rgb(var(--bg));
+    color: rgb(var(--fg));
+    font-family: 'Outfit Variable', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    transition:
+      background-color 0.35s ease,
+      color 0.35s ease;
+  }
+
+  /* 顶部金黄光晕 + 红色余晖,营造指挥中心氛围 */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    background:
+      radial-gradient(120% 75% at 50% -25%, rgb(255 199 44 / var(--glow-gold)), transparent 60%),
+      radial-gradient(70% 50% at 105% -10%, rgb(218 41 28 / var(--glow-ember)), transparent 55%);
+    transition: opacity 0.35s ease;
+  }
+
+  /* 细腻噪点,去除纯色塑料感 */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: var(--noise-opacity);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  ::selection {
+    background: rgba(255, 199, 44, 0.3);
+    color: rgb(var(--selection-fg));
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgb(var(--scrollbar-thumb));
+    border-radius: 999px;
+    border: 2px solid rgb(var(--bg));
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgb(var(--scrollbar-thumb-hover));
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  /* 卡片顶部微高光:--line 随主题翻转(深色=白提亮 / 亮色=黑压暗),保持立体感 */
+  .grain-card {
+    background-image: linear-gradient(180deg, rgb(var(--line) / 0.03), transparent);
+  }
+}

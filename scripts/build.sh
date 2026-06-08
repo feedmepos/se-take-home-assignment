@@ -1,15 +1,16 @@
 #!/bin/bash
+# Build Script — 编译所有 workspace 包(core / cli / server / web 视存在情况)
+set -euo pipefail
+cd "$(dirname "$0")/.."
 
-# Build Script
-# This script should contain all compilation steps for your CLI application
+echo "Enabling pnpm via corepack..."
+corepack enable >/dev/null 2>&1 || true
+corepack prepare pnpm@10.10.0 --activate >/dev/null 2>&1 || true
 
-echo "Building CLI application..."
+echo "Installing dependencies..."
+pnpm install --frozen-lockfile
 
-# For Go projects:
-# go build -o order-controller ./cmd/main.go
-
-# For Node.js projects:
-# npm install
-# npm run build (if needed)
+echo "Building all packages..."
+pnpm -r build
 
 echo "Build completed"

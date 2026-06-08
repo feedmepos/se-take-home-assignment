@@ -1,0 +1,73 @@
+# 开发进度跟踪
+
+> 设计文档:[docs/specs/2026-06-01-order-management-design.md](./specs/2026-06-01-order-management-design.md)
+> 最近更新:2026-06-01
+
+## 状态图例
+
+✅ 完成 ｜ 🚧 进行中 ｜ ⬜ 待开始 ｜ ⏸️ 阻塞
+
+---
+
+## M0 设计阶段
+
+- ✅ 分析仓库需求与 CI 约束
+- ✅ 确定技术方案(后端权威 + 共享 core,WebSocket,宝塔部署)
+- ✅ 编写技术设计文档
+- ✅ 建立进度跟踪文档
+
+## M1 工程脚手架
+
+- ✅ pnpm workspaces monorepo 初始化(国内镜像源 .npmrc)
+- ✅ tsconfig.base / ESLint(flat config)/ Prettier / tsup 构建
+- ✅ Husky pre-commit(M6 完成:lint-staged + typecheck + test)
+- ✅ 接通 CI 脚本(build/test/run + result.txt,本地 test.sh 全绿)
+
+## M2 领域核心 + 单测(TDD)✅ 41 tests passing
+
+- ✅ types(枚举 + PROCESSING_DURATION_MS)
+- ✅ Clock(RealClock / FakeClock,支持回调内再注册定时器)
+- ✅ Order 实体(受控状态迁移)
+- ✅ Bot 实体(assign/finish/abort)
+- ✅ OrderQueue(VIP/普通双段优先级 + requeue 退回保序)
+- ✅ Kitchen 聚合根(createOrder/addBot/removeBot/dispatch/complete + 全量快照)
+- ✅ 领域事件 + snapshot 类型
+- ✅ 全 user story 单测(优先级 / 并发 / 删 Bot 退回 / 唯一递增 / IDLE / 计时器取消 / 事件序列)
+- ✅ typecheck 干净 + tsup 构建产物 + lint 通过
+
+## M3 CLI(result.txt)✅ 11 tests passing
+
+- ✅ 复用 core 跑预设场景(simulation.ts,FakeClock 瞬时 + 真实基准时间戳)
+- ✅ 事件 → 带 HH:MM:SS 的日志行(renderer.ts,TDD)
+- ✅ run.sh 接通,result.txt 通过 CI 时间戳校验
+- ✅ 场景覆盖:VIP 优先 / 并发 / 删 bot 退回 / 退回订单被接手 / 完成统计
+
+## M4 后端服务 ✅ 12 tests passing
+
+- ✅ Fastify + REST 命令路由(orders/bots/state,非法类型 400)
+- ✅ WS gateway(连接推全量快照 + 每事件推 EVENT+STATE)
+- ✅ KitchenService 用例编排(注入 Clock,默认 RealClock)
+- ✅ config(端口/host 环境变量)
+- ✅ 集成测试(fastify inject + 真实 WS 客户端)+ 手动 curl 冒烟通过
+- ✅ 共享 WS 协议类型(core/protocol.ts)
+
+## M5 前端(UI)✅ 14 tests passing
+
+- ✅ Vite + React + Tailwind + Zustand + framer-motion 脚手架
+- ✅ 自托管字体(@fontsource,避免国内访问 Google Fonts 问题)
+- ✅ WS 连接(自动重连)+ REST service + Zustand store
+- ✅ Header / Metrics / ControlBar / OrderBoard(三列)/ BotPanel
+- ✅ 处理中 10s 进度条 + bot cooking 进度环 + 卡片流转动效(frontend-design skill)
+- ✅ 「厨房指挥中心」深色金调美学,VIP 金色高亮
+- ✅ 前端单测(config/store/OrderCard/ControlBar)
+- ✅ Playwright 视觉验证通过(processing 进度条、VIP 优先、bot 状态)
+- ✅ .env.production 指向 api.demo.magicyyds.com
+
+## M6 打磨与上线
+
+- ✅ 覆盖率门槛(packages/core/vitest.config.ts,≥90% 门槛,现 core 100% / 46 tests)
+- ✅ Husky + lint-staged pre-commit(eslint --fix + prettier → typecheck → test)
+- ✅ README 使用说明(架构/启动/测试/API/部署 + 原始题目附录)
+- ✅ 部署文档 docs/DEPLOYMENT.md(宝塔前端静态 + 后端反代 WS 升级头 + SSL + PR 流程)
+- ⬜ 实际宝塔上线(需服务器操作)
+- ⬜ 提交 PR 到 feedmepos(需推送 fork)
