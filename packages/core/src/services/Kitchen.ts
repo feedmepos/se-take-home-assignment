@@ -80,8 +80,8 @@ export class Kitchen {
     return order;
   }
 
-  addBot(): Bot {
-    const bot = new Bot(this.nextBotId++);
+  addBot(_processingDurationMs?: number): Bot {
+    const bot = new Bot(this.nextBotId++, _processingDurationMs ?? PROCESSING_DURATION_MS);
     this.botList.push(bot);
     this.emit({ kind: 'BotAdded', at: this.clock.now(), botId: bot.id });
     this.dispatch();
@@ -99,7 +99,12 @@ export class Kitchen {
       if (order) {
         order.markPending();
         this.queue.requeue(order);
-        this.emit({ kind: 'OrderRequeued', at: this.clock.now(), orderId: order.id, botId: bot.id });
+        this.emit({
+          kind: 'OrderRequeued',
+          at: this.clock.now(),
+          orderId: order.id,
+          botId: bot.id,
+        });
       }
     }
 
@@ -110,20 +115,98 @@ export class Kitchen {
 
   // --- 内部调度 ---
 
-  /** 把等待订单分配给空闲机器人,直到没有空闲机器人或没有待处理订单。 */
+  /**
+   * 按优先级把等待订单分配给机器人。每次调度都「预测式」重新评估,不持久预分配:
+   *
+   * - **VIP(最优分配)**:把所有等待 VIP 按 FIFO 顺序做贪心模拟,逐个分配给「预计完成最早」
+   *   的 bot —— 就绪时刻 readyAt = 空闲时为 now、已被本轮模拟占用时累加其 processingTime,
+   *   因此 fast bot 会先吃下「排队仍划算」的若干单,超出的自动分流给空闲的 slow bot。
+   *   模拟后,只把「当前真正空闲 bot 的首个分配」立即开工(可能取队列中间的 VIP);
+   *   其余 VIP 留在队列,待某 bot 完成(或机器人增删)触发下次 dispatch 重新评估。
+   * - **Normal**:严格让位于 VIP —— 只有当不存在任何等待 VIP 时,才把 Normal 派给第一个空闲 bot。
+   */
   private dispatch(): void {
-    for (const bot of this.botList) {
-      if (bot.status !== BotStatus.IDLE) continue;
-      const order = this.queue.dequeue();
-      if (!order) break;
+    for (;;) {
+      // VIP 优先:开工本轮模拟得出的、当前空闲 bot 应处理的 VIP。
+      const startedVip = this.dispatchVipRound();
+      if (startedVip) continue;
 
-      bot.assign(order);
-      order.markProcessing();
-      this.emit({ kind: 'OrderPickedUp', at: this.clock.now(), orderId: order.id, botId: bot.id });
+      // 仍有等待 VIP(都在等忙碌的最优 bot)→ 严格 VIP 优先,不让 Normal 占用空闲 bot。
+      if (this.queue.hasVip()) break;
 
-      const cancel = this.clock.setTimeout(() => this.complete(bot), PROCESSING_DURATION_MS);
-      this.timers.set(bot.id, cancel);
+      // 没有等待 VIP 了,普通订单派给第一个空闲 bot。
+      const idle = this.firstIdleBot();
+      const normal = this.queue.normalPending[0];
+      if (!idle || !normal) break;
+      this.queue.remove(normal);
+      this.startProcessing(idle, normal);
     }
+  }
+
+  /**
+   * 对所有等待 VIP 做一轮最优分配模拟,把「当前空闲 bot 的首个被分配 VIP」立即开工。
+   * 返回是否有 VIP 真正开工(用于驱动 dispatch 循环重新评估)。
+   */
+  private dispatchVipRound(): boolean {
+    const pendingVips = this.queue.vipPending;
+    if (pendingVips.length === 0) return false;
+
+    const now = this.clock.now();
+    // 每个 bot 的模拟就绪时刻:空闲=now、忙碌=其当前任务预计完成时刻。
+    const lanes = this.botList.map((bot) => ({
+      bot,
+      readyAt: bot.status === BotStatus.IDLE ? now : (bot.expectedFinishAt ?? now),
+      assignedFirst: null as Order | null,
+    }));
+    if (lanes.length === 0) return false;
+
+    for (const vip of pendingVips) {
+      let best = lanes[0]!;
+      for (const lane of lanes) {
+        if (this.preferLane(lane, best)) best = lane;
+      }
+      if (best.assignedFirst === null) best.assignedFirst = vip;
+      best.readyAt += best.bot.processingTime;
+    }
+
+    // 立即开工:当前真正空闲、且本轮分到首个 VIP 的 bot。
+    const ready = lanes.find(
+      (lane) => lane.bot.status === BotStatus.IDLE && lane.assignedFirst !== null,
+    );
+    if (!ready || !ready.assignedFirst) return false;
+    this.queue.remove(ready.assignedFirst);
+    this.startProcessing(ready.bot, ready.assignedFirst);
+    return true;
+  }
+
+  /** 比较两条 lane 谁更适合接下一个 VIP:完成更早者优先;并列时偏好可立即开工者、再取较小 id。 */
+  private preferLane(
+    candidate: { bot: Bot; readyAt: number; assignedFirst: Order | null },
+    best: { bot: Bot; readyAt: number; assignedFirst: Order | null },
+  ): boolean {
+    const candidateFinish = candidate.readyAt + candidate.bot.processingTime;
+    const bestFinish = best.readyAt + best.bot.processingTime;
+    if (candidateFinish !== bestFinish) return candidateFinish < bestFinish;
+
+    // 完成时刻并列:优先「当前空闲且本轮尚未被占用」可立即开工的 bot。
+    const candidateStartable =
+      candidate.bot.status === BotStatus.IDLE && candidate.assignedFirst === null;
+    const bestStartable = best.bot.status === BotStatus.IDLE && best.assignedFirst === null;
+    if (candidateStartable !== bestStartable) return candidateStartable;
+    return candidate.bot.id < best.bot.id;
+  }
+
+  private firstIdleBot(): Bot | null {
+    return this.botList.find((bot) => bot.status === BotStatus.IDLE) ?? null;
+  }
+
+  private startProcessing(bot: Bot, order: Order): void {
+    bot.assign(order, this.clock.now());
+    order.markProcessing();
+    this.emit({ kind: 'OrderPickedUp', at: this.clock.now(), orderId: order.id, botId: bot.id });
+
+    const cancel = this.clock.setTimeout(() => this.complete(bot), bot.processingTime);
+    this.timers.set(bot.id, cancel);
   }
 
   private complete(bot: Bot): void {
@@ -164,5 +247,6 @@ function toBotSnapshot(bot: Bot): BotSnapshot {
     id: bot.id,
     status: bot.status,
     currentOrderId: bot.currentOrder?.id ?? null,
+    processingTime: bot.processingTime,
   };
 }

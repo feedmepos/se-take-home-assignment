@@ -16,8 +16,8 @@ export class KitchenService {
     return this.kitchen.createOrder(type);
   }
 
-  addBot(): Bot {
-    return this.kitchen.addBot();
+  addBot(processingTimeMs?: number): Bot {
+    return this.kitchen.addBot(processingTimeMs);
   }
 
   removeBot(): Bot | null {

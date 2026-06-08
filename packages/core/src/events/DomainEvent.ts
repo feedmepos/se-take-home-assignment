@@ -14,6 +14,8 @@ export interface BotSnapshot {
   id: number;
   status: BotStatus;
   currentOrderId: number | null;
+  /** 该机器人完成单个订单所需的整体时间(毫秒)。 */
+  processingTime: number;
 }
 
 /** 系统全量状态快照,WS 首次连接与刷新时下发。 */

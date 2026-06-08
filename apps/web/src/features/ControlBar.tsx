@@ -78,6 +78,12 @@ export function ControlBar(): JSX.Element {
         onClick={() => api.addBot()}
       />
       <ActionButton
+        label="+ Add Fast Bot"
+        hint="Spin up a cook"
+        variant="add"
+        onClick={() => api.addBot(5_000)}
+      />
+      <ActionButton
         label="− Remove Bot"
         hint="Destroy newest"
         variant="remove"

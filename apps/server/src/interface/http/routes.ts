@@ -22,8 +22,9 @@ export function registerHttpRoutes(app: FastifyInstance, service: KitchenService
     return reply.send({ state: service.getState() });
   });
 
-  app.post('/api/bots', () => {
-    service.addBot();
+  app.post<{ Body: { time?: number } }>('/api/bots', (request) => {
+    const time = request.body?.time;
+    service.addBot(time);
     return { state: service.getState() };
   });
 

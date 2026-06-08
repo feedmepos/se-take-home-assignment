@@ -10,10 +10,14 @@ export function OrderBoard(): JSX.Element {
   const bots = useKitchenStore((s) => s.bots);
   const startedAt = useKitchenStore((s) => s.startedAt);
 
-  // orderId → 正在处理它的机器人编号
+  // orderId → 正在处理它的机器人编号 / 该机器人的整体处理时间(ms)
   const botByOrder: Record<number, number> = {};
+  const durationByOrder: Record<number, number> = {};
   for (const bot of bots) {
-    if (bot.currentOrderId !== null) botByOrder[bot.currentOrderId] = bot.id;
+    if (bot.currentOrderId !== null) {
+      botByOrder[bot.currentOrderId] = bot.id;
+      durationByOrder[bot.currentOrderId] = bot.processingTime;
+    }
   }
 
   // 最近完成的排在前面,更符合直觉
@@ -28,6 +32,7 @@ export function OrderBoard(): JSX.Element {
         now={now}
         startedAt={startedAt}
         botByOrder={botByOrder}
+        durationByOrder={durationByOrder}
         emptyHint="No orders waiting"
       />
       <OrderColumn
@@ -37,6 +42,7 @@ export function OrderBoard(): JSX.Element {
         now={now}
         startedAt={startedAt}
         botByOrder={botByOrder}
+        durationByOrder={durationByOrder}
         emptyHint="No bots cooking"
       />
       <OrderColumn
@@ -46,6 +52,7 @@ export function OrderBoard(): JSX.Element {
         now={now}
         startedAt={startedAt}
         botByOrder={botByOrder}
+        durationByOrder={durationByOrder}
         emptyHint="Nothing served yet"
       />
     </div>

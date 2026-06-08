@@ -12,6 +12,7 @@ interface OrderColumnProps {
   now: number;
   startedAt: Record<number, number>;
   botByOrder: Record<number, number>;
+  durationByOrder: Record<number, number>;
   emptyHint: string;
 }
 
@@ -28,6 +29,7 @@ export function OrderColumn({
   now,
   startedAt,
   botByOrder,
+  durationByOrder,
   emptyHint,
 }: OrderColumnProps): JSX.Element {
   return (
@@ -49,6 +51,7 @@ export function OrderColumn({
               now={now}
               startedAt={startedAt[order.id]}
               botId={botByOrder[order.id]}
+              duration={durationByOrder[order.id]}
             />
           ))}
         </AnimatePresence>

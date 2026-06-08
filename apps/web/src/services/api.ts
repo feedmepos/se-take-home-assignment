@@ -15,6 +15,6 @@ async function send(path: string, method: string, body?: unknown): Promise<void>
 
 export const api = {
   createOrder: (type: OrderTypeCommand) => send('/api/orders', 'POST', { type }),
-  addBot: () => send('/api/bots', 'POST'),
+  addBot: (time?: number) => send('/api/bots', 'POST', { time: time ?? 10_000 }),
   removeBot: () => send('/api/bots', 'DELETE'),
 };

@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { BotStatus, PROCESSING_DURATION_MS, type BotSnapshot } from '@feedme/core';
+import { BotStatus, type BotSnapshot } from '@feedme/core';
 
 interface BotChipProps {
   bot: BotSnapshot;
@@ -10,8 +10,9 @@ interface BotChipProps {
 export function BotChip({ bot, startedAt, now }: BotChipProps): JSX.Element {
   const busy = bot.status === BotStatus.PROCESSING;
   const elapsed = startedAt ? now - startedAt : 0;
-  const secondsLeft = Math.max(0, Math.ceil((PROCESSING_DURATION_MS - elapsed) / 1000));
-  const progress = Math.min(1, elapsed / PROCESSING_DURATION_MS);
+  const duration = bot.processingTime;
+  const secondsLeft = Math.max(0, Math.ceil((duration - elapsed) / 1000));
+  const progress = Math.min(1, elapsed / duration);
 
   return (
     <motion.div

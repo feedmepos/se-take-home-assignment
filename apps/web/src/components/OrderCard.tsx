@@ -10,14 +10,17 @@ interface OrderCardProps {
   now: number;
   /** 正在处理该订单的机器人编号。 */
   botId?: number | undefined;
+  /** 处理该订单的机器人的整体处理时间(ms)。 */
+  duration?: number | undefined;
 }
 
-export function OrderCard({ order, startedAt, now, botId }: OrderCardProps): JSX.Element {
+export function OrderCard({ order, startedAt, now, botId, duration }: OrderCardProps): JSX.Element {
   const isVip = order.type === OrderType.VIP;
 
+  const totalMs = duration ?? PROCESSING_DURATION_MS;
   const elapsed = startedAt ? now - startedAt : 0;
-  const progress = Math.min(1, elapsed / PROCESSING_DURATION_MS);
-  const secondsLeft = Math.max(0, Math.ceil((PROCESSING_DURATION_MS - elapsed) / 1000));
+  const progress = Math.min(1, elapsed / totalMs);
+  const secondsLeft = Math.max(0, Math.ceil((totalMs - elapsed) / 1000));
 
   return (
     <motion.article

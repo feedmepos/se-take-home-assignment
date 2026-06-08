@@ -8,7 +8,7 @@ const snapshot: StateSnapshot = {
   ],
   processing: [],
   complete: [],
-  bots: [{ id: 1, status: BotStatus.IDLE, currentOrderId: null }],
+  bots: [{ id: 1, status: BotStatus.IDLE, currentOrderId: null, processingTime: 10_000 }],
 };
 
 beforeEach(() => {
@@ -31,7 +31,9 @@ describe('useKitchenStore', () => {
   });
 
   it('records a processing start time on OrderPickedUp', () => {
-    useKitchenStore.getState().applyEvent({ kind: 'OrderPickedUp', at: 0, orderId: 1001, botId: 1 });
+    useKitchenStore
+      .getState()
+      .applyEvent({ kind: 'OrderPickedUp', at: 0, orderId: 1001, botId: 1 });
     expect(useKitchenStore.getState().startedAt[1001]).toBeTypeOf('number');
   });
 

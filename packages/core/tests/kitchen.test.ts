@@ -184,7 +184,12 @@ describe('Kitchen — state snapshot', () => {
     expect(snap.processing.map((o) => o.id)).toEqual([processing.id]);
     expect(snap.complete).toEqual([]);
     expect(snap.bots).toEqual([
-      { id: bot.id, status: BotStatus.PROCESSING, currentOrderId: processing.id },
+      {
+        id: bot.id,
+        status: BotStatus.PROCESSING,
+        currentOrderId: processing.id,
+        processingTime: PROCESSING_DURATION_MS,
+      },
     ]);
 
     clock.advance(PROCESSING_DURATION_MS);
@@ -199,7 +204,14 @@ describe('Kitchen — state snapshot', () => {
     const bot = kitchen.addBot();
     const snap = kitchen.snapshot();
     expect(snap.processing).toEqual([]);
-    expect(snap.bots).toEqual([{ id: bot.id, status: BotStatus.IDLE, currentOrderId: null }]);
+    expect(snap.bots).toEqual([
+      {
+        id: bot.id,
+        status: BotStatus.IDLE,
+        currentOrderId: null,
+        processingTime: PROCESSING_DURATION_MS,
+      },
+    ]);
   });
 });
 
@@ -227,5 +239,120 @@ describe('Kitchen — domain events', () => {
 
     expect(kinds).toContain('OrderRequeued');
     expect(kinds).toContain('BotRemoved');
+  });
+});
+
+describe('Kitchen — VIP earliest-finish dispatch (heterogeneous bot speeds)', () => {
+  it('routes a VIP to a busy-but-faster bot when that finishes the order sooner', () => {
+    // BotB(5s) 先忙、剩 2s;BotA(10s) 空闲。新 VIP 应等 B(共 7s) 而非立刻给 A(共 10s)。
+    const { clock, kitchen } = setup();
+    const fast = kitchen.addBot(5_000); // B
+    kitchen.createOrder(OrderType.NORMAL); // B 接住,预计 t=5000 完成
+    clock.advance(3_000); // t=3000:B 还差 2000ms
+    const slow = kitchen.addBot(10_000); // A,空闲
+
+    const vip = kitchen.createOrder(OrderType.VIP); // t=3000 创建
+    // A finishAt=3000+10000=13000;B finishAt=5000+5000=10000 → 最优=B(忙) → VIP 等待,A 空转
+    expect(vip.status).toBe(OrderStatus.PENDING);
+    expect(slow.status).toBe(BotStatus.IDLE);
+
+    clock.advance(2_000); // t=5000:B 完成 filler → 重新评估 → 派给 B
+    expect(vip.status).toBe(OrderStatus.PROCESSING);
+    expect(fast.currentOrder?.id).toBe(vip.id);
+
+    clock.advance(5_000); // t=10000:B 完成 VIP
+    expect(vip.status).toBe(OrderStatus.COMPLETE);
+    expect(vip.completedAt).toBe(10_000);
+    // 创建于 t=3000、完成于 t=10000 → 总耗时 7s(优于派给空闲 A 的 10s)。
+    expect(vip.completedAt! - vip.createdAt).toBe(7_000);
+  });
+
+  it('when all bots are idle, a VIP goes to the fastest one', () => {
+    const { kitchen } = setup();
+    const slow = kitchen.addBot(10_000);
+    const fast = kitchen.addBot(5_000);
+    const vip = kitchen.createOrder(OrderType.VIP);
+    expect(fast.currentOrder?.id).toBe(vip.id);
+    expect(slow.status).toBe(BotStatus.IDLE);
+  });
+
+  it('on a finish-time tie, prefers an idle bot so the VIP can start immediately', () => {
+    const { kitchen } = setup();
+    const busy = kitchen.addBot(5_000); // 在 t=0 接 Normal → finishAt=5000;若给 VIP 则 5000+5000=10000
+    kitchen.createOrder(OrderType.NORMAL);
+    const idle = kitchen.addBot(10_000); // 空闲 → VIP finishAt=0+10000=10000(并列)
+    const vip = kitchen.createOrder(OrderType.VIP);
+    // 完成时刻并列(都 10000)→ 偏好空闲 bot,立即开工。
+    expect(idle.currentOrder?.id).toBe(vip.id);
+    expect(busy.currentOrder?.id).not.toBe(vip.id);
+  });
+
+  it('keeps a VIP strictly ahead of Normal: an idle bot does NOT grab the Normal while the VIP waits', () => {
+    const { clock, kitchen } = setup();
+    kitchen.addBot(5_000); // B
+    kitchen.createOrder(OrderType.NORMAL); // B 接住,t=5000 完成
+    clock.advance(3_000); // B 剩 2000ms
+    const slow = kitchen.addBot(10_000); // A,空闲
+
+    const vip = kitchen.createOrder(OrderType.VIP); // 最优=B(忙) → 等待
+    const normal = kitchen.createOrder(OrderType.NORMAL); // 排在 VIP 之后
+
+    // A 既不抢 Normal、也不降级接 VIP;两单都等待,VIP 严格在前。
+    expect(vip.status).toBe(OrderStatus.PENDING);
+    expect(normal.status).toBe(OrderStatus.PENDING);
+    expect(slow.status).toBe(BotStatus.IDLE);
+    expect(kitchen.pendingOrders().map((o) => o.id)).toEqual([vip.id, normal.id]);
+  });
+
+  it('spreads many VIPs across a busy fast bot and an idle slow bot (no idle waste, optimal backlog)', () => {
+    // fast(5s) 正忙、剩 2s;slow(10s) 空闲。一次涌入 5 个 VIP。
+    // 不应 5 个都死等 fast(空转 slow),而要按「完成最早」把队列最优分摊:
+    // fast 吃 V1/V3/V4(完成 10s/15s/20s),slow 吃 V2/V5(完成 13s/23s)。
+    const { clock, kitchen } = setup(1);
+    const fast = kitchen.addBot(5_000);
+    kitchen.createOrder(OrderType.NORMAL); // fast 接 filler,t=5000 完成
+    clock.advance(3_000); // t=3000:fast 剩 2000ms
+    const slow = kitchen.addBot(10_000); // 空闲
+
+    const v1 = kitchen.createOrder(OrderType.VIP);
+    const v2 = kitchen.createOrder(OrderType.VIP);
+    const v3 = kitchen.createOrder(OrderType.VIP);
+    const v4 = kitchen.createOrder(OrderType.VIP);
+    const v5 = kitchen.createOrder(OrderType.VIP);
+
+    // 关键:slow 立即分流处理 V2(不空转),fast 仍在跑 filler,其余 VIP 等待。
+    expect(slow.currentOrder?.id).toBe(v2.id);
+    expect(v2.status).toBe(OrderStatus.PROCESSING);
+    expect(fast.status).toBe(BotStatus.PROCESSING); // 仍在 filler 上
+    expect([v1, v3, v4, v5].map((o) => o.status)).toEqual(Array(4).fill(OrderStatus.PENDING));
+
+    clock.advance(20_000); // 跑到全部完成(t=23000)
+
+    // 每个 VIP 的最终完成时刻 = 最优分摊的结果。
+    expect(v1.completedAt).toBe(10_000);
+    expect(v2.completedAt).toBe(13_000);
+    expect(v3.completedAt).toBe(15_000);
+    expect(v4.completedAt).toBe(20_000);
+    expect(v5.completedAt).toBe(23_000);
+  });
+
+  it('re-dispatches a waiting VIP to a remaining bot after the optimal (busy) bot is removed', () => {
+    const { clock, kitchen } = setup();
+    const slow = kitchen.addBot(10_000); // bot1
+    kitchen.createOrder(OrderType.NORMAL); // slow 接住,t=10000 完成
+    kitchen.addBot(5_000); // bot2(fast)
+    kitchen.createOrder(OrderType.NORMAL); // fast 接住,t=5000 完成
+    clock.advance(3_000); // t=3000:fast 剩 2000ms
+
+    const vip = kitchen.createOrder(OrderType.VIP);
+    // fast finishAt=5000+5000=10000;slow finishAt=10000+10000=20000 → 最优=fast(忙) → VIP 等待
+    expect(vip.status).toBe(OrderStatus.PENDING);
+
+    kitchen.removeBot(); // 移除最新 = fast(忙)→其 Normal 退回;仍无空闲 bot → VIP 继续等待
+    expect(vip.status).toBe(OrderStatus.PENDING);
+
+    clock.advance(7_000); // t=10000:slow 完成 → 重新评估 → 由仅剩的 slow 处理 VIP
+    expect(vip.status).toBe(OrderStatus.PROCESSING);
+    expect(slow.currentOrder?.id).toBe(vip.id);
   });
 });
