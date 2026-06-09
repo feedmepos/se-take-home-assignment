@@ -47,7 +47,7 @@ export default function App({ eventSourceFactory }: AppProps): React.ReactElemen
     <div className="flex flex-col h-screen bg-base-200">
       {/* Brand header */}
       <header className="bg-primary text-primary-content px-4 py-3 flex items-center gap-3 shadow-md shrink-0">
-        <img src={archesUrl} alt="McDonald's golden arches" className="h-8 w-10 shrink-0 object-contain" />
+        <img src={archesUrl} alt="McDonald's golden arches" className="h-7 w-9 shrink-0 object-contain" />
         <h1 className="text-xl font-bold tracking-tight">McDonald's Order Controller</h1>
         <span className="ml-auto flex items-center gap-2 text-sm font-medium text-white">
           <span
