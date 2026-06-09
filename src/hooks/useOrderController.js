@@ -5,7 +5,6 @@ export const PROCESS_TIME_MS = 10_000;
 const createInitialState = () => {
 	return {
 		nextOrderNumber: 1,
-		nextBotId: 1,
 		orders: [],
 		pendingQueue: [],
 		completeQueue: [],
@@ -13,7 +12,6 @@ const createInitialState = () => {
 	};
 };
 
-// Can use for restore normal order as well
 const insertAfterVips = (pendingQueue, orders, orderId) => {
 	let insertAt = 0;
 	for (let i = 0; i < pendingQueue.length; i++) {
@@ -24,14 +22,30 @@ const insertAfterVips = (pendingQueue, orders, orderId) => {
 	pendingQueue.splice(insertAt, 0, orderId);
 };
 
-const restoreVipToQueue = (pendingQueue, orders, orderId) => {
+const getInsertIndexByTypeAndId = (pendingQueue, orders, orderId) => {
+	const order = orders[orderId];
 	for (let i = 0; i < pendingQueue.length; i++) {
-		if (orders[pendingQueue[i]].type === 'vip') {
-			pendingQueue.splice(i, 0, orderId);
-			return;
+		const other = orders[pendingQueue[i]];
+		// When restoring a VIP order, and the next order is a normal order, insert before the normal order
+		if (order.type === 'vip' && other.type === 'normal') {
+			return i;
+		}
+		// When restoring a normal order, and the next order is a VIP order, skip
+		if (order.type === 'normal' && other.type === 'vip') {
+			continue;
+		}
+		// If the order id is greater than the current order id, continue the loop
+		// else insert at this index
+		if (orderId < pendingQueue[i]) {
+			return i;
 		}
 	}
-	pendingQueue.splice(0, 0, orderId);
+	return pendingQueue.length;
+};
+
+const restoreOrderToQueue = (pendingQueue, orders, orderId) => {
+	const insertAt = getInsertIndexByTypeAndId(pendingQueue, orders, orderId);
+	pendingQueue.splice(insertAt, 0, orderId);
 };
 
 const assignWorkToIdleBots = (draft, onProcessComplete) => {
@@ -86,11 +100,7 @@ const restoreOrderToPending = (draft, orderId) => {
 	order.status = 'pending';
 	delete order.botId;
 
-	if (order.type === 'vip') {
-		restoreVipToQueue(draft.pendingQueue, draft.orders, orderId);
-	} else {
-		insertAfterVips(draft.pendingQueue, draft.orders, orderId);
-	}
+	restoreOrderToQueue(draft.pendingQueue, draft.orders, orderId);
 };
 
 export const useOrderController = () => {
@@ -168,7 +178,7 @@ export const useOrderController = () => {
 	const addBot = useCallback(() => {
 		setState((prev) => {
 			const draft = structuredClone(prev);
-			const botId = draft.nextBotId++;
+			const botId = draft.bots.length + 1;
 			draft.bots.push({ id: botId, status: 'idle', orderId: null });
 			assignWorkToIdleBots(draft, scheduleComplete);
 			return draft;
