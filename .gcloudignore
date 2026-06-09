@@ -1,0 +1,14 @@
+# Controls what `gcloud run deploy --source` uploads to Cloud Build.
+# Exclude deps/build output (the image does a clean npm ci) and local cruft.
+.git
+.github
+.claude
+**/node_modules
+**/dist
+frontend/dist
+backend/dist
+backend/coverage
+docs
+scripts/result.txt
+**/*.log
+**/.DS_Store
