@@ -6,7 +6,7 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, "docs"),
     filename: "bundle.[contenthash].js",
-    publicPath: "/",
+    publicPath: "/se-take-home-assignment/",
   },
   resolve: {
     extensions: [".tsx", ".ts", ".js", ".css"],
