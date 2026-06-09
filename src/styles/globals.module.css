@@ -1,0 +1,26 @@
+/* 全局移动端适配样式（CSS Modules 支持 :global） */
+:global(html, body) {
+  height: 100%;
+  margin: 0;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, "Noto Sans SC",
+    "PingFang SC", "Microsoft Yahei", sans-serif;
+  background: #f7f7f7;
+  color: #222;
+}
+
+/* 根容器导出用于 App 使用 */
+.appContainer {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 小屏幕优化示例 */
+:global(img) {
+  max-width: 100%;
+  height: auto;
+}
