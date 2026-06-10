@@ -1,0 +1,22 @@
+# Build artifacts
+/demo
+/interactive
+
+# IDE
+.idea/
+
+# WorkBuddy
+.workbuddy/
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# OS
+.DS_Store
+Thumbs.db

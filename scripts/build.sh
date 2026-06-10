@@ -1,15 +1,13 @@
 #!/bin/bash
 
 # Build Script
-# This script should contain all compilation steps for your CLI application
+# Compiles both cmd/demo and cmd/interactive CLI targets.
+
+set -e
 
 echo "Building CLI application..."
 
-# For Go projects:
-# go build -o order-controller ./cmd/main.go
-
-# For Node.js projects:
-# npm install
-# npm run build (if needed)
+go build -o demo ./cmd/demo/
+go build -o interactive ./cmd/interactive/
 
 echo "Build completed"
