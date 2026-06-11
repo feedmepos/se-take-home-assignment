@@ -1,7 +1,3 @@
-'use client';
+import HomePage from '@/views/home';
 
-import Dashboard from '@/components/Dashboard';
-
-export default function Home() {
-  return <Dashboard />;
-}
+export default HomePage;

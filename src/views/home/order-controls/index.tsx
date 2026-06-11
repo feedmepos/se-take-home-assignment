@@ -1,4 +1,4 @@
-import styles from './OrderControls.module.css';
+import styles from './order-controls.module.css';
 
 export default function OrderControls({
   onNewNormalOrder,

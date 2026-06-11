@@ -1,6 +1,6 @@
 import type { Bot, Order } from '@/types';
 import { formatOrderNumber } from '@/utils/string';
-import styles from './BotControls.module.css';
+import styles from './bot-controls.module.css';
 
 export default function BotControls({
   bots,
@@ -27,7 +27,7 @@ export default function BotControls({
           const order = bot.currentOrderId ? orderMap.get(bot.currentOrderId) : null;
           return (
             <li key={bot.id} className={styles.botItem}>
-              🤖 {bot.id} — {bot.status === 'IDLE' ? 'Idle' : `Processing #${order ? formatOrderNumber(order.orderNumber) : '?'}`}
+              🤖 #{bot.id} — {bot.status === 'IDLE' ? 'Idle' : `Processing #${order ? formatOrderNumber(order.orderNumber) : '?'}`}
             </li>
           );
         })}

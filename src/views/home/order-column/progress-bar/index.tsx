@@ -1,4 +1,4 @@
-import styles from './ProgressBar.module.css';
+import styles from './progress-bar.module.css';
 
 export default function ProgressBar({ percent }: { percent: number }) {
   const clamped = Math.min(100, Math.max(0, percent));
