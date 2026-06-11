@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">
+  <rect x="8" y="10" width="24" height="22" rx="6" fill="#E9ECEF" />
+  <circle cx="15" cy="18" r="2" fill="#6C757D" />
+  <circle cx="25" cy="18" r="2" fill="#6C757D" />
+  <path d="M16 26h8" stroke="#6C757D" stroke-width="2" stroke-linecap="round" />
+  <text x="20" y="24" text-anchor="middle" font-size="8" fill="#DA291C" font-weight="700">M</text>
+</svg>
