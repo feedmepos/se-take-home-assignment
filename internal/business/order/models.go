@@ -22,6 +22,7 @@ type Order struct {
 	Type              OrderType
 	Status            OrderStatus
 	ProcessingStarted time.Time
+	seq               uint64
 }
 
 type BotStatus int

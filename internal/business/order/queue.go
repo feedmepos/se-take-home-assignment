@@ -46,7 +46,13 @@ func (q *Queue) Pop() *Order {
 	if len(q.inner) == 0 {
 		return nil
 	}
-	return heap.Pop(&q.inner).(*heapItem).Order
+	hi := heap.Pop(&q.inner).(*heapItem)
+	hi.Order.seq = hi.seq
+	return hi.Order
+}
+
+func (q *Queue) PushReturn(o *Order) {
+	heap.Push(&q.inner, &heapItem{Order: o, seq: o.seq})
 }
 
 func (q *Queue) RemoveAt(i int) *Order { return heap.Remove(&q.inner, i).(*heapItem).Order }

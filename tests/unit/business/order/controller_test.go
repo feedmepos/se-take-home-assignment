@@ -88,22 +88,37 @@ func TestProcessingDuration_CompletesOrder(t *testing.T) {
 func TestVIP_Priority(t *testing.T) {
 	c := order.NewController(order.WithDuration(50 * time.Millisecond))
 	normal := c.NewOrder(order.OrderNormal)
-	c.NewOrder(order.OrderVIP)
+	vip := c.NewOrder(order.OrderVIP)
 	c.AddBot()
 	deadline := time.Now().Add(2 * time.Second)
 	for time.Now().Before(deadline) {
-		if c.CompletedCount() > 0 {
-			if normal.Status != order.OrderCompleted {
-				return
-			}
-			t.Fatalf("Normal completed before VIP")
-		}
 		if c.ProcessCompleted() > 0 {
 			break
 		}
 		time.Sleep(10 * time.Millisecond)
 	}
 	if c.CompletedCount() != 1 {
-		t.Fatalf("want 1 completed, got %d", c.CompletedCount())
+		t.Fatalf("expected 1 completed, got %d", c.CompletedCount())
+	}
+	if normal.Status == order.OrderCompleted && vip.Status != order.OrderCompleted {
+		t.Fatalf("Normal completed before VIP")
+	}
+}
+
+func TestReturnedOrder_PreservesPosition(t *testing.T) {
+	c := order.NewController()
+	c.NewOrder(order.OrderVIP)
+	c.NewOrder(order.OrderNormal)
+	c.AddBot()    // picks VIP
+	c.AddBot()    // picks Normal
+	c.RemoveBot() // destroys Normal's bot
+
+	if c.PendingCount() != 1 {
+		t.Fatalf("expected 1 pending (returned Normal), got %d", c.PendingCount())
+	}
+	// Re-add a bot: should still pick order (returned order is in queue)
+	bot := c.AddBot()
+	if bot.Status != order.BotBusy {
+		t.Fatalf("expected returned order to be picked, bot idle")
 	}
 }

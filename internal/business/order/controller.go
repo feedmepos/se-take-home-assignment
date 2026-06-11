@@ -73,7 +73,7 @@ func (c *Controller) RemoveBot() *Bot {
 	if bot.Order != nil && bot.Status == BotBusy {
 		bot.Order.Status = OrderPending
 		bot.Order.ProcessingStarted = time.Time{}
-		c.queue.Push(bot.Order)
+		c.queue.PushReturn(bot.Order)
 		c.record("%s → returned to PENDING", orderStr(bot.Order))
 	}
 	c.record("-Bot #%d", bot.ID)
