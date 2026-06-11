@@ -1,5 +1,5 @@
 *.exe
-order
+/order
 order-controller
 out.txt
 err.txt

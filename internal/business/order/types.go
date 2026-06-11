@@ -2,21 +2,6 @@ package order
 
 import "time"
 
-type OrderType int
-
-const (
-	OrderNormal OrderType = iota
-	OrderVIP
-)
-
-type OrderStatus int
-
-const (
-	OrderPending OrderStatus = iota
-	OrderProcessing
-	OrderCompleted
-)
-
 type Order struct {
 	ID                uint64
 	Type              OrderType
@@ -24,13 +9,6 @@ type Order struct {
 	ProcessingStarted time.Time
 	seq               uint64
 }
-
-type BotStatus int
-
-const (
-	BotIdle BotStatus = iota
-	BotBusy
-)
 
 type Bot struct {
 	ID     uint64
