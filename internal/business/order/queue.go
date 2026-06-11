@@ -30,18 +30,22 @@ func (pq *innerPQ) Pop() any {
 	return x
 }
 
+// Queue is a priority queue that orders items by VIP status first, then FIFO within each priority.
 type Queue struct {
 	inner innerPQ
 	seq   uint64
 }
 
+// NewQueue returns an initialized empty Queue.
 func NewQueue() *Queue { q := &Queue{}; heap.Init(&q.inner); return q }
 
+// Push inserts an order into the queue with a new sequence number.
 func (q *Queue) Push(o *Order) {
 	q.seq++
 	heap.Push(&q.inner, &heapItem{Order: o, seq: q.seq})
 }
 
+// Pop removes and returns the highest-priority order (VIP first, then FIFO).
 func (q *Queue) Pop() *Order {
 	if len(q.inner) == 0 {
 		return nil
@@ -51,10 +55,11 @@ func (q *Queue) Pop() *Order {
 	return hi.Order
 }
 
+// PushReturn re-inserts an order using its original sequence number,
+// preserving its position relative to other orders of the same type.
 func (q *Queue) PushReturn(o *Order) {
 	heap.Push(&q.inner, &heapItem{Order: o, seq: o.seq})
 }
 
-func (q *Queue) RemoveAt(i int) *Order { return heap.Remove(&q.inner, i).(*heapItem).Order }
-
+// Len returns the number of orders in the queue.
 func (q *Queue) Len() int { return len(q.inner) }

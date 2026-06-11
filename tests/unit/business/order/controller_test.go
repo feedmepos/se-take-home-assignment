@@ -62,6 +62,13 @@ func TestRemoveBot_ReturnsOrder(t *testing.T) {
 	}
 }
 
+func TestRemoveBot_Empty(t *testing.T) {
+	c := order.NewController()
+	if got := c.RemoveBot(); got != nil {
+		t.Fatalf("want nil, got %v", got)
+	}
+}
+
 func TestIdleBot_PicksNewOrder(t *testing.T) {
 	c := order.NewController()
 	c.AddBot()
@@ -83,6 +90,22 @@ func TestProcessingDuration_CompletesOrder(t *testing.T) {
 		time.Sleep(10 * time.Millisecond)
 	}
 	t.Fatalf("order not completed within deadline")
+}
+
+func TestCompletedCount(t *testing.T) {
+	c := order.NewController(order.WithDuration(50 * time.Millisecond))
+	c.NewOrder(order.OrderNormal)
+	c.AddBot()
+	deadline := time.Now().Add(2 * time.Second)
+	for time.Now().Before(deadline) {
+		if c.ProcessCompleted() > 0 {
+			break
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	if c.CompletedCount() != 1 {
+		t.Fatalf("want 1, got %d", c.CompletedCount())
+	}
 }
 
 func TestVIP_Priority(t *testing.T) {

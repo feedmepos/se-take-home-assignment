@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+// Controller manages a queue of orders and a pool of bots, dispatching
+// pending orders to idle bots and tracking completed orders.
 type Controller struct {
 	mu          sync.Mutex
 	queue       *Queue
@@ -17,16 +19,20 @@ type Controller struct {
 	recorder    *Recorder
 }
 
+// ControllerOption configures a Controller during construction.
 type ControllerOption func(*Controller)
 
+// WithDuration sets the time an order needs to be processed before it completes.
 func WithDuration(d time.Duration) ControllerOption {
 	return func(c *Controller) { c.duration = d }
 }
 
+// WithRecorder attaches an event recorder to the controller.
 func WithRecorder(r *Recorder) ControllerOption {
 	return func(c *Controller) { c.recorder = r }
 }
 
+// NewController creates a Controller with the given options.
 func NewController(opts ...ControllerOption) *Controller {
 	c := &Controller{
 		queue:       NewQueue(),
@@ -40,6 +46,7 @@ func NewController(opts ...ControllerOption) *Controller {
 	return c
 }
 
+// NewOrder creates a new order with the given type and enqueues it for processing.
 func (c *Controller) NewOrder(t OrderType) *Order {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -51,6 +58,7 @@ func (c *Controller) NewOrder(t OrderType) *Order {
 	return o
 }
 
+// AddBot creates a new idle bot and dispatches pending orders to it.
 func (c *Controller) AddBot() *Bot {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -62,6 +70,8 @@ func (c *Controller) AddBot() *Bot {
 	return bot
 }
 
+// RemoveBot removes the most recently added bot. If it was busy, the order
+// is returned to the queue at its original position.
 func (c *Controller) RemoveBot() *Bot {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -80,6 +90,8 @@ func (c *Controller) RemoveBot() *Bot {
 	return bot
 }
 
+// ProcessCompleted checks all busy bots and completes any whose processing
+// duration has elapsed. Returns the number of newly completed orders.
 func (c *Controller) ProcessCompleted() int {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -91,13 +103,25 @@ func (c *Controller) ProcessCompleted() int {
 		if time.Since(bot.Order.ProcessingStarted) >= c.duration {
 			bot.Order.Status = OrderCompleted
 			c.completed = append(c.completed, bot.Order)
-			c.record("%s → COMPLETED", orderStr(bot.Order))
+			c.record("%s → COMPLETED by Bot #%d", orderStr(bot.Order), bot.ID)
 			bot.Order = nil
 			bot.Status = BotIdle
 			completed++
+			if c.queue.Len() > 0 {
+				o := c.queue.Pop()
+				if o != nil {
+					o.Status = OrderProcessing
+					o.ProcessingStarted = time.Now()
+					bot.Order = o
+					bot.Status = BotBusy
+					c.record("%s → picked by Bot #%d (completes at %s)", orderStr(o), bot.ID, o.ProcessingStarted.Add(c.duration).Format("15:04:05"))
+				}
+			}
+			if bot.Order == nil {
+				c.record("Bot #%d → IDLE (no pending orders)", bot.ID)
+			}
 		}
 	}
-	c.dispatch()
 	return completed
 }
 
@@ -110,26 +134,32 @@ func (c *Controller) dispatch() {
 			return
 		}
 		o := c.queue.Pop()
+		if o == nil {
+			return
+		}
 		o.Status = OrderProcessing
 		o.ProcessingStarted = time.Now()
 		bot.Order = o
 		bot.Status = BotBusy
-		c.record("%s → picked by Bot #%d", orderStr(o), bot.ID)
+		c.record("%s → picked by Bot #%d (completes at %s)", orderStr(o), bot.ID, o.ProcessingStarted.Add(c.duration).Format("15:04:05"))
 	}
 }
 
+// PendingCount returns the number of orders waiting in the queue.
 func (c *Controller) PendingCount() int {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	return c.queue.Len()
 }
 
+// BotCount returns the number of bots in the pool.
 func (c *Controller) BotCount() int {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	return len(c.bots)
 }
 
+// CompletedCount returns the number of orders that have been fully processed.
 func (c *Controller) CompletedCount() int {
 	c.mu.Lock()
 	defer c.mu.Unlock()

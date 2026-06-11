@@ -6,12 +6,16 @@ import (
 )
 
 func NewRootCommand() *cobra.Command {
-	return &cobra.Command{
-		Use:   "order-controller",
+	root := &cobra.Command{
+		Use:   "order",
 		Short: "McDonald's order controller simulation",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			order.RunDemo(cmd.OutOrStdout())
 			return nil
 		},
 	}
+	for _, cmd := range order.Commands() {
+		root.AddCommand(cmd)
+	}
+	return root
 }

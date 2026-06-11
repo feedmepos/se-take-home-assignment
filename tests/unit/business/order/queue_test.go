@@ -23,15 +23,15 @@ func TestQueue_VIPBeforeNormal(t *testing.T) {
 	}
 }
 
-func TestQueue_RemoveAt(t *testing.T) {
+func TestQueue_PushReturn(t *testing.T) {
 	q := order.NewQueue()
-	q.Push(&order.Order{ID: 1, Type: order.OrderVIP})
+	q.Push(&order.Order{ID: 1, Type: order.OrderNormal})
 	q.Push(&order.Order{ID: 2, Type: order.OrderNormal})
-	if r := q.RemoveAt(0); r.ID != 1 {
-		t.Fatalf("want 1, got %d", r.ID)
-	}
-	if q.Len() != 1 {
-		t.Fatalf("want 1, got %d", q.Len())
+	popped := q.Pop()
+	q.PushReturn(popped)
+	got := q.Pop()
+	if got.ID != 1 {
+		t.Fatalf("want returned order (1), got %d", got.ID)
 	}
 }
 
