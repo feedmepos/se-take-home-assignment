@@ -1,0 +1,71 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.count {
+  font-weight: 600;
+  color: #ddd;
+  min-width: 60px;
+}
+
+.add,
+.remove {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.add {
+  background: #2a7d2a;
+}
+
+.add:hover {
+  background: #3a9d3a;
+}
+
+.add:active {
+  background: #1a5d1a;
+}
+
+.remove {
+  background: #a03030;
+}
+
+.remove:hover:not(:disabled) {
+  background: #c04040;
+}
+
+.remove:active:not(:disabled) {
+  background: #802020;
+}
+
+.remove:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.botList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.botItem {
+  font-size: 12px;
+  color: #aaa;
+}

@@ -1,0 +1,40 @@
+.row {
+  display: flex;
+  gap: 8px;
+}
+
+.normal,
+.vip {
+  padding: 8px 18px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.normal {
+  background: #3a3a8a;
+}
+
+.normal:hover {
+  background: #4a4aaa;
+}
+
+.normal:active {
+  background: #2a2a6a;
+}
+
+.vip {
+  background: #d4a017;
+  color: #111;
+}
+
+.vip:hover {
+  background: #e4b027;
+}
+
+.vip:active {
+  background: #c49007;
+}
