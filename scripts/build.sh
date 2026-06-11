@@ -1,15 +1,11 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-# Build Script
-# This script should contain all compilation steps for your CLI application
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$REPO_DIR"
 
 echo "Building CLI application..."
-
-# For Go projects:
-# go build -o order-controller ./cmd/main.go
-
-# For Node.js projects:
-# npm install
-# npm run build (if needed)
-
-echo "Build completed"
+mkdir -p bin
+go build -o bin/order-controller .
+echo "Build completed: $REPO_DIR/bin/order-controller"
