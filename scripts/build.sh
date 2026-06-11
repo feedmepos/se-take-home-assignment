@@ -1,5 +1,5 @@
 #!/bin/bash
 set -e
 echo "Building CLI application..."
-go build -o order-controller ./cmd/foundation-cli
+go build -o order ./cmd/order
 echo "Build completed"

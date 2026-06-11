@@ -3,7 +3,7 @@ package order_test
 import (
 	"testing"
 
-	"foundation-cli/internal/business/order"
+	"order/internal/business/order"
 )
 
 func TestQueue_VIPBeforeNormal(t *testing.T) {

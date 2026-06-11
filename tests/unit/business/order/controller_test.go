@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"foundation-cli/internal/business/order"
+	"order/internal/business/order"
 )
 
 func TestNewOrder_PendingCount(t *testing.T) {

@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"foundation-cli/internal/business/order"
+	"order/internal/business/order"
 )
 
 func TestRecorder_HHMMSS(t *testing.T) {

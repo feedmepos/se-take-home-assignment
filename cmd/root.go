@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"foundation-cli/internal/business/order"
 	"github.com/spf13/cobra"
+	"order/internal/business/order"
 )
 
 func NewRootCommand() *cobra.Command {

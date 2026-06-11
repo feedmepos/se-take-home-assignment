@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"foundation-cli/cmd"
+	"order/cmd"
 	"os"
 )
 

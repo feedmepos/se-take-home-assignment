@@ -1,0 +1,26 @@
+=== McDonald's Order Controller Demo ===
+
+[11:34:42] Order #1 (Normal) → PENDING
+[11:34:42] Order #2 (Normal) → PENDING
+[11:34:42] Order #3 (VIP) → PENDING
+[11:34:42] Order #4 (VIP) → PENDING
+[11:34:42] +Bot #1
+[11:34:42] Order #3 (VIP) → picked by Bot #1
+[11:34:42] +Bot #2
+[11:34:42] Order #4 (VIP) → picked by Bot #2
+[11:34:42] +Bot #3
+[11:34:42] Order #1 (Normal) → picked by Bot #3
+[11:34:42] Order #1 (Normal) → returned to PENDING
+[11:34:42] -Bot #3
+[11:34:44] Order #3 (VIP) → COMPLETED
+[11:34:44] Order #4 (VIP) → COMPLETED
+[11:34:44] Order #2 (Normal) → picked by Bot #1
+[11:34:44] Order #1 (Normal) → picked by Bot #2
+[11:34:45] Order #5 (Normal) → PENDING
+[11:34:46] Order #2 (Normal) → COMPLETED
+[11:34:46] Order #1 (Normal) → COMPLETED
+[11:34:46] Order #5 (Normal) → picked by Bot #1
+
+=== Demo Summary ===
+Total events: 20
+=== Demo Complete ===
