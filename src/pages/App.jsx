@@ -16,8 +16,12 @@ const App = () => {
 		addVipOrder,
 		addBot,
 		removeBot,
+		addFastBot,
+		removeFastBot,
 		getOrder,
 		totalBots,
+		totalNormalBots,
+		totalFastBots,
 	} = useOrderController();
 
 	return (
@@ -29,8 +33,12 @@ const App = () => {
 				onAddVipOrder={addVipOrder}
 				activeBotCount={activeBotCount}
 				totalBots={totalBots}
+				totalNormalBots={totalNormalBots}
+				totalFastBots={totalFastBots}
 				onAddBot={addBot}
 				onRemoveBot={removeBot}
+				onAddFastBot={addFastBot}
+				onRemoveFastBot={removeFastBot}
 			/>
 
 			<section className="main-grid">

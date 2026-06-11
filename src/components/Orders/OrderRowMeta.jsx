@@ -1,7 +1,7 @@
 import burgerIcon from '../../assets/png/burger.png';
 import OrderBadge from './OrderBadge';
 
-export default function OrderRowMeta({ order, time }) {
+export default function OrderRowMeta({ order, time, processTime }) {
 	return (
 		<>
 			<div className="order-row__left">
@@ -9,6 +9,9 @@ export default function OrderRowMeta({ order, time }) {
 					<OrderBadge type={order.type} />
 				</div>
 				<span className="order-row__id">#{order.id}</span>
+				{processTime ? (
+					<span className="order-row__process-time">{processTime}</span>
+				) : null}
 			</div>
 			<div className="order-row__right">
 				<img src={burgerIcon} alt="" className="order-row__burger" />

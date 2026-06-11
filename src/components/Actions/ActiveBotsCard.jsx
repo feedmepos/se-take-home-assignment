@@ -3,8 +3,12 @@ import robotIcon from '../../assets/png/robot-1.png';
 const ActiveBotsCard = ({
 	activeBotCount,
 	totalBots,
+	totalNormalBots,
+	totalFastBots,
 	onAddBot,
 	onRemoveBot,
+	onAddFastBot,
+	onRemoveFastBot,
 }) => {
 	return (
 		<div className="stat-card stat-card--bots">
@@ -32,9 +36,24 @@ const ActiveBotsCard = ({
 					type="button"
 					className="outline-btn outline-btn--remove"
 					onClick={onRemoveBot}
-					disabled={totalBots === 0}
+					disabled={totalNormalBots === 0}
 				>
 					− Remove Bot
+				</button>
+				<button
+					type="button"
+					className="outline-btn outline-btn--add"
+					onClick={onAddFastBot}
+				>
+					+ Add Fast Bot
+				</button>
+				<button
+					type="button"
+					className="outline-btn outline-btn--remove"
+					onClick={onRemoveFastBot}
+					disabled={totalFastBots === 0}
+				>
+					− Remove Fast Bot
 				</button>
 			</div>
 		</div>

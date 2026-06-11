@@ -552,6 +552,16 @@
 	line-height: 1;
 }
 
+.order-row__process-time {
+	font-size: 11px;
+	font-weight: 700;
+	color: #155724;
+	background: #d4edda;
+	padding: 3px 8px;
+	border-radius: 4px;
+	white-space: nowrap;
+}
+
 .order-row__right {
 	display: flex;
 	align-items: center;
@@ -620,6 +630,16 @@
 .badge--idle {
 	background: #e9ecef;
 	color: #6c757d;
+}
+
+.badge--cancelling {
+	background: #fff3cd;
+	color: #856404;
+}
+
+.badge--reserved {
+	background: #cce5ff;
+	color: #004085;
 }
 
 /* Bots */
@@ -696,6 +716,10 @@
 	background: var(--mcd-green);
 	border-radius: 3px;
 	transition: width 0.2s linear;
+}
+
+.bot-row__progress-fill--cancelling {
+	background: #ffc107;
 }
 
 .bot-row__timer {

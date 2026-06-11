@@ -6,3 +6,8 @@ export const formatOrderTime = (timestamp) => {
 		hour12: true,
 	});
 };
+
+export const formatProcessDuration = (durationMs) => {
+	const totalSeconds = Math.max(0, Math.round(durationMs / 1000));
+	return `${totalSeconds}s`;
+};
