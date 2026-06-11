@@ -1,19 +1,16 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-# Run Script
-# This script should execute your CLI application and output results to result.txt
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$REPO_DIR"
 
-echo "Running CLI application..."
+BIN="$REPO_DIR/bin/order-controller"
+if [ ! -x "$BIN" ]; then
+    echo "Binary not found; building first..."
+    ./scripts/build.sh
+fi
 
-# For Go projects:
-# ./order-controller > result.txt
-
-# For Node.js projects:
-# node index.js > result.txt
-# or npm start > result.txt
-
-# Temporary placeholder - remove this when you implement your CLI
-echo "Added 1 bot" > result.txt
-echo "status: bot: [1], order: []" >> result.txt
-
-echo "CLI application execution completed"
+echo "Running CLI application (demo mode)..."
+"$BIN" --demo > "$SCRIPT_DIR/result.txt"
+echo "CLI application execution completed; output written to $SCRIPT_DIR/result.txt"
