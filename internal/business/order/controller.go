@@ -23,6 +23,10 @@ func WithDuration(d time.Duration) ControllerOption {
 	return func(c *Controller) { c.duration = d }
 }
 
+func WithRecorder(r *Recorder) ControllerOption {
+	return func(c *Controller) { c.recorder = r }
+}
+
 func NewController(opts ...ControllerOption) *Controller {
 	c := &Controller{
 		queue:       NewQueue(),

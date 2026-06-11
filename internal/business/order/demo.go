@@ -9,7 +9,7 @@ import (
 func RunDemo(w io.Writer) {
 	r := NewRecorder(w)
 	demoDuration := 2 * time.Second
-	c := NewController(WithDuration(demoDuration))
+	c := NewController(WithDuration(demoDuration), WithRecorder(r))
 
 	fmt.Fprintln(w, "=== McDonald's Order Controller Demo ===")
 	fmt.Fprintln(w, "")
