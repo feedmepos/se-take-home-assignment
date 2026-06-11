@@ -10,5 +10,8 @@ echo "Running unit tests..."
 
 # For Node.js projects:
 # npm test
+cd "$(dirname "$0")/.."
+
+go test ./... -v
 
 echo "Unit tests completed"

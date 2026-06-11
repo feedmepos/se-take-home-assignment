@@ -1,26 +1,46 @@
-McDonald's Order Management System - Simulation Results
+=== McDonald's Order Control System ===
 
-[14:32:01] System initialized with 0 bots
-[14:32:01] Created Normal Order #1001 - Status: PENDING
-[14:32:02] Created VIP Order #1002 - Status: PENDING
-[14:32:02] Created Normal Order #1003 - Status: PENDING
-[14:32:03] Bot #1 created - Status: ACTIVE
-[14:32:03] Bot #1 picked up VIP Order #1002 - Status: PROCESSING
-[14:32:04] Bot #2 created - Status: ACTIVE
-[14:32:04] Bot #2 picked up Normal Order #1001 - Status: PROCESSING
-[14:32:13] Bot #1 completed VIP Order #1002 - Status: COMPLETE (Processing time: 10s)
-[14:32:13] Bot #1 picked up Normal Order #1003 - Status: PROCESSING
-[14:32:14] Bot #2 completed Normal Order #1001 - Status: COMPLETE (Processing time: 10s)
-[14:32:14] Bot #2 is now IDLE - No pending orders
-[14:32:15] Created VIP Order #1004 - Status: PENDING
-[14:32:15] Bot #2 picked up VIP Order #1004 - Status: PROCESSING
-[14:32:23] Bot #1 completed Normal Order #1003 - Status: COMPLETE (Processing time: 10s)
-[14:32:25] Bot #2 completed VIP Order #1004 - Status: COMPLETE (Processing time: 10s)
-[14:32:25] Bot #2 destroyed while IDLE
-[14:32:26] Bot #1 is now IDLE - No pending orders
+--- Scenario 1: Add normal orders ---
+[17:31:11] Added Normal#1
+[17:31:11] status: bot: [0], order: [Normal#1]
+[17:31:11] Added Normal#2
+[17:31:11] status: bot: [0], order: [Normal#2, Normal#1]
 
-Final Status:
-- Total Orders Processed: 4 (2 VIP, 2 Normal)
-- Orders Completed: 4
-- Active Bots: 1
-- Pending Orders: 0
+--- Scenario 2: Add VIP order (should be prioritized) ---
+[17:31:11] Added VIP#3
+[17:31:11] status: bot: [0], order: [VIP#3, Normal#2, Normal#1]
+
+--- Scenario 3: Add first bot (starts processing VIP order) ---
+[17:31:11] Added bot #1
+[17:31:11] status: bot: [1], order: [VIP#3, Normal#2, Normal#1]
+[17:31:11] Bot #1 started processing VIP#3
+[17:31:11] status: bot: [1], order: [Normal#2, Normal#1, VIP#3]
+
+--- Scenario 4: Add another normal order ---
+[17:31:12] Added Normal#4
+[17:31:12] status: bot: [1], order: [Normal#4, Normal#2, Normal#1, VIP#3]
+
+--- Scenario 5: Add second bot (processes next order) ---
+[17:31:12] Added bot #2
+[17:31:12] status: bot: [2], order: [Normal#4, Normal#2, Normal#1, VIP#3]
+[17:31:12] Bot #2 started processing Normal#4
+[17:31:12] status: bot: [2], order: [Normal#2, Normal#1, VIP#3, Normal#4]
+
+--- Scenario 6: Remove a bot ---
+[17:31:12] Removed bot #2 (was processing Normal#4, returned to pending)
+[17:31:12] Bot #2 stopped while processing Normal#4
+[17:31:12] status: bot: [1], order: [Normal#4, Normal#2, Normal#1, VIP#3]
+
+--- Scenario 7: Wait for orders to complete ---
+[17:31:21] Bot #1 completed VIP#3
+[17:31:21] status: bot: [1], order: [Normal#4, Normal#2, Normal#1]
+[17:31:21] Bot #1 started processing Normal#4
+[17:31:21] status: bot: [1], order: [Normal#2, Normal#1, Normal#4]
+
+=== Final Status ===
+Total Orders Created: 4
+Pending Orders: 2
+Active Bots: 1
+Completed Orders: 1
+
+=== System Demo Completed ===

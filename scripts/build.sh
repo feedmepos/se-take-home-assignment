@@ -12,4 +12,8 @@ echo "Building CLI application..."
 # npm install
 # npm run build (if needed)
 
+cd "$(dirname "$0")/.."
+
+go build -o order-controller .
+
 echo "Build completed"
