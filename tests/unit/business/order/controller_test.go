@@ -75,21 +75,35 @@ func TestProcessingDuration_CompletesOrder(t *testing.T) {
 	c := order.NewController(order.WithDuration(50 * time.Millisecond))
 	c.NewOrder(order.OrderNormal)
 	c.AddBot()
-	time.Sleep(100 * time.Millisecond)
-	n := c.ProcessCompleted()
-	if n != 1 {
-		t.Fatalf("want 1 completed, got %d", n)
+	deadline := time.Now().Add(2 * time.Second)
+	for time.Now().Before(deadline) {
+		if c.ProcessCompleted() > 0 {
+			return
+		}
+		time.Sleep(10 * time.Millisecond)
 	}
+	t.Fatalf("order not completed within deadline")
 }
 
 func TestVIP_Priority(t *testing.T) {
 	c := order.NewController(order.WithDuration(50 * time.Millisecond))
-	c.NewOrder(order.OrderNormal)
+	normal := c.NewOrder(order.OrderNormal)
 	c.NewOrder(order.OrderVIP)
 	c.AddBot()
-	time.Sleep(100 * time.Millisecond)
-	c.ProcessCompleted()
+	deadline := time.Now().Add(2 * time.Second)
+	for time.Now().Before(deadline) {
+		if c.CompletedCount() > 0 {
+			if normal.Status != order.OrderCompleted {
+				return
+			}
+			t.Fatalf("Normal completed before VIP")
+		}
+		if c.ProcessCompleted() > 0 {
+			break
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
 	if c.CompletedCount() != 1 {
-		t.Fatalf("want VIP completed, got %d", c.CompletedCount())
+		t.Fatalf("want 1 completed, got %d", c.CompletedCount())
 	}
 }

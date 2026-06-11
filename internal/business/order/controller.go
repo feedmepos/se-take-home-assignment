@@ -142,8 +142,8 @@ func orderStr(o *Order) string {
 	s := fmt.Sprintf("Order #%d", o.ID)
 	if o.Type == OrderVIP {
 		s += " (VIP)"
-	} else {
-		s += " (Normal)"
+		return s
 	}
+	s += " (Normal)"
 	return s
 }
