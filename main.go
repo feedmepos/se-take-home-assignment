@@ -86,7 +86,8 @@ func printQueue(c *controller.Controller, log controller.LogFn) {
 
 func runInteractive(tick time.Duration, log controller.LogFn) {
 	c := controller.New(controller.Options{Tick: tick, Logger: log})
-	log("System initialized - interactive mode (type 'help' for commands)")
+	log("System initialized - interactive mode")
+	printHelp()
 
 	scanner := bufio.NewScanner(os.Stdin)
 	fmt.Print("> ")
