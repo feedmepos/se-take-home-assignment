@@ -1,0 +1,14 @@
+{
+  "name": "mcdonalds-order-management",
+  "version": "1.0.0",
+  "description": "McDonald's Order Management System - CLI Application",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node test/system.test.js",
+    "build": "echo 'No build step required for Node.js'"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
