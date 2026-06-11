@@ -1,14 +1,8 @@
 #!/bin/bash
-
-# Unit Test Script
-# This script should contain all unit test execution steps
+# Unit Test Script — runs all Go tests with the race detector.
+set -euo pipefail
+cd "$(dirname "$0")/.."
 
 echo "Running unit tests..."
-
-# For Go projects:
-# go test ./... -v
-
-# For Node.js projects:
-# npm test
-
+go test -race -v ./...
 echo "Unit tests completed"
