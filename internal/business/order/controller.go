@@ -53,7 +53,7 @@ func (c *Controller) NewOrder(t OrderType) *Order {
 	o := &Order{ID: c.nextOrderID, Type: t, Status: OrderPending}
 	c.nextOrderID++
 	c.queue.Push(o)
-	c.record("%s → PENDING", orderStr(o))
+	c.record("%s -> PENDING", orderStr(o))
 	c.dispatch()
 	return o
 }
@@ -84,7 +84,7 @@ func (c *Controller) RemoveBot() *Bot {
 		bot.Order.Status = OrderPending
 		bot.Order.ProcessingStarted = time.Time{}
 		c.queue.PushReturn(bot.Order)
-		c.record("%s → returned to PENDING", orderStr(bot.Order))
+		c.record("%s -> returned to PENDING", orderStr(bot.Order))
 	}
 	c.record("-Bot #%d", bot.ID)
 	return bot
@@ -103,7 +103,7 @@ func (c *Controller) ProcessCompleted() int {
 		if time.Since(bot.Order.ProcessingStarted) >= c.duration {
 			bot.Order.Status = OrderCompleted
 			c.completed = append(c.completed, bot.Order)
-			c.record("%s → COMPLETED by Bot #%d", orderStr(bot.Order), bot.ID)
+			c.record("%s -> COMPLETED by Bot #%d", orderStr(bot.Order), bot.ID)
 			bot.Order = nil
 			bot.Status = BotIdle
 			completed++
@@ -114,11 +114,11 @@ func (c *Controller) ProcessCompleted() int {
 					o.ProcessingStarted = time.Now()
 					bot.Order = o
 					bot.Status = BotBusy
-					c.record("%s → picked by Bot #%d (completes at %s)", orderStr(o), bot.ID, o.ProcessingStarted.Add(c.duration).Format("15:04:05"))
+					c.record("%s -> picked by Bot #%d (completes at %s)", orderStr(o), bot.ID, o.ProcessingStarted.Add(c.duration).Format("15:04:05"))
 				}
 			}
 			if bot.Order == nil {
-				c.record("Bot #%d → IDLE (no pending orders)", bot.ID)
+				c.record("Bot #%d -> IDLE (no pending orders)", bot.ID)
 			}
 		}
 	}
@@ -141,7 +141,7 @@ func (c *Controller) dispatch() {
 		o.ProcessingStarted = time.Now()
 		bot.Order = o
 		bot.Status = BotBusy
-		c.record("%s → picked by Bot #%d (completes at %s)", orderStr(o), bot.ID, o.ProcessingStarted.Add(c.duration).Format("15:04:05"))
+		c.record("%s -> picked by Bot #%d (completes at %s)", orderStr(o), bot.ID, o.ProcessingStarted.Add(c.duration).Format("15:04:05"))
 	}
 }
 
