@@ -1,0 +1,14 @@
+{
+  "name": "mcd-order-controller",
+  "version": "1.0.0",
+  "description": "McDonald's order controller CLI",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "node --test test/**/*.test.js",
+    "start": "node src/index.js",
+    "interactive": "node src/interactive.js"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}
