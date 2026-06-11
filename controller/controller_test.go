@@ -190,3 +190,133 @@ func TestShutdownStopsAllBots(t *testing.T) {
 		t.Fatal("expected 0 bots after shutdown")
 	}
 }
+
+func TestMultipleBotsProcessConcurrently(t *testing.T) {
+	c, logs := newTestController(t)
+	c.tick = 300 * time.Millisecond
+
+	c.NewOrder(OrderNormal)
+	c.NewOrder(OrderNormal)
+	c.AddBot()
+	c.AddBot()
+
+	start := time.Now()
+	if !c.WaitIdle(2 * time.Second) {
+		t.Fatalf("not idle\nlogs:\n%s", logs.joined())
+	}
+	elapsed := time.Since(start)
+
+	if elapsed > 550*time.Millisecond {
+		t.Fatalf("bots appear to be serial: 2 orders took %v with tick=%v (expected ~%v if concurrent)",
+			elapsed, c.tick, c.tick)
+	}
+
+	snap := c.Status()
+	if len(snap.Completed) != 2 {
+		t.Fatalf("expected 2 completed orders, got %d", len(snap.Completed))
+	}
+}
+
+func TestShutdownRequeuesInFlightOrders(t *testing.T) {
+	c, logs := newTestController(t)
+	c.tick = 500 * time.Millisecond
+
+	c.NewOrder(OrderVIP)    // #1 — Bot #1 will take this
+	c.NewOrder(OrderNormal) // #2 — Bot #2 will take this
+	c.AddBot()
+	c.AddBot()
+
+	time.Sleep(100 * time.Millisecond) // let both bots start processing
+
+	mid := c.Status()
+	processing := 0
+	for _, b := range mid.Bots {
+		if b.Status == BotProcessing {
+			processing++
+		}
+	}
+	if processing != 2 {
+		t.Fatalf("expected 2 bots processing, got %d\nlogs:\n%s", processing, logs.joined())
+	}
+
+	c.Shutdown()
+
+	final := c.Status()
+	if len(final.Bots) != 0 {
+		t.Fatalf("expected 0 bots after shutdown, got %d", len(final.Bots))
+	}
+	if len(final.Completed) != 0 {
+		t.Fatalf("expected 0 completed (orders were interrupted), got %d", len(final.Completed))
+	}
+	if len(final.Pending) != 2 {
+		t.Fatalf("expected 2 orders requeued, got %d\npending: %+v", len(final.Pending), final.Pending)
+	}
+	if final.Pending[0].Type != OrderVIP || final.Pending[0].ID != 1 {
+		t.Fatalf("expected VIP#1 at front of requeued, got %s#%d",
+			final.Pending[0].Type, final.Pending[0].ID)
+	}
+	if final.Pending[1].Type != OrderNormal || final.Pending[1].ID != 2 {
+		t.Fatalf("expected Normal#2 second, got %s#%d",
+			final.Pending[1].Type, final.Pending[1].ID)
+	}
+}
+
+func TestOrdersStayPendingWithNoBots(t *testing.T) {
+	c, _ := newTestController(t)
+	c.NewOrder(OrderNormal)
+	c.NewOrder(OrderVIP)
+	c.NewOrder(OrderNormal)
+
+	if c.WaitIdle(150 * time.Millisecond) {
+		t.Fatal("WaitIdle returned true but there is pending work and no bots")
+	}
+
+	snap := c.Status()
+	if len(snap.Pending) != 3 {
+		t.Fatalf("expected 3 pending orders, got %d", len(snap.Pending))
+	}
+	if len(snap.Bots) != 0 {
+		t.Fatalf("expected 0 bots, got %d", len(snap.Bots))
+	}
+	if len(snap.Completed) != 0 {
+		t.Fatalf("expected 0 completed, got %d", len(snap.Completed))
+	}
+}
+
+func TestRemovingOnlyBotLeavesOrderInQueue(t *testing.T) {
+	c, _ := newTestController(t)
+	c.tick = 500 * time.Millisecond
+	c.NewOrder(OrderNormal)
+	c.AddBot()
+
+	time.Sleep(100 * time.Millisecond) // let bot start processing
+
+	c.RemoveNewestBot()
+
+	snap := c.Status()
+	if len(snap.Bots) != 0 {
+		t.Fatalf("expected 0 bots, got %d", len(snap.Bots))
+	}
+	if len(snap.Pending) != 1 || snap.Pending[0].ID != 1 {
+		t.Fatalf("expected order #1 back in queue, got %+v", snap.Pending)
+	}
+	if len(snap.Completed) != 0 {
+		t.Fatalf("expected 0 completed, got %d", len(snap.Completed))
+	}
+
+	if c.WaitIdle(150 * time.Millisecond) {
+		t.Fatal("WaitIdle returned true but there is a pending order and no bots")
+	}
+}
+
+func TestShutdownOnEmptyControllerIsNoOp(t *testing.T) {
+	c, _ := newTestController(t)
+	c.Shutdown()
+
+	snap := c.Status()
+	if len(snap.Bots) != 0 || len(snap.Pending) != 0 || len(snap.Completed) != 0 {
+		t.Fatalf("expected empty state, got %+v", snap)
+	}
+
+	c.Shutdown()
+}
