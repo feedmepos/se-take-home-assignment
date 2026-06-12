@@ -1,0 +1,53 @@
+.card {
+  padding: 10px 12px;
+  border-radius: 6px;
+  border-left: 4px solid #555;
+  background: #1e1e2e;
+  font-size: 13px;
+}
+
+.vip {
+  border-left-color: #d4a017;
+}
+
+.normal {
+  border-left-color: #666;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.orderNumber {
+  font-weight: 700;
+  font-size: 15px;
+  color: #fff;
+}
+
+.badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge.vip {
+  background: #d4a017;
+  color: #111;
+}
+
+.badge.normal {
+  background: #444;
+  color: #ccc;
+}
+
+.status {
+  display: block;
+  font-size: 11px;
+  color: #888;
+  margin-top: 4px;
+}

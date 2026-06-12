@@ -1,0 +1,1 @@
+- improved rendering logic where initially AI use tick in zustand to force rerender the whole dashboard, have optimized it to let each order card handle its own rerender
