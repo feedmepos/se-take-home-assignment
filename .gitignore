@@ -1,0 +1,17 @@
+# Binaries
+bin/
+*.exe
+order-controller
+
+# IDE & Tools
+.idea/
+.vscode/
+.qoder/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# CI generated
+scripts/order-controller
+scripts/result.txt

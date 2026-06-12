@@ -62,3 +62,95 @@ You must implement **either** frontend or backend components as described below:
 - Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.
 - Utilize coding agent to complete the assignment scope your working hour within 1 hour, do not over engineer it. However, ensure you read and understand what your code doing and apply good engineering practice.
 - Complete the implementation as clean as possible, clean code is a strong plus point, do not bring in all the fancy tech stuff.
+
+---
+
+## Implementation
+
+### Tech Stack
+- **Language**: Go 1.24
+- **Architecture**: CLI + embedded Web UI (single binary)
+- **Concurrency**: goroutine per bot, `sync.Mutex` for thread safety
+- **Frontend**: Vanilla HTML/CSS/JS with SSE real-time updates
+
+### Project Structure
+```
+├── cmd/main.go                  # CLI entry point
+├── internal/
+│   ├── model/order.go           # Order types & status
+│   ├── queue/queue.go           # Thread-safe VIP/Normal dual-queue
+│   ├── bot/bot.go               # Bot with goroutine processing
+│   ├── controller/controller.go # Orchestrator (queue + bots)
+│   └── web/                     # HTTP server + embedded frontend
+├── build.sh                     # Cross-platform build script
+├── run.sh                       # Cross-platform run script
+├── test.sh                      # Test runner
+└── scripts/                     # CI-specific scripts
+```
+
+### Running the Application
+
+#### Prerequisites
+- Go 1.22+ installed
+
+#### Build
+```bash
+./build.sh              # Auto-detect OS
+./build.sh --windows    # Cross-compile for Windows
+./build.sh --mac        # Cross-compile for macOS
+./build.sh --linux      # Cross-compile for Linux
+```
+
+#### Run
+```bash
+# Interactive CLI mode
+./run.sh
+
+# Demo mode (generates scripts/result.txt for CI)
+./run.sh --linux
+
+# Web UI mode (browser at http://localhost:18080)
+./run.sh --web
+
+# Combine: specific OS + web mode
+./run.sh --mac --web
+```
+
+```bash
+./run.sh --web              # 自动检测 → windows（你当前系统）
+./run.sh --windows --web    # 显式指定 Windows
+./run.sh --linux --web      # 交叉编译 Linux 版并以 web 模式跑
+./run.sh --mac --web        # 交叉编译 macOS 版
+```
+
+#### Test
+```bash
+./test.sh              # Run all unit tests
+./test.sh --race       # Run with Go race detector
+```
+
+#### CI Scripts (`scripts/` directory)
+These are used by GitHub Actions (`backend-verify-result` workflow) and require no arguments:
+```bash
+scripts/test.sh    # Run unit tests
+scripts/build.sh   # Compile Linux binary → scripts/order-controller
+scripts/run.sh     # Execute demo mode → scripts/result.txt
+```
+The CI pipeline runs them in order: `test.sh` → `build.sh` → `run.sh`, then verifies `scripts/result.txt` contains HH:MM:SS timestamps.
+
+### CLI Commands (Interactive Mode)
+| Key | Action |
+|-----|--------|
+| `1` | New Normal Order |
+| `2` | New VIP Order |
+| `+` | Add Bot |
+| `-` | Remove Bot |
+| `s` | Show Status |
+| `q` | Quit |
+
+### Design Decisions
+- **Dual-queue**: VIP and Normal orders in separate slices for O(1) enqueue and clean priority separation
+- **Bot ID**: `int16` with wrap-around at 32767 for compact representation
+- **Order ID**: `int64` using bit-shift `(unix_seconds << 16) | sequence` for unique, time-sortable IDs
+- **Max Limits**: 50 bots, 1000 pending orders to prevent resource exhaustion
+- **Queue thread-safety**: Queue manages its own `sync.Mutex`, controller doesn't double-lock for queue access

@@ -1,0 +1,6 @@
+* text=auto eol=lf
+*.sh text eol=lf
+*.go text eol=lf
+*.html text eol=lf
+*.mod text eol=lf
+*.exe binary

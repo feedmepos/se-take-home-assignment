@@ -1,26 +1,63 @@
-McDonald's Order Management System - Simulation Results
+=== McDonald's Order Controller - Demo Mode ===
 
-[14:32:01] System initialized with 0 bots
-[14:32:01] Created Normal Order #1001 - Status: PENDING
-[14:32:02] Created VIP Order #1002 - Status: PENDING
-[14:32:02] Created Normal Order #1003 - Status: PENDING
-[14:32:03] Bot #1 created - Status: ACTIVE
-[14:32:03] Bot #1 picked up VIP Order #1002 - Status: PROCESSING
-[14:32:04] Bot #2 created - Status: ACTIVE
-[14:32:04] Bot #2 picked up Normal Order #1001 - Status: PROCESSING
-[14:32:13] Bot #1 completed VIP Order #1002 - Status: COMPLETE (Processing time: 10s)
-[14:32:13] Bot #1 picked up Normal Order #1003 - Status: PROCESSING
-[14:32:14] Bot #2 completed Normal Order #1001 - Status: COMPLETE (Processing time: 10s)
-[14:32:14] Bot #2 is now IDLE - No pending orders
-[14:32:15] Created VIP Order #1004 - Status: PENDING
-[14:32:15] Bot #2 picked up VIP Order #1004 - Status: PROCESSING
-[14:32:23] Bot #1 completed Normal Order #1003 - Status: COMPLETE (Processing time: 10s)
-[14:32:25] Bot #2 completed VIP Order #1004 - Status: COMPLETE (Processing time: 10s)
-[14:32:25] Bot #2 destroyed while IDLE
-[14:32:26] Bot #1 is now IDLE - No pending orders
+--- Adding orders ---
+[12:33:06] Order #116735265079297 (Normal) added to PENDING
+[12:33:06] Order #116735265079298 (Normal) added to PENDING
+[12:33:06] Order #116735265079299 (VIP) added to PENDING
+[12:33:06] Order #116735265079300 (Normal) added to PENDING
+[12:33:06] Order #116735265079301 (VIP) added to PENDING
 
-Final Status:
-- Total Orders Processed: 4 (2 VIP, 2 Normal)
-- Orders Completed: 4
-- Active Bots: 1
-- Pending Orders: 0
+--- Status ---
+Bots: 0
+PENDING (5): Order #116735265079299 (VIP), Order #116735265079301 (VIP), Order #116735265079297 (Normal), Order #116735265079298 (Normal), Order #116735265079300 (Normal)
+PROCESSING (0): 
+COMPLETE (0): 
+--------------
+
+--- Adding Bot 1 ---
+[12:33:06] Bot 1 created - processing Order #116735265079299 (VIP)
+--- Adding Bot 2 ---
+[12:33:06] Bot 2 created - processing Order #116735265079301 (VIP)
+
+--- Status ---
+Bots: 2
+PENDING (3): Order #116735265079297 (Normal), Order #116735265079298 (Normal), Order #116735265079300 (Normal)
+PROCESSING (2): Order #116735265079299 (VIP), Order #116735265079301 (VIP)
+COMPLETE (0): 
+--------------
+
+--- Waiting 10 seconds for orders to complete ---
+[12:33:16] Order #116735265079301 (VIP) completed by Bot 2 - moved to COMPLETE
+[12:33:16] Bot 2 processing Order #116735265079297 (Normal)
+[12:33:16] Order #116735265079299 (VIP) completed by Bot 1 - moved to COMPLETE
+[12:33:16] Bot 1 processing Order #116735265079298 (Normal)
+
+--- Status ---
+Bots: 2
+PENDING (1): Order #116735265079300 (Normal)
+PROCESSING (2): Order #116735265079298 (Normal), Order #116735265079297 (Normal)
+COMPLETE (2): Order #116735265079301 (VIP), Order #116735265079299 (VIP)
+--------------
+
+--- Removing Bot 2 (should return its order to PENDING) ---
+[12:33:17] Bot 2 removed - Order #116735265079297 (Normal) returned to PENDING
+
+--- Status ---
+Bots: 1
+PENDING (2): Order #116735265079297 (Normal), Order #116735265079300 (Normal)
+PROCESSING (1): Order #116735265079298 (Normal)
+COMPLETE (2): Order #116735265079301 (VIP), Order #116735265079299 (VIP)
+--------------
+
+--- Waiting for Bot 1 to complete remaining orders ---
+[12:33:26] Order #116735265079298 (Normal) completed by Bot 1 - moved to COMPLETE
+[12:33:26] Bot 1 processing Order #116735265079297 (Normal)
+
+--- Status ---
+Bots: 1
+PENDING (1): Order #116735265079300 (Normal)
+PROCESSING (1): Order #116735265079297 (Normal)
+COMPLETE (3): Order #116735265079301 (VIP), Order #116735265079299 (VIP), Order #116735265079298 (Normal)
+--------------
+
+--- Waiting for next order to complete ---

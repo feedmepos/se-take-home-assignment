@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>McDonald's Order Controller</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #1a1a2e; color: #eee; min-height: 100vh; padding: 20px; }
+        h1 { text-align: center; color: #ffcc00; margin-bottom: 20px; font-size: 1.8em; }
+        .controls { display: flex; justify-content: center; gap: 12px; margin-bottom: 30px; flex-wrap: wrap; }
+        .btn { padding: 12px 24px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: transform 0.1s, opacity 0.2s; }
+        .btn:hover { transform: scale(1.05); }
+        .btn:active { transform: scale(0.95); }
+        .btn-normal { background: #4CAF50; color: white; }
+        .btn-vip { background: #FF9800; color: white; }
+        .btn-add { background: #2196F3; color: white; }
+        .btn-remove { background: #f44336; color: white; }
+        .dashboard { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; max-width: 1200px; margin: 0 auto; }
+        .panel { background: #16213e; border-radius: 12px; padding: 20px; min-height: 300px; }
+        .panel h2 { margin-bottom: 15px; font-size: 1.1em; display: flex; align-items: center; gap: 8px; }
+        .panel h2 .count { background: #333; padding: 2px 10px; border-radius: 12px; font-size: 0.85em; }
+        .pending h2 { color: #ffcc00; }
+        .processing h2 { color: #2196F3; }
+        .complete h2 { color: #4CAF50; }
+        .order-card { background: #0f3460; padding: 10px 14px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .order-card.new { animation: slideIn 0.3s ease; }
+        .order-card.vip { border-left: 4px solid #FF9800; }
+        .order-card.normal { border-left: 4px solid #4CAF50; }
+        .order-id { font-weight: 600; font-size: 0.9em; }
+        .order-type { font-size: 0.75em; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+        .order-type.vip { background: #FF9800; color: #000; }
+        .order-type.normal { background: #4CAF50; color: #fff; }
+        .btn-shutdown { background: #666; color: white; font-size: 12px; padding: 8px 16px; }
+        .bot-info { text-align: center; margin-bottom: 20px; color: #aaa; font-size: 0.95em; }
+        .bot-info span { color: #2196F3; font-weight: 700; font-size: 1.2em; }
+        .log-panel { max-width: 1200px; margin: 30px auto 0; background: #16213e; border-radius: 12px; padding: 20px; }
+        .log-panel h2 { color: #aaa; margin-bottom: 10px; font-size: 1em; }
+        .log-entries { max-height: 200px; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 0.8em; color: #8f8; }
+        .log-entries div { padding: 2px 0; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 768px) { .dashboard { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <h1>McDonald's Order Controller</h1>
+    <div class="bot-info">Active Bots: <span id="bot-count">0</span></div>
+    <div class="controls">
+        <button class="btn btn-normal" onclick="newOrder('normal')">New Normal Order</button>
+        <button class="btn btn-vip" onclick="newOrder('vip')">New VIP Order</button>
+        <button class="btn btn-add" onclick="addBot()">+ Bot</button>
+        <button class="btn btn-remove" onclick="removeBot()">- Bot</button>
+        <button class="btn btn-shutdown" onclick="shutdown()">Shutdown</button>
+    </div>
+    <div class="dashboard">
+        <div class="panel pending">
+            <h2>PENDING <span class="count" id="pending-count">0</span></h2>
+            <div id="pending-list"></div>
+        </div>
+        <div class="panel processing">
+            <h2>PROCESSING <span class="count" id="processing-count">0</span></h2>
+            <div id="processing-list"></div>
+        </div>
+        <div class="panel complete">
+            <h2>COMPLETE <span class="count" id="complete-count">0</span></h2>
+            <div id="complete-list"></div>
+        </div>
+    </div>
+    <div class="log-panel">
+        <h2>Event Log</h2>
+        <div class="log-entries" id="log-entries"></div>
+    </div>
+    <script>
+        async function newOrder(type) {
+            await fetch('/api/order', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({type}) });
+        }
+        async function addBot() {
+            await fetch('/api/bot', { method: 'POST' });
+        }
+        async function removeBot() {
+            await fetch('/api/bot', { method: 'DELETE' });
+        }
+        async function shutdown() {
+            if (confirm('Shut down the server?')) {
+                await fetch('/api/shutdown', { method: 'POST' });
+                document.body.innerHTML = '<h1 style="text-align:center;margin-top:40vh;color:#ffcc00">Server stopped. You can close this tab.</h1>';
+            }
+        }
+
+        // Track previous state to avoid unnecessary DOM updates
+        let prevJSON = '';
+
+        function renderOrders(list, orders, prevOrders) {
+            // Build a set of existing IDs to detect new cards
+            const existingIds = new Set(prevOrders.map(o => o.id));
+            list.innerHTML = orders.map(o => {
+                const isNew = !existingIds.has(o.id);
+                return `<div class="order-card ${o.type}${isNew ? ' new' : ''}">
+                    <span class="order-id">#${o.id}</span>
+                    <span class="order-type ${o.type}">${o.type.toUpperCase()}</span>
+                </div>`;
+            }).join('');
+        }
+
+        function addLog(msg) {
+            const el = document.getElementById('log-entries');
+            const div = document.createElement('div');
+            div.textContent = msg;
+            el.prepend(div);
+            if (el.children.length > 100) el.lastChild.remove();
+        }
+
+        let prevData = { pending: [], processing: [], completed: [] };
+
+        function applyState(data) {
+            const json = JSON.stringify(data);
+            if (json === prevJSON) return; // No change, skip DOM update
+            prevJSON = json;
+
+            document.getElementById('bot-count').textContent = data.bots;
+            document.getElementById('pending-count').textContent = data.pending.length;
+            document.getElementById('processing-count').textContent = data.processing.length;
+            document.getElementById('complete-count').textContent = data.completed.length;
+            renderOrders(document.getElementById('pending-list'), data.pending, prevData.pending);
+            renderOrders(document.getElementById('processing-list'), data.processing, prevData.processing);
+            renderOrders(document.getElementById('complete-list'), data.completed, prevData.completed);
+            prevData = data;
+        }
+
+        // SSE for real-time updates
+        const evtSource = new EventSource('/api/events');
+        evtSource.onmessage = (e) => applyState(JSON.parse(e.data));
+        evtSource.addEventListener('log', (e) => { addLog(e.data); });
+
+        // Initial fetch
+        fetch('/api/status').then(r => r.json()).then(applyState);
+    </script>
+</body>
+</html>
