@@ -17,6 +17,9 @@ const MaxBotID int16 = 32767
 // MaxBots is the maximum number of concurrent bots allowed.
 const MaxBots = 50
 
+// MaxPendingOrders is the maximum number of orders allowed in the pending queue.
+const MaxPendingOrders = 1000
+
 // Controller manages the order queue and cooking bots.
 type Controller struct {
 	sync.Mutex
@@ -58,6 +61,11 @@ func (c *Controller) SetOutput(w io.Writer) {
 func (c *Controller) NewOrder(orderType model.OrderType) {
 	c.Lock()
 	defer c.Unlock()
+
+	if c.queue.Len() >= MaxPendingOrders {
+		c.log("Cannot add order - pending queue full (%d)", MaxPendingOrders)
+		return
+	}
 
 	order := &model.Order{
 		ID:     c.generateOrderID(),
