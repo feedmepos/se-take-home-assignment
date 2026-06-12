@@ -1,19 +1,9 @@
 #!/bin/bash
 
-# Run Script
-# This script should execute your CLI application and output results to result.txt
+# CI Run Script - Executes demo mode, outputs to scripts/result.txt
 
-echo "Running CLI application..."
+set -e
 
-# For Go projects:
-# ./order-controller > result.txt
-
-# For Node.js projects:
-# node index.js > result.txt
-# or npm start > result.txt
-
-# Temporary placeholder - remove this when you implement your CLI
-echo "Added 1 bot" > result.txt
-echo "status: bot: [1], order: []" >> result.txt
-
-echo "CLI application execution completed"
+echo "Running CLI application in demo mode..."
+./scripts/order-controller --demo > scripts/result.txt 2>&1
+echo "Results written to scripts/result.txt"

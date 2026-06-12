@@ -1,15 +1,10 @@
 #!/bin/bash
 
-# Build Script
-# This script should contain all compilation steps for your CLI application
+# CI Build Script - Compiles for Linux (GitHub Actions ubuntu-latest)
+
+set -e
 
 echo "Building CLI application..."
-
-# For Go projects:
-# go build -o order-controller ./cmd/main.go
-
-# For Node.js projects:
-# npm install
-# npm run build (if needed)
-
-echo "Build completed"
+mkdir -p scripts
+go build -o scripts/order-controller ./cmd/main.go
+echo "Build completed: scripts/order-controller"
