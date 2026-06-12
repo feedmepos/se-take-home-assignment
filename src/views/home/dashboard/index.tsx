@@ -16,10 +16,12 @@ export default function Dashboard() {
   const removeBot = useKitchenStore((s) => s.removeBot);
 
   const pendingOrders = useMemo(
-    () => orders.filter((o) => o.status === 'PENDING').sort((a, b) => {
-      if (a.type !== b.type) return a.type === 'VIP' ? -1 : 1;
-      return a.createdAt - b.createdAt;
-    }),
+    () => orders
+      .filter((o) => o.status !== 'COMPLETE')
+      .sort((a, b) => {
+        if (a.type !== b.type) return a.type === 'VIP' ? -1 : 1;
+        return a.createdAt - b.createdAt;
+      }),
     [orders]
   );
 
@@ -41,7 +43,6 @@ export default function Dashboard() {
       </header>
       <div className={styles.columns}>
         <OrderColumn title="⏳ PENDING" orders={pendingOrders} />
-        <OrderColumn title="🔄 PROCESSING" orders={processingOrders} />
         <OrderColumn title="✅ COMPLETE" orders={completedOrders} />
       </div>
     </div>
