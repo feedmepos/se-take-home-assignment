@@ -1,64 +1,41 @@
-## FeedMe Software Engineer Take Home Assignment
-Below is a take home assignment before the interview of the position. You are required to
-1. Understand the situation and use case. You may contact the interviewer for further clarification.
-2. implement the requirement with **either frontend or backend components**.
-3. Complete the requirement with **AI** if possible, but perform your own testing.
-4. Provide documentation for the any part that you think is needed.
-5. Bring the source code and functioning prototype to the interview session.
+# Order Management
 
-### Situation
-McDonald is transforming their business during COVID-19. They wish to build the automated cooking bots to reduce workforce and increase their efficiency. As one of the software engineer in the project. You task is to create an order controller which handle the order control flow. 
+This repository contains a small order-management demo split into two parts:
 
-### User Story
-As below is part of the user story:
-1. As McDonald's normal customer, after I submitted my order, I wish to see my order flow into "PENDING" area. After the cooking bot process my order, I want to see it flow into to "COMPLETE" area.
-2. As McDonald's VIP member, after I submitted my order, I want my order being process first before all order by normal customer.  However if there's existing order from VIP member, my order should queue behind his/her order.
-3. As McDonald's manager, I want to increase or decrease number of cooking bot available in my restaurant. When I increase a bot, it should immediately process any pending order. When I decrease a bot, the processing order should remain un-process.
-4. As McDonald bot, it can only pickup and process 1 order at a time, each order required 10 seconds to complete process.
+- `order-management-service` — backend service implemented in Go (Gin). Provides order and bot management APIs.
+- `order-management-web` — static frontend (HTML/JS/CSS) that calls the backend APIs and shows order lists.
 
-### Requirements
-1. When "New Normal Order" clicked, a new order should show up "PENDING" Area.
-2. When "New VIP Order" clicked, a new order should show up in "PENDING" Area. It should place in-front of all existing "Normal" order but behind of all existing "VIP" order.
-3. The order number should be unique and increasing.
-4. When "+ Bot" clicked, a bot should be created and start processing the order inside "PENDING" area. after 10 seconds picking up the order, the order should move to "COMPLETE" area. Then the bot should start processing another order if there is any left in "PENDING" area.
-5. If there is no more order in the "PENDING" area, the bot should become IDLE until a new order come in.
-6. When "- Bot" clicked, the newest bot should be destroyed. If the bot is processing an order, it should also stop the process. The order should return to its original position in the "PENDING" area (maintaining VIP/Normal order priority).
-7. No data persistance is needed for this prototype, you may perform all the process inside memory.
+## Backend (`order-management-service`)
 
-### Functioning Prototype
-You must implement **either** frontend or backend components as described below:
+- Main purpose: simulate order creation, bot workers, processing and completion. Maintains in-memory queues and bots.
+- Key endpoints (HTTP JSON):
+	- `POST /order/normal` — create a normal order
+	- `POST /order/vip` — create a VIP order (priority)
+	- `POST /bot/add` — add a worker bot
+	- `POST /bot/remove` — remove the most recently added bot
+	- `GET /orders` — returns JSON with `all` (all orders), `pending_queue` and `bot_count`
 
-#### 1. Frontend
-- You are free to use **any framework and programming language** of your choice
-- The UI application must be compiled, deployed and hosted on any publicly accessible web platform
-- Must provide a user interface that demonstrates all the requirements listed above
-- Should allow users to interact with the McDonald's order management system
+Start backend (from the repository root or any shell):
+```bash
+cd order-management-service
+go mod tidy
+go run .
+# service listens on :8080 by default
+```
 
-#### 2. Backend
-- You must use **either Go (Golang) or Node.js** for the backend implementation
-- The backend must be a CLI application that can be executed in GitHub Actions
-- Must implement the following scripts in the `script` directory:
-  - `test.sh`: Contains unit test execution steps
-  - `build.sh`: Contains compilation steps for the CLI application
-  - `run.sh`: Contains execution steps that run the CLI application
-- The CLI application result must be printed to `result.txt`
-- The `result.txt` output must include timestamps in `HH:MM:SS` format to track order completion times
-- Must follow **GitHub Flow**: Create a Pull Request with your changes to this repository
-- Ensure all GitHub Action checks pass successfully
-- **Note**: An interactive CLI implementation is compulsory for the next round of interview. Candidates should be prepared to demonstrate interactive command handling.
+## Frontend (`order-management-web`)
 
-#### Submission Requirements
-- Fork this repository and implement your solution with either frontend or backend
-- **Frontend option**: Deploy to a publicly accessible URL using any technology stack
-- **Backend option**: Must be implemented in Go or Node.js and work within the GitHub Actions environment
-  - Follow GitHub Flow process with Pull Request submission
-  - All tests in `test.sh` must pass
-  - The `result.txt` file must contain meaningful output from your CLI application
-  - All output must include timestamps in `HH:MM:SS` format to track order completion times
-  - Submit a Pull Request and ensure the `backend-verify-result` workflow passes
-- Provide documentation for any part that you think is needed
+- Main purpose: provide admin UI to create orders, add/remove bots, and monitor Pending/Complete lists.
+- Files: `index.html`, `app.js`, `styles.css` (static files). Uses `fetch` to call backend on `http://localhost:8080`.
 
-### Tips on completing this task
-- Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.
-- Utilize coding agent to complete the assignment scope your working hour within 1 hour, do not over engineer it. However, ensure you read and understand what your code doing and apply good engineering practice.
-- Complete the implementation as clean as possible, clean code is a strong plus point, do not bring in all the fancy tech stuff.
+Frontend access (open directly):
+```bash
+# Open the static frontend by opening the file in your browser
+# For example, double-click or open this file in your browser:
+# order-management-web/index.html
+# Or use a file URL like: file:///path/to/order-management-web/index.html
+```
+
+Notes:
+- The frontend expects the backend at `http://localhost:8080`. If you run the backend on a different host/port, edit `order-management-web/app.js` and update `BASE`.
+- `go mod tidy` should be run inside `order-management-service` to populate `go.sum` (the repository includes the generated files).
