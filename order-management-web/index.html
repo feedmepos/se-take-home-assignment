@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>McOrder Admin Dashboard</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>McDonald's Order Management System</h1>
+        <p class="subtitle">Admin Console — Monitor and manage orders and chef bots</p>
+      </header>
+
+      <section class="controls">
+        <div class="controls-group orders">
+          <h3>Order Actions</h3>
+          <div class="controls-row">
+            <button id="new-normal">New Normal Order</button>
+            <button id="new-vip">New VIP Order</button>
+          </div>
+        </div>
+
+        <div class="controls-group bots">
+          <h3>Bot Actions</h3>
+          <div class="controls-row">
+            <button id="add-bot">+Bot</button>
+            <button id="remove-bot">-Bot</button>
+            <div id="bot-count">Bots: 0</div>
+          </div>
+        </div>
+      </section>
+
+      <main>
+        <section class="panel pending">
+          <h2>Pending <span id="pending-count" class="count-badge">0</span></h2>
+          <div class="table-wrap">
+            <table id="pending-table">
+              <thead>
+                <tr>
+                  <th>Order</th>
+                  <th>Created At</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="pending-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel complete">
+          <h2>Complete <span id="complete-count" class="count-badge">0</span></h2>
+          <div class="table-wrap">
+            <table id="complete-table">
+              <thead>
+                <tr>
+                  <th>Order</th>
+                  <th>Completed At</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="complete-body"></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- toast container for transient feedback -->
+    <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
