@@ -1,19 +1,19 @@
 #!/bin/bash
+# Run Script -- executes the CLI demo scenario and writes timestamped output
+# to scripts/result.txt (HH:MM:SS timestamps, as required).
+set -e
 
-# Run Script
-# This script should execute your CLI application and output results to result.txt
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+BACKEND="$ROOT/codes/backend"
+RESULT="$SCRIPT_DIR/result.txt"
 
 echo "Running CLI application..."
+cd "$BACKEND"
 
-# For Go projects:
-# ./order-controller > result.txt
-
-# For Node.js projects:
-# node index.js > result.txt
-# or npm start > result.txt
-
-# Temporary placeholder - remove this when you implement your CLI
-echo "Added 1 bot" > result.txt
-echo "status: bot: [1], order: []" >> result.txt
+# Each order takes the full 10 seconds required by the assignment.
+# (Override with e.g. PROCESS_MS=300 for a fast local run.)
+node src/demo.js | tee "$RESULT"
 
 echo "CLI application execution completed"
+echo "Results written to $RESULT"

@@ -1,15 +1,16 @@
 #!/bin/bash
+# Build Script -- installs the Node.js CLI application dependencies.
+set -e
 
-# Build Script
-# This script should contain all compilation steps for your CLI application
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+BACKEND="$ROOT/codes/backend"
 
 echo "Building CLI application..."
+cd "$BACKEND"
 
-# For Go projects:
-# go build -o order-controller ./cmd/main.go
-
-# For Node.js projects:
-# npm install
-# npm run build (if needed)
+# No third-party dependencies are required (built on Node.js stdlib only),
+# but we still run npm install so package-lock / engines are validated.
+npm install
 
 echo "Build completed"
