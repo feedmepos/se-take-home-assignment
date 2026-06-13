@@ -1,0 +1,41 @@
+# --- Claude / local agent config ---
+.claude/
+CLAUDE.local.md
+
+# --- Go ---
+# Build output
+/bin/
+/dist/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+# Test binaries / coverage
+*.test
+*.out
+coverage.*
+# Go workspace file
+go.work
+go.work.sum
+
+# --- Node (CI image installs Node; ignore in case of tooling) ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# --- Editors / IDE ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# --- OS ---
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+desktop.ini
