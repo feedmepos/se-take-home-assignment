@@ -100,6 +100,25 @@ Run tests with: `./scripts/test.sh`
 
 The CLI application runs a complete simulation demonstrating all requirements and outputs results to `scripts/result.txt`.
 
+### CLI Modes
+
+**Default (CI / demo simulation):**
+```bash
+./order-controller
+```
+
+**Interactive CLI (for interview demo):**
+```bash
+./order-controller -i
+```
+
+**Scripted E2E (commands from file):**
+```bash
+./order-controller -f scripts/simulation.txt
+```
+
+Interactive commands: `normal`, `vip`, `+bot`, `-bot`, `status`, `wait <seconds>`, `final`, `quit`
+
 ## Sample Output
 
 The application demonstrates:

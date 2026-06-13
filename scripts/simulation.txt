@@ -1,0 +1,14 @@
+# Scripted E2E demo matching the assignment requirements
+normal
+vip
+normal
+wait 1
++bot
+wait 1
++bot
+wait 12
+vip
+wait 1
+wait 12
+-bot
+final

@@ -5,13 +5,20 @@ import (
 	"time"
 )
 
+func shutdownController(t *testing.T, ctrl *OrderController) {
+	t.Helper()
+	for ctrl.GetActiveBotCount() > 0 {
+		ctrl.RemoveBot()
+	}
+}
+
 func TestOrderController_CreateNormalOrder(t *testing.T) {
 	ctrl := NewOrderController()
 
 	order := ctrl.CreateNormalOrder()
 
-	if order.ID != 1 {
-		t.Errorf("Expected order ID to be 1, got %d", order.ID)
+	if order.ID != FirstOrderID {
+		t.Errorf("Expected order ID to be %d, got %d", FirstOrderID, order.ID)
 	}
 
 	if order.Type != Normal {
@@ -34,17 +41,13 @@ func TestOrderController_CreateNormalOrder(t *testing.T) {
 func TestOrderController_CreateVIPOrder(t *testing.T) {
 	ctrl := NewOrderController()
 
-	// Create a normal order first
 	normalOrder := ctrl.CreateNormalOrder()
-
-	// Create a VIP order - should be prioritized
 	vipOrder := ctrl.CreateVIPOrder()
 
 	if vipOrder.Type != VIP {
 		t.Errorf("Expected order type to be VIP")
 	}
 
-	// VIP order should be first in queue
 	ctrl.mu.RLock()
 	if len(ctrl.pendingQueue) != 2 {
 		t.Errorf("Expected 2 orders in pending queue, got %d", len(ctrl.pendingQueue))
@@ -63,13 +66,11 @@ func TestOrderController_CreateVIPOrder(t *testing.T) {
 func TestOrderController_VIPOrderPriority(t *testing.T) {
 	ctrl := NewOrderController()
 
-	// Create orders in this sequence: Normal, VIP, Normal, VIP
 	normal1 := ctrl.CreateNormalOrder()
 	vip1 := ctrl.CreateVIPOrder()
 	normal2 := ctrl.CreateNormalOrder()
 	vip2 := ctrl.CreateVIPOrder()
 
-	// Expected order in queue: VIP1, VIP2, Normal1, Normal2
 	ctrl.mu.RLock()
 	expectedOrder := []int{vip1.ID, vip2.ID, normal1.ID, normal2.ID}
 
@@ -101,14 +102,11 @@ func TestOrderController_AddBot(t *testing.T) {
 
 func TestOrderController_BotProcessesOrder(t *testing.T) {
 	ctrl := NewOrderController()
+	t.Cleanup(func() { shutdownController(t, ctrl) })
 
-	// Create an order
 	order := ctrl.CreateNormalOrder()
-
-	// Add a bot - should immediately start processing
 	bot := ctrl.AddBot()
 
-	// Give it a moment to start processing
 	time.Sleep(100 * time.Millisecond)
 
 	ctrl.mu.RLock()
@@ -133,11 +131,9 @@ func TestOrderController_BotProcessesOrder(t *testing.T) {
 func TestOrderController_RemoveBot(t *testing.T) {
 	ctrl := NewOrderController()
 
-	// Create two bots
 	bot1 := ctrl.AddBot()
 	bot2 := ctrl.AddBot()
 
-	// Remove bot (should remove the newest one - bot2)
 	removedBot := ctrl.RemoveBot()
 
 	if removedBot.ID != bot2.ID {
@@ -148,7 +144,6 @@ func TestOrderController_RemoveBot(t *testing.T) {
 		t.Errorf("Expected 1 active bot after removal, got %d", ctrl.GetActiveBotCount())
 	}
 
-	// Remaining bot should be bot1
 	ctrl.mu.RLock()
 	if ctrl.bots[0].ID != bot1.ID {
 		t.Errorf("Expected remaining bot to be bot1")
@@ -158,29 +153,25 @@ func TestOrderController_RemoveBot(t *testing.T) {
 
 func TestOrderController_RemoveBotWhileProcessing(t *testing.T) {
 	ctrl := NewOrderController()
+	t.Cleanup(func() { shutdownController(t, ctrl) })
 
-	// Create an order and a bot
 	order := ctrl.CreateNormalOrder()
 	bot := ctrl.AddBot()
 
-	// Wait for processing to start
 	time.Sleep(100 * time.Millisecond)
 
-	// Verify bot is processing
 	ctrl.mu.RLock()
 	if bot.Status != Processing {
 		t.Errorf("Expected bot to be processing")
 	}
 	ctrl.mu.RUnlock()
 
-	// Remove the bot while it's processing
 	removedBot := ctrl.RemoveBot()
 
 	if removedBot.ID != bot.ID {
 		t.Errorf("Expected to remove the processing bot")
 	}
 
-	// Order should be back in pending queue
 	if ctrl.GetPendingOrderCount() != 1 {
 		t.Errorf("Expected order to be back in pending queue")
 	}
@@ -196,17 +187,51 @@ func TestOrderController_RemoveBotWhileProcessing(t *testing.T) {
 	ctrl.mu.RUnlock()
 }
 
+func TestOrderController_RestoreOriginalQueuePosition(t *testing.T) {
+	ctrl := NewOrderController()
+	t.Cleanup(func() { shutdownController(t, ctrl) })
+
+	ctrl.CreateVIPOrder()
+	normal1 := ctrl.CreateNormalOrder()
+	normal2 := ctrl.CreateNormalOrder()
+
+	ctrl.AddBot()
+	ctrl.AddBot()
+
+	time.Sleep(100 * time.Millisecond)
+
+	removedBot := ctrl.RemoveBot()
+	if removedBot == nil {
+		t.Fatal("Expected to remove a bot")
+	}
+
+	ctrl.mu.RLock()
+	defer ctrl.mu.RUnlock()
+
+	if len(ctrl.pendingQueue) != 2 {
+		t.Fatalf("Expected 2 pending orders after interruption, got %d", len(ctrl.pendingQueue))
+	}
+
+	if ctrl.pendingQueue[0].ID != normal1.ID {
+		t.Errorf("Expected interrupted order %d to return to front of pending queue, got %d",
+			normal1.ID, ctrl.pendingQueue[0].ID)
+	}
+
+	if ctrl.pendingQueue[1].ID != normal2.ID {
+		t.Errorf("Expected order %d to remain after interrupted order, got %d",
+			normal2.ID, ctrl.pendingQueue[1].ID)
+	}
+}
+
 func TestOrderController_OrderCompletion(t *testing.T) {
 	ctrl := NewOrderController()
+	t.Cleanup(func() { shutdownController(t, ctrl) })
 
-	// Create order and bot
 	order := ctrl.CreateNormalOrder()
 	ctrl.AddBot()
 
-	// Wait for processing to complete (slightly more than 10 seconds)
 	time.Sleep(11 * time.Second)
 
-	// Order should be completed
 	if ctrl.GetCompletedOrderCount() != 1 {
 		t.Errorf("Expected 1 completed order, got %d", ctrl.GetCompletedOrderCount())
 	}
@@ -229,10 +254,8 @@ func TestOrderController_OrderCompletion(t *testing.T) {
 func TestOrderController_EmptyQueue(t *testing.T) {
 	ctrl := NewOrderController()
 
-	// Create bot without orders
 	bot := ctrl.AddBot()
 
-	// Bot should remain idle
 	time.Sleep(100 * time.Millisecond)
 
 	if bot.Status != Idle {

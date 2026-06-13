@@ -1,51 +1,58 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-	"order-controller/pkg/controller"
+	"os"
 	"time"
+
+	"order-controller/pkg/controller"
 )
 
 func main() {
+	interactive := flag.Bool("i", false, "run interactive CLI")
+	scriptFile := flag.String("f", "", "run commands from a script file")
+	flag.Parse()
+
 	fmt.Println("McDonald's Order Management System - Simulation Results")
 	fmt.Println("")
 
-	// Create the order controller
-	orderCtrl := controller.NewOrderController()
+	ctrl := controller.NewOrderController()
+	ctrl.LogWithTimestamp("System initialized with 0 bots")
 
-	// Run simulation demonstrating all requirements
-	runSimulation(orderCtrl)
+	switch {
+	case *scriptFile != "":
+		if err := runScript(ctrl, *scriptFile); err != nil {
+			fmt.Fprintf(os.Stderr, "script error: %v\n", err)
+			os.Exit(1)
+		}
+	case *interactive:
+		runInteractive(ctrl)
+	default:
+		runSimulation(ctrl)
+	}
 }
 
 func runSimulation(ctrl *controller.OrderController) {
-	// Log system initialization
-	ctrl.LogWithTimestamp("System initialized with 0 bots")
-
-	// Requirement 1 & 2: Create orders
 	ctrl.CreateNormalOrder()
 	ctrl.CreateVIPOrder()
 	ctrl.CreateNormalOrder()
 
-	// Wait a moment
 	time.Sleep(1 * time.Second)
 
-	// Requirement 4 & 5: Add bots and process orders
 	ctrl.AddBot()
 	time.Sleep(1 * time.Second)
 	ctrl.AddBot()
 
-	// Wait for orders to complete (10+ seconds each)
 	time.Sleep(12 * time.Second)
 
-	// Test bot removal while processing
 	ctrl.CreateVIPOrder()
 	time.Sleep(1 * time.Second)
 
-	// Wait for final processing
 	time.Sleep(12 * time.Second)
 
-	// Remove one bot to test idle state
 	ctrl.RemoveBot()
+	ctrl.WaitUntilIdle()
 
 	ctrl.PrintFinalStatus()
 }
