@@ -1,0 +1,2 @@
+# Shell scripts run in GitHub Actions (Linux/bash) — force LF to avoid \r errors.
+*.sh text eol=lf
