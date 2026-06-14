@@ -160,23 +160,23 @@
 }
 
 .btn-add-robot {
-  color: #16a34a;
-  background: rgba(22, 163, 74, 0.1);
-  border-color: rgba(22, 163, 74, 0.4);
+  color: #b8860b;
+  background: rgba(255, 199, 44, 0.15);
+  border-color: rgba(255, 199, 44, 0.5);
 }
 
 .btn-add-robot:hover:not(:disabled) {
-  background: rgba(22, 163, 74, 0.2);
+  background: rgba(255, 199, 44, 0.3);
 }
 
 .btn-remove-robot {
-  color: #dc2626;
-  background: rgba(220, 38, 38, 0.1);
-  border-color: rgba(220, 38, 38, 0.4);
+  color: var(--accent);
+  background: var(--accent-bg);
+  border-color: var(--accent-border);
 }
 
 .btn-remove-robot:hover:not(:disabled) {
-  background: rgba(220, 38, 38, 0.2);
+  background: rgba(218, 41, 28, 0.2);
 }
 
 /* ========================================
@@ -197,6 +197,7 @@
   align-items: center;
   padding: 12px 16px;
   border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
 }
 
 .robot-section-header h2 {
@@ -215,8 +216,10 @@
 .robot-section-body {
   padding: 12px;
   min-height: 64px;
+  max-height: 540px;
   display: flex;
   align-items: center;
+  overflow-y: auto;
 }
 
 .robot-hint {
@@ -239,18 +242,26 @@
 
 .robot-card {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  gap: 8px;
   padding: 10px 16px;
   border-radius: 8px;
   font-size: 14px;
   transition: background 0.2s;
   flex-shrink: 0;
+  box-sizing: border-box;
+  width: calc((100% - 30px) / 4);
+}
+
+.robot-card-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .robot-card.robot-busy {
-  background: rgba(22, 163, 74, 0.08);
-  border: 1px solid rgba(22, 163, 74, 0.25);
+  background: rgba(255, 199, 44, 0.1);
+  border: 1px solid rgba(255, 199, 44, 0.3);
 }
 
 .robot-card.robot-idle {
@@ -305,6 +316,42 @@
   color: #fff;
 }
 
+/* Robot Countdown Progress */
+
+.robot-countdown {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.robot-progress-bar {
+  height: 6px;
+  flex: 1;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+  min-width: 40px;
+}
+
+.robot-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.1s linear;
+}
+
+.robot-countdown-text {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  white-space: nowrap;
+  min-width: 3.5em;
+  text-align: right;
+}
+
 /* ========================================
    Dark Mode Adjustments
    ======================================== */
@@ -316,13 +363,13 @@
   }
 
   .btn-add-robot {
-    color: #4ade80;
-    background: rgba(74, 222, 128, 0.1);
-    border-color: rgba(74, 222, 128, 0.3);
+    color: #FFC72C;
+    background: rgba(255, 199, 44, 0.12);
+    border-color: rgba(255, 199, 44, 0.35);
   }
 
   .btn-add-robot:hover:not(:disabled) {
-    background: rgba(74, 222, 128, 0.2);
+    background: rgba(255, 199, 44, 0.25);
   }
 
   .btn-remove-robot {
@@ -336,8 +383,8 @@
   }
 
   .robot-card.robot-busy {
-    background: rgba(74, 222, 128, 0.08);
-    border-color: rgba(74, 222, 128, 0.25);
+    background: rgba(255, 199, 44, 0.08);
+    border-color: rgba(255, 199, 44, 0.2);
   }
 
   .robot-card.robot-idle {
@@ -351,6 +398,10 @@
 
   .order-tag-vip {
     background: var(--accent-bg);
+  }
+
+  .robot-progress-bar {
+    background: rgba(255, 255, 255, 0.1);
   }
 }
 
@@ -390,6 +441,6 @@
   }
 
   .robot-card {
-    justify-content: space-between;
+    width: 100%;
   }
 }

@@ -1,22 +1,9 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import './App.css'
+import HeaderPanel from './components/HeaderPanel'
+import RobotPanel from './components/RobotPanel'
 
-type OrderType = 'vip' | 'normal'
-
-interface Order {
-  id: string
-  type: OrderType
-}
-
-interface Robot {
-  id: number
-  processingOrder: Order | null
-}
-
-/** Format a number as zero-padded 3-digit ID (for both orders and robots) */
-function padId(num: number): string {
-  return String(num).padStart(3, '0')
-}
+import { type Order, type Robot, padId } from './types'
 
 function App() {
   const [pendingOrders, setPendingOrders] = useState<Order[]>([])
@@ -41,7 +28,7 @@ function App() {
       if (prev.length === 0) {
         // No orders available — robot goes idle
         setRobots(prevR =>
-          prevR.map(r => (r.id === robotId ? { ...r, processingOrder: null } : r)),
+          prevR.map(r => (r.id === robotId ? { ...r, processingOrder: null, processingStartTime: null } : r)),
         )
         return prev
       }
@@ -54,7 +41,7 @@ function App() {
 
       // Mark robot as processing
       setRobots(prevR =>
-        prevR.map(r => (r.id === robotId ? { ...r, processingOrder: order } : r)),
+        prevR.map(r => (r.id === robotId ? { ...r, processingOrder: order, processingStartTime: Date.now() } : r)),
       )
 
       // Start 10-second processing timer
@@ -81,7 +68,7 @@ function App() {
 
       // Free the robot
       setRobots(prev =>
-        prev.map(r => (r.id === robotId ? { ...r, processingOrder: null } : r)),
+        prev.map(r => (r.id === robotId ? { ...r, processingOrder: null, processingStartTime: null } : r)),
       )
 
       // Continue processing loop — pick next order for this robot
@@ -158,7 +145,7 @@ function App() {
   // ---- Button: +机器人 ----
   const addRobot = useCallback(() => {
     const robotId = ++robotIdCounterRef.current
-    setRobots(prev => [...prev, { id: robotId, processingOrder: null }])
+    setRobots(prev => [...prev, { id: robotId, processingOrder: null, processingStartTime: null }])
 
     // New robot always tries to pick up a pending order
     setTimeout(() => processIdleRobots(), 0)
@@ -228,107 +215,29 @@ function App() {
 
   return (
     <div className="app-container">
-      {/* 顶部：待处理 / 已完成 双栏 */}
-      <div className="top-panels">
-        <div className="panel panel-pending">
-          <div className="panel-header">
-            <h2>待处理</h2>
-            <span className="panel-count">{pendingOrders.length}</span>
-          </div>
-          <div className="panel-body">
-            {pendingOrders.length === 0 ? (
-              <div className="panel-empty">暂无订单</div>
-            ) : (
-              pendingOrders.map(order => (
-                <div key={order.id} className={`order-item${order.type === 'vip' ? ' order-vip' : ''}`}>
-                  <span className="order-id">{order.id}</span>
-                  {order.type === 'vip' && <span className="vip-badge">VIP</span>}
-                </div>
-              ))
-            )}
-          </div>
-        </div>
+      <h1>McDonald's Order Dashboard</h1>
 
-        <div className="panel panel-completed">
-          <div className="panel-header">
-            <h2>已完成</h2>
-            <span className="panel-count">{completedOrders.length}</span>
-          </div>
-          <div className="panel-body">
-            {completedOrders.length === 0 ? (
-              <div className="panel-empty">暂无订单</div>
-            ) : (
-              completedOrders.map(order => (
-                <div key={order.id} className={`order-item${order.type === 'vip' ? ' order-vip' : ''}`}>
-                  <span className="order-id">{order.id}</span>
-                  {order.type === 'vip' && <span className="vip-badge">VIP</span>}
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* 中间：操作按钮 */}
+      {/* 操作按钮 */}
       <div className="action-bar">
         <button className="btn btn-normal" onClick={addNormalOrder}>
-          新建普通订单
+          New Normal Order
         </button>
         <button className="btn btn-vip" onClick={addVipOrder}>
-          新建VIP订单
+          New VIP Order
         </button>
         <button className="btn btn-add-robot" onClick={addRobot}>
-          +机器人
+          +Robot
         </button>
         <button className="btn btn-remove-robot" onClick={removeRobot} disabled={robots.length === 0}>
-          -机器人
+          -Robot
         </button>
       </div>
 
+      {/* 顶部：待处理 / 已完成 双栏 */}
+      <HeaderPanel pendingOrders={pendingOrders} completedOrders={completedOrders} />
+
       {/* 机器人展示区 */}
-      <div className="robot-section">
-        <div className="robot-section-header">
-          <h2>机器人</h2>
-          <span className="robot-section-summary">
-            {robots.length} 台 · 处理中 {robots.filter(r => r.processingOrder !== null).length}
-          </span>
-        </div>
-        <div className="robot-section-body">
-          {robots.length === 0 ? (
-            <div className="robot-hint">
-              {pendingOrders.length > 0
-                ? `当前有 ${pendingOrders.length} 个订单等待处理，请添加机器人`
-                : '暂无机器人，点击「+机器人」添加'}
-            </div>
-          ) : (
-            <div className="robot-cards">
-              {[...robots]
-                .sort((a, b) => a.id - b.id)
-                .map(robot => (
-                  <div
-                    key={robot.id}
-                    className={`robot-card${robot.processingOrder ? ' robot-busy' : ' robot-idle'}`}
-                  >
-                    <span className="robot-card-label">机器人 {padId(robot.id)}</span>
-                    {robot.processingOrder ? (
-                      <span className="robot-card-status">
-                        处理中{' '}
-                        <span className={`order-tag${robot.processingOrder.type === 'vip' ? ' order-tag-vip' : ''}`}>
-                          {robot.processingOrder.id}
-                          {robot.processingOrder.type === 'vip' && (
-                            <span className="tag-vip-badge">VIP</span>
-                          )}
-                        </span>
-                      </span>
-                    ) : (
-                      <span className="robot-card-idle-text">空闲</span>
-                    )}
-                  </div>
-                ))}
-            </div>
-          )}
-        </div>
-      </div>
+      <RobotPanel robots={robots} pendingOrders={pendingOrders} />
     </div>
   )
 }
