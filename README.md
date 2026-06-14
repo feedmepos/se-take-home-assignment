@@ -1,4 +1,95 @@
 ## FeedMe Software Engineer Take Home Assignment
+
+## Solution Summary
+
+This submission implements the **backend CLI option in Go**. The application is an in-memory order
+controller with an interactive CLI for the interview round and a scripted demo for GitHub Actions.
+
+### Run
+
+```bash
+./scripts/test.sh
+./scripts/build.sh
+./scripts/run.sh
+```
+
+The run script writes timestamped demo output to `scripts/result.txt`, which is the file verified by
+the `backend-verify-result` GitHub Actions workflow.
+
+After building, the interactive CLI can be started with:
+
+```bash
+./bin/order-controller -i
+```
+
+Interactive commands:
+
+```text
+normal   create a Normal order
+vip      create a VIP order
++bot     add a cooking bot
+-bot     remove the newest cooking bot
+status   print current state
+quit     stop bots and exit
+```
+
+### Design
+
+- The core controller is UI-agnostic and lives under `internal/controller`.
+- A single mutex guards all mutable state: pending orders, processing bots, completed orders, and the
+  next order ID. Order ID generation is shared state, so it happens under that same lock.
+- Pending orders use one ordering rule everywhere: VIP before Normal, then lower order ID first.
+  The monotonic order ID therefore satisfies the "unique and increasing" requirement and restores
+  interrupted orders to their original FIFO position.
+- Each processing order is driven by a timer and a cancellable context. When completion fires, the
+  controller re-checks that the bot still owns that exact order before moving it to COMPLETE, so stale
+  completions after bot removal are ignored.
+- Tests use a minimal fake timer to make completion/cancellation interleavings deterministic. The fake
+  timer controls when completion fires; the mutex plus ownership re-check controls the outcome.
+
+### Requirements to Tests
+
+| Requirement | Test coverage |
+| --- | --- |
+| Normal order enters PENDING | `TestOrdersStayPendingWhenThereAreZeroBots` |
+| VIP enters before Normal and behind earlier VIPs | `TestVIPBeforeNormalFIFOWithinKind` |
+| Order number is unique and increasing | `TestOrderIDsUniqueAndIncreasing` |
+| `+bot` immediately processes pending work | `TestAddingBotImmediatelyPicksUpPendingWork` |
+| Bot completes an order and picks the next one | `TestBotCompletesThenPicksNextOrder` |
+| Idle bot waits for future work | `TestIdleBotPicksUpNewlyArrivingOrder` |
+| `-bot` removes the newest bot | `TestRemoveBotTargetsNewestBotLIFO` |
+| Removing an idle bot does not affect orders | `TestRemovingIdleBotDoesNotAffectOrders` |
+| Removing a processing bot restores original queue position | `TestRemovingProcessingBotRequeuesAtExactPriorityPosition`, `TestRequeuedVIPPreservesFIFOAmongVIPs`, `TestMultiBotRemovalRestoresReturnedOrdersInOriginalOrder` |
+| Returned work is assigned to another idle bot immediately | `TestRequeuedOrderIsImmediatelyPickedUpByRemainingIdleBot` |
+| Timer/removal race does not lose or duplicate orders | `TestStaleCompletionAfterRemovalCannotDuplicateOrLoseOrder`, `TestRandomizedOperationsPreserveOrderConservation` |
+| Interactive CLI commands map to controller operations | `TestExecuteCommandAliasesAndStatus`, `TestExecuteCommandUnknownAndQuit` |
+
+### Scope Decisions
+
+This is intentionally not a web app, database-backed service, Docker setup, or framework-heavy
+project. The brief asks for either a frontend or backend implementation and explicitly cautions
+against over-engineering, so this submission focuses on the backend track: the controller state
+machine, deterministic tests, CI scripts, and an interview-ready CLI.
+
+### Full-system Extensibility
+
+The controller is designed so a web UI can be added without reimplementing order logic. A thin
+`net/http` adapter would call the same mutation methods (`AddOrder`, `AddBot`, `RemoveBot`) and render
+`Snapshot()` as JSON or server-sent events:
+
+```go
+http.HandleFunc("/api/state", func(w http.ResponseWriter, r *http.Request) {
+	json.NewEncoder(w).Encode(controller.Snapshot())
+})
+```
+
+That extension is deliberately not included here: the assignment asks for one track, and keeping the
+core UI-agnostic gives the extension point without adding unrequested infrastructure.
+
+AI was used to help enumerate adversarial edge cases such as concurrent removal, stale timer
+completion, and order conservation. Those cases were treated as hypotheses, encoded as deterministic
+tests, and verified with `go test -race`.
+
 Below is a take home assignment before the interview of the position. You are required to
 1. Understand the situation and use case. You may contact the interviewer for further clarification.
 2. implement the requirement with **either frontend or backend components**.
