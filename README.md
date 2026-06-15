@@ -27,7 +27,7 @@ npm ci --prefix backend
 ./scripts/run.sh
 ```
 
-`scripts/run.sh` runs the deterministic demo mode and writes the CLI result to `scripts/result.txt`. The output includes `HH:MM:SS` timestamps for order start and completion events.
+`scripts/run.sh` runs the deterministic demo mode and writes the CLI result to `scripts/result.txt`. The output includes current local `HH:MM:SS` timestamps for order start and completion events.
 
 Interactive mode is the default backend start command. It prints help immediately, and cooking time advances automatically while the CLI is open.
 
@@ -38,10 +38,12 @@ node backend/src/cli.js
 
 Supported commands:
 
-- `normal` or `n`
-- `vip` or `v`
-- `+bot` or `+`
-- `-bot` or `-`
-- `status` or `s`
-- `help`, `h`, or `?`
-- `exit` or `q`
+| Command | Shortcut | Description |
+| --- | --- | --- |
+| `normal` | `n` | Create a Normal order |
+| `vip` | `v` | Create a VIP order |
+| `+bot` | `+` | Add one cooking bot |
+| `-bot` | `-` | Remove the latest bot |
+| `status` | `s` | Print the current kitchen state |
+| `help` | `h`, `?` | Show command help |
+| `exit` | `q` | Stop interactive mode |

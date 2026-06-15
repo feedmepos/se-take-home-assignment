@@ -1,20 +1,20 @@
-[08:00:00] Added bot #1
-[08:00:00] Created Normal order #1
-[08:00:00] Bot #1 started order #1; completes at 08:00:10
-[08:00:00] Created Normal order #2
-[08:00:00] Created VIP order #3
-[08:00:10] Completed order #1 by bot #1
-[08:00:10] Bot #1 started order #3; completes at 08:00:20
-[08:00:20] Completed order #3 by bot #1
-[08:00:20] Bot #1 started order #2; completes at 08:00:30
-[08:00:20] Added bot #2
-[08:00:20] Created VIP order #4
-[08:00:20] Bot #2 started order #4; completes at 08:00:30
-[08:00:20] Created Normal order #5
-[08:00:20] Removed bot #2; returned order #4 to pending
-[08:00:30] Completed order #2 by bot #1
-[08:00:30] Bot #1 started order #4; completes at 08:00:40
-[08:00:40] Completed order #4 by bot #1
-[08:00:40] Bot #1 started order #5; completes at 08:00:50
-[08:00:50] Completed order #5 by bot #1
-[08:00:50] time=08:00:50 pending=[] cooking=[] completed=[#1(Normal), #3(VIP), #2(Normal), #4(VIP), #5(Normal)] idleBots=[1]
+[21:09:55] Added bot #1
+[21:09:55] Created Normal order #1
+[21:09:55] Bot #1 started order #1; completes at 21:10:05
+[21:09:55] Created Normal order #2
+[21:09:55] Created VIP order #3
+[21:10:05] Completed order #1 by bot #1
+[21:10:05] Bot #1 started order #3; completes at 21:10:15
+[21:10:15] Completed order #3 by bot #1
+[21:10:15] Bot #1 started order #2; completes at 21:10:25
+[21:10:15] Added bot #2
+[21:10:15] Created VIP order #4
+[21:10:15] Bot #2 started order #4; completes at 21:10:25
+[21:10:15] Created Normal order #5
+[21:10:15] Removed bot #2; returned order #4 to pending
+[21:10:25] Completed order #2 by bot #1
+[21:10:25] Bot #1 started order #4; completes at 21:10:35
+[21:10:35] Completed order #4 by bot #1
+[21:10:35] Bot #1 started order #5; completes at 21:10:45
+[21:10:45] Completed order #5 by bot #1
+[21:10:45] time=21:10:45 pending=[] cooking=[] completed=[#1(Normal), #3(VIP), #2(Normal), #4(VIP), #5(Normal)] idleBots=[1]

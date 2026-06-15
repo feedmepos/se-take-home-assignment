@@ -1,11 +1,16 @@
 "use strict";
 
 const DEFAULT_COOK_SECONDS = 10;
-const DEFAULT_START_TIME = "08:00:00";
 const ORDER_KINDS = Object.freeze({
   NORMAL: "Normal",
   VIP: "VIP",
 });
+
+function getCurrentTimeLabel(date = new Date()) {
+  return [date.getHours(), date.getMinutes(), date.getSeconds()]
+    .map((part) => String(part).padStart(2, "0"))
+    .join(":");
+}
 
 function parseTime(value) {
   const match = /^(\d{2}):(\d{2}):(\d{2})$/.exec(value);
@@ -57,7 +62,7 @@ function formatOrderList(orders) {
 class OrderController {
   constructor(options = {}) {
     this.cookSeconds = options.cookSeconds ?? DEFAULT_COOK_SECONDS;
-    this.currentSecond = parseTime(options.startTime ?? DEFAULT_START_TIME);
+    this.currentSecond = parseTime(options.startTime ?? getCurrentTimeLabel());
     this.nextOrderId = 1;
     this.nextBotId = 1;
     this.pending = [];
@@ -247,8 +252,8 @@ class OrderController {
   }
 }
 
-function runDemoScenario() {
-  const controller = new OrderController();
+function runDemoScenario(options = {}) {
+  const controller = new OrderController(options);
 
   controller.addBot();
   controller.createOrder(ORDER_KINDS.NORMAL);
@@ -267,11 +272,11 @@ function runDemoScenario() {
 
 module.exports = {
   DEFAULT_COOK_SECONDS,
-  DEFAULT_START_TIME,
   ORDER_KINDS,
   OrderController,
   compareOrders,
   formatTime,
+  getCurrentTimeLabel,
   parseTime,
   runDemoScenario,
 };

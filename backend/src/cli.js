@@ -11,21 +11,22 @@ const {
 
 function printHelp() {
   const rows = [
-    ["normal | n", "Create a Normal order"],
-    ["vip    | v", "Create a VIP order"],
-    ["+bot   | +", "Add one cooking bot"],
-    ["-bot   | -", "Remove the latest bot"],
-    ["status | s", "Print the current kitchen state"],
-    ["help   | ?", "Show this help"],
-    ["exit   | q", "Stop interactive mode"],
+    ["normal", "n", "Create a Normal order"],
+    ["vip", "v", "Create a VIP order"],
+    ["+bot", "+", "Add one cooking bot"],
+    ["-bot", "-", "Remove the latest bot"],
+    ["status", "s", "Print the current kitchen state"],
+    ["help", "h, ?", "Show this help"],
+    ["exit", "q", "Stop interactive mode"],
   ];
   const commandWidth = Math.max(...rows.map(([command]) => command.length));
+  const shortcutWidth = Math.max(...rows.map(([, shortcut]) => shortcut.length));
 
   return [
     "Commands:",
     ...rows.map(
-      ([command, description]) =>
-        `  ${command.padEnd(commandWidth)}  ${description}`,
+      ([command, shortcut, description]) =>
+        `  ${command.padEnd(commandWidth)}  ${shortcut.padEnd(shortcutWidth)}  ${description}`,
     ),
   ].join("\n");
 }
@@ -176,8 +177,8 @@ function advanceClockWithOutput(controller, seconds = 1) {
   return output;
 }
 
-function runCommands(commands) {
-  const controller = new OrderController();
+function runCommands(commands, options = {}) {
+  const controller = new OrderController(options);
   const output = [];
 
   for (const command of commands) {

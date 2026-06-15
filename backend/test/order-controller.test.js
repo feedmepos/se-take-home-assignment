@@ -6,6 +6,7 @@ const {
   ORDER_KINDS,
   OrderController,
   formatTime,
+  getCurrentTimeLabel,
   parseTime,
   runDemoScenario,
 } = require("../src/order-controller");
@@ -94,13 +95,13 @@ test("time helpers enforce and emit HH:MM:SS format", () => {
 });
 
 test("demo and scripted CLI output include completion timestamps", () => {
-  const demoOutput = runDemoScenario();
+  const demoOutput = runDemoScenario({ startTime: "08:00:00" });
   const scriptedOutput = runCommands([
     "add-bot",
     "normal",
     "tick 10",
     "status",
-  ]);
+  ], { startTime: "08:00:00" });
 
   assert.match(demoOutput, /\[08:00:10\] Completed order #1 by bot #1/);
   assert.match(scriptedOutput, /\[08:00:10\] Completed order #1 by bot #1/);
@@ -108,7 +109,7 @@ test("demo and scripted CLI output include completion timestamps", () => {
 });
 
 test("interactive command output includes immediate events and current status", () => {
-  const controller = new OrderController();
+  const controller = new OrderController({ startTime: "08:00:00" });
 
   assert.deepEqual(
     executeCommandWithOutput(controller, "+", { includeStatus: true }),
@@ -129,7 +130,7 @@ test("interactive command output includes immediate events and current status", 
 });
 
 test("automatic clock output reports completed orders without a tick command", () => {
-  const controller = new OrderController();
+  const controller = new OrderController({ startTime: "08:00:00" });
   executeCommandWithOutput(controller, "+bot", { includeStatus: true });
   executeCommandWithOutput(controller, "v", { includeStatus: true });
 
@@ -146,12 +147,20 @@ test("automatic clock output reports completed orders without a tick command", (
 test("help lists interactive shortcuts and hides tick", () => {
   const helpText = printHelp();
 
-  assert.match(helpText, /normal \| n/);
-  assert.match(helpText, /vip \| v/);
-  assert.match(helpText, /\+bot \| \+/);
-  assert.match(helpText, /-bot \| -/);
-  assert.match(helpText, /status \| s/);
-  assert.match(helpText, /help \| h \| \?/);
-  assert.match(helpText, /exit \| q/);
+  assert.match(helpText, /normal\s+n\s+Create a Normal order/);
+  assert.match(helpText, /vip\s+v\s+Create a VIP order/);
+  assert.match(helpText, /\+bot\s+\+\s+Add one cooking bot/);
+  assert.match(helpText, /-bot\s+-\s+Remove the latest bot/);
+  assert.match(helpText, /status\s+s\s+Print the current kitchen state/);
+  assert.match(helpText, /help\s+h, \?\s+Show this help/);
+  assert.match(helpText, /exit\s+q\s+Stop interactive mode/);
   assert.doesNotMatch(helpText, /tick/);
+});
+
+test("default controller time starts from the current local time", () => {
+  const before = getCurrentTimeLabel();
+  const controller = new OrderController();
+  const after = getCurrentTimeLabel();
+
+  assert.ok([before, after].includes(controller.snapshot().time));
 });
