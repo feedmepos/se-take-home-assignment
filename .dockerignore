@@ -1,0 +1,4 @@
+.git
+bin
+frontend/node_modules
+frontend/dist
