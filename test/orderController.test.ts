@@ -96,7 +96,7 @@ test("completed orders move to COMPLETE with timestamps and bots keep working", 
   let callCount = 0;
   const now = () => {
     callCount += 1;
-    return new Date(`2026-06-14T12:34:5${callCount}+08:00`);
+    return new Date(2026, 5, 14, 12, 34, 50 + callCount);
   };
   const controller = new OrderController({ timerAdapter, now });
 
@@ -127,7 +127,7 @@ test("fires a completion event when an order finishes", () => {
   const completedEvents: Array<{ id: number; type: string; completedAt: string }> = [];
   const controller = new OrderController({
     timerAdapter,
-    now: () => new Date("2026-06-14T12:34:56+08:00"),
+    now: () => new Date(2026, 5, 14, 12, 34, 56),
     onOrderCompleted: (order) => {
       completedEvents.push(order);
     },
