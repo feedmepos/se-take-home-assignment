@@ -81,23 +81,73 @@ function executeCommand(controller, rawCommand) {
   }
 }
 
+function formatStatusLine(controller) {
+  return `[${controller.timeLabel()}] ${controller.status()}`;
+}
+
+function isStateChangingCommand(rawCommand) {
+  const line = rawCommand.trim();
+
+  if (line.length === 0 || line.startsWith("#")) {
+    return false;
+  }
+
+  const [command] = line.split(/\s+/, 1);
+
+  return [
+    "normal",
+    "new-normal",
+    "vip",
+    "new-vip",
+    "add-bot",
+    "+bot",
+    "+robot",
+    "remove-bot",
+    "-bot",
+    "-robot",
+    "tick",
+  ].includes(command.toLowerCase());
+}
+
+function executeCommandWithOutput(controller, rawCommand, options = {}) {
+  const eventStart = controller.events.length;
+  const commandOutput = executeCommand(controller, rawCommand);
+
+  if (commandOutput.includes("__EXIT__")) {
+    return commandOutput;
+  }
+
+  const output = [
+    ...controller.events.slice(eventStart),
+    ...commandOutput,
+  ];
+
+  if (options.includeStatus && isStateChangingCommand(rawCommand)) {
+    const statusLine = formatStatusLine(controller);
+
+    if (output.at(-1) !== statusLine) {
+      output.push(statusLine);
+    }
+  }
+
+  return output;
+}
+
 function runCommands(commands) {
   const controller = new OrderController();
   const output = [];
 
   for (const command of commands) {
-    const eventStart = controller.events.length;
-    const commandOutput = executeCommand(controller, command);
+    const commandOutput = executeCommandWithOutput(controller, command);
 
     if (commandOutput.includes("__EXIT__")) {
       break;
     }
 
-    output.push(...controller.events.slice(eventStart));
     output.push(...commandOutput);
   }
 
-  const finalStatus = `[${controller.timeLabel()}] ${controller.status()}`;
+  const finalStatus = formatStatusLine(controller);
 
   if (output.at(-1) !== finalStatus) {
     output.push(finalStatus);
@@ -120,10 +170,13 @@ async function runInteractive() {
 
   console.log("Interactive order controller. Type help for commands.");
   rl.prompt();
+  let lastPrintedLine = "";
 
   for await (const line of rl) {
     try {
-      const commandOutput = executeCommand(controller, line);
+      const commandOutput = executeCommandWithOutput(controller, line, {
+        includeStatus: true,
+      });
 
       if (commandOutput.includes("__EXIT__")) {
         break;
@@ -131,6 +184,7 @@ async function runInteractive() {
 
       for (const item of commandOutput) {
         console.log(item);
+        lastPrintedLine = item;
       }
     } catch (error) {
       console.error(error.message);
@@ -140,7 +194,11 @@ async function runInteractive() {
   }
 
   rl.close();
-  console.log(controller.output());
+  const finalStatus = formatStatusLine(controller);
+
+  if (lastPrintedLine !== finalStatus) {
+    console.log(finalStatus);
+  }
 }
 
 async function main(argv) {
@@ -186,6 +244,7 @@ if (require.main === module) {
 
 module.exports = {
   executeCommand,
+  executeCommandWithOutput,
   printHelp,
   runCommands,
 };
