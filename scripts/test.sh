@@ -7,4 +7,8 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 cd "${REPO_ROOT}"
 
+if [ ! -d node_modules ]; then
+  npm ci
+fi
+
 npm test
