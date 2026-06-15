@@ -7,7 +7,7 @@ cd "$ROOT_DIR"
 
 echo "Running CLI application..."
 
-npm --prefix "$ROOT_DIR/backend" run --silent start > "$RESULT_FILE"
+npm --prefix "$ROOT_DIR/backend" run --silent demo > "$RESULT_FILE"
 cat "$RESULT_FILE"
 
 echo "CLI application execution completed"

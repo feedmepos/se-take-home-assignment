@@ -27,9 +27,9 @@ npm ci --prefix backend
 ./scripts/run.sh
 ```
 
-`scripts/run.sh` writes the CLI result to `scripts/result.txt`. The output includes `HH:MM:SS` timestamps for order start and completion events.
+`scripts/run.sh` runs the deterministic demo mode and writes the CLI result to `scripts/result.txt`. The output includes `HH:MM:SS` timestamps for order start and completion events.
 
-Interactive mode is also available:
+Interactive mode is the default backend start command:
 
 ```bash
 npm --prefix backend start
