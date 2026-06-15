@@ -6,6 +6,6 @@ cd "$ROOT_DIR"
 
 echo "Running unit tests..."
 
-npm run backend:test
+npm --prefix "$ROOT_DIR/backend" test
 
 echo "Unit tests completed"

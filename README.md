@@ -8,18 +8,20 @@ This repository contains two implementations of the order controller prototype:
 ## Frontend
 
 ```bash
-npm run dev
-npm run lint
-npm run build
+npm ci --prefix frontend
+npm --prefix frontend run dev
+npm --prefix frontend run lint
+npm --prefix frontend run build
 ```
 
-The frontend runs from the `frontend/` directory through the root package scripts.
+The frontend package lives in `frontend/package.json`.
 
 ## Backend CLI
 
 The backend is a Node.js CLI application. It uses a virtual kitchen clock so CI can verify the 10-second cooking rule without waiting in real time.
 
 ```bash
+npm ci --prefix backend
 ./scripts/test.sh
 ./scripts/build.sh
 ./scripts/run.sh
@@ -30,6 +32,7 @@ The backend is a Node.js CLI application. It uses a virtual kitchen clock so CI 
 Interactive mode is also available:
 
 ```bash
+npm --prefix backend start
 node backend/src/cli.js
 ```
 

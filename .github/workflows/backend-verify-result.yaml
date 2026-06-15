@@ -18,9 +18,10 @@ jobs:
       with:
         node-version: '20'
         cache: npm
+        cache-dependency-path: backend/package-lock.json
 
-    - name: Install dependencies
-      run: npm ci
+    - name: Install backend dependencies
+      run: npm ci --prefix backend
 
     - name: Verify Node.js version
       run: node --version

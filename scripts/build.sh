@@ -6,6 +6,6 @@ cd "$ROOT_DIR"
 
 echo "Building CLI application..."
 
-npm run backend:build
+npm --prefix "$ROOT_DIR/backend" run build
 
 echo "Build completed"
