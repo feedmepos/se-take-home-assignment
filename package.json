@@ -3,10 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
+    "dev": "next dev frontend",
+    "build": "next build frontend",
+    "start": "next start frontend",
+    "lint": "eslint frontend",
+    "backend:build": "node --check backend/src/order-controller.js && node --check backend/src/cli.js && mkdir -p backend/dist && cp backend/src/*.js backend/dist/",
+    "backend:run": "node backend/src/cli.js --demo",
+    "backend:test": "node --test backend/test/*.test.js"
   },
   "dependencies": {
     "next": "16.2.9",
