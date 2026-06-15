@@ -218,7 +218,6 @@
   min-height: 64px;
   max-height: 540px;
   display: flex;
-  align-items: center;
   overflow-y: auto;
 }
 
