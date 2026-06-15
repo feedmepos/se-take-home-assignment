@@ -1,0 +1,5 @@
+bin/
+frontend/dist/
+frontend/node_modules/
+https-keys/
+.idea/

@@ -1,0 +1,16 @@
+FROM golang:1.23.9-alpine AS build
+
+WORKDIR /app
+COPY go.mod ./
+COPY cmd ./cmd
+COPY internal ./internal
+RUN go build -o /out/order-api ./cmd/api
+RUN go build -o /out/order-controller ./cmd/order-controller
+
+FROM alpine:3.21
+
+WORKDIR /app
+COPY --from=build /out/order-api /usr/local/bin/order-api
+COPY --from=build /out/order-controller /usr/local/bin/order-controller
+EXPOSE 8080
+CMD ["order-api"]
