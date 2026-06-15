@@ -29,7 +29,7 @@ npm ci --prefix backend
 
 `scripts/run.sh` runs the deterministic demo mode and writes the CLI result to `scripts/result.txt`. The output includes `HH:MM:SS` timestamps for order start and completion events.
 
-Interactive mode is the default backend start command:
+Interactive mode is the default backend start command. It prints help immediately, and cooking time advances automatically while the CLI is open.
 
 ```bash
 npm --prefix backend start
@@ -38,11 +38,10 @@ node backend/src/cli.js
 
 Supported commands:
 
-- `normal`
-- `vip`
-- `add-bot`
-- `remove-bot`
-- `tick <seconds>`
-- `status`
-- `help`
-- `exit`
+- `normal` or `n`
+- `vip` or `v`
+- `+bot` or `+`
+- `-bot` or `-`
+- `status` or `s`
+- `help`, `h`, or `?`
+- `exit` or `q`

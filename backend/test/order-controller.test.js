@@ -9,7 +9,12 @@ const {
   parseTime,
   runDemoScenario,
 } = require("../src/order-controller");
-const { executeCommandWithOutput, runCommands } = require("../src/cli");
+const {
+  advanceClockWithOutput,
+  executeCommandWithOutput,
+  printHelp,
+  runCommands,
+} = require("../src/cli");
 
 test("VIP orders are queued before Normal orders and after existing VIP orders", () => {
   const controller = new OrderController();
@@ -106,7 +111,7 @@ test("interactive command output includes immediate events and current status", 
   const controller = new OrderController();
 
   assert.deepEqual(
-    executeCommandWithOutput(controller, "add-bot", { includeStatus: true }),
+    executeCommandWithOutput(controller, "+", { includeStatus: true }),
     [
       "[08:00:00] Added bot #1",
       "[08:00:00] time=08:00:00 pending=[] cooking=[] completed=[] idleBots=[1]",
@@ -114,19 +119,39 @@ test("interactive command output includes immediate events and current status", 
   );
 
   assert.deepEqual(
-    executeCommandWithOutput(controller, "vip", { includeStatus: true }),
+    executeCommandWithOutput(controller, "v", { includeStatus: true }),
     [
       "[08:00:00] Created VIP order #1",
       "[08:00:00] Bot #1 started order #1; completes at 08:00:10",
       "[08:00:00] time=08:00:00 pending=[] cooking=[bot #1->#1(VIP)] completed=[] idleBots=[]",
     ],
   );
+});
 
+test("automatic clock output reports completed orders without a tick command", () => {
+  const controller = new OrderController();
+  executeCommandWithOutput(controller, "+bot", { includeStatus: true });
+  executeCommandWithOutput(controller, "v", { includeStatus: true });
+
+  assert.deepEqual(advanceClockWithOutput(controller, 9), []);
   assert.deepEqual(
-    executeCommandWithOutput(controller, "tick 10", { includeStatus: true }),
+    advanceClockWithOutput(controller),
     [
       "[08:00:10] Completed order #1 by bot #1",
       "[08:00:10] time=08:00:10 pending=[] cooking=[] completed=[#1(VIP)] idleBots=[1]",
     ],
   );
+});
+
+test("help lists interactive shortcuts and hides tick", () => {
+  const helpText = printHelp();
+
+  assert.match(helpText, /normal \| n/);
+  assert.match(helpText, /vip \| v/);
+  assert.match(helpText, /\+bot \| \+/);
+  assert.match(helpText, /-bot \| -/);
+  assert.match(helpText, /status \| s/);
+  assert.match(helpText, /help \| h \| \?/);
+  assert.match(helpText, /exit \| q/);
+  assert.doesNotMatch(helpText, /tick/);
 });

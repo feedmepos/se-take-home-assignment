@@ -10,16 +10,23 @@ const {
 } = require("./order-controller");
 
 function printHelp() {
+  const rows = [
+    ["normal | n", "Create a Normal order"],
+    ["vip    | v", "Create a VIP order"],
+    ["+bot   | +", "Add one cooking bot"],
+    ["-bot   | -", "Remove the latest bot"],
+    ["status | s", "Print the current kitchen state"],
+    ["help   | ?", "Show this help"],
+    ["exit   | q", "Stop interactive mode"],
+  ];
+  const commandWidth = Math.max(...rows.map(([command]) => command.length));
+
   return [
     "Commands:",
-    "  normal             Create a Normal order",
-    "  vip                Create a VIP order",
-    "  add-bot            Add one cooking bot",
-    "  remove-bot         Remove the latest bot",
-    "  tick <seconds>     Advance the virtual kitchen clock",
-    "  status             Print the current kitchen state",
-    "  help               Show this help",
-    "  exit               Stop interactive mode",
+    ...rows.map(
+      ([command, description]) =>
+        `  ${command.padEnd(commandWidth)}  ${description}`,
+    ),
   ].join("\n");
 }
 
@@ -35,27 +42,36 @@ function executeCommand(controller, rawCommand) {
   switch (command.toLowerCase()) {
     case "normal":
     case "new-normal":
+    case "n":
       controller.createOrder(ORDER_KINDS.NORMAL);
       return [];
 
     case "vip":
     case "new-vip":
+    case "v":
       controller.createOrder(ORDER_KINDS.VIP);
       return [];
 
     case "add-bot":
     case "+bot":
     case "+robot":
+    case "+":
+    case "a":
+    case "add":
       controller.addBot();
       return [];
 
     case "remove-bot":
     case "-bot":
     case "-robot":
+    case "-":
+    case "r":
+    case "remove":
       controller.removeLatestBot();
       return [];
 
-    case "tick": {
+    case "tick":
+    case "t": {
       const seconds = Number(argument ?? "1");
 
       if (!Number.isInteger(seconds) || seconds < 0) {
@@ -67,13 +83,18 @@ function executeCommand(controller, rawCommand) {
     }
 
     case "status":
+    case "s":
       return [`[${controller.timeLabel()}] ${controller.status()}`];
 
     case "help":
+    case "h":
+    case "?":
       return [printHelp()];
 
     case "exit":
     case "quit":
+    case "q":
+    case "e":
       return ["__EXIT__"];
 
     default:
@@ -97,15 +118,24 @@ function isStateChangingCommand(rawCommand) {
   return [
     "normal",
     "new-normal",
+    "n",
     "vip",
     "new-vip",
+    "v",
     "add-bot",
     "+bot",
     "+robot",
+    "+",
+    "a",
+    "add",
     "remove-bot",
     "-bot",
     "-robot",
+    "-",
+    "r",
+    "remove",
     "tick",
+    "t",
   ].includes(command.toLowerCase());
 }
 
@@ -128,6 +158,19 @@ function executeCommandWithOutput(controller, rawCommand, options = {}) {
     if (output.at(-1) !== statusLine) {
       output.push(statusLine);
     }
+  }
+
+  return output;
+}
+
+function advanceClockWithOutput(controller, seconds = 1) {
+  const eventStart = controller.events.length;
+  controller.tick(seconds);
+
+  const output = controller.events.slice(eventStart);
+
+  if (output.length > 0) {
+    output.push(formatStatusLine(controller));
   }
 
   return output;
@@ -168,9 +211,24 @@ async function runInteractive() {
     prompt: "kitchen> ",
   });
 
-  console.log("Interactive order controller. Type help for commands.");
+  console.log("Interactive order controller. Cooking time advances automatically.");
+  console.log(printHelp());
   rl.prompt();
   let lastPrintedLine = "";
+  const clockInterval = setInterval(() => {
+    const clockOutput = advanceClockWithOutput(controller);
+
+    if (clockOutput.length === 0) {
+      return;
+    }
+
+    for (const item of clockOutput) {
+      console.log(item);
+      lastPrintedLine = item;
+    }
+
+    rl.prompt(true);
+  }, 1000);
 
   for await (const line of rl) {
     try {
@@ -193,6 +251,7 @@ async function runInteractive() {
     rl.prompt();
   }
 
+  clearInterval(clockInterval);
   rl.close();
   const finalStatus = formatStatusLine(controller);
 
@@ -243,6 +302,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+  advanceClockWithOutput,
   executeCommand,
   executeCommandWithOutput,
   printHelp,
