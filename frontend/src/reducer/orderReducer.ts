@@ -41,6 +41,37 @@ function assignToIdleBot(orders: Order[], bots: Bot[]): { orders: Order[]; bots:
   }
 }
 
+// If a VIP order is PENDING and no idle bot is available, preempt the bot processing
+// the lowest-priority Normal order (last in the queue — "most bottom") and assign it
+// to the VIP order instead. Called after any action that may leave a VIP waiting.
+function applyVipPreemption(orders: Order[], bots: Bot[]): { orders: Order[]; bots: Bot[] } {
+  const pendingVip = orders.find(o => o.type === 'VIP' && o.status === 'PENDING')
+  if (!pendingVip) return { orders, bots }
+
+  // Idle bot available — assign it directly, no preemption needed
+  if (bots.some(b => b.status === 'IDLE')) {
+    return assignToIdleBot(orders, bots)
+  }
+
+  // Find the last Normal order being processed ("most bottom" in the queue)
+  let botToPreempt: Bot | undefined
+  for (let i = orders.length - 1; i >= 0; i--) {
+    if (orders[i].type === 'NORMAL' && orders[i].status === 'PROCESSING') {
+      botToPreempt = bots.find(b => b.processingOrderId === orders[i].id)
+      break
+    }
+  }
+
+  if (!botToPreempt || botToPreempt.processingOrderId === null) return { orders, bots }
+
+  const preemptedOrder = orders.find(o => o.id === botToPreempt!.processingOrderId)!
+  const ordersMinusPreempted = orders.filter(o => o.id !== preemptedOrder.id)
+  const ordersRestored = reinsertOrder(ordersMinusPreempted, preemptedOrder)
+  const botsFreed = bots.map(b =>
+    b.id === botToPreempt!.id ? { ...b, status: 'IDLE' as const, processingOrderId: null } : b
+  )
+  return assignToIdleBot(ordersRestored, botsFreed)
+}
 
 export function orderReducer(state: AppState, action: Action): AppState {
   switch (action.type) {
@@ -53,35 +84,7 @@ export function orderReducer(state: AppState, action: Action): AppState {
     case 'ADD_VIP_ORDER': {
       const newOrder: Order = { id: state.nextOrderId, type: 'VIP', status: 'PENDING', startedAt: null }
       const ordersWithVip = insertVipOrder(state.orders, newOrder)
-
-      // Idle bot available — assign immediately, no preemption needed
-      if (state.bots.some(b => b.status === 'IDLE')) {
-        const { orders, bots } = assignToIdleBot(ordersWithVip, state.bots)
-        return { ...state, orders, bots, nextOrderId: state.nextOrderId + 1 }
-      }
-
-      // No idle bot — preempt the first bot found processing a NORMAL order
-      const botToPreempt = state.bots.find(b =>
-        b.status === 'PROCESSING' &&
-        b.processingOrderId !== null &&
-        state.orders.find(o => o.id === b.processingOrderId)?.type === 'NORMAL'
-      )
-
-      if (!botToPreempt || botToPreempt.processingOrderId === null) {
-        // All bots are busy with VIP orders — just queue the new VIP order
-        return { ...state, orders: ordersWithVip, nextOrderId: state.nextOrderId + 1 }
-      }
-
-      // Return the preempted normal order to the back of the pending queue
-      const preemptedOrder = state.orders.find(o => o.id === botToPreempt.processingOrderId)!
-      const ordersMinusPreempted = ordersWithVip.filter(o => o.id !== preemptedOrder.id)
-      const ordersRestored = reinsertOrder(ordersMinusPreempted, preemptedOrder)
-
-      // Free the preempted bot then assign the VIP order to it
-      const botsFreed = state.bots.map(b =>
-        b.id === botToPreempt.id ? { ...b, status: 'IDLE' as const, processingOrderId: null } : b
-      )
-      const { orders, bots } = assignToIdleBot(ordersRestored, botsFreed)
+      const { orders, bots } = applyVipPreemption(ordersWithVip, state.bots)
       return { ...state, orders, bots, nextOrderId: state.nextOrderId + 1 }
     }
 
@@ -104,7 +107,10 @@ export function orderReducer(state: AppState, action: Action): AppState {
           )
         }
       }
-      return { ...state, orders, bots: state.bots.filter(b => b.id !== botToRemove.id) }
+      const remainingBots = state.bots.filter(b => b.id !== botToRemove.id)
+      // If a VIP order landed in PENDING (returned from the removed bot), trigger preemption
+      const { orders: finalOrders, bots: finalBots } = applyVipPreemption(orders, remainingBots)
+      return { ...state, orders: finalOrders, bots: finalBots }
     }
 
     case 'ORDER_COMPLETE': {
