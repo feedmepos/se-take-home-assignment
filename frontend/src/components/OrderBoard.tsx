@@ -24,7 +24,12 @@ function EmptyState({ message }: { message: string }) {
 export function OrderBoard() {
   const { state } = useOrderContext()
 
-  const pendingOrders = state.orders.filter(o => o.status === 'PENDING' || o.status === 'PROCESSING')
+  const pendingOrders = state.orders
+    .filter(o => o.status === 'PENDING' || o.status === 'PROCESSING')
+    .sort((a, b) => {
+      if (a.type === b.type) return 0
+      return a.type === 'VIP' ? -1 : 1
+    })
   const completeOrders = [...state.orders.filter(o => o.status === 'COMPLETE')].reverse()
 
   return (
