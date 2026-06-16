@@ -22,6 +22,11 @@ function insertVipOrder(orders: Order[], newOrder: Order): Order[] {
   return [...orders, newOrder]
 }
 
+function reinsertOrder(orders: Order[], order: Order): Order[] {
+  const reset: Order = { ...order, status: 'PENDING', startedAt: null }
+  return order.type === 'VIP' ? insertVipOrder(orders, reset) : [...orders, reset]
+}
+
 function assignToIdleBot(orders: Order[], bots: Bot[]): { orders: Order[]; bots: Bot[] } {
   const idleBot = bots.find(b => b.status === 'IDLE')
   const pendingOrder = orders.find(o => o.status === 'PENDING')
@@ -52,8 +57,28 @@ export function orderReducer(state: AppState, action: Action): AppState {
       return { ...state, orders, bots, nextOrderId: state.nextOrderId + 1 }
     }
 
-    case 'ADD_BOT':
-    case 'REMOVE_BOT':
+    case 'ADD_BOT': {
+      const newBot: Bot = { id: state.nextBotId, status: 'IDLE', processingOrderId: null }
+      const { orders, bots } = assignToIdleBot(state.orders, [...state.bots, newBot])
+      return { ...state, orders, bots, nextBotId: state.nextBotId + 1 }
+    }
+
+    case 'REMOVE_BOT': {
+      if (state.bots.length === 0) return state
+      const botToRemove = state.bots.reduce((prev, curr) => curr.id > prev.id ? curr : prev)
+      let orders = state.orders
+      if (botToRemove.processingOrderId !== null) {
+        const processingOrder = state.orders.find(o => o.id === botToRemove.processingOrderId)
+        if (processingOrder) {
+          orders = reinsertOrder(
+            state.orders.filter(o => o.id !== processingOrder.id),
+            processingOrder
+          )
+        }
+      }
+      return { ...state, orders, bots: state.bots.filter(b => b.id !== botToRemove.id) }
+    }
+
     case 'ORDER_COMPLETE':
       return state
 
