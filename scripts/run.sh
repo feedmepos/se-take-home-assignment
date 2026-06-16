@@ -1,19 +1,26 @@
 #!/bin/bash
+set -e
+cd "$(dirname "$0")/.."
 
-# Run Script
-# This script should execute your CLI application and output results to result.txt
+./scripts/build.sh
 
-echo "Running CLI application..."
-
-# For Go projects:
-# ./order-controller > result.txt
-
-# For Node.js projects:
-# node index.js > result.txt
-# or npm start > result.txt
-
-# Temporary placeholder - remove this when you implement your CLI
-echo "Added 1 bot" > result.txt
-echo "status: bot: [1], order: []" >> result.txt
-
-echo "CLI application execution completed"
+# 演示场景: 覆盖所有 PRD 需求
+# n=普通订单 v=VIP订单 +=加Bot -=减Bot s=状态 w=等待5s q=退出
+./obot <<'EOF' > scripts/result.txt
+n
+n
+v
+s
++
+s
+v
++
+s
+-
+s
+w
+w
+w
+s
+q
+EOF
