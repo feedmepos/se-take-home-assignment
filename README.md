@@ -1,64 +1,137 @@
-## FeedMe Software Engineer Take Home Assignment
-Below is a take home assignment before the interview of the position. You are required to
-1. Understand the situation and use case. You may contact the interviewer for further clarification.
-2. implement the requirement with **either frontend or backend components**.
-3. Complete the requirement with **AI** if possible, but perform your own testing.
-4. Provide documentation for the any part that you think is needed.
-5. Bring the source code and functioning prototype to the interview session.
+# obot — McDonald's Order Controller
 
-### Situation
-McDonald is transforming their business during COVID-19. They wish to build the automated cooking bots to reduce workforce and increase their efficiency. As one of the software engineer in the project. You task is to create an order controller which handle the order control flow. 
+## 项目概述
 
-### User Story
-As below is part of the user story:
-1. As McDonald's normal customer, after I submitted my order, I wish to see my order flow into "PENDING" area. After the cooking bot process my order, I want to see it flow into to "COMPLETE" area.
-2. As McDonald's VIP member, after I submitted my order, I want my order being process first before all order by normal customer.  However if there's existing order from VIP member, my order should queue behind his/her order.
-3. As McDonald's manager, I want to increase or decrease number of cooking bot available in my restaurant. When I increase a bot, it should immediately process any pending order. When I decrease a bot, the processing order should remain un-process.
-4. As McDonald bot, it can only pickup and process 1 order at a time, each order required 10 seconds to complete process.
+CLI 应用，模拟麦当劳自动烹饪机器人订单控制系统。支持 VIP / Normal 两级订单优先级、Bot 动态增减、订单生命周期管理。
 
-### Requirements
-1. When "New Normal Order" clicked, a new order should show up "PENDING" Area.
-2. When "New VIP Order" clicked, a new order should show up in "PENDING" Area. It should place in-front of all existing "Normal" order but behind of all existing "VIP" order.
-3. The order number should be unique and increasing.
-4. When "+ Bot" clicked, a bot should be created and start processing the order inside "PENDING" area. after 10 seconds picking up the order, the order should move to "COMPLETE" area. Then the bot should start processing another order if there is any left in "PENDING" area.
-5. If there is no more order in the "PENDING" area, the bot should become IDLE until a new order come in.
-6. When "- Bot" clicked, the newest bot should be destroyed. If the bot is processing an order, it should also stop the process. The order should return to its original position in the "PENDING" area (maintaining VIP/Normal order priority).
-7. No data persistance is needed for this prototype, you may perform all the process inside memory.
+## 技术方案
 
-### Functioning Prototype
-You must implement **either** frontend or backend components as described below:
+### 模块说明
 
-#### 1. Frontend
-- You are free to use **any framework and programming language** of your choice
-- The UI application must be compiled, deployed and hosted on any publicly accessible web platform
-- Must provide a user interface that demonstrates all the requirements listed above
-- Should allow users to interact with the McDonald's order management system
+| 模块 | 路径 | 职责 |
+|------|------|------|
+| `order` | `internal/order/` | 订单实体，工厂方法 `NewVIP()` / `NewNormal()`，`atomic` 自增 ID |
+| `queue` | `internal/mgr/queue/` | 订单队列接口及实现，状态转移（pending / processing / completed） |
+| `bot` | `internal/mgr/bot/` | Bot 状态机及生命周期管理，依赖 `queue` 接口 |
+| `orchestrator` | `orchestrator/` | CLI REPL 事件循环，命令分发，Bot 异步事件日志 |
 
-#### 2. Backend
-- You must use **either Go (Golang) or Node.js** for the backend implementation
-- The backend must be a CLI application that can be executed in GitHub Actions
-- Must implement the following scripts in the `script` directory:
-  - `test.sh`: Contains unit test execution steps
-  - `build.sh`: Contains compilation steps for the CLI application
-  - `run.sh`: Contains execution steps that run the CLI application
-- The CLI application result must be printed to `result.txt`
-- The `result.txt` output must include timestamps in `HH:MM:SS` format to track order completion times
-- Must follow **GitHub Flow**: Create a Pull Request with your changes to this repository
-- Ensure all GitHub Action checks pass successfully
-- **Note**: An interactive CLI implementation is compulsory for the next round of interview. Candidates should be prepared to demonstrate interactive command handling.
+### 模块依赖
 
-#### Submission Requirements
-- Fork this repository and implement your solution with either frontend or backend
-- **Frontend option**: Deploy to a publicly accessible URL using any technology stack
-- **Backend option**: Must be implemented in Go or Node.js and work within the GitHub Actions environment
-  - Follow GitHub Flow process with Pull Request submission
-  - All tests in `test.sh` must pass
-  - The `result.txt` file must contain meaningful output from your CLI application
-  - All output must include timestamps in `HH:MM:SS` format to track order completion times
-  - Submit a Pull Request and ensure the `backend-verify-result` workflow passes
-- Provide documentation for any part that you think is needed
+```
+main
+ └── orchestrator
+       ├── internal/mgr/queue (interface + impl)
+       ├── internal/mgr/bot
+       │     └── internal/mgr/queue (interface only)
+       └── internal/order
+```
 
-### Tips on completing this task
-- Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.
-- Utilize coding agent to complete the assignment scope your working hour within 1 hour, do not over engineer it. However, ensure you read and understand what your code doing and apply good engineering practice.
-- Complete the implementation as clean as possible, clean code is a strong plus point, do not bring in all the fancy tech stuff.
+依赖方向单向向下，`bot` 依赖 `queue` 接口而非实现，新增优先级只需 `order` 包加 factory 函数。
+
+### Queue 设计
+
+三容器 + `sync.Cond` 并发模型：
+
+```
+Enqueue → pending (min-heap)    按 (Priority↑, ID↑) 排序
+            ↓ Dequeue
+         processing (slice)      Bot 处理中
+            ↓ CompleteOrder  ↘ ReturnToPending
+         completed (slice)     pending (heap.Push)
+```
+
+`Signal` / `Broadcast` 内聚于 `queue` 包，`Dequeue(stopCh)` 通过内部 helper goroutine 将外部 `stopCh` 转为 `cond.Broadcast` 唤醒。
+
+### Bot 状态机
+
+```
+IDLE ──Dequeue 取到订单──→ PROCESSING ──10s 完成──→ IDLE
+  │                           │
+  └──stopCh──→ STOPPED ←──stopCh──┘
+```
+
+`Bot.Run()` 以 `sync.RWMutex` 保护 `State` / `CurrentOrder`，`Manager` 负责批量生命周期管理。
+
+### 项目结构
+
+```
+./
+├── main.go                          # 入口
+├── orchestrator/
+│   └── biz.go                       # CLI REPL 循环、事件日志
+├── internal/
+│   ├── mgr/
+│   │   ├── queue/
+│   │   │   ├── interface.go         # OrderQueue 接口
+│   │   │   ├── biz.go               # min-heap + sync.Cond 实现
+│   │   │   └── biz_test.go          # 27 个单元测试
+│   │   └── bot/
+│   │       ├── biz.go               # Bot 状态机 + Manager
+│   │       └── biz_test.go          # 16 个单元测试（mock queue）
+│   └── order/
+│       └── biz.go                   # Order + NewVIP/NewNormal (atomic ID)
+├── scripts/
+│   ├── build.sh                     # go build
+│   ├── test.sh                      # go vet + go test
+│   └── run.sh                       # heredoc 驱动 CLI → result.txt
+├── docs/
+│   └── prd.md                       # 需求文档
+└── go.mod
+```
+
+## 测试
+
+```bash
+# 全部单元测试
+bash scripts/test.sh
+
+# 按包运行
+go test ./internal/mgr/queue/ -v   # 27 tests: 入队/出队/回收/完成/并发
+go test ./internal/mgr/bot/ -v     # 16 tests: Bot 状态机/生命周期 (mock queue)
+```
+
+| 包 | 用例数 | 覆盖 |
+|----|--------|------|
+| `queue` | 27 | Enqueue/Dequeue/RecycleOrder/CompleteOrder/PendingOrders/ProcessingOrders/CompletedOrders + 并发 |
+| `bot` | 16 | AddBot/RemoveBot/Bot.Run/Bots/Shutdown/State（mock queue 隔离） |
+
+## 运行
+
+### 交互模式
+
+```bash
+go build -o obot .
+./obot
+
+> n       # 新建 Normal 订单
+> v       # 新建 VIP 订单
+> +       # 增加 Bot
+> -       # 减少 Bot
+> s       # 查看状态
+> w       # 等待 5 秒（含异步事件输出）
+> q       # 退出
+```
+
+### CI 模式（管道脚本）
+
+```bash
+bash scripts/run.sh
+cat scripts/result.txt
+```
+
+`run.sh` 通过 heredoc 向 CLI 发送预设命令序列，stdout 重定向到 `scripts/result.txt`，包含 `HH:MM:SS` 时间戳的完整订单生命周期日志。
+
+### 输出示例
+
+```
+11:15:23 [SYSTEM] McDonald's Order Controller started
+11:15:23 [ORDER] Normal #1 created
+11:15:23 [ORDER] VIP #2 created
+11:15:23 [STATE] Pending: [VIP #2, Normal #1] | Processing: [] | Completed: []
+11:15:23 [BOT] Bot #1 added
+11:15:23 [ORDER] VIP #2 PROCESSING by Bot #1
+11:15:33 [ORDER] VIP #2 COMPLETED
+11:15:33 [ORDER] Normal #1 PROCESSING by Bot #1
+11:15:43 [ORDER] Normal #1 COMPLETED
+11:15:43 [BOTS] Bot #1 IDLE
+```
