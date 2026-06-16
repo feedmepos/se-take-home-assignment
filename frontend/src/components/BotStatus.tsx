@@ -9,7 +9,7 @@ export function BotStatus() {
     <div className="px-4 py-3 border-b border-[#EDE8E1]">
       <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2.5">
         Active Bots
-        <span className="ml-2 px-1.5 py-0.5 rounded-full bg-[#27251F] text-white text-[9px]">
+        <span className="ml-2 px-1.5 py-0.5 rounded-full bg-mcd-black text-white text-[9px]">
           {state.bots.length}
         </span>
       </p>

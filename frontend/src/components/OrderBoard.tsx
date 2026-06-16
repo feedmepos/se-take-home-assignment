@@ -2,11 +2,11 @@ import { useOrderContext } from '../hooks/useOrderContext'
 import { OrderCard } from './OrderCard'
 import { BotCard } from './BotCard'
 
-function ColumnHeader({ label, count, accent }: { label: string; count: number; accent: string }) {
+function ColumnHeader({ label, count, badgeClass }: { label: string; count: number; badgeClass: string }) {
   return (
     <div className="flex items-center gap-2 mb-3">
       <span className="text-[11px] font-black uppercase tracking-widest text-gray-500">{label}</span>
-      <span className={`px-2 py-0.5 rounded-full text-[10px] font-black text-white`} style={{ background: accent }}>
+      <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${badgeClass}`}>
         {count}
       </span>
     </div>
@@ -30,13 +30,15 @@ export function OrderBoard() {
       if (a.type === b.type) return 0
       return a.type === 'VIP' ? -1 : 1
     })
-  const completeOrders = [...state.orders.filter(o => o.status === 'COMPLETE')].reverse()
+
+  // filter() already returns a new array; reverse() is safe without spread
+  const completeOrders = state.orders.filter(o => o.status === 'COMPLETE').reverse()
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
       {/* Bots column — desktop only */}
       <div className="hidden lg:block">
-        <ColumnHeader label="Bots" count={state.bots.length} accent="#27251F" />
+        <ColumnHeader label="bots" count={state.bots.length} badgeClass="bg-mcd-black text-white" />
         <div className="flex flex-col gap-2">
           {state.bots.length === 0 ? (
             <EmptyState message="No bots active" />
@@ -54,7 +56,7 @@ export function OrderBoard() {
 
       {/* Pending column */}
       <div>
-        <ColumnHeader label="PENDING" count={pendingOrders.length} accent="#FFC72C" />
+        <ColumnHeader label="pending" count={pendingOrders.length} badgeClass="bg-mcd-gold text-mcd-black" />
         <div className="flex flex-col gap-2">
           {pendingOrders.length === 0 ? (
             <EmptyState message="No orders queued" />
@@ -66,7 +68,7 @@ export function OrderBoard() {
 
       {/* Complete column */}
       <div>
-        <ColumnHeader label="COMPLETE" count={completeOrders.length} accent="#22C55E" />
+        <ColumnHeader label="complete" count={completeOrders.length} badgeClass="bg-green-500 text-white" />
         <div className="flex flex-col gap-2">
           {completeOrders.length === 0 ? (
             <EmptyState message="No completed orders" />
