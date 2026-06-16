@@ -49,7 +49,7 @@ export function OrderBoard() {
 
       {/* Pending column */}
       <div>
-        <ColumnHeader label="Queue" count={pendingOrders.length} accent="#FFC72C" />
+        <ColumnHeader label="PENDING" count={pendingOrders.length} accent="#FFC72C" />
         <div className="flex flex-col gap-2">
           {pendingOrders.length === 0 ? (
             <EmptyState message="No orders queued" />
@@ -61,7 +61,7 @@ export function OrderBoard() {
 
       {/* Complete column */}
       <div>
-        <ColumnHeader label="Complete" count={completeOrders.length} accent="#22C55E" />
+        <ColumnHeader label="COMPLETE" count={completeOrders.length} accent="#22C55E" />
         <div className="flex flex-col gap-2">
           {completeOrders.length === 0 ? (
             <EmptyState message="No completed orders" />
