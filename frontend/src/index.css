@@ -1,0 +1,126 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ─── McDonald's Brand Tokens ─────────────────────────────────────────────── */
+/* Primary Red : #DA291C  Secondary Gold : #FFC72C  Text : #27251F             */
+
+@theme inline {
+    --font-sans: system-ui, 'Helvetica Neue', Arial, sans-serif;
+    --font-heading: var(--font-sans);
+
+    /* McDonald's brand colours exposed as Tailwind utilities */
+    --color-mcd-red:         #DA291C;
+    --color-mcd-red-dark:    #B01E14;
+    --color-mcd-red-light:   #F44336;
+    --color-mcd-gold:        #FFC72C;
+    --color-mcd-gold-dark:   #E6A800;
+    --color-mcd-gold-light:  #FFD966;
+    --color-mcd-black:       #27251F;
+    --color-mcd-warm-white:  #F5F0E8;
+
+    /* shadcn semantic tokens → resolved from CSS vars below */
+    --color-background:          var(--background);
+    --color-foreground:          var(--foreground);
+    --color-card:                var(--card);
+    --color-card-foreground:     var(--card-foreground);
+    --color-popover:             var(--popover);
+    --color-popover-foreground:  var(--popover-foreground);
+    --color-primary:             var(--primary);
+    --color-primary-foreground:  var(--primary-foreground);
+    --color-secondary:           var(--secondary);
+    --color-secondary-foreground:var(--secondary-foreground);
+    --color-muted:               var(--muted);
+    --color-muted-foreground:    var(--muted-foreground);
+    --color-accent:              var(--accent);
+    --color-accent-foreground:   var(--accent-foreground);
+    --color-destructive:         var(--destructive);
+    --color-border:              var(--border);
+    --color-input:               var(--input);
+    --color-ring:                var(--ring);
+
+    --radius-sm:  calc(var(--radius) * 0.6);
+    --radius-md:  calc(var(--radius) * 0.8);
+    --radius-lg:  var(--radius);
+    --radius-xl:  calc(var(--radius) * 1.4);
+    --radius-2xl: calc(var(--radius) * 1.8);
+    --radius-3xl: calc(var(--radius) * 2.2);
+    --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/* ─── Light Mode ─────────────────────────────────────────────────────────── */
+:root {
+    /* Semantic surface colours */
+    --background:          #F5F0E8;   /* warm off-white — McDonald's tray liner feel */
+    --foreground:          #27251F;   /* near-black text */
+    --card:                #FFFFFF;
+    --card-foreground:     #27251F;
+    --popover:             #FFFFFF;
+    --popover-foreground:  #27251F;
+
+    /* Primary = McDonald's Red */
+    --primary:             #DA291C;
+    --primary-foreground:  #FFFFFF;
+
+    /* Secondary = McDonald's Gold */
+    --secondary:           #FFC72C;
+    --secondary-foreground:#27251F;
+
+    --muted:               #F0EBE0;
+    --muted-foreground:    #6B6157;
+
+    /* Accent = Gold highlight */
+    --accent:              #FFC72C;
+    --accent-foreground:   #27251F;
+
+    --destructive:         #DA291C;
+
+    --border:              #DDD5C8;
+    --input:               #DDD5C8;
+    --ring:                #DA291C;
+
+    --radius: 0.5rem;
+}
+
+/* ─── Dark Mode (optional — keeps McDonald's red/gold identity) ──────────── */
+.dark {
+    --background:          #1A1714;
+    --foreground:          #F5F0E8;
+    --card:                #27251F;
+    --card-foreground:     #F5F0E8;
+    --popover:             #27251F;
+    --popover-foreground:  #F5F0E8;
+
+    --primary:             #DA291C;
+    --primary-foreground:  #FFFFFF;
+
+    --secondary:           #FFC72C;
+    --secondary-foreground:#27251F;
+
+    --muted:               #3A3530;
+    --muted-foreground:    #A09890;
+
+    --accent:              #FFC72C;
+    --accent-foreground:   #27251F;
+
+    --destructive:         #F44336;
+
+    --border:              rgba(255 255 255 / 12%);
+    --input:               rgba(255 255 255 / 15%);
+    --ring:                #FFC72C;
+}
+
+/* ─── Base Reset ─────────────────────────────────────────────────────────── */
+@layer base {
+    * {
+        @apply border-border outline-ring/50;
+    }
+    body {
+        @apply bg-background text-foreground;
+    }
+    html {
+        @apply font-sans;
+    }
+}
