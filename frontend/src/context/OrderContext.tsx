@@ -2,6 +2,7 @@ import { createContext, useReducer, useRef, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { orderReducer, initialState } from '../reducer/orderReducer'
 import type { AppState, Action } from '../reducer/types'
+import { ORDER_DURATION_MS } from '../constants'
 
 interface OrderContextValue {
   state: AppState
@@ -30,7 +31,7 @@ export function OrderProvider({ children }: { children: ReactNode }) {
           handle: setTimeout(() => {
             dispatch({ type: 'ORDER_COMPLETE', botId: bot.id })
             delete botTimers.current[bot.id]
-          }, 10000),
+          }, ORDER_DURATION_MS),
         }
       }
     })
