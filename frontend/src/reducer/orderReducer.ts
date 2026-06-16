@@ -52,8 +52,36 @@ export function orderReducer(state: AppState, action: Action): AppState {
 
     case 'ADD_VIP_ORDER': {
       const newOrder: Order = { id: state.nextOrderId, type: 'VIP', status: 'PENDING', startedAt: null }
-      const inserted = insertVipOrder(state.orders, newOrder)
-      const { orders, bots } = assignToIdleBot(inserted, state.bots)
+      const ordersWithVip = insertVipOrder(state.orders, newOrder)
+
+      // Idle bot available — assign immediately, no preemption needed
+      if (state.bots.some(b => b.status === 'IDLE')) {
+        const { orders, bots } = assignToIdleBot(ordersWithVip, state.bots)
+        return { ...state, orders, bots, nextOrderId: state.nextOrderId + 1 }
+      }
+
+      // No idle bot — preempt the first bot found processing a NORMAL order
+      const botToPreempt = state.bots.find(b =>
+        b.status === 'PROCESSING' &&
+        b.processingOrderId !== null &&
+        state.orders.find(o => o.id === b.processingOrderId)?.type === 'NORMAL'
+      )
+
+      if (!botToPreempt || botToPreempt.processingOrderId === null) {
+        // All bots are busy with VIP orders — just queue the new VIP order
+        return { ...state, orders: ordersWithVip, nextOrderId: state.nextOrderId + 1 }
+      }
+
+      // Return the preempted normal order to the back of the pending queue
+      const preemptedOrder = state.orders.find(o => o.id === botToPreempt.processingOrderId)!
+      const ordersMinusPreempted = ordersWithVip.filter(o => o.id !== preemptedOrder.id)
+      const ordersRestored = reinsertOrder(ordersMinusPreempted, preemptedOrder)
+
+      // Free the preempted bot then assign the VIP order to it
+      const botsFreed = state.bots.map(b =>
+        b.id === botToPreempt.id ? { ...b, status: 'IDLE' as const, processingOrderId: null } : b
+      )
+      const { orders, bots } = assignToIdleBot(ordersRestored, botsFreed)
       return { ...state, orders, bots, nextOrderId: state.nextOrderId + 1 }
     }
 

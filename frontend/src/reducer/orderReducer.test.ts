@@ -128,13 +128,19 @@ describe('ORDER_COMPLETE', () => {
     expect(state.bots[0]).toMatchObject({ status: 'PROCESSING', processingOrderId: 2 })
   })
 
-  it('bot picks VIP order before Normal on chain', () => {
-    let state = orderReducer(initialState, { type: 'ADD_NORMAL_ORDER' }) // #1 Normal (bot picks)
-    state = orderReducer(state, { type: 'ADD_BOT' })
-    state = orderReducer(state, { type: 'ADD_NORMAL_ORDER' })             // #2 Normal
-    state = orderReducer(state, { type: 'ADD_VIP_ORDER' })                // #3 VIP (should be next)
-    state = orderReducer(state, { type: 'ORDER_COMPLETE', botId: 1 })
+  it('bot preempts normal order immediately when VIP order is added', () => {
+    let state = orderReducer(initialState, { type: 'ADD_NORMAL_ORDER' }) // #1 Normal
+    state = orderReducer(state, { type: 'ADD_BOT' })                      // bot picks #1
+    state = orderReducer(state, { type: 'ADD_NORMAL_ORDER' })             // #2 Normal → pending
+    state = orderReducer(state, { type: 'ADD_VIP_ORDER' })                // #3 VIP → preempts bot off #1
+    // Bot should immediately be processing VIP #3 (preemption, not waiting for #1 to finish)
     expect(state.bots[0].processingOrderId).toBe(3)
+    expect(state.orders.find(o => o.id === 3)?.status).toBe('PROCESSING')
+    // Normal #1 should be returned to pending
+    expect(state.orders.find(o => o.id === 1)?.status).toBe('PENDING')
+    // After VIP finishes, bot picks the next pending normal order
+    state = orderReducer(state, { type: 'ORDER_COMPLETE', botId: 1 })
+    expect(state.bots[0].processingOrderId).toBe(2)
   })
 
   it('order IDs are unique and increasing across all actions', () => {
