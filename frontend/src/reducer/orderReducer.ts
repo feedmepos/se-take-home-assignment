@@ -36,11 +36,6 @@ function assignToIdleBot(orders: Order[], bots: Bot[]): { orders: Order[]; bots:
   }
 }
 
-// @ts-ignore - Reserved for future use in ORDER_COMPLETE handler
-function reinsertOrder(orders: Order[], order: Order): Order[] {
-  const reset: Order = { ...order, status: 'PENDING', startedAt: null }
-  return order.type === 'VIP' ? insertVipOrder(orders, reset) : [...orders, reset]
-}
 
 export function orderReducer(state: AppState, action: Action): AppState {
   switch (action.type) {
