@@ -12,7 +12,7 @@ export function CircularProgress({ progress, countdown, size = 52, strokeWidth =
   const isActive = progress > 0
 
   return (
-    <div className="relative flex items-center justify-center flex-shrink-0" style={{ width: size, height: size }}>
+    <div className="relative flex items-center justify-center shrink-0" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90" aria-hidden="true">
         {/* Track ring */}
         <circle

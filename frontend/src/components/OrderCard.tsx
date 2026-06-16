@@ -19,9 +19,6 @@ export function OrderCard({ order }: OrderCardProps) {
         setProgress(Math.min(elapsed / 10000, 1))
         setCountdown(Math.max(Math.ceil(10 - elapsed / 1000), 0))
       }, 100)
-    } else {
-      setProgress(0)
-      setCountdown(10)
     }
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current)
@@ -50,7 +47,7 @@ export function OrderCard({ order }: OrderCardProps) {
             )}
           </div>
         </div>
-        <div className="flex items-center gap-1.5 flex-shrink-0">
+        <div className="flex items-center gap-1.5 shrink-0">
           <span className="text-[#22C55E] text-lg">✓</span>
           <span className="text-[11px] font-bold text-[#22C55E]">Done</span>
         </div>
@@ -79,7 +76,7 @@ export function OrderCard({ order }: OrderCardProps) {
             )}
           </div>
         </div>
-        <span className="text-[10px] font-bold uppercase tracking-wide text-[#DA291C] flex-shrink-0">Cooking</span>
+        <span className="text-[10px] font-bold uppercase tracking-wide text-[#DA291C] shrink-0">Cooking</span>
       </div>
     )
   }
@@ -105,7 +102,7 @@ export function OrderCard({ order }: OrderCardProps) {
           )}
         </div>
       </div>
-      <span className="text-[10px] font-bold uppercase tracking-wide text-gray-400 flex-shrink-0">Queued</span>
+      <span className="text-[10px] font-bold uppercase tracking-wide text-gray-400 shrink-0">Queued</span>
     </div>
   )
 }
