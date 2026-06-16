@@ -107,19 +107,36 @@ describe('REMOVE_BOT', () => {
     expect(pending[pending.length - 1]).toMatchObject({ id: 2, type: 'NORMAL', startedAt: null })
   })
 
-  it('removing VIP-processing bot triggers preemption of most-bottom Normal bot', () => {
+  it('REMOVE_BOT removes idle before normal-processing before vip-processing', () => {
+    let state = orderReducer(initialState, { type: 'ADD_NORMAL_ORDER' }) // #1 Normal
+    state = orderReducer(state, { type: 'ADD_VIP_ORDER' })               // #2 VIP (goes before #1)
+    state = orderReducer(state, { type: 'ADD_BOT' })                     // bot1 picks #2 VIP
+    state = orderReducer(state, { type: 'ADD_BOT' })                     // bot2 picks #1 Normal
+    state = orderReducer(state, { type: 'ADD_BOT' })                     // bot3 idle
+
+    state = orderReducer(state, { type: 'REMOVE_BOT' })
+    expect(state.bots.find(b => b.id === 3)).toBeUndefined() // idle bot3 removed first
+    expect(state.bots).toHaveLength(2)
+
+    state = orderReducer(state, { type: 'REMOVE_BOT' })
+    expect(state.bots.find(b => b.id === 2)).toBeUndefined() // normal-processing bot2 removed next
+    expect(state.bots).toHaveLength(1)
+
+    state = orderReducer(state, { type: 'REMOVE_BOT' })
+    expect(state.bots.find(b => b.id === 1)).toBeUndefined() // vip-processing bot1 removed last
+    expect(state.bots).toHaveLength(0)
+  })
+
+  it('REMOVE_BOT tiebreaker: removes normal bot with highest order ID (lowest queue priority) first', () => {
     let state = orderReducer(initialState, { type: 'ADD_NORMAL_ORDER' }) // #1 Normal
     state = orderReducer(state, { type: 'ADD_NORMAL_ORDER' })             // #2 Normal
     state = orderReducer(state, { type: 'ADD_BOT' })                      // bot1 picks #1
     state = orderReducer(state, { type: 'ADD_BOT' })                      // bot2 picks #2
-    state = orderReducer(state, { type: 'ADD_BOT' })                      // bot3 idle
-    state = orderReducer(state, { type: 'ADD_VIP_ORDER' })                // #3 VIP → bot3 picks it
-    expect(state.bots.find(b => b.id === 3)?.processingOrderId).toBe(3)
-    state = orderReducer(state, { type: 'REMOVE_BOT' })                   // remove bot3 → VIP#3 returns to PENDING
-    // bot2 is processing #2 (last/most-bottom Normal) → should preempt and take VIP#3
-    expect(state.bots.find(b => b.id === 2)?.processingOrderId).toBe(3)
-    expect(state.orders.find(o => o.id === 2)?.status).toBe('PENDING')
-    expect(state.orders.find(o => o.id === 3)?.status).toBe('PROCESSING')
+    // bot2 processes order#2 (higher orderId = lower queue priority) → removed first
+    state = orderReducer(state, { type: 'REMOVE_BOT' })
+    expect(state.bots.find(b => b.id === 2)).toBeUndefined()
+    expect(state.bots.find(b => b.id === 1)?.processingOrderId).toBe(1) // bot1 preserved on #1
+    expect(state.orders.find(o => o.id === 2)?.status).toBe('PENDING')  // #2 returned
   })
 })
 

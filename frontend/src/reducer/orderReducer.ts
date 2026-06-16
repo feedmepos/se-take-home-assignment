@@ -41,6 +41,28 @@ function assignToIdleBot(orders: Order[], bots: Bot[]): { orders: Order[]; bots:
   }
 }
 
+// Select which bot to remove based on priority:
+//   IDLE > Normal-processing > VIP-processing
+// Tiebreaker within each group: highest processingOrderId (lowest queue priority removed first).
+// For IDLE bots (no order): highest bot ID as tiebreaker.
+function selectBotToRemove(orders: Order[], bots: Bot[]): Bot {
+  const idleBots = bots.filter(b => b.status === 'IDLE')
+  if (idleBots.length > 0) {
+    return idleBots.reduce((a, b) => b.id > a.id ? b : a)
+  }
+
+  const normalBots = bots.filter(
+    b => b.processingOrderId !== null &&
+    orders.find(o => o.id === b.processingOrderId)?.type === 'NORMAL'
+  )
+  if (normalBots.length > 0) {
+    return normalBots.reduce((a, b) => (b.processingOrderId ?? 0) > (a.processingOrderId ?? 0) ? b : a)
+  }
+
+  // All remaining bots are VIP-processing
+  return bots.reduce((a, b) => (b.processingOrderId ?? 0) > (a.processingOrderId ?? 0) ? b : a)
+}
+
 // If a VIP order is PENDING and no idle bot is available, preempt the bot processing
 // the lowest-priority Normal order (last in the queue — "most bottom") and assign it
 // to the VIP order instead. Called after any action that may leave a VIP waiting.
@@ -96,7 +118,7 @@ export function orderReducer(state: AppState, action: Action): AppState {
 
     case 'REMOVE_BOT': {
       if (state.bots.length === 0) return state
-      const botToRemove = state.bots.reduce((prev, curr) => curr.id > prev.id ? curr : prev)
+      const botToRemove = selectBotToRemove(state.orders, state.bots)
       let orders = state.orders
       if (botToRemove.processingOrderId !== null) {
         const processingOrder = state.orders.find(o => o.id === botToRemove.processingOrderId)
