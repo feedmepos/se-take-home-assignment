@@ -1,4 +1,4 @@
-import { AppState, Action, Order, Bot } from './types'
+import type { AppState, Action, Order, Bot } from './types'
 
 export const initialState: AppState = {
   orders: [],
@@ -36,7 +36,8 @@ function assignToIdleBot(orders: Order[], bots: Bot[]): { orders: Order[]; bots:
   }
 }
 
-export function reinsertOrder(orders: Order[], order: Order): Order[] {
+// @ts-ignore - Reserved for future use in ORDER_COMPLETE handler
+function reinsertOrder(orders: Order[], order: Order): Order[] {
   const reset: Order = { ...order, status: 'PENDING', startedAt: null }
   return order.type === 'VIP' ? insertVipOrder(orders, reset) : [...orders, reset]
 }
