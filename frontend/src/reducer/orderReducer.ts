@@ -79,8 +79,36 @@ export function orderReducer(state: AppState, action: Action): AppState {
       return { ...state, orders, bots: state.bots.filter(b => b.id !== botToRemove.id) }
     }
 
-    case 'ORDER_COMPLETE':
-      return state
+    case 'ORDER_COMPLETE': {
+      const bot = state.bots.find(b => b.id === action.botId)
+      if (!bot || bot.processingOrderId === null) return state
+
+      const completedId = bot.processingOrderId
+      const updatedOrders = state.orders.map(o =>
+        o.id === completedId ? { ...o, status: 'COMPLETE' as const, startedAt: null } : o
+      )
+      const nextPending = updatedOrders.find(o => o.status === 'PENDING')
+
+      if (nextPending) {
+        return {
+          ...state,
+          orders: updatedOrders.map(o =>
+            o.id === nextPending.id ? { ...o, status: 'PROCESSING' as const, startedAt: Date.now() } : o
+          ),
+          bots: state.bots.map(b =>
+            b.id === action.botId ? { ...b, processingOrderId: nextPending.id } : b
+          ),
+        }
+      }
+
+      return {
+        ...state,
+        orders: updatedOrders,
+        bots: state.bots.map(b =>
+          b.id === action.botId ? { ...b, status: 'IDLE' as const, processingOrderId: null } : b
+        ),
+      }
+    }
 
     default:
       return state

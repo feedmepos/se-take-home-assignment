@@ -107,3 +107,43 @@ describe('REMOVE_BOT', () => {
     expect(pending[pending.length - 1]).toMatchObject({ id: 2, type: 'NORMAL', startedAt: null })
   })
 })
+
+describe('ORDER_COMPLETE', () => {
+  it('marks order COMPLETE and bot goes IDLE when no more pending', () => {
+    let state = orderReducer(initialState, { type: 'ADD_NORMAL_ORDER' })
+    state = orderReducer(state, { type: 'ADD_BOT' })
+    state = orderReducer(state, { type: 'ORDER_COMPLETE', botId: 1 })
+    expect(state.orders[0].status).toBe('COMPLETE')
+    expect(state.orders[0].startedAt).toBeNull()
+    expect(state.bots[0]).toMatchObject({ status: 'IDLE', processingOrderId: null })
+  })
+
+  it('bot picks next pending order after completing one', () => {
+    let state = orderReducer(initialState, { type: 'ADD_NORMAL_ORDER' }) // #1
+    state = orderReducer(state, { type: 'ADD_NORMAL_ORDER' })             // #2
+    state = orderReducer(state, { type: 'ADD_BOT' })                      // bot picks #1
+    state = orderReducer(state, { type: 'ORDER_COMPLETE', botId: 1 })
+    expect(state.orders.find(o => o.id === 1)?.status).toBe('COMPLETE')
+    expect(state.orders.find(o => o.id === 2)?.status).toBe('PROCESSING')
+    expect(state.bots[0]).toMatchObject({ status: 'PROCESSING', processingOrderId: 2 })
+  })
+
+  it('bot picks VIP order before Normal on chain', () => {
+    let state = orderReducer(initialState, { type: 'ADD_NORMAL_ORDER' }) // #1 Normal (bot picks)
+    state = orderReducer(state, { type: 'ADD_BOT' })
+    state = orderReducer(state, { type: 'ADD_NORMAL_ORDER' })             // #2 Normal
+    state = orderReducer(state, { type: 'ADD_VIP_ORDER' })                // #3 VIP (should be next)
+    state = orderReducer(state, { type: 'ORDER_COMPLETE', botId: 1 })
+    expect(state.bots[0].processingOrderId).toBe(3)
+  })
+
+  it('order IDs are unique and increasing across all actions', () => {
+    let state = orderReducer(initialState, { type: 'ADD_NORMAL_ORDER' })
+    state = orderReducer(state, { type: 'ADD_NORMAL_ORDER' })
+    state = orderReducer(state, { type: 'ADD_VIP_ORDER' })
+    const ids = state.orders.map(o => o.id)
+    expect(new Set(ids).size).toBe(3)
+    expect(Math.max(...ids)).toBe(3)
+    expect(Math.min(...ids)).toBe(1)
+  })
+})
