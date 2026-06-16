@@ -34,7 +34,7 @@ export function OrderCard({ order }: OrderCardProps) {
 
   if (order.status === 'COMPLETE') {
     return (
-      <Card className="flex items-center gap-3 p-3 rounded-2xl shadow-sm border border-green-100">
+      <Card className="flex items-center gap-3 p-3 rounded-2xl shadow-sm bg-green-50 border border-green-100">
         <div className="flex-1">
           <p className="font-bold text-sm text-gray-700">Order #{order.id}</p>
           <Badge

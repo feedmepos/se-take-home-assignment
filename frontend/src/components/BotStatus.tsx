@@ -6,7 +6,7 @@ export function BotStatus() {
   if (state.bots.length === 0) return null
 
   return (
-    <div className="px-4 pb-2">
+    <div className="px-4 pb-3 border-b border-gray-100">
       <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Bots</p>
       <div className="flex flex-wrap gap-2">
         {state.bots.map(bot => (

@@ -17,7 +17,7 @@ export function OrderBoard() {
         </p>
         <div className="flex flex-col gap-2">
           {state.bots.length === 0 ? (
-            <p className="text-sm text-gray-400">No bots active</p>
+            <p className="text-sm text-gray-400 italic py-4 text-center">No bots active</p>
           ) : (
             state.bots.map(bot => (
               <BotCard
@@ -37,7 +37,7 @@ export function OrderBoard() {
         </p>
         <div className="flex flex-col gap-2">
           {pendingOrders.length === 0 ? (
-            <p className="text-sm text-gray-400">No pending orders</p>
+            <p className="text-sm text-gray-400 italic py-4 text-center">No pending orders</p>
           ) : (
             pendingOrders.map(order => <OrderCard key={order.id} order={order} />)
           )}
@@ -51,7 +51,7 @@ export function OrderBoard() {
         </p>
         <div className="flex flex-col gap-2">
           {completeOrders.length === 0 ? (
-            <p className="text-sm text-gray-400">No completed orders</p>
+            <p className="text-sm text-gray-400 italic py-4 text-center">No completed orders</p>
           ) : (
             completeOrders.map(order => <OrderCard key={order.id} order={order} />)
           )}
