@@ -7,7 +7,8 @@
       "@/*": ["./src/*"]
     },
     "target": "es2023",
-    "lib": ["ES2023", "DOM"],
+    "strict": true,
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "module": "esnext",
     "types": ["vite/client"],
     "skipLibCheck": true,
