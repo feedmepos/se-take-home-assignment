@@ -1,6 +1,4 @@
 import type { Bot, Order } from '../reducer/types'
-import { Card } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 
 interface BotCardProps {
   bot: Bot
@@ -8,16 +6,24 @@ interface BotCardProps {
 }
 
 export function BotCard({ bot, processingOrder }: BotCardProps) {
+  const isProcessing = bot.status === 'PROCESSING'
+
   return (
-    <Card className="p-3 rounded-2xl shadow-sm min-w-[130px]">
-      <p className="font-bold text-sm text-gray-800">Bot #{bot.id}</p>
-      {bot.status === 'IDLE' ? (
-        <Badge variant="secondary" className="mt-1 text-xs">○ Idle</Badge>
-      ) : (
-        <Badge className="mt-1 text-xs bg-orange-500 text-white hover:bg-orange-500">
-          ● Order #{processingOrder?.id}
-        </Badge>
-      )}
-    </Card>
+    <div className={`bg-white rounded-2xl px-3 py-2.5 shadow-sm flex items-center gap-2.5 min-w-[140px] border-l-4 transition-all ${isProcessing ? 'border-[#DA291C]' : 'border-gray-200'}`}>
+      <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-sm ${isProcessing ? 'bg-[#DA291C]' : 'bg-gray-100'}`}>
+        <span className={isProcessing ? 'text-white' : 'text-gray-400'}>🤖</span>
+      </div>
+      <div className="min-w-0">
+        <p className="text-[11px] font-black text-[#27251F] leading-none">Bot #{bot.id}</p>
+        {isProcessing ? (
+          <p className="text-[10px] font-semibold text-[#DA291C] mt-0.5 flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#DA291C] animate-pulse inline-block" />
+            Order #{processingOrder?.id}
+          </p>
+        ) : (
+          <p className="text-[10px] text-gray-400 mt-0.5 font-medium">Idle</p>
+        )}
+      </div>
+    </div>
   )
 }

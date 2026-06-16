@@ -6,16 +6,28 @@ import { OrderBoard } from './components/OrderBoard'
 export default function App() {
   return (
     <OrderProvider>
-      <div className="min-h-screen bg-gray-50">
-        <header className="bg-gray-900 text-white px-4 py-3 shadow-lg sticky top-0 z-10">
+      <div className="min-h-screen bg-[#F5F0E8]">
+        {/* Header — McDonald's red with golden M branding */}
+        <header className="bg-[#DA291C] text-white px-4 py-3 shadow-lg sticky top-0 z-10">
           <div className="max-w-5xl mx-auto flex items-center justify-between">
-            <h1 className="text-lg font-bold tracking-tight">🍔 McDonald's Order Controller</h1>
-            <span className="text-xs text-gray-400">Order Management System</span>
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-[#FFC72C] flex items-center justify-center shadow-md flex-shrink-0">
+                <span className="text-[#DA291C] font-black text-lg leading-none">M</span>
+              </div>
+              <div>
+                <h1 className="text-base font-black tracking-tight leading-tight">McDonald's</h1>
+                <p className="text-[11px] text-red-200 leading-none">Order Controller</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="hidden sm:block text-[11px] text-red-200 font-medium">Kitchen Dashboard</span>
+            </div>
           </div>
         </header>
-        <main className="max-w-5xl mx-auto pt-2">
+
+        <main className="max-w-5xl mx-auto">
           <ControlPanel />
-          {/* BotStatus shows on mobile/tablet; hidden on lg (shown in OrderBoard sidebar) */}
+          {/* BotStatus: visible on mobile/tablet only — desktop shows bots in OrderBoard sidebar */}
           <div className="lg:hidden">
             <BotStatus />
           </div>

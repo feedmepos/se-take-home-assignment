@@ -6,9 +6,14 @@ export function BotStatus() {
   if (state.bots.length === 0) return null
 
   return (
-    <div className="px-4 pb-3 border-b border-gray-100">
-      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Bots</p>
-      <div className="flex flex-wrap gap-2">
+    <div className="px-4 py-3 border-b border-[#EDE8E1]">
+      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2.5">
+        Active Bots
+        <span className="ml-2 px-1.5 py-0.5 rounded-full bg-[#27251F] text-white text-[9px]">
+          {state.bots.length}
+        </span>
+      </p>
+      <div className="flex gap-2 overflow-x-auto pb-1">
         {state.bots.map(bot => (
           <BotCard
             key={bot.id}

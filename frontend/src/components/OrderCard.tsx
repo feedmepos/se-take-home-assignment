@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Order } from '../reducer/types'
 import { CircularProgress } from './CircularProgress'
-import { Card } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 
 interface OrderCardProps {
   order: Order
@@ -34,39 +32,80 @@ export function OrderCard({ order }: OrderCardProps) {
 
   if (order.status === 'COMPLETE') {
     return (
-      <Card className="flex items-center gap-3 p-3 rounded-2xl shadow-sm bg-green-50 border border-green-100">
-        <div className="flex-1">
-          <p className="font-bold text-sm text-gray-700">Order #{order.id}</p>
-          <Badge
-            className={isVip ? 'bg-amber-500 text-white mt-1' : 'mt-1'}
-            variant={isVip ? 'default' : 'secondary'}
-          >
-            {isVip ? '👑 VIP' : 'Normal'}
-          </Badge>
+      <div className="bg-white rounded-2xl shadow-sm border-l-4 border-[#22C55E] flex items-center gap-3 px-4 py-3">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-black uppercase tracking-widest text-gray-400">Order</span>
+            <span className="text-xl font-black text-[#27251F] leading-none">#{order.id}</span>
+          </div>
+          <div className="mt-1">
+            {isVip ? (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FFC72C] text-[#27251F]">
+                👑 VIP
+              </span>
+            ) : (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-gray-100 text-gray-500">
+                Normal
+              </span>
+            )}
+          </div>
         </div>
-        <span className="text-green-500 text-lg">✅</span>
-      </Card>
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          <span className="text-[#22C55E] text-lg">✓</span>
+          <span className="text-[11px] font-bold text-[#22C55E]">Done</span>
+        </div>
+      </div>
     )
   }
 
-  return (
-    <Card className={`flex items-center gap-3 p-3 rounded-2xl shadow-md ${order.status === 'PROCESSING' ? 'border border-orange-200' : ''}`}>
-      <CircularProgress
-        progress={order.status === 'PROCESSING' ? progress : 0}
-        countdown={order.status === 'PROCESSING' ? countdown : 10}
-      />
-      <div className="flex-1">
-        <p className="font-bold text-sm text-gray-800">Order #{order.id}</p>
-        <Badge
-          className={isVip ? 'bg-amber-500 text-white mt-1' : 'mt-1'}
-          variant={isVip ? 'default' : 'secondary'}
-        >
-          {isVip ? '👑 VIP' : 'Normal'}
-        </Badge>
+  if (order.status === 'PROCESSING') {
+    return (
+      <div className="bg-white rounded-2xl shadow-md border-l-4 border-[#DA291C] flex items-center gap-3 px-4 py-3">
+        <CircularProgress progress={progress} countdown={countdown} size={52} />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-black uppercase tracking-widest text-gray-400">Order</span>
+            <span className="text-xl font-black text-[#27251F] leading-none">#{order.id}</span>
+          </div>
+          <div className="mt-1">
+            {isVip ? (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FFC72C] text-[#27251F]">
+                👑 VIP
+              </span>
+            ) : (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-gray-100 text-gray-500">
+                Normal
+              </span>
+            )}
+          </div>
+        </div>
+        <span className="text-[10px] font-bold uppercase tracking-wide text-[#DA291C] flex-shrink-0">Cooking</span>
       </div>
-      {order.status === 'PROCESSING' && (
-        <span className="text-xs text-orange-400 font-medium">Processing</span>
-      )}
-    </Card>
+    )
+  }
+
+  // PENDING
+  return (
+    <div className="bg-white rounded-2xl shadow-sm border-l-4 border-[#FFC72C] flex items-center gap-3 px-4 py-3">
+      <CircularProgress progress={0} countdown={10} size={52} />
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] font-black uppercase tracking-widest text-gray-400">Order</span>
+          <span className="text-xl font-black text-[#27251F] leading-none">#{order.id}</span>
+        </div>
+        <div className="mt-1">
+          {isVip ? (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FFC72C] text-[#27251F]">
+              👑 VIP
+            </span>
+          ) : (
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-gray-100 text-gray-500">
+              Normal
+            </span>
+          )}
+        </div>
+      </div>
+      <span className="text-[10px] font-bold uppercase tracking-wide text-gray-400 flex-shrink-0">Queued</span>
+    </div>
   )
 }
