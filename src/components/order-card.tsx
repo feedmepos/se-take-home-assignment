@@ -29,7 +29,7 @@ export function OrderCard({ order }: OrderCardProps) {
 
         <div className="flex items-center gap-2">
           {order.status === 'COMPLETE' && (
-            <span className="text-xs text-slate-500 font-mono">
+            <span data-testid="completed-at" className="text-xs text-slate-500 font-mono">
               {formatTime(order.completedAt)}
             </span>
           )}
