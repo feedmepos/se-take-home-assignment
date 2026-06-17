@@ -1,12 +1,12 @@
 {
-  "name": "se-take-home-assignment",
+  "name": "order-controller-frontend",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint ."
   },
   "dependencies": {
     "next": "16.2.9",
