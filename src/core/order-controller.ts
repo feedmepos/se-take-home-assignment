@@ -9,6 +9,8 @@
 //   insertOrder() so it sorts back to its exact original slot by id
 // --------------------------------------------------------------------------
 
+import { insertOrder, pickNext } from './queue';
+import { type Scheduler, type TimerHandle, systemScheduler } from './scheduler';
 import type {
   Bot,
   CompleteOrder,
@@ -18,8 +20,6 @@ import type {
   ProcessingOrder,
   Snapshot,
 } from './types';
-import { insertOrder, pickNext } from './queue';
-import { type Scheduler, type TimerHandle, systemScheduler } from './scheduler';
 
 /** How long a bot spends processing one order. */
 const PROCESS_MS = 10_000;
@@ -207,7 +207,8 @@ export class OrderController {
   }
 
   private buildSnapshot(): Snapshot {
-    const processing: ProcessingOrder[] = [...this.inFlight.values()].map((e) => e.order);
+    // Array.from avoids the for-of iteration-protocol requirement on MapIterator
+    const processing: ProcessingOrder[] = Array.from(this.inFlight.values()).map((e) => e.order);
     return {
       pending: this.pending,
       processing,
@@ -219,7 +220,8 @@ export class OrderController {
   /** Rebuild cached snapshot and notify all subscribers. */
   private commit(): void {
     this.cachedSnapshot = this.buildSnapshot();
-    for (const listener of this.listeners) {
+    // Array.from converts the Set so for-of works regardless of TS target quirks
+    for (const listener of Array.from(this.listeners)) {
       listener();
     }
   }
