@@ -1,30 +1,30 @@
-export type OrderType = 'NORMAL' | 'VIP'
-export type OrderStatus = 'PENDING' | 'PROCESSING' | 'COMPLETE'
-export type BotStatus = 'IDLE' | 'PROCESSING'
+export type OrderType = "NORMAL" | "VIP";
+export type OrderStatus = "PENDING" | "PROCESSING" | "COMPLETE";
+export type BotStatus = "IDLE" | "PROCESSING";
 
 export interface Order {
-  id: number
-  type: OrderType
-  status: OrderStatus
-  startedAt: number | null   // timestamp when bot picked it up; drives circular progress
+  id: number;
+  type: OrderType;
+  status: OrderStatus;
+  startedAt: number | null; // timestamp when bot picked it up; drives circular progress
 }
 
 export interface Bot {
-  id: number
-  status: BotStatus
-  processingOrderId: number | null
+  id: number;
+  status: BotStatus;
+  processingOrderId: number | null;
 }
 
 export interface AppState {
-  orders: Order[]
-  bots: Bot[]
-  nextOrderId: number
-  nextBotId: number
+  orders: Order[];
+  bots: Bot[];
+  nextOrderId: number;
+  nextBotId: number;
 }
 
 export type Action =
-  | { type: 'ADD_NORMAL_ORDER' }
-  | { type: 'ADD_VIP_ORDER' }
-  | { type: 'ADD_BOT' }
-  | { type: 'REMOVE_BOT' }
-  | { type: 'ORDER_COMPLETE'; botId: number }
+  | { type: "ADD_NORMAL_ORDER" }
+  | { type: "ADD_VIP_ORDER" }
+  | { type: "ADD_BOT" }
+  | { type: "REMOVE_BOT" }
+  | { type: "ORDER_COMPLETE"; botId: number };

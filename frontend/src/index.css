@@ -8,119 +8,119 @@
 /* Primary Red : #DA291C  Secondary Gold : #FFC72C  Text : #27251F             */
 
 @theme inline {
-    --font-sans: system-ui, 'Helvetica Neue', Arial, sans-serif;
-    --font-heading: var(--font-sans);
+  --font-sans: system-ui, "Helvetica Neue", Arial, sans-serif;
+  --font-heading: var(--font-sans);
 
-    /* McDonald's brand colours exposed as Tailwind utilities */
-    --color-mcd-red:         #DA291C;
-    --color-mcd-red-dark:    #B01E14;
-    --color-mcd-red-light:   #F44336;
-    --color-mcd-gold:        #FFC72C;
-    --color-mcd-gold-dark:   #E6A800;
-    --color-mcd-gold-light:  #FFD966;
-    --color-mcd-black:       #27251F;
-    --color-mcd-warm-white:  #F5F0E8;
+  /* McDonald's brand colours exposed as Tailwind utilities */
+  --color-mcd-red: #da291c;
+  --color-mcd-red-dark: #b01e14;
+  --color-mcd-red-light: #f44336;
+  --color-mcd-gold: #ffc72c;
+  --color-mcd-gold-dark: #e6a800;
+  --color-mcd-gold-light: #ffd966;
+  --color-mcd-black: #27251f;
+  --color-mcd-warm-white: #f5f0e8;
 
-    /* shadcn semantic tokens → resolved from CSS vars below */
-    --color-background:          var(--background);
-    --color-foreground:          var(--foreground);
-    --color-card:                var(--card);
-    --color-card-foreground:     var(--card-foreground);
-    --color-popover:             var(--popover);
-    --color-popover-foreground:  var(--popover-foreground);
-    --color-primary:             var(--primary);
-    --color-primary-foreground:  var(--primary-foreground);
-    --color-secondary:           var(--secondary);
-    --color-secondary-foreground:var(--secondary-foreground);
-    --color-muted:               var(--muted);
-    --color-muted-foreground:    var(--muted-foreground);
-    --color-accent:              var(--accent);
-    --color-accent-foreground:   var(--accent-foreground);
-    --color-destructive:         var(--destructive);
-    --color-border:              var(--border);
-    --color-input:               var(--input);
-    --color-ring:                var(--ring);
+  /* shadcn semantic tokens → resolved from CSS vars below */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
 
-    --radius-sm:  calc(var(--radius) * 0.6);
-    --radius-md:  calc(var(--radius) * 0.8);
-    --radius-lg:  var(--radius);
-    --radius-xl:  calc(var(--radius) * 1.4);
-    --radius-2xl: calc(var(--radius) * 1.8);
-    --radius-3xl: calc(var(--radius) * 2.2);
-    --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
 /* ─── Light Mode ─────────────────────────────────────────────────────────── */
 :root {
-    /* Semantic surface colours */
-    --background:          #F5F0E8;   /* warm off-white — McDonald's tray liner feel */
-    --foreground:          #27251F;   /* near-black text */
-    --card:                #FFFFFF;
-    --card-foreground:     #27251F;
-    --popover:             #FFFFFF;
-    --popover-foreground:  #27251F;
+  /* Semantic surface colours */
+  --background: #f5f0e8; /* warm off-white — McDonald's tray liner feel */
+  --foreground: #27251f; /* near-black text */
+  --card: #ffffff;
+  --card-foreground: #27251f;
+  --popover: #ffffff;
+  --popover-foreground: #27251f;
 
-    /* Primary = McDonald's Red */
-    --primary:             #DA291C;
-    --primary-foreground:  #FFFFFF;
+  /* Primary = McDonald's Red */
+  --primary: #da291c;
+  --primary-foreground: #ffffff;
 
-    /* Secondary = McDonald's Gold */
-    --secondary:           #FFC72C;
-    --secondary-foreground:#27251F;
+  /* Secondary = McDonald's Gold */
+  --secondary: #ffc72c;
+  --secondary-foreground: #27251f;
 
-    --muted:               #F0EBE0;
-    --muted-foreground:    #6B6157;
+  --muted: #f0ebe0;
+  --muted-foreground: #6b6157;
 
-    /* Accent = Gold highlight */
-    --accent:              #FFC72C;
-    --accent-foreground:   #27251F;
+  /* Accent = Gold highlight */
+  --accent: #ffc72c;
+  --accent-foreground: #27251f;
 
-    --destructive:         #DA291C;
+  --destructive: #da291c;
 
-    --border:              #DDD5C8;
-    --input:               #DDD5C8;
-    --ring:                #DA291C;
+  --border: #ddd5c8;
+  --input: #ddd5c8;
+  --ring: #da291c;
 
-    --radius: 0.5rem;
+  --radius: 0.5rem;
 }
 
 /* ─── Dark Mode (optional — keeps McDonald's red/gold identity) ──────────── */
 .dark {
-    --background:          #1A1714;
-    --foreground:          #F5F0E8;
-    --card:                #27251F;
-    --card-foreground:     #F5F0E8;
-    --popover:             #27251F;
-    --popover-foreground:  #F5F0E8;
+  --background: #1a1714;
+  --foreground: #f5f0e8;
+  --card: #27251f;
+  --card-foreground: #f5f0e8;
+  --popover: #27251f;
+  --popover-foreground: #f5f0e8;
 
-    --primary:             #DA291C;
-    --primary-foreground:  #FFFFFF;
+  --primary: #da291c;
+  --primary-foreground: #ffffff;
 
-    --secondary:           #FFC72C;
-    --secondary-foreground:#27251F;
+  --secondary: #ffc72c;
+  --secondary-foreground: #27251f;
 
-    --muted:               #3A3530;
-    --muted-foreground:    #A09890;
+  --muted: #3a3530;
+  --muted-foreground: #a09890;
 
-    --accent:              #FFC72C;
-    --accent-foreground:   #27251F;
+  --accent: #ffc72c;
+  --accent-foreground: #27251f;
 
-    --destructive:         #F44336;
+  --destructive: #f44336;
 
-    --border:              rgba(255 255 255 / 12%);
-    --input:               rgba(255 255 255 / 15%);
-    --ring:                #FFC72C;
+  --border: rgba(255 255 255 / 12%);
+  --input: rgba(255 255 255 / 15%);
+  --ring: #ffc72c;
 }
 
 /* ─── Base Reset ─────────────────────────────────────────────────────────── */
 @layer base {
-    * {
-        @apply border-border outline-ring/50;
-    }
-    body {
-        @apply bg-background text-foreground;
-    }
-    html {
-        @apply font-sans;
-    }
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
 }
