@@ -10,7 +10,7 @@ export function BotCard({ bot, processingOrder }: BotCardProps) {
 
   return (
     <div
-      className={`bg-white rounded-2xl px-3 py-2.5 shadow-sm flex items-center gap-2.5 min-w-[140px] border-l-4 transition-all ${isProcessing ? "border-mcd-red" : "border-gray-200"}`}
+      className={`bg-white rounded-2xl px-3 py-2.5 shadow-sm flex items-center gap-2.5 min-w-35 border-l-4 transition-all ${isProcessing ? "border-mcd-red" : "border-gray-200"}`}
     >
       <div
         className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-sm ${isProcessing ? "bg-mcd-red" : "bg-gray-100"}`}
