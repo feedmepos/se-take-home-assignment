@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { PendingOrder } from './types';
 import { compareOrders, insertOrder, pickNext } from './queue';
+import type { PendingOrder } from './types';
 
 // Helper to build a minimal PendingOrder for testing
 function make(id: number, type: PendingOrder['type']): PendingOrder {

@@ -52,7 +52,7 @@ describe('order ordering', () => {
   it('order ids are strictly increasing and unique', () => {
     const ctrl = new OrderController();
     ctrl.addNormalOrder(); // id 1
-    ctrl.addVipOrder();    // id 2
+    ctrl.addVipOrder(); // id 2
     ctrl.addNormalOrder(); // id 3
     const { pending } = ctrl.getSnapshot();
     const ids = pending.map((o) => o.id);
@@ -131,7 +131,7 @@ describe('-Bot', () => {
   it('mid-process: returns order to its exact original slot and cancels timer (no leak)', () => {
     const ctrl = new OrderController();
     // Queue: VIP-1, NORMAL-2, NORMAL-3
-    ctrl.addVipOrder();    // id 1
+    ctrl.addVipOrder(); // id 1
     ctrl.addNormalOrder(); // id 2
     ctrl.addNormalOrder(); // id 3
 
@@ -163,7 +163,7 @@ describe('-Bot', () => {
 
   it('mid-process: a new bot picks the returned order from its correct slot', () => {
     const ctrl = new OrderController();
-    ctrl.addVipOrder();    // id 1
+    ctrl.addVipOrder(); // id 1
     ctrl.addNormalOrder(); // id 2
     ctrl.addBot();
 
