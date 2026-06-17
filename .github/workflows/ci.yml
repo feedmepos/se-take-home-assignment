@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: |
+            frontend/package-lock.json
+            backend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: npm ci --prefix frontend
+
+      - name: Install backend dependencies
+        run: npm ci --prefix backend
+
+      - name: Lint frontend
+        run: npm --prefix frontend run lint
+
+      - name: Build frontend
+        run: npm --prefix frontend run build
+
+      - name: Test backend CLI
+        run: bash scripts/test.sh
+
+      - name: Build backend CLI
+        run: bash scripts/build.sh
+
+      - name: Run backend CLI
+        run: bash scripts/run.sh
+
+      - name: Verify result timestamps
+        run: grep -Eq "\\[[0-9]{2}:[0-9]{2}:[0-9]{2}\\] Completed order" scripts/result.txt

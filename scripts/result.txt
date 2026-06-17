@@ -1,26 +1,20 @@
-McDonald's Order Management System - Simulation Results
-
-[14:32:01] System initialized with 0 bots
-[14:32:01] Created Normal Order #1001 - Status: PENDING
-[14:32:02] Created VIP Order #1002 - Status: PENDING
-[14:32:02] Created Normal Order #1003 - Status: PENDING
-[14:32:03] Bot #1 created - Status: ACTIVE
-[14:32:03] Bot #1 picked up VIP Order #1002 - Status: PROCESSING
-[14:32:04] Bot #2 created - Status: ACTIVE
-[14:32:04] Bot #2 picked up Normal Order #1001 - Status: PROCESSING
-[14:32:13] Bot #1 completed VIP Order #1002 - Status: COMPLETE (Processing time: 10s)
-[14:32:13] Bot #1 picked up Normal Order #1003 - Status: PROCESSING
-[14:32:14] Bot #2 completed Normal Order #1001 - Status: COMPLETE (Processing time: 10s)
-[14:32:14] Bot #2 is now IDLE - No pending orders
-[14:32:15] Created VIP Order #1004 - Status: PENDING
-[14:32:15] Bot #2 picked up VIP Order #1004 - Status: PROCESSING
-[14:32:23] Bot #1 completed Normal Order #1003 - Status: COMPLETE (Processing time: 10s)
-[14:32:25] Bot #2 completed VIP Order #1004 - Status: COMPLETE (Processing time: 10s)
-[14:32:25] Bot #2 destroyed while IDLE
-[14:32:26] Bot #1 is now IDLE - No pending orders
-
-Final Status:
-- Total Orders Processed: 4 (2 VIP, 2 Normal)
-- Orders Completed: 4
-- Active Bots: 1
-- Pending Orders: 0
+[21:09:55] Added bot #1
+[21:09:55] Created Normal order #1
+[21:09:55] Bot #1 started order #1; completes at 21:10:05
+[21:09:55] Created Normal order #2
+[21:09:55] Created VIP order #3
+[21:10:05] Completed order #1 by bot #1
+[21:10:05] Bot #1 started order #3; completes at 21:10:15
+[21:10:15] Completed order #3 by bot #1
+[21:10:15] Bot #1 started order #2; completes at 21:10:25
+[21:10:15] Added bot #2
+[21:10:15] Created VIP order #4
+[21:10:15] Bot #2 started order #4; completes at 21:10:25
+[21:10:15] Created Normal order #5
+[21:10:15] Removed bot #2; returned order #4 to pending
+[21:10:25] Completed order #2 by bot #1
+[21:10:25] Bot #1 started order #4; completes at 21:10:35
+[21:10:35] Completed order #4 by bot #1
+[21:10:35] Bot #1 started order #5; completes at 21:10:45
+[21:10:45] Completed order #5 by bot #1
+[21:10:45] time=21:10:45 pending=[] cooking=[] completed=[#1(Normal), #3(VIP), #2(Normal), #4(VIP), #5(Normal)] idleBots=[1]

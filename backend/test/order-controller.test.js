@@ -1,0 +1,166 @@
+"use strict";
+
+const assert = require("node:assert/strict");
+const test = require("node:test");
+const {
+  ORDER_KINDS,
+  OrderController,
+  formatTime,
+  getCurrentTimeLabel,
+  parseTime,
+  runDemoScenario,
+} = require("../src/order-controller");
+const {
+  advanceClockWithOutput,
+  executeCommandWithOutput,
+  printHelp,
+  runCommands,
+} = require("../src/cli");
+
+test("VIP orders are queued before Normal orders and after existing VIP orders", () => {
+  const controller = new OrderController();
+
+  controller.createOrder(ORDER_KINDS.NORMAL);
+  controller.createOrder(ORDER_KINDS.VIP);
+  controller.createOrder(ORDER_KINDS.NORMAL);
+  controller.createOrder(ORDER_KINDS.VIP);
+
+  assert.deepEqual(
+    controller.snapshot().pending.map((order) => order.id),
+    [2, 4, 1, 3],
+  );
+});
+
+test("orders receive unique increasing ids", () => {
+  const controller = new OrderController();
+
+  const orders = [
+    controller.createOrder(ORDER_KINDS.NORMAL),
+    controller.createOrder(ORDER_KINDS.VIP),
+    controller.createOrder(ORDER_KINDS.NORMAL),
+  ];
+
+  assert.deepEqual(
+    orders.map((order) => order.id),
+    [1, 2, 3],
+  );
+});
+
+test("a bot completes one order after 10 seconds and immediately starts the next", () => {
+  const controller = new OrderController({ startTime: "09:30:00" });
+
+  controller.addBot();
+  controller.createOrder(ORDER_KINDS.NORMAL);
+  controller.createOrder(ORDER_KINDS.NORMAL);
+
+  assert.equal(controller.snapshot().bots[0].job.order.id, 1);
+
+  controller.tick(9);
+  assert.equal(controller.snapshot().completed.length, 0);
+
+  controller.tick(1);
+  const snapshot = controller.snapshot();
+
+  assert.equal(snapshot.completed.length, 1);
+  assert.equal(snapshot.completed[0].order.id, 1);
+  assert.equal(snapshot.completed[0].completedAt, "09:30:10");
+  assert.equal(snapshot.bots[0].job.order.id, 2);
+});
+
+test("removing the latest busy bot returns its order to the priority queue", () => {
+  const controller = new OrderController();
+
+  controller.addBot();
+  controller.addBot();
+  controller.createOrder(ORDER_KINDS.NORMAL);
+  controller.createOrder(ORDER_KINDS.VIP);
+  controller.createOrder(ORDER_KINDS.NORMAL);
+
+  controller.removeLatestBot();
+
+  const snapshot = controller.snapshot();
+
+  assert.equal(snapshot.bots.length, 1);
+  assert.deepEqual(
+    snapshot.pending.map((order) => order.id),
+    [2, 3],
+  );
+  assert.equal(snapshot.bots[0].job.order.id, 1);
+});
+
+test("time helpers enforce and emit HH:MM:SS format", () => {
+  assert.equal(parseTime("23:59:58"), 86398);
+  assert.equal(formatTime(86401), "00:00:01");
+  assert.throws(() => parseTime("9:00"), /Invalid time/);
+});
+
+test("demo and scripted CLI output include completion timestamps", () => {
+  const demoOutput = runDemoScenario({ startTime: "08:00:00" });
+  const scriptedOutput = runCommands([
+    "add-bot",
+    "normal",
+    "tick 10",
+    "status",
+  ], { startTime: "08:00:00" });
+
+  assert.match(demoOutput, /\[08:00:10\] Completed order #1 by bot #1/);
+  assert.match(scriptedOutput, /\[08:00:10\] Completed order #1 by bot #1/);
+  assert.match(scriptedOutput, /\[08:00:10\] time=08:00:10/);
+});
+
+test("interactive command output includes immediate events and current status", () => {
+  const controller = new OrderController({ startTime: "08:00:00" });
+
+  assert.deepEqual(
+    executeCommandWithOutput(controller, "+", { includeStatus: true }),
+    [
+      "[08:00:00] Added bot #1",
+      "[08:00:00] time=08:00:00 pending=[] cooking=[] completed=[] idleBots=[1]",
+    ],
+  );
+
+  assert.deepEqual(
+    executeCommandWithOutput(controller, "v", { includeStatus: true }),
+    [
+      "[08:00:00] Created VIP order #1",
+      "[08:00:00] Bot #1 started order #1; completes at 08:00:10",
+      "[08:00:00] time=08:00:00 pending=[] cooking=[bot #1->#1(VIP)] completed=[] idleBots=[]",
+    ],
+  );
+});
+
+test("automatic clock output reports completed orders without a tick command", () => {
+  const controller = new OrderController({ startTime: "08:00:00" });
+  executeCommandWithOutput(controller, "+bot", { includeStatus: true });
+  executeCommandWithOutput(controller, "v", { includeStatus: true });
+
+  assert.deepEqual(advanceClockWithOutput(controller, 9), []);
+  assert.deepEqual(
+    advanceClockWithOutput(controller),
+    [
+      "[08:00:10] Completed order #1 by bot #1",
+      "[08:00:10] time=08:00:10 pending=[] cooking=[] completed=[#1(VIP)] idleBots=[1]",
+    ],
+  );
+});
+
+test("help lists interactive shortcuts and hides tick", () => {
+  const helpText = printHelp();
+
+  assert.match(helpText, /normal\s+n\s+Create a Normal order/);
+  assert.match(helpText, /vip\s+v\s+Create a VIP order/);
+  assert.match(helpText, /\+bot\s+\+\s+Add one cooking bot/);
+  assert.match(helpText, /-bot\s+-\s+Remove the latest bot/);
+  assert.match(helpText, /status\s+s\s+Print the current kitchen state/);
+  assert.match(helpText, /help\s+h, \?\s+Show this help/);
+  assert.match(helpText, /exit\s+q\s+Stop interactive mode/);
+  assert.doesNotMatch(helpText, /tick/);
+});
+
+test("default controller time starts from the current local time", () => {
+  const before = getCurrentTimeLabel();
+  const controller = new OrderController();
+  const after = getCurrentTimeLabel();
+
+  assert.ok([before, after].includes(controller.snapshot().time));
+});
