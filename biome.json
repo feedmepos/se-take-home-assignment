@@ -31,6 +31,6 @@
     }
   },
   "files": {
-    "ignore": [".next", "node_modules", "playwright-report", "test-results"]
+    "ignore": [".next", "node_modules", "playwright-report", "test-results", "next-env.d.ts"]
   }
 }
