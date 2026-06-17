@@ -1,0 +1,29 @@
+{
+  "name": "vite-vue-demo",
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "2.3.2",
+    "element-plus": "2.14.2",
+    "pinia": "3.0.4",
+    "vue": "3.5.38",
+    "vue-router": "5.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "25.9.3",
+    "@vitejs/plugin-basic-ssl": "2.3.0",
+    "@vitejs/plugin-vue": "6.0.7",
+    "@vue/test-utils": "^2.4.11",
+    "happy-dom": "^20.10.4",
+    "sass": "1.101.0",
+    "typescript": "6.0.3",
+    "vite": "8.0.10",
+    "vitest": "4.1.9"
+  }
+}
