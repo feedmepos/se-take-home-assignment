@@ -1,5 +1,6 @@
 import { useOrderContext } from "../hooks/useOrderContext";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export function ControlPanel() {
   const { state, dispatch } = useOrderContext();
@@ -39,17 +40,26 @@ export function ControlPanel() {
           <div className="flex flex-wrap gap-2">
             <Button
               onClick={() => dispatch({ type: "ADD_BOT" })}
-              className="rounded-full px-5 h-10 text-sm font-semibold bg-mcd-black hover:bg-[#3D3830] text-white border-0 shadow-sm"
+              className="rounded-full px-5 h-10 text-sm font-semibold bg-mcd-black hover:bg-[#3D3830] text-white border-0 bg-clip-border shadow-sm"
             >
               + Bot
             </Button>
-            <Button
-              onClick={() => dispatch({ type: "REMOVE_BOT" })}
-              className="rounded-full px-5 h-10 text-sm font-semibold border-2 border-mcd-red text-mcd-red bg-transparent hover:bg-mcd-red hover:text-white disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
-              disabled={state.bots.length === 0}
+            <span
+              className={cn(state.bots.length === 0 && "cursor-not-allowed")}
             >
-              - Bot
-            </Button>
+              <Button
+                onClick={() => dispatch({ type: "REMOVE_BOT" })}
+                className={cn(
+                  "rounded-full px-5 h-10 text-sm font-semibold border-2 border-mcd-red bg-clip-border shadow-sm",
+                  state.bots.length === 0
+                    ? "opacity-40 text-mcd-red bg-transparent"
+                    : "text-mcd-red bg-transparent hover:bg-mcd-red hover:text-white cursor-pointer",
+                )}
+                disabled={state.bots.length === 0}
+              >
+                - Bot
+              </Button>
+            </span>
           </div>
         </div>
       </div>
