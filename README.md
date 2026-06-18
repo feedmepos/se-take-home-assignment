@@ -62,3 +62,88 @@ You must implement **either** frontend or backend components as described below:
 - Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.
 - Utilize coding agent to complete the assignment scope your working hour within 1 hour, do not over engineer it. However, ensure you read and understand what your code doing and apply good engineering practice.
 - Complete the implementation as clean as possible, clean code is a strong plus point, do not bring in all the fancy tech stuff.
+
+---
+
+## Solution — Frontend (Next.js + TypeScript)
+
+**Live demo:** [mcdonalds-order-bots-haikal.vercel.app](https://mcdonalds-order-bots-haikal.vercel.app/)  
+**Author:** Haikal Azim · **Branch:** `feat/mcdonalds-order-controller-haikal`
+
+### Quick start
+
+```bash
+pnpm install
+pnpm dev        # http://localhost:3000
+```
+
+### All gates
+
+```bash
+pnpm typecheck  # TS strict + noUncheckedIndexedAccess + exactOptionalPropertyTypes
+pnpm lint       # Biome (format + lint)
+pnpm test       # Vitest — 28 unit tests, all pure core
+pnpm e2e        # Playwright — VIP-first happy path with clock control
+pnpm build      # Next.js production build
+```
+
+---
+
+### The queue invariant (the heart of the assignment)
+
+PENDING is **always** kept sorted by a single composite key:
+
+> **(VIP before NORMAL), then (ascending order id)**
+
+Because order ids are monotonically assigned at creation time, this one rule satisfies every ordering requirement automatically:
+
+| Scenario | Why it works |
+|---|---|
+| New Normal → back of queue | Highest id among Normals → sorts last |
+| New VIP → ahead of all Normals | VIP tier outranks all Normals regardless of id |
+| New VIP → behind existing VIPs | Higher id than earlier VIPs → sorts after them |
+| `-Bot` returns order to original slot | `insertOrder` re-sorts by the same key; unchanged id → same position |
+
+This is implemented in **`src/core/queue.ts`** as `compareOrders`. A new order tier or priority rule is a change to one function and nothing else.
+
+---
+
+### Architecture & design decisions
+
+```
+core (pure)  →  store (bridge)  →  components (presentation)
+```
+
+**`src/core/`** — Zero React / DOM / globals. Time is injected via `Scheduler` (default `systemScheduler` = `setTimeout`/`Date.now`), making the core unit-testable with `vi.useFakeTimers()` without any fake scheduler. Same core can back a CLI unchanged.
+
+**`src/store/use-order-controller.ts`** — `useSyncExternalStore` bridge. One module-level `OrderController` singleton. Selector hooks (`usePendingOrders`, `useCompleteOrders`, `useBots`) let each column subscribe independently. `controllerActions` is a stable module-level object — never recreated.
+
+**`src/components/countdown.tsx`** — Isolated ticking leaf. Its own `setInterval` reads `endsAt - Date.now()` every 200 ms. The board (pending/complete columns) **never re-renders** because a countdown ticks.
+
+**Stable snapshots** — `getSnapshot()` returns the exact same object reference until `commit()` is called. `useSyncExternalStore` uses `Object.is` equality; a stable reference means no spurious re-renders on reads that don't follow a state change.
+
+**`removeBot()` timer cancellation** — when a bot is removed mid-process, `scheduler.clearTimeout(handle)` is called before the order is re-inserted. The headline test advances 15 s past removal and asserts zero completions.
+
+---
+
+### AI-assisted workflow
+
+This solution was built using Claude Code in **plan-mode** (`/plan`):
+
+1. Read `PRD.md` and `CLAUDE.md`, then produced a full implementation plan before touching any code.
+2. The plan dictated the Conventional Commit order (`core → tests → bridge → UI → docs`), the must-pass test list, and the architectural constraints.
+3. Implementation ran in one pass on one branch (`feat/order-controller`), keeping every commit green.
+4. Vitest and Playwright gates were run after each step; any failures were fixed before the next commit.
+
+The AI handled scaffolding, boilerplate, and test-writing. Architecture decisions (injected Scheduler, stable snapshots, isolated countdown, single sort invariant) were derived from the spec and verified by reading the generated code before each commit.
+
+---
+
+### What I'd add next
+
+- **Interactive CLI** on the same pure core (no React needed — the core is already framework-agnostic).
+- **Configurable processing time** — expose `PROCESS_MS` as a constructor parameter.
+- **Order cancellation** — customer-side; re-inserts to pending then re-assigns.
+- **Bot failure / retry** — the timer callback would emit a `BotFailed` event, re-queue the order, and mark the bot as faulted.
+- **Persistence** — serialise the snapshot to `localStorage`; restore on mount.
+- **Real concurrency / locking** — irrelevant for in-memory single-thread JS, but documented for the interviewer.
