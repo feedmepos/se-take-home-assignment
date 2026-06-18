@@ -1,4 +1,46 @@
 ## FeedMe Software Engineer Take Home Assignment
+
+### Frontend Prototype Implementation
+
+This branch implements the **frontend option** of the assignment with a Vite,
+React, TypeScript, Vitest, Oxlint, and shadcn/ui-style interface.
+
+#### Local Development
+
+```bash
+npm ci
+npm run dev
+```
+
+#### Testing
+
+```bash
+npm test
+npm run build
+```
+
+The implementation keeps the order controller in memory. It uses two queues:
+
+- VIP queue
+- Normal queue
+
+Bots always pick from the VIP queue first, then the normal queue. If the newest
+bot is removed while processing an order, that order is returned to its own
+queue by increasing order ID, which keeps same-priority orders in their original
+creation order while preserving VIP priority.
+
+#### Cloudflare Pages Deployment
+
+Use Cloudflare Pages with the GitHub repository connected.
+
+- Framework preset: `Vite`
+- Build command: `npm run build`
+- Build output directory: `dist`
+- Node.js version: `22`
+
+After deployment, add the public Cloudflare Pages URL to the pull request
+description.
+
 Below is a take home assignment before the interview of the position. You are required to
 1. Understand the situation and use case. You may contact the interviewer for further clarification.
 2. implement the requirement with **either frontend or backend components**.
