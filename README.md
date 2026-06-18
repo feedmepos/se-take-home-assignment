@@ -67,8 +67,8 @@ You must implement **either** frontend or backend components as described below:
 
 ## Solution — Frontend (Next.js + TypeScript)
 
-**Live demo:** *(Vercel URL — added after deployment)*  
-**Author:** Haikal Azim · **Branch:** `feat/order-controller`
+**Live demo:** [mcdonalds-order-bots-haikal.vercel.app](https://mcdonalds-order-bots-haikal.vercel.app/)  
+**Author:** Haikal Azim · **Branch:** `feat/mcdonalds-order-controller-haikal`
 
 ### Quick start
 
