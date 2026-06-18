@@ -6,10 +6,10 @@ The project will be implemented as a Go terminal user interface (TUI) applicatio
 
 | Area | Choice | Reason |
 | --- | --- | --- |
-| Language | Go 1.26.x | Required by the backend option, fast to build, simple deployment, good standard library support for time and tests. |
-| TUI framework | Bubble Tea v2 | Event-driven TUI framework that fits keyboard input, timer ticks, and reactive screen updates. |
-| Terminal styling | Lip Gloss v2 | Lightweight styling and layout library for terminal panels, borders, colors, and alignment. |
-| Optional components | Bubbles v2 | Use only if needed for help text, viewport, table, or timer components. Avoid it for the MVP if manual rendering is enough. |
+| Language | Go 1.23+ | The GitHub Actions workflow currently installs Go 1.23.9, so the implementation targets that version while also working on newer local Go versions. |
+| TUI framework | Bubble Tea v1.2.4 | Event-driven TUI framework that fits keyboard input, timer ticks, and reactive screen updates while remaining compatible with Go 1.23. |
+| Terminal styling | Lip Gloss v1.0.0 | Lightweight styling and layout library for terminal panels, borders, colors, and alignment while remaining compatible with Go 1.23. |
+| Optional components | None | Manual rendering is enough for the MVP; no Bubbles dependency is needed. |
 | CLI routing | Go standard library | Use `os.Args` or `flag`; no Cobra dependency is needed for two modes. |
 | Tests | Go standard `testing` package | Keeps tests simple and CI-friendly. |
 | Persistence | None | All state stays in memory as required by the assignment. |
@@ -80,7 +80,7 @@ The output must:
 |   |   `-- demo.go
 |   `-- tui/
 |       |-- model.go
-|       `-- view.go
+|       `-- styles.go
 |-- scripts/
 |   |-- build.sh
 |   |-- run.sh
@@ -232,17 +232,17 @@ Use fixed `time.Time` values in tests rather than sleeping for 10 seconds.
 
 ## 9. Dependency Policy
 
-Start with:
+Use the CI-compatible Charm versions pinned in `go.mod`:
 
 ```text
-charm.land/bubbletea/v2
-charm.land/lipgloss/v2
+github.com/charmbracelet/bubbletea v1.2.4
+github.com/charmbracelet/lipgloss v1.0.0
 ```
 
-Add Bubbles only when a built-in component clearly helps:
+Do not add Bubbles unless a built-in component clearly helps:
 
 ```text
-charm.land/bubbles/v2
+github.com/charmbracelet/bubbles
 ```
 
 Avoid other dependencies for the MVP.

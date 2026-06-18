@@ -1,19 +1,30 @@
 #!/bin/bash
+set -euo pipefail
 
-# Run Script
-# This script should execute your CLI application and output results to result.txt
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+BINARY="${REPO_ROOT}/order-controller"
+RESULT_FILE="${SCRIPT_DIR}/result.txt"
+MODE="${1:-demo}"
 
-echo "Running CLI application..."
+cd "${REPO_ROOT}"
 
-# For Go projects:
-# ./order-controller > result.txt
+echo "Building CLI application..."
+go build -o "${BINARY}" ./cmd/order-controller
 
-# For Node.js projects:
-# node index.js > result.txt
-# or npm start > result.txt
-
-# Temporary placeholder - remove this when you implement your CLI
-echo "Added 1 bot" > result.txt
-echo "status: bot: [1], order: []" >> result.txt
-
-echo "CLI application execution completed"
+case "${MODE}" in
+  tui)
+    echo "Starting interactive TUI..."
+    exec "${BINARY}" tui
+    ;;
+  demo)
+    echo "Running deterministic demo..."
+    "${BINARY}" demo > "${RESULT_FILE}"
+    echo "Demo output written to ${RESULT_FILE}"
+    ;;
+  *)
+    echo "Unknown mode: ${MODE}" >&2
+    echo "Usage: ./scripts/run.sh [tui|demo]" >&2
+    exit 1
+    ;;
+esac
