@@ -19,7 +19,7 @@ export function OrderProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     state.bots.forEach((bot) => {
-      if (bot.status === "PROCESSING" && bot.processingOrderId !== null) {
+      if (bot.status === "PROCESSING" && bot.processingOrderId) {
         const existing = botTimers.current[bot.id];
         // Already tracking this exact order for this bot — nothing to do
         if (existing?.orderId === bot.processingOrderId) return;

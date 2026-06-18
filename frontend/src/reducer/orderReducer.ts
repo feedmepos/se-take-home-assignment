@@ -1,4 +1,19 @@
 import type { AppState, Action, Order, Bot } from "./types";
+import {
+  insertAt,
+  updateWhere,
+  removeWhere,
+  findOrder,
+  findFirstPending,
+  findIdleBots,
+  findBotForOrder,
+  markProcessing,
+  markPending,
+  markComplete,
+  assignBot,
+  idleBot,
+  createdLatest,
+} from "./helpers";
 
 export const initialState: AppState = {
   orders: [],
@@ -7,94 +22,74 @@ export const initialState: AppState = {
   nextBotId: 1,
 };
 
+// ── Queue insertion ──
+
 function insertVipOrder(orders: Order[], newOrder: Order): Order[] {
   let lastVipIndex = -1;
   for (let i = 0; i < orders.length; i++) {
     if (orders[i].type === "VIP" && orders[i].status === "PENDING")
       lastVipIndex = i;
   }
-  if (lastVipIndex >= 0) {
-    return [
-      ...orders.slice(0, lastVipIndex + 1),
-      newOrder,
-      ...orders.slice(lastVipIndex + 1),
-    ];
-  }
+  if (lastVipIndex >= 0) return insertAt(orders, lastVipIndex + 1, newOrder);
+
   const firstNormalIndex = orders.findIndex(
     (o) => o.type === "NORMAL" && o.status === "PENDING",
   );
-  if (firstNormalIndex >= 0) {
-    return [
-      ...orders.slice(0, firstNormalIndex),
-      newOrder,
-      ...orders.slice(firstNormalIndex),
-    ];
-  }
+  if (firstNormalIndex >= 0) return insertAt(orders, firstNormalIndex, newOrder);
+
   return [...orders, newOrder];
 }
 
 function reinsertOrder(orders: Order[], order: Order): Order[] {
-  const reset: Order = { ...order, status: "PENDING", startedAt: null };
-  return order.type === "VIP"
-    ? insertVipOrder(orders, reset)
-    : [...orders, reset];
+  const reset = markPending(order);
+  const sameType = reset.type;
+
+  for (let i = 0; i < orders.length; i++) {
+    if (
+      orders[i].type === sameType &&
+      orders[i].status === "PENDING" &&
+      orders[i].createdAt > reset.createdAt
+    ) {
+      return insertAt(orders, i, reset);
+    }
+  }
+
+  if (sameType === "VIP") {
+    const firstNormalIndex = orders.findIndex(
+      (o) => o.type === "NORMAL" && o.status === "PENDING",
+    );
+    if (firstNormalIndex >= 0) return insertAt(orders, firstNormalIndex, reset);
+  }
+
+  return [...orders, reset];
 }
 
-function assignToIdleBot(
+// ── Bot assignment ──
+
+function assignIdleBot(
   orders: Order[],
   bots: Bot[],
 ): { orders: Order[]; bots: Bot[] } {
-  const idleBot = bots.find((b) => b.status === "IDLE");
-  const pendingOrder = orders.find((o) => o.status === "PENDING");
-  if (!idleBot || !pendingOrder) return { orders, bots };
+  const idle = findIdleBots(bots)[0];
+  const pending = findFirstPending(orders);
+  if (!idle || !pending) return { orders, bots };
+
   return {
-    orders: orders.map((o) =>
-      o.id === pendingOrder.id
-        ? { ...o, status: "PROCESSING" as const, startedAt: Date.now() }
-        : o,
-    ),
-    bots: bots.map((b) =>
-      b.id === idleBot.id
-        ? {
-            ...b,
-            status: "PROCESSING" as const,
-            processingOrderId: pendingOrder.id,
-          }
-        : b,
-    ),
+    orders: updateWhere(orders, (o) => o.id === pending.id, markProcessing),
+    bots: updateWhere(bots, (b) => b.id === idle.id, (b) => assignBot(b, pending.id)),
   };
 }
 
-// Select which bot to remove based on priority:
-//   IDLE > Normal-processing > VIP-processing
-// Tiebreaker within each group: highest processingOrderId (lowest queue priority removed first).
-// For IDLE bots (no order): highest bot ID as tiebreaker.
-function selectBotToRemove(orders: Order[], bots: Bot[]): Bot {
-  const idleBots = bots.filter((b) => b.status === "IDLE");
-  if (idleBots.length > 0) {
-    return idleBots.reduce((a, b) => (b.id > a.id ? b : a));
-  }
+// ── Bot removal selection ──
 
-  const normalBots = bots.filter(
-    (b) =>
-      b.processingOrderId !== null &&
-      orders.find((o) => o.id === b.processingOrderId)?.type === "NORMAL",
-  );
-  if (normalBots.length > 0) {
-    return normalBots.reduce((a, b) =>
-      (b.processingOrderId ?? 0) > (a.processingOrderId ?? 0) ? b : a,
-    );
-  }
-
-  // All remaining bots are VIP-processing
-  return bots.reduce((a, b) =>
-    (b.processingOrderId ?? 0) > (a.processingOrderId ?? 0) ? b : a,
+function selectBotToRemove(_orders: Order[], bots: Bot[]): Bot {
+  return bots.reduce((newest, bot) =>
+    bot.createdAt > newest.createdAt ? bot : newest,
   );
 }
 
-// If a VIP order is PENDING and no idle bot is available, preempt the bot processing
-// the lowest-priority Normal order (last in the queue — "most bottom") and assign it
-// to the VIP order instead. Called after any action that may leave a VIP waiting.
+// ── VIP preemption ──
+
 function applyVipPreemption(
   orders: Order[],
   bots: Bot[],
@@ -104,61 +99,56 @@ function applyVipPreemption(
   );
   if (!pendingVip) return { orders, bots };
 
-  // Idle bot available — assign it directly, no preemption needed
   if (bots.some((b) => b.status === "IDLE")) {
-    return assignToIdleBot(orders, bots);
+    return assignIdleBot(orders, bots);
   }
 
-  // Find the last Normal order being processed ("most bottom" in the queue)
-  let botToPreempt: Bot | undefined;
-  for (let i = orders.length - 1; i >= 0; i--) {
-    if (orders[i].type === "NORMAL" && orders[i].status === "PROCESSING") {
-      botToPreempt = bots.find((b) => b.processingOrderId === orders[i].id);
-      break;
-    }
-  }
-
-  if (!botToPreempt || botToPreempt.processingOrderId === null)
-    return { orders, bots };
-
-  const preemptedOrder = orders.find(
-    (o) => o.id === botToPreempt!.processingOrderId,
-  )!;
-  const ordersMinusPreempted = orders.filter((o) => o.id !== preemptedOrder.id);
-  const ordersRestored = reinsertOrder(ordersMinusPreempted, preemptedOrder);
-  const botsFreed = bots.map((b) =>
-    b.id === botToPreempt!.id
-      ? { ...b, status: "IDLE" as const, processingOrderId: null }
-      : b,
+  const processingNormals = orders.filter(
+    (o) => o.type === "NORMAL" && o.status === "PROCESSING",
   );
-  return assignToIdleBot(ordersRestored, botsFreed);
+  if (processingNormals.length === 0) return { orders, bots };
+
+  const latestNormal = processingNormals.reduce(createdLatest);
+  const botToPreempt = findBotForOrder(bots, latestNormal.id);
+  if (!botToPreempt) return { orders, bots };
+
+  const restored = reinsertOrder(
+    removeWhere(orders, (o) => o.id === latestNormal.id),
+    latestNormal,
+  );
+  const freed = updateWhere(bots, (b) => b.id === botToPreempt.id, idleBot);
+
+  return assignIdleBot(restored, freed);
+}
+
+// ── Reducer ──
+
+function createOrder(state: AppState, type: "NORMAL" | "VIP"): Order {
+  return {
+    id: state.nextOrderId,
+    type,
+    status: "PENDING",
+    createdAt: Date.now(),
+  };
 }
 
 export function orderReducer(state: AppState, action: Action): AppState {
   switch (action.type) {
     case "ADD_NORMAL_ORDER": {
-      const newOrder: Order = {
-        id: state.nextOrderId,
-        type: "NORMAL",
-        status: "PENDING",
-        startedAt: null,
-      };
-      const { orders, bots } = assignToIdleBot(
-        [...state.orders, newOrder],
+      const order = createOrder(state, "NORMAL");
+      const { orders, bots } = assignIdleBot(
+        [...state.orders, order],
         state.bots,
       );
       return { ...state, orders, bots, nextOrderId: state.nextOrderId + 1 };
     }
 
     case "ADD_VIP_ORDER": {
-      const newOrder: Order = {
-        id: state.nextOrderId,
-        type: "VIP",
-        status: "PENDING",
-        startedAt: null,
-      };
-      const ordersWithVip = insertVipOrder(state.orders, newOrder);
-      const { orders, bots } = applyVipPreemption(ordersWithVip, state.bots);
+      const order = createOrder(state, "VIP");
+      const { orders, bots } = applyVipPreemption(
+        insertVipOrder(state.orders, order),
+        state.bots,
+      );
       return { ...state, orders, bots, nextOrderId: state.nextOrderId + 1 };
     }
 
@@ -166,9 +156,10 @@ export function orderReducer(state: AppState, action: Action): AppState {
       const newBot: Bot = {
         id: state.nextBotId,
         status: "IDLE",
-        processingOrderId: null,
+        processingOrderId: undefined,
+        createdAt: Date.now(),
       };
-      const { orders, bots } = assignToIdleBot(state.orders, [
+      const { orders, bots } = assignIdleBot(state.orders, [
         ...state.bots,
         newBot,
       ]);
@@ -177,64 +168,51 @@ export function orderReducer(state: AppState, action: Action): AppState {
 
     case "REMOVE_BOT": {
       if (state.bots.length === 0) return state;
-      const botToRemove = selectBotToRemove(state.orders, state.bots);
+
+      const victim = selectBotToRemove(state.orders, state.bots);
       let orders = state.orders;
-      if (botToRemove.processingOrderId !== null) {
-        const processingOrder = state.orders.find(
-          (o) => o.id === botToRemove.processingOrderId,
-        );
-        if (processingOrder) {
+
+      if (victim.processingOrderId) {
+        const order = findOrder(state.orders, victim.processingOrderId);
+        if (order) {
           orders = reinsertOrder(
-            state.orders.filter((o) => o.id !== processingOrder.id),
-            processingOrder,
+            removeWhere(state.orders, (o) => o.id === order.id),
+            order,
           );
         }
       }
-      const remainingBots = state.bots.filter((b) => b.id !== botToRemove.id);
-      // If a VIP order landed in PENDING (returned from the removed bot), trigger preemption
-      const { orders: finalOrders, bots: finalBots } = applyVipPreemption(
+
+      const remainingBots = removeWhere(state.bots, (b) => b.id === victim.id);
+      const { orders: final, bots: finalBots } = applyVipPreemption(
         orders,
         remainingBots,
       );
-      return { ...state, orders: finalOrders, bots: finalBots };
+      return { ...state, orders: final, bots: finalBots };
     }
 
     case "ORDER_COMPLETE": {
       const bot = state.bots.find((b) => b.id === action.botId);
-      if (!bot || bot.processingOrderId === null) return state;
+      if (!bot || !bot.processingOrderId) return state;
 
-      const completedId = bot.processingOrderId;
-      const updatedOrders = state.orders.map((o) =>
-        o.id === completedId
-          ? { ...o, status: "COMPLETE" as const, startedAt: null }
-          : o,
+      const completed = updateWhere(
+        state.orders,
+        (o) => o.id === bot.processingOrderId,
+        markComplete,
       );
-      const nextPending = updatedOrders.find((o) => o.status === "PENDING");
 
-      if (nextPending) {
+      const next = findFirstPending(completed);
+      if (next) {
         return {
           ...state,
-          orders: updatedOrders.map((o) =>
-            o.id === nextPending.id
-              ? { ...o, status: "PROCESSING" as const, startedAt: Date.now() }
-              : o,
-          ),
-          bots: state.bots.map((b) =>
-            b.id === action.botId
-              ? { ...b, processingOrderId: nextPending.id }
-              : b,
-          ),
+          orders: updateWhere(completed, (o) => o.id === next.id, markProcessing),
+          bots: updateWhere(state.bots, (b) => b.id === action.botId, (b) => assignBot(b, next.id)),
         };
       }
 
       return {
         ...state,
-        orders: updatedOrders,
-        bots: state.bots.map((b) =>
-          b.id === action.botId
-            ? { ...b, status: "IDLE" as const, processingOrderId: null }
-            : b,
-        ),
+        orders: completed,
+        bots: updateWhere(state.bots, (b) => b.id === action.botId, idleBot),
       };
     }
 

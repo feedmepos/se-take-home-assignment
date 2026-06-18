@@ -48,26 +48,18 @@ export function CircularProgress({
         )}
       </svg>
       <span
-        className="absolute font-black leading-none"
-        style={{
-          fontSize: size * 0.22,
-          color: isActive ? "#DA291C" : "#B0A898",
-        }}
+        className="absolute flex items-baseline gap-px leading-none"
+        style={{ color: isActive ? "#DA291C" : "#B0A898" }}
       >
-        {isActive ? (countdown > 0 ? `${countdown}` : "✓") : "—"}
-      </span>
-      {isActive && countdown > 0 && (
-        <span
-          className="absolute font-semibold leading-none"
-          style={{
-            fontSize: size * 0.13,
-            color: "#DA291C",
-            marginTop: size * 0.3,
-          }}
-        >
-          s
+        <span className="font-black" style={{ fontSize: size * 0.22 }}>
+          {isActive ? (countdown > 0 ? `${countdown}` : "✓") : "—"}
         </span>
-      )}
+        {isActive && countdown > 0 && (
+          <span className="font-semibold" style={{ fontSize: size * 0.18 }}>
+            s
+          </span>
+        )}
+      </span>
     </div>
   );
 }

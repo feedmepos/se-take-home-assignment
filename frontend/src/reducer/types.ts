@@ -6,13 +6,15 @@ export interface Order {
   id: number;
   type: OrderType;
   status: OrderStatus;
-  startedAt: number | null; // timestamp when bot picked it up; drives circular progress
+  createdAt: number;
+  startedAt?: number;
 }
 
 export interface Bot {
   id: number;
   status: BotStatus;
-  processingOrderId: number | null;
+  processingOrderId?: number;
+  createdAt: number;
 }
 
 export interface AppState {

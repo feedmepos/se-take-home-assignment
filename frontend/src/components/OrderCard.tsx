@@ -40,7 +40,8 @@ export function OrderCard({ order }: OrderCardProps) {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    if (order.status !== "PROCESSING" || order.startedAt === null) return;
+    setElapsed(0);
+    if (order.status !== "PROCESSING" || !order.startedAt) return;
     const startedAt = order.startedAt;
     intervalRef.current = setInterval(() => {
       setElapsed(Math.max(0, Date.now() - startedAt));

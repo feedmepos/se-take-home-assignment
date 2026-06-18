@@ -39,8 +39,8 @@ export function OrderBoard() {
   const pendingOrders = state.orders
     .filter((o) => o.status === "PENDING" || o.status === "PROCESSING")
     .sort((a, b) => {
-      if (a.type === b.type) return 0;
-      return a.type === "VIP" ? -1 : 1;
+      if (a.type !== b.type) return a.type === "VIP" ? -1 : 1;
+      return a.createdAt - b.createdAt;
     });
 
   // filter() already returns a new array; reverse() is safe without spread
