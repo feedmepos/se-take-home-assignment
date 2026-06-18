@@ -1,0 +1,2 @@
+export const ORDER_DURATION_MS = 10_000;
+export const ORDER_DURATION_S = ORDER_DURATION_MS / 1000;
