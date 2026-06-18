@@ -25,3 +25,5 @@ Thumbs.db
 # Superpowers / AI tooling (not for submission)
 docs/superpowers/
 .claude/
+
+.vercel
