@@ -340,10 +340,10 @@ function OrderRow({
 
 function BotRow({ bot, now }: { bot: Bot; now: number }) {
   const remainingMs = bot.processing
-    ? Math.max(0, bot.processing.completesAt - now)
+    ? clamp(bot.processing.completesAt - now, 0, PROCESSING_MS)
     : 0
   const progress = bot.processing
-    ? Math.min(100, ((PROCESSING_MS - remainingMs) / PROCESSING_MS) * 100)
+    ? clamp(((PROCESSING_MS - remainingMs) / PROCESSING_MS) * 100, 0, 100)
     : 0
 
   return (
@@ -398,6 +398,10 @@ function formatTime(value: number) {
     second: '2-digit',
     hour12: false,
   }).format(value)
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value))
 }
 
 export default App
