@@ -337,7 +337,6 @@ describe("EDGE CASE: ORDER_COMPLETE for invalid/edge scenarios", () => {
   it("ORDER_COMPLETE for non-existent bot is a no-op", () => {
     let state = orderReducer(initialState, { type: "ADD_NORMAL_ORDER" });
     state = orderReducer(state, { type: "ADD_BOT" });
-    const before = { ...state };
     const after = orderReducer(state, { type: "ORDER_COMPLETE", botId: 999 });
     expect(after).toBe(state); // exact same reference — no change
   });
