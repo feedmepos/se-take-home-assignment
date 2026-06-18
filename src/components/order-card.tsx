@@ -2,12 +2,10 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatTime } from '@/core/format';
 // No domain logic — just renders the data from a snapshot order.
-import type { CompleteOrder, PendingOrder, ProcessingOrder } from '@/core/types';
-
-type OrderCardOrder = PendingOrder | ProcessingOrder | CompleteOrder;
+import type { Order } from '@/core/types';
 
 interface OrderCardProps {
-  order: OrderCardOrder;
+  order: Order;
 }
 
 export function OrderCard({ order }: OrderCardProps) {
