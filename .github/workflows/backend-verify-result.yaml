@@ -32,6 +32,9 @@ jobs:
     - name: Verify npm version
       run: npm --version
 
+    - name: Install dependencies
+      run: npm install
+
     - name: Make scripts executable
       run: chmod +x scripts/test.sh scripts/build.sh scripts/run.sh
       
