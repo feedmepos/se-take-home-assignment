@@ -167,10 +167,9 @@ describe('runDemo', () => {
     await vi.advanceTimersByTimeAsync(100)
     await runPromise
 
-    const normalizeTimestamp = (line) => line.replace(/^\d{2}:\d{2}:\d{2}/, '00:00:00')
+    const normalizeTimestamp = (line) => line.replace(/^\[\d{2}:\d{2}:\d{2}\]/, '[00:00:00]')
     const expectedLines = readFileSync(new URL('../scripts/result.txt', import.meta.url), 'utf8')
       .split('\n')
-      .filter((line) => /^\d{2}:\d{2}:\d{2} /.test(line))
       .map(normalizeTimestamp)
     const actualLines = writeLine.mock.calls.map(([line]) => normalizeTimestamp(line))
 
