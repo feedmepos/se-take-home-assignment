@@ -1,0 +1,14 @@
+{
+  "name": "se-take-home-assignment-backend",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "build": "node --check backend/order-controller.js && node --check backend/cli.js && node --check backend/index.js",
+    "start": "node backend/index.js"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.4"
+  }
+}
