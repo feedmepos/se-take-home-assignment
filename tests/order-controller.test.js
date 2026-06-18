@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { describe, expect, it, vi } from 'vitest'
 import { OrderController } from '../backend/order-controller.js'
 import { runDemo } from '../backend/cli.js'
@@ -154,25 +155,26 @@ describe('OrderController', () => {
 })
 
 describe('runDemo', () => {
-  it('emits timestamped output lines', async () => {
+  it('emits output matching the saved result format', async () => {
     vi.useFakeTimers()
-    let tick = 0
     const writeLine = vi.fn()
-    const now = vi.fn(() => new Date(Date.UTC(2026, 5, 18, 12, 0, tick++)))
 
     const runPromise = runDemo({
       processingTimeMs: 10,
-      now,
       writeLine,
     })
 
     await vi.advanceTimersByTimeAsync(100)
     await runPromise
 
-    expect(writeLine).toHaveBeenCalled()
-    const lines = writeLine.mock.calls.map(([line]) => line)
-    expect(lines.every((line) => /^\d{2}:\d{2}:\d{2} /.test(line))).toBe(true)
-    expect(lines.some((line) => line.includes('completed'))).toBe(true)
+    const normalizeTimestamp = (line) => line.replace(/^\d{2}:\d{2}:\d{2}/, '00:00:00')
+    const expectedLines = readFileSync(new URL('../scripts/result.txt', import.meta.url), 'utf8')
+      .split('\n')
+      .filter((line) => /^\d{2}:\d{2}:\d{2} /.test(line))
+      .map(normalizeTimestamp)
+    const actualLines = writeLine.mock.calls.map(([line]) => normalizeTimestamp(line))
+
+    expect(actualLines).toEqual(expectedLines)
 
     vi.useRealTimers()
   })
