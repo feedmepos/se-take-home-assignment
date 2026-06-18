@@ -5,6 +5,12 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      deploy_ref:
+        description: Branch, tag, or SHA to deploy
+        required: false
+        default: feature/frontend-order-controller
+        type: string
 
 permissions:
   contents: read
@@ -23,6 +29,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.deploy_ref || github.ref }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
