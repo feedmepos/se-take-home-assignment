@@ -8,10 +8,15 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-slate-900 text-white hover:bg-slate-700',
-        secondary: 'bg-amber-500 text-white hover:bg-amber-600',
+        // Order controls: each has a distinct, readable color
+        default: 'bg-slate-800 text-white hover:bg-slate-700',
+        // VIP → brand gold; dark text for contrast on gold
+        secondary: 'bg-[#FFC72C] text-gray-900 font-semibold hover:bg-amber-400',
+        // +Bot → green (positive action)
+        success: 'bg-green-600 text-white hover:bg-green-700',
         outline: 'border border-slate-300 bg-white text-slate-900 hover:bg-slate-50',
-        destructive: 'bg-red-600 text-white hover:bg-red-700',
+        // -Bot → brand red (destructive action)
+        destructive: 'bg-[#DA291C] text-white hover:bg-red-700',
         ghost: 'hover:bg-slate-100 text-slate-900',
       },
       size: {

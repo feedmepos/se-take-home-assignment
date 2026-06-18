@@ -8,7 +8,8 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default: 'bg-slate-100 text-slate-700',
-        vip: 'bg-amber-100 text-amber-800',
+        // VIP → brand gold; dark text for readable contrast
+        vip: 'bg-[#FFC72C] text-gray-900',
         processing: 'bg-blue-100 text-blue-800',
         complete: 'bg-green-100 text-green-800',
       },

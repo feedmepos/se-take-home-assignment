@@ -5,13 +5,13 @@ export function CompleteColumn() {
   const complete = useCompleteOrders();
 
   return (
-    <div className="flex-1 min-w-0">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 mb-3">
-        Complete{' '}
-        <span className="ml-1 rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-700">
+    <div className="flex-1 min-w-52 rounded-xl bg-white border border-slate-200 shadow-sm p-4 flex flex-col gap-3">
+      <div className="flex items-center gap-2">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-600">Complete</h2>
+        <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-bold text-green-800">
           {complete.length}
         </span>
-      </h2>
+      </div>
       <div className="flex flex-col gap-2">
         {complete.map((order) => (
           <OrderCard key={order.id} order={order} />
