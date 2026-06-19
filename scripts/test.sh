@@ -1,14 +1,11 @@
 #!/bin/bash
+set -euo pipefail
 
-# Unit Test Script
-# This script should contain all unit test execution steps
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
-echo "Running unit tests..."
+cd "${REPO_ROOT}"
 
-# For Go projects:
-# go test ./... -v
-
-# For Node.js projects:
-# npm test
-
-echo "Unit tests completed"
+echo "Running Go tests..."
+go test ./...
+echo "Go tests completed"
