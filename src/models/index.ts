@@ -1,4 +1,4 @@
-export type CustomerType = "REGULAR" | "VIP"
+export type CustomerType = "Normal" | "VIP"
 export type OrderStatus = "PENDING" | "PROCESSING" | "COMPLETE"
 export type BotStatus = "PROCESSING" | "IDLE"
 
