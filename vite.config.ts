@@ -14,6 +14,9 @@ export default defineConfig({
     alias,
   },
   test: {
+    coverage: {
+      enabled: true,
+    },
     projects: [
       {
         resolve: {

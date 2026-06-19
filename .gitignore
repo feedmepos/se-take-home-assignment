@@ -2,6 +2,7 @@
 .agents/skills
 .vitest-attachments
 __screenshots__
+coverage
 dist
 node_modules
 skills-lock.json

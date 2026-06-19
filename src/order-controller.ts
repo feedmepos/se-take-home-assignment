@@ -8,7 +8,10 @@ export type Order = {
   kind: OrderKind;
   createdAt: number;
   startedAt?: number;
-  completedAt?: number;
+};
+
+export type CompletedOrder = Order & {
+  completedAt: number;
 };
 
 export type IdleBot = {
@@ -31,7 +34,7 @@ export type State = {
   nextBotId: number;
   now: number;
   pending: Order[];
-  completed: Order[];
+  completed: CompletedOrder[];
   bots: Bot[];
   events: string[];
 };
@@ -119,7 +122,7 @@ export function reducer(state: State, action: Action): State {
       let changed = false;
       const bots = state.bots.map((bot) => {
         if (bot.id === action.botId && bot.status === "processing" && bot.finishAt <= action.now) {
-          const completedOrder: Order = {
+          const completedOrder: CompletedOrder = {
             ...bot.order,
             completedAt: action.now,
           };

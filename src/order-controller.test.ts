@@ -120,6 +120,61 @@ describe("order controller", () => {
     });
   });
 
+  it("does nothing except advance time when removing a bot from an empty kitchen", () => {
+    const initial = createInitialState(START);
+
+    const afterRemove = reducer(initial, { type: "remove-bot", now: START + 123 });
+
+    expect(afterRemove).toEqual({ ...initial, now: START + 123 });
+  });
+
+  it("removes the newest idle bot without changing active work", () => {
+    const cooking = apply(createInitialState(START), [
+      { type: "add-bot", now: START },
+      { type: "add-bot", now: START + 1 },
+      { type: "add-order", kind: "normal", now: START + 2 },
+    ]);
+
+    const afterRemove = reducer(cooking, { type: "remove-bot", now: START + 300 });
+
+    expect(afterRemove.pending).toHaveLength(0);
+    expect(afterRemove.bots).toMatchObject([
+      { id: 1, status: "processing", order: { id: 1, kind: "normal" } },
+    ]);
+    expect(afterRemove.events[0]).toContain("Idle bot #2 was removed.");
+  });
+
+  it("keeps only the 10 newest events", () => {
+    const state = apply(
+      createInitialState(START),
+      Array.from({ length: 11 }, (_, index) => ({
+        type: "add-order" as const,
+        kind: "normal" as const,
+        now: START + index,
+      })),
+    );
+
+    expect(state.events).toHaveLength(10);
+    expect(state.events[0]).toContain("Order #11 entered pending.");
+    expect(state.events.at(-1)).toContain("Order #2 entered pending.");
+  });
+
+  it("ignores completions for other bots", () => {
+    const cooking = apply(createInitialState(START), [
+      { type: "add-order", kind: "normal", now: START },
+      { type: "add-bot", now: START },
+    ]);
+
+    const ignored = reducer(cooking, {
+      type: "complete-order",
+      botId: 999,
+      now: START + PROCESSING_MS,
+    });
+
+    expect(ignored.completed).toHaveLength(0);
+    expect(ignored.bots[0]).toMatchObject({ status: "processing", order: { id: 1 } });
+  });
+
   it("removes the newest bot and returns its processing order to the priority queue", () => {
     const cooking = apply(createInitialState(START), [
       { type: "add-order", kind: "normal", now: START },

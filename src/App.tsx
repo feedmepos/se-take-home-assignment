@@ -10,6 +10,7 @@ import {
   orderLabel,
   reducer,
   type Bot,
+  type CompletedOrder,
   type Order,
 } from "@/order-controller";
 
@@ -227,7 +228,7 @@ function BotsCard({ bots }: { bots: Bot[] }) {
   );
 }
 
-function CompleteCard({ orders }: { orders: Order[] }) {
+function CompleteCard({ orders }: { orders: CompletedOrder[] }) {
   return (
     <Card
       aria-label="Complete area"
@@ -245,9 +246,7 @@ function CompleteCard({ orders }: { orders: Order[] }) {
               <OrderCard
                 key={order.id}
                 order={order}
-                meta={
-                  order.completedAt ? `Completed at ${formatTime(order.completedAt)}` : undefined
-                }
+                meta={`Completed at ${formatTime(order.completedAt)}`}
               />
             ))}
           </div>
