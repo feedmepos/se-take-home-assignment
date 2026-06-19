@@ -1,0 +1,90 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  color-scheme: light;
+  --background: oklch(0.99 0.004 95);
+  --foreground: oklch(0.21 0.015 80);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.21 0.015 80);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.21 0.015 80);
+  --primary: oklch(0.65 0.21 41);
+  --primary-foreground: oklch(0.99 0.004 95);
+  --secondary: oklch(0.95 0.018 85);
+  --secondary-foreground: oklch(0.26 0.018 80);
+  --muted: oklch(0.96 0.012 85);
+  --muted-foreground: oklch(0.52 0.02 80);
+  --accent: oklch(0.95 0.07 92);
+  --accent-foreground: oklch(0.31 0.06 65);
+  --destructive: oklch(0.57 0.22 27);
+  --destructive-foreground: oklch(0.99 0.004 95);
+  --border: oklch(0.9 0.018 85);
+  --input: oklch(0.9 0.018 85);
+  --ring: oklch(0.65 0.21 41);
+  --radius: 0.9rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+* {
+  border-color: var(--border);
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  background:
+    radial-gradient(circle at top left, oklch(0.88 0.12 87 / 45%), transparent 36rem),
+    linear-gradient(135deg, oklch(0.99 0.004 95), oklch(0.96 0.018 80));
+  color: var(--foreground);
+}
+
+button {
+  font: inherit;
+}
+
+@keyframes order-progress {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}

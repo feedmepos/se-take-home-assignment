@@ -2,67 +2,67 @@ name: backend-verify-result
 
 on:
   pull_request:
-    types: [ opened, synchronize, reopened, edited ]
-    branches: [ main ]
+    types: [opened, synchronize, reopened, edited]
+    branches: [main]
 
 jobs:
   verify-result:
     runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up Go
-      uses: actions/setup-go@v5
-      with:
-        go-version: '1.23.9'
-        
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '22.19.0'
-        
-    - name: Verify Go version
-      run: go version
-      
-    - name: Verify Node.js version
-      run: node --version
-      
-    - name: Verify npm version
-      run: npm --version
 
-    - name: Make scripts executable
-      run: chmod +x scripts/test.sh scripts/build.sh scripts/run.sh
-      
-    - name: Execute test script
-      run: ./scripts/test.sh
-      
-    - name: Execute build script
-      run: ./scripts/build.sh
-      
-    - name: Execute run script
-      run: ./scripts/run.sh
-      
-    - name: Verify result.txt exists and is not empty
-      run: |
-        if [ ! -f scripts/result.txt ]; then
-          echo "ERROR: scripts/result.txt does not exist"
-          exit 1
-        fi
-        
-        if [ ! -s scripts/result.txt ]; then
-          echo "ERROR: scripts/result.txt is empty"
-          exit 1
-        fi
-        
-        # Verify that the result contains timestamps in HH:MM:SS format
-        if ! grep -E '[0-9]{2}:[0-9]{2}:[0-9]{2}' scripts/result.txt > /dev/null; then
-          echo "ERROR: scripts/result.txt must contain timestamps in HH:MM:SS format"
-          echo "No valid timestamp pattern found in the output"
-          exit 1
-        fi
-        
-        echo "SUCCESS: scripts/result.txt exists, is not empty, and contains valid timestamps"
-        echo "Content of scripts/result.txt:"
-        cat scripts/result.txt
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23.9"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.19.0"
+
+      - name: Verify Go version
+        run: go version
+
+      - name: Verify Node.js version
+        run: node --version
+
+      - name: Verify npm version
+        run: npm --version
+
+      - name: Make scripts executable
+        run: chmod +x scripts/test.sh scripts/build.sh scripts/run.sh
+
+      - name: Execute test script
+        run: ./scripts/test.sh
+
+      - name: Execute build script
+        run: ./scripts/build.sh
+
+      - name: Execute run script
+        run: ./scripts/run.sh
+
+      - name: Verify result.txt exists and is not empty
+        run: |
+          if [ ! -f scripts/result.txt ]; then
+            echo "ERROR: scripts/result.txt does not exist"
+            exit 1
+          fi
+
+          if [ ! -s scripts/result.txt ]; then
+            echo "ERROR: scripts/result.txt is empty"
+            exit 1
+          fi
+
+          # Verify that the result contains timestamps in HH:MM:SS format
+          if ! grep -E '[0-9]{2}:[0-9]{2}:[0-9]{2}' scripts/result.txt > /dev/null; then
+            echo "ERROR: scripts/result.txt must contain timestamps in HH:MM:SS format"
+            echo "No valid timestamp pattern found in the output"
+            exit 1
+          fi
+
+          echo "SUCCESS: scripts/result.txt exists, is not empty, and contains valid timestamps"
+          echo "Content of scripts/result.txt:"
+          cat scripts/result.txt
