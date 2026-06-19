@@ -24,4 +24,21 @@ export class OrderController {
     findAll() {
         return orders;
     }
+
+    update(id: number, data: Partial<Order>) {
+        const index = orders.findIndex(row => row.id === id);
+
+        if (index === -1) {
+            return undefined;
+        }
+
+        const updatedOrder = {
+            ...orders[index],
+            ...data,
+        };
+
+        orders[index] = updatedOrder;
+
+        return updatedOrder;
+    }
 }

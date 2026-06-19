@@ -151,4 +151,38 @@ describe("Order Controller", () => {
             expect(result).toHaveLength(2);
         })
     })
+
+    describe("Update Order", () => {
+        beforeEach(() => {
+            orders.splice(0, orders.length)
+        })
+
+        it("should update the status of an existing order", () => {
+            const order = controller.create("REGULAR");
+
+            const updatedOrder = controller.update(order.id, { status: "PROCESSING" });
+
+            expect(updatedOrder).toStrictEqual({
+                id: order.id,
+                customer: "REGULAR",
+                status: "PROCESSING"
+            })
+        })
+
+        it("should not affect other orders", () => {
+            const first = controller.create("REGULAR");
+            const second = controller.create("REGULAR");
+
+            controller.update(first.id, { status: "PROCESSING" });
+
+            expect(orders.find(row => row.id === first.id)?.status).toBe("PROCESSING")
+            expect(orders.find(row => row.id === second.id)?.status).toBe("PENDING")
+        })
+
+        it("should return undefined when the order does not exist", () => {
+            const result = controller.update(999, { status: "PROCESSING" });
+
+            expect(result).toBeUndefined();
+        })
+    })
 })
