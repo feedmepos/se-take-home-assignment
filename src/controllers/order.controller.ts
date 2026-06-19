@@ -21,8 +21,14 @@ export class OrderController {
         return order;
     }
 
-    findAll() {
-        return orders;
+    findAll(filter?: Partial<Order>) {
+        if (!filter) {
+            return orders;
+        }
+
+        const keys = Object.keys(filter) as (keyof Order)[];
+
+        return orders.filter(order => keys.every(key => order[key] === filter[key]));
     }
 
     update(id: number, data: Partial<Order>) {

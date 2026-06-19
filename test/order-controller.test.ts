@@ -150,6 +150,25 @@ describe("Order Controller", () => {
 
             expect(result).toHaveLength(2);
         })
+
+        it("should return only orders matching the given filter", () => {
+            const regular = controller.create("REGULAR");
+            const vip = controller.create("VIP");
+
+            const filterA = controller.findAll({ customer: "VIP" })
+            const filterB = controller.findAll({ customer: "REGULAR" })
+
+            expect(filterA).toStrictEqual([vip]);
+            expect(filterB).toStrictEqual([regular]);
+        })
+
+        it("should return an empty list when no orders match the filter", () => {
+            controller.create("REGULAR");
+
+            const result = controller.findAll({ status: "PROCESSING" })
+
+            expect(result).toStrictEqual([]);
+        })
     })
 
     describe("Update Order", () => {
