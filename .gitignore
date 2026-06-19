@@ -1,0 +1,7 @@
+!lib
+.agents/skills
+.vitest-attachments
+__screenshots__
+dist
+node_modules
+skills-lock.json
