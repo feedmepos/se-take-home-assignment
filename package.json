@@ -6,6 +6,7 @@
   "scripts": {
     "clean": "node -e \"fs.rmSync('dist', { recursive: true, force: true })\"",
     "build": "npm run clean && tsc --project tsconfig.json",
+    "build:site": "npm run build && node scripts/build-static-site.mjs",
     "cli": "npm run build && node dist/src/cli.js --interactive",
     "test": "npm run build && node --test dist/test/**/*.test.js"
   },
