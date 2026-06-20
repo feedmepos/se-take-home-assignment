@@ -1,0 +1,1 @@
+export const PROCESS_DURATION_MS = 10_000;
