@@ -1,8 +1,16 @@
+import { Logger } from "../libs";
 import { CustomerType, Order } from "../models";
 import { orders } from "../stores";
 
 export class OrderController {
     private nextId = 1;
+    private listeners: Array<(order: Order) => void> = [];
+
+    constructor(private logger?: Logger) {}
+
+    onOrderCreated(listener: (order: Order) => void) {
+        this.listeners.push(listener);
+    }
 
     create(customer: CustomerType) {
         const order: Order = {
@@ -17,6 +25,9 @@ export class OrderController {
         } else {
             orders.push(order)
         }
+
+        this.logger?.log(`Created ${customer} Order #${order.id} - Status: PENDING`);
+        this.listeners.forEach((listener) => listener(order));
 
         return order;
     }

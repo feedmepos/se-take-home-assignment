@@ -6,7 +6,6 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "start": "node dist/index.js",
-    "dev": "ts-node src/index.ts",
     "test": "jest",
     "test:watch": "jest --watch --runInBand"
   },
