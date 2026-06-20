@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FeedMe Order Controller</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">McDonald's Bot Kitchen</p>
+          <h1>Order Controller</h1>
+        </div>
+        <div class="clock" aria-live="polite">
+          <span>Time</span>
+          <strong id="clock">09:00:00</strong>
+        </div>
+      </header>
+
+      <section class="controls" aria-label="Order controller actions">
+        <button type="button" id="new-normal">New Normal Order</button>
+        <button type="button" id="new-vip" class="vip">New VIP Order</button>
+        <button type="button" id="add-bot" aria-label="Add bot">+ Bot</button>
+        <button type="button" id="remove-bot" aria-label="Remove newest bot">- Bot</button>
+        <button type="button" id="tick-one">+1s</button>
+        <button type="button" id="tick-ten">+10s</button>
+        <button type="button" id="toggle-run">Run</button>
+        <button type="button" id="reset" class="quiet">Reset</button>
+      </section>
+
+      <section class="metrics" aria-label="Current kitchen summary">
+        <div>
+          <span>Pending</span>
+          <strong id="pending-count">0</strong>
+        </div>
+        <div>
+          <span>Processing</span>
+          <strong id="processing-count">0</strong>
+        </div>
+        <div>
+          <span>Complete</span>
+          <strong id="complete-count">0</strong>
+        </div>
+        <div>
+          <span>Bots</span>
+          <strong id="bot-count">0</strong>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <section class="lane" aria-labelledby="pending-title">
+          <h2 id="pending-title">Pending</h2>
+          <div id="pending-list" class="stack"></div>
+        </section>
+
+        <section class="lane" aria-labelledby="bots-title">
+          <h2 id="bots-title">Cooking Bots</h2>
+          <div id="bot-list" class="stack"></div>
+        </section>
+
+        <section class="lane" aria-labelledby="complete-title">
+          <h2 id="complete-title">Complete</h2>
+          <div id="complete-list" class="stack"></div>
+        </section>
+      </section>
+
+      <section class="events" aria-labelledby="events-title">
+        <h2 id="events-title">Event Log</h2>
+        <ol id="event-list"></ol>
+      </section>
+    </main>
+
+    <script type="module" src="../dist/frontend/app.js"></script>
+  </body>
+</html>
