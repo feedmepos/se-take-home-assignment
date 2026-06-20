@@ -21,21 +21,28 @@ export class BotController {
         };
 
         bots.push(bot);
-        this.logger?.log(`Bot #${bot.id} created`);
+        this.logger?.log(`Bot #${bot.id} created - Status: ACTIVE`);
         this.processNext(bot);
 
         return bot;
     }
 
-    removeBot() {
-        const bot = bots.pop();
+    removeBot(id: number) {
+        const index = bots.findIndex((bot) => bot.id === id);
+
+        if (index === -1) {
+            return undefined;
+        }
+
+        const [bot] = bots.splice(index, 1);
 
         if (!bot) {
             return undefined;
         }
 
+        const status = bot.status;
         this.stopProcessing(bot);
-        this.logger?.log(`Bot #${bot.id} destroyed`);
+        this.logger?.log(`Bot #${bot.id} destroyed while ${status}`);
 
         return bot;
     }
@@ -75,7 +82,7 @@ export class BotController {
             const order = this.orderController.update(bot.currentOrderId, { status: "COMPLETE" });
 
             if (order) {
-                this.logger?.log(`Bot #${bot.id} completed ${order.customer} Order #${order.id} - Status: COMPLETE`);
+                this.logger?.log(`Bot #${bot.id} completed ${order.customer} Order #${order.id} - Status: COMPLETE (Processing time: ${PROCESS_DURATION_MS / 1000}s)`);
             }
         }
 

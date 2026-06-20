@@ -75,24 +75,41 @@ describe("Bot Controller", () => {
     });
 
     describe("Remove Bot", () => {
-        it("should destroy the newest bot", () => {
+        it("should destroy the bot matching the given id", () => {
             const first = botController.addBot();
             const second = botController.addBot();
-            const removed = botController.removeBot();
+            const removed = botController.removeBot(second.id);
 
             expect(removed).toStrictEqual(second);
             expect(bots).toStrictEqual([first]);
         });
 
+        it("should remove a bot in the middle without affecting the others", () => {
+            const first = botController.addBot();
+            const second = botController.addBot();
+            const third = botController.addBot();
+            const removed = botController.removeBot(second.id);
+
+            expect(removed).toStrictEqual(second);
+            expect(bots).toStrictEqual([first, third]);
+        });
+
         it("should return undefined when there is no bot to remove", () => {
-            expect(botController.removeBot()).toBeUndefined();
+            expect(botController.removeBot(1)).toBeUndefined();
+        });
+
+        it("should return undefined when the id does not match any bot", () => {
+            const bot = botController.addBot();
+
+            expect(botController.removeBot(bot.id + 1)).toBeUndefined();
+            expect(bots).toStrictEqual([bot]);
         });
 
         it("should stop processing and return the order to pending", () => {
             const order = orderController.create("Normal");
 
-            botController.addBot();
-            botController.removeBot();
+            const bot = botController.addBot();
+            botController.removeBot(bot.id);
 
             expect(orderController.findAll({ id: order.id })[0].status).toBe("PENDING");
             expect(bots).toHaveLength(0);
@@ -101,8 +118,8 @@ describe("Bot Controller", () => {
         it("should not complete the order even after 10 seconds once the bot is removed", () => {
             const order = orderController.create("Normal");
 
-            botController.addBot();
-            botController.removeBot();
+            const bot = botController.addBot();
+            botController.removeBot(bot.id);
 
             jest.advanceTimersByTime(10_000);
 
@@ -117,7 +134,7 @@ describe("Bot Controller", () => {
 
             expect(bot.currentOrderId).toBe(vip.id);
 
-            botController.removeBot();
+            botController.removeBot(bot.id);
 
             expect(orders.map((row) => row.id)).toStrictEqual([vip.id, normal1.id, normal2.id]);
             expect(orderController.findAll({ id: vip.id })[0].status).toBe("PENDING");
@@ -125,8 +142,8 @@ describe("Bot Controller", () => {
 
         it("should let another bot pick up an order freed by a removed bot", () => {
             const order = orderController.create("Normal");
-            botController.addBot();
-            botController.removeBot();
+            const bot = botController.addBot();
+            botController.removeBot(bot.id);
 
             const secondBot = botController.addBot();
 
