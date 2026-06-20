@@ -99,28 +99,6 @@ function renderReport(controller: OrderController): string {
   ].join("\n");
 }
 
-function renderStatus(controller: OrderController): string {
-  const snapshot = controller.getSnapshot();
-  const pending = snapshot.pendingOrders.map(formatOrderSummary).join(", ") || "none";
-  const processing =
-    snapshot.processingOrders
-      .map(
-        (item) =>
-          `Bot #${item.botId}: ${formatOrderSummary(item.order)} (${item.remainingSeconds}s left)`
-      )
-      .join(", ") || "none";
-  const completed = snapshot.completedOrders.map(formatOrderSummary).join(", ") || "none";
-
-  return [
-    `[${snapshot.time}] Current Status`,
-    `Bots: ${snapshot.bots.length}`,
-    `Pending: ${pending}`,
-    `Processing: ${processing}`,
-    `Complete: ${completed}`,
-    "",
-  ].join("\n");
-}
-
 function renderDashboard(controller: OrderController, message: string): string {
   const snapshot = controller.getSnapshot();
   const recentEvents = controller.formatEvents().slice(-5);
