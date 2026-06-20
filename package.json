@@ -1,0 +1,19 @@
+{
+  "name": "feedme-order-controller",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "clean": "node -e \"fs.rmSync('dist', { recursive: true, force: true })\"",
+    "build": "npm run clean && tsc --project tsconfig.json",
+    "cli": "npm run build && node dist/src/cli.js --interactive",
+    "test": "npm run build && node --test dist/test/**/*.test.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.0",
+    "typescript": "^5.9.3"
+  }
+}
