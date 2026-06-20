@@ -88,18 +88,18 @@ function renderReport(controller: OrderController): string {
   const normalCompleted = countCompleted(snapshot, "NORMAL");
 
   return [
-    "McDonald's Order Management System - Simulation Results",
-    "",
+    timestampLine(snapshot.time, "McDonald's Order Management System - Simulation Results"),
     ...controller.formatEvents(),
-    "",
-    "Final Status:",
-    `- Simulated Time: ${snapshot.time}`,
-    `- Total Orders Processed: ${snapshot.completedOrders.length} (${vipCompleted} VIP, ${normalCompleted} Normal)`,
-    `- Orders Completed: ${snapshot.completedOrders.length}`,
-    `- Active Bots: ${snapshot.bots.length}`,
-    `- Pending Orders: ${snapshot.pendingOrders.length}`,
-    `- Processing Orders: ${snapshot.processingOrders.length}`,
-    "",
+    timestampLine(snapshot.time, "Final Status:"),
+    timestampLine(snapshot.time, `- Simulated Time: ${snapshot.time}`),
+    timestampLine(
+      snapshot.time,
+      `- Total Orders Processed: ${snapshot.completedOrders.length} (${vipCompleted} VIP, ${normalCompleted} Normal)`
+    ),
+    timestampLine(snapshot.time, `- Orders Completed: ${snapshot.completedOrders.length}`),
+    timestampLine(snapshot.time, `- Active Bots: ${snapshot.bots.length}`),
+    timestampLine(snapshot.time, `- Pending Orders: ${snapshot.pendingOrders.length}`),
+    timestampLine(snapshot.time, `- Processing Orders: ${snapshot.processingOrders.length}`),
   ].join("\n");
 }
 
@@ -194,6 +194,10 @@ function formatOrderSummary(order: OrderSnapshot): string {
 
 function line(): string {
   return "----------------------------------------";
+}
+
+function timestampLine(time: string, message: string): string {
+  return `[${time}] ${message}`;
 }
 
 function clearScreen(): string {
