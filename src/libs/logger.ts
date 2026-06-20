@@ -3,11 +3,15 @@ import { join } from "node:path";
 
 export class Logger {
     private stream: WriteStream
+    private silent: boolean
+    public filePath: string
 
-    constructor(filePath: string = join(__dirname, "..", "runtime.log")) {
-        this.stream = createWriteStream(filePath, {
+    constructor(silent = false) {
+        this.filePath = join(__dirname, "..", "runtime.log")
+        this.stream = createWriteStream(this.filePath, {
             flags: "w",
         });
+        this.silent = silent;
     }
 
     private timestamp() {
@@ -17,7 +21,9 @@ export class Logger {
     log(message: string) {
         const line = `[${this.timestamp()}] ${message}`;
 
-        console.log(line);
+        if (!this.silent) {
+            console.log(line);
+        }
         this.stream.write(line + "\n");
     }
 }
