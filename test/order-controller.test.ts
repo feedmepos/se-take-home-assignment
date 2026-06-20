@@ -1,0 +1,199 @@
+import { OrderController } from "@/controllers";
+import { orders } from "@/stores";
+
+describe("Order Controller", () => {
+    let controller: OrderController;
+
+    beforeAll(() => {
+        controller = new OrderController()
+    });
+
+    beforeEach(() => {
+        orders.splice(0, orders.length)
+    })
+
+    describe("Create Order", () => {
+        it("should create new order", () => {
+            const newOrder = controller.create("Normal");
+            const orders = controller.findAll();
+
+            expect(orders).toHaveLength(1);
+            expect(newOrder).toStrictEqual({
+                id: expect.any(Number),
+                customer: "Normal",
+                status: "PENDING"
+            })
+        })
+
+        it("should create new vip order", () => {
+            const newOrder = controller.create("VIP");
+            const orders = controller.findAll();
+
+            expect(orders).toHaveLength(1);
+            expect(newOrder).toStrictEqual({
+                id: expect.any(Number),
+                customer: "VIP",
+                status: "PENDING"
+            })
+        })
+
+        it("should be no duplicate id", () => {
+            controller.create("Normal");
+            controller.create("Normal");
+            controller.create("VIP");
+
+            const ids = new Set(orders.map(row => row.id));
+
+            expect(ids.size).toBe(orders.length)
+        })
+
+        it("should create multiple order", () => {
+            const newOrderList = [
+                controller.create("Normal"),
+                controller.create("Normal")
+            ]
+            const orders = controller.findAll();
+
+            expect(orders).toHaveLength(2);
+
+            for (const order of newOrderList) {
+                expect(order).toStrictEqual({
+                    id: expect.any(Number),
+                    customer: "Normal",
+                    status: "PENDING"
+                })
+            }
+        })
+
+        it("should prioritize vip order", () => {
+            const result = [
+                controller.create("Normal"),
+                controller.create("Normal"),
+                controller.create("VIP"),
+            ]
+
+            expect(result.every(row => Boolean(row.id))).toBeTruthy();
+            expect(orders).toHaveLength(3);
+            expect(orders.at(0)?.customer).toBe("VIP")
+        })
+
+        it("should queue next vip order behind existing vip", () => {
+            const result = [
+                controller.create("Normal"),
+                controller.create("Normal"),
+                controller.create("VIP"),
+                controller.create("Normal"),
+                controller.create("VIP"),
+            ]
+
+            expect(result.every(row => Boolean(row.id))).toBeTruthy();
+            expect(orders).toHaveLength(5);
+            expect(orders.at(0)?.customer).toBe("VIP")
+            expect(orders.at(1)?.customer).toBe("VIP")
+        })
+
+        it("should keep increasing ids even after an order is removed", () => {
+            const first = controller.create("Normal");
+            const second = controller.create("Normal");
+            const third = controller.create("Normal");
+
+            const previousMaxId = Math.max(first.id, second.id, third.id);
+
+            orders.splice(1, 1)
+
+            const fourth = controller.create("Normal");
+
+            expect(fourth.id).toBeGreaterThan(previousMaxId);
+
+            const ids = orders.map(row => row.id);
+            expect(new Set(ids).size).toBe(ids.length)
+        })
+
+        it("should preserve relative order of regular orders when a vip order is inserted between them", () => {
+            const regular1 = controller.create("Normal");
+            const vip = controller.create("VIP");
+            const regular2 = controller.create("Normal");
+
+            expect(orders.map(row => row.id)).toStrictEqual([vip.id, regular1.id, regular2.id])
+        })
+    })
+
+    describe("Find All Orders", () => {
+        it("should return an empty list when no orders exist", () => {
+            expect(controller.findAll()).toStrictEqual([]);
+        })
+
+        it("should return all created orders", () => {
+            const first = controller.create("Normal");
+            const second = controller.create("VIP");
+
+            expect(controller.findAll()).toStrictEqual([second, first]);
+        })
+
+        it("should return the same reference as the underlying store", () => {
+            controller.create("Normal");
+
+            expect(controller.findAll()).toBe(orders);
+        })
+
+        it("should reflect subsequent changes to the store", () => {
+            controller.create("Normal");
+            const result = controller.findAll();
+
+            expect(result).toHaveLength(1);
+
+            controller.create("VIP");
+
+            expect(result).toHaveLength(2);
+        })
+
+        it("should return only orders matching the given filter", () => {
+            const regular = controller.create("Normal");
+            const vip = controller.create("VIP");
+
+            const filterA = controller.findAll({ customer: "VIP" })
+            const filterB = controller.findAll({ customer: "Normal" })
+
+            expect(filterA).toStrictEqual([vip]);
+            expect(filterB).toStrictEqual([regular]);
+        })
+
+        it("should return an empty list when no orders match the filter", () => {
+            controller.create("Normal");
+
+            const result = controller.findAll({ status: "PROCESSING" })
+
+            expect(result).toStrictEqual([]);
+        })
+    })
+
+    describe("Update Order", () => {
+        it("should update the status of an existing order", () => {
+            const order = controller.create("Normal");
+
+            const updatedOrder = controller.update(order.id, { status: "PROCESSING" });
+
+            expect(updatedOrder).toStrictEqual({
+                id: order.id,
+                customer: "Normal",
+                status: "PROCESSING"
+            })
+        })
+
+        it("should not affect other orders", () => {
+            const first = controller.create("Normal");
+            const second = controller.create("Normal");
+
+            controller.update(first.id, { status: "PROCESSING" });
+
+            expect(orders.find(row => row.id === first.id)?.status).toBe("PROCESSING")
+            expect(orders.find(row => row.id === second.id)?.status).toBe("PENDING")
+        })
+
+        it("should return undefined when the order does not exist", () => {
+            const result = controller.update(999, { status: "PROCESSING" });
+
+            expect(result).toBeUndefined();
+        })
+    })
+})

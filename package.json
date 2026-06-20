@@ -1,0 +1,37 @@
+{
+  "name": "feed-me-assignment",
+  "version": "1.0.0",
+  "description": "Below is a take home assignment before the interview of the position. You are required to 1. Understand the situation and use case. You may contact the interviewer for further clarification. 2. implement the requirement with **either frontend or backend components**. 3. Complete the requirement with **AI** if possible, but perform your own testing. 4. Provide documentation for the any part that you think is needed. 5. Bring the source code and functioning prototype to the interview session.",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/index.js --tui",
+    "test": "jest",
+    "test:watch": "jest --watch --runInBand"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kashi93/se-take-home-assignment.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kashi93/se-take-home-assignment/issues"
+  },
+  "homepage": "https://github.com/kashi93/se-take-home-assignment#readme",
+  "devDependencies": {
+    "@types/blessed": "^0.1.27",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^26.0.0",
+    "@types/yargs": "^17.0.35",
+    "jest": "^30.4.2",
+    "ts-jest": "^29.4.11",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
+  },
+  "dependencies": {
+    "blessed": "^0.1.81",
+    "yargs": "^17.7.3"
+  }
+}
