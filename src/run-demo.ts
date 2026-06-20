@@ -44,13 +44,7 @@ export const runDemo = () => {
     // Removes the most recently added bot ~2 processing cycles in; if it's mid-order,
     // that order is reset to PENDING (see BotController.stopProcessing) for another bot to pick up
     setTimeout(() => {
-        const bots = botController.findAll();
-        const newestBot = bots[bots.length - 1];
-
-        if (newestBot) {
-            botController.removeBot(newestBot.id);
-        }
-
+        botController.removeNewestBot();
         botRemoved = true;
     }, 2 * PROCESS_DURATION_MS + 2_000);
 

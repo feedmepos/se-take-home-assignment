@@ -98,6 +98,19 @@ describe("Bot Controller", () => {
             expect(botController.removeBot(1)).toBeUndefined();
         });
 
+        it("should destroy the newest bot when removing without specifying an id", () => {
+            const first = botController.addBot();
+            const second = botController.addBot();
+            const removed = botController.removeNewestBot();
+
+            expect(removed).toStrictEqual(second);
+            expect(bots).toStrictEqual([first]);
+        });
+
+        it("should return undefined when removing the newest bot but none exist", () => {
+            expect(botController.removeNewestBot()).toBeUndefined();
+        });
+
         it("should return undefined when the id does not match any bot", () => {
             const bot = botController.addBot();
 

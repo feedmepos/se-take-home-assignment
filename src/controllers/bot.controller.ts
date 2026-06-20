@@ -47,6 +47,16 @@ export class BotController {
         return bot;
     }
 
+    removeNewestBot() {
+        const newestBot = bots[bots.length - 1];
+
+        if (!newestBot) {
+            return undefined;
+        }
+
+        return this.removeBot(newestBot.id);
+    }
+
     findAll() {
         return bots;
     }
