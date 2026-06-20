@@ -1,11 +1,7 @@
 import { stdout as output, stdin as input } from "node:process";
 import { createInterface } from "node:readline";
-import {
-  type BotSnapshot,
-  type ControllerSnapshot,
-  type OrderSnapshot,
-  OrderController,
-} from "./orderController.js";
+import type { BotSnapshot, ControllerSnapshot, OrderSnapshot } from "./domain.js";
+import { OrderController } from "./orderController.js";
 
 function runDemo(): string {
   const controller = new OrderController({

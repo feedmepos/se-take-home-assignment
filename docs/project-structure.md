@@ -29,10 +29,14 @@ Backend and shared domain logic.
 ```text
 src/
 |-- cli.ts
-`-- orderController.ts
+|-- domain.ts
+|-- orderController.ts
+`-- time.ts
 ```
 
-- `orderController.ts` contains the in-memory order queue, bot lifecycle, simulated clock, snapshots, and event logging.
+- `domain.ts` contains shared constants, branded IDs, domain statuses, and public snapshot shapes.
+- `orderController.ts` contains the in-memory order queue, bot lifecycle, snapshots, and event logging.
+- `time.ts` contains HH:MM:SS parsing and formatting helpers for the simulated clock.
 - `cli.ts` contains the non-interactive simulation used by `scripts/run.sh` and a dependency-free terminal dashboard for interview demonstration.
 
 The controller is intentionally framework-free so it can be reused by tests, CLI, and frontend without duplicating business logic.
@@ -43,6 +47,7 @@ Node test runner specs.
 
 ```text
 test/
+|-- cliResult.test.ts
 `-- orderController.test.ts
 ```
 

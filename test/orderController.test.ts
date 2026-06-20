@@ -1,12 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import {
-  type ControllerSnapshot,
-  type ProcessingOrderSnapshot,
-  OrderController,
-  formatSecondsAsTime,
-  parseTimeToSeconds,
-} from "../src/orderController.js";
+import type { ControllerSnapshot, ProcessingOrderSnapshot } from "../src/domain.js";
+import { OrderController } from "../src/orderController.js";
+import { formatSecondsAsTime, parseTimeToSeconds } from "../src/time.js";
 
 describe("OrderController", () => {
   it("queues VIP orders before normal orders while preserving FIFO inside each priority", () => {

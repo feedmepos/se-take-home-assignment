@@ -1,4 +1,5 @@
-import { type BotSnapshot, type OrderSnapshot, OrderController } from "../src/orderController.js";
+import type { BotSnapshot, OrderSnapshot } from "../src/domain.js";
+import { OrderController } from "../src/orderController.js";
 
 const processingSeconds = 10;
 let controller = createController();

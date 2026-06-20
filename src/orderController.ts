@@ -1,28 +1,22 @@
-type Brand<TValue, TBrand extends string> = TValue & { readonly __brand: TBrand };
-
-export type OrderId = Brand<number, "OrderId">;
-export type BotId = Brand<number, "BotId">;
-export type Seconds = Brand<number, "Seconds">;
-
-export const ORDER_TYPES = {
-  NORMAL: "NORMAL",
-  VIP: "VIP",
-} as const;
-
-export const BOT_STATUS = {
-  IDLE: "IDLE",
-  PROCESSING: "PROCESSING",
-} as const;
-
-export const ORDER_STATUS = {
-  PENDING: "PENDING",
-  PROCESSING: "PROCESSING",
-  COMPLETE: "COMPLETE",
-} as const;
-
-export type OrderType = (typeof ORDER_TYPES)[keyof typeof ORDER_TYPES];
-export type BotStatus = (typeof BOT_STATUS)[keyof typeof BOT_STATUS];
-export type OrderStatus = (typeof ORDER_STATUS)[keyof typeof ORDER_STATUS];
+import {
+  BOT_STATUS,
+  ORDER_STATUS,
+  ORDER_TYPES,
+  toBotId,
+  toOrderId,
+} from "./domain.js";
+import type {
+  BotId,
+  BotSnapshot,
+  ControllerSnapshot,
+  OrderControllerOptions,
+  OrderId,
+  OrderSnapshot,
+  OrderStatus,
+  OrderType,
+  Seconds,
+} from "./domain.js";
+import { formatSecondsAsTime, parseTimeToSeconds, toSeconds } from "./time.js";
 
 interface Order {
   id: OrderId;
@@ -54,55 +48,6 @@ type Bot = IdleBot | ProcessingBot;
 interface EventLogEntry {
   time: string;
   message: string;
-}
-
-export interface OrderControllerOptions {
-  processingSeconds?: number;
-  startTime?: string;
-  firstOrderId?: number;
-}
-
-export interface OrderSnapshot {
-  id: OrderId;
-  type: OrderType;
-  status: OrderStatus;
-  createdAt: string;
-  startedAt: string | null;
-  completedAt: string | null;
-}
-
-export interface ProcessingOrderSnapshot {
-  botId: BotId;
-  order: OrderSnapshot;
-  remainingSeconds: number;
-}
-
-interface BaseBotSnapshot {
-  id: BotId;
-  status: BotStatus;
-  remainingSeconds: number;
-}
-
-export interface IdleBotSnapshot extends BaseBotSnapshot {
-  status: typeof BOT_STATUS.IDLE;
-  orderId: null;
-  orderType: null;
-}
-
-export interface ProcessingBotSnapshot extends BaseBotSnapshot {
-  status: typeof BOT_STATUS.PROCESSING;
-  orderId: OrderId;
-  orderType: OrderType;
-}
-
-export type BotSnapshot = IdleBotSnapshot | ProcessingBotSnapshot;
-
-export interface ControllerSnapshot {
-  time: string;
-  pendingOrders: OrderSnapshot[];
-  processingOrders: ProcessingOrderSnapshot[];
-  completedOrders: OrderSnapshot[];
-  bots: BotSnapshot[];
 }
 
 const ORDER_PRIORITY = {
@@ -350,36 +295,6 @@ export class OrderController {
   }
 }
 
-export function formatSecondsAsTime(totalSeconds: number): string {
-  const secondsInDay = 24 * 60 * 60;
-  const normalized = ((totalSeconds % secondsInDay) + secondsInDay) % secondsInDay;
-  const hours = Math.floor(normalized / 3600);
-  const minutes = Math.floor((normalized % 3600) / 60);
-  const seconds = normalized % 60;
-
-  return [hours, minutes, seconds]
-    .map((value) => String(value).padStart(2, "0"))
-    .join(":");
-}
-
-export function parseTimeToSeconds(time: string): Seconds {
-  const match = /^(\d{2}):(\d{2}):(\d{2})$/.exec(time);
-  if (!match) {
-    throw new Error("Time must be in HH:MM:SS format");
-  }
-
-  const [, hoursText, minutesText, secondsText] = match;
-  const hours = Number(hoursText);
-  const minutes = Number(minutesText);
-  const seconds = Number(secondsText);
-
-  if (hours > 23 || minutes > 59 || seconds > 59) {
-    throw new Error("Time must be a valid HH:MM:SS value");
-  }
-
-  return toSeconds(hours * 3600 + minutes * 60 + seconds);
-}
-
 function isIdleBot(bot: Bot): bot is IdleBot {
   return bot.status === BOT_STATUS.IDLE;
 }
@@ -423,16 +338,4 @@ function copyBot(bot: Bot, currentTime: Seconds): BotSnapshot {
     orderType: null,
     remainingSeconds: 0,
   };
-}
-
-function toOrderId(value: number): OrderId {
-  return value as OrderId;
-}
-
-function toBotId(value: number): BotId {
-  return value as BotId;
-}
-
-function toSeconds(value: number): Seconds {
-  return value as Seconds;
 }
