@@ -9,6 +9,7 @@ const config: Config = {
     ...pathsToModuleNameMapper(compilerOptions.paths, { prefix: '<rootDir>/' }),
   },
   testMatch: ["<rootDir>/test/**/*.test.ts"],
+  setupFilesAfterEnv: ["<rootDir>/test/setup.ts"],
 };
 
 export default config;
