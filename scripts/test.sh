@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # Unit Test Script
 # This script should contain all unit test execution steps

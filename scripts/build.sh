@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # Build Script
 # This script should contain all compilation steps for your CLI application

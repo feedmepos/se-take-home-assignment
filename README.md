@@ -22,7 +22,7 @@ As below is part of the user story:
 3. The order number should be unique and increasing.
 4. When "+ Bot" clicked, a bot should be created and start processing the order inside "PENDING" area. after 10 seconds picking up the order, the order should move to "COMPLETE" area. Then the bot should start processing another order if there is any left in "PENDING" area.
 5. If there is no more order in the "PENDING" area, the bot should become IDLE until a new order come in.
-6. When "- Bot" clicked, the newest bot should be destroyed. If the bot is processing an order, it should also stop the process. The order now back to "PENDING" and ready to process by other bot.
+6. When "- Bot" clicked, the newest bot should be destroyed. If the bot is processing an order, it should also stop the process. The order should return to its original position in the "PENDING" area (maintaining VIP/Normal order priority).
 7. No data persistance is needed for this prototype, you may perform all the process inside memory.
 
 ### Functioning Prototype
@@ -45,6 +45,7 @@ You must implement **either** frontend or backend components as described below:
 - The `result.txt` output must include timestamps in `HH:MM:SS` format to track order completion times
 - Must follow **GitHub Flow**: Create a Pull Request with your changes to this repository
 - Ensure all GitHub Action checks pass successfully
+- **Note**: An interactive CLI implementation is compulsory for the next round of interview. Candidates should be prepared to demonstrate interactive command handling.
 
 #### Submission Requirements
 - Fork this repository and implement your solution with either frontend or backend
@@ -54,10 +55,10 @@ You must implement **either** frontend or backend components as described below:
   - All tests in `test.sh` must pass
   - The `result.txt` file must contain meaningful output from your CLI application
   - All output must include timestamps in `HH:MM:SS` format to track order completion times
-  - Submit a Pull Request and ensure the `go-verify-result` workflow passes
+  - Submit a Pull Request and ensure the `backend-verify-result` workflow passes
 - Provide documentation for any part that you think is needed
 
 ### Tips on completing this task
 - Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.
-- Treat this assignment as a vibe coding, don't over engineer it. Try to scope your working hour within 30 min. However, ensure you read and understand what your code doing.
+- Utilize coding agent to complete the assignment scope your working hour within 1 hour, do not over engineer it. However, ensure you read and understand what your code doing and apply good engineering practice.
 - Complete the implementation as clean as possible, clean code is a strong plus point, do not bring in all the fancy tech stuff.

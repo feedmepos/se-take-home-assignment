@@ -1,3 +1,3 @@
-module order-controller
+module se-take-home-assignment
 
-go 1.21
+go 1.23
