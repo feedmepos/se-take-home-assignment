@@ -112,4 +112,26 @@ describe('order controller', () => {
     expect(state.completedOrders).toEqual([])
     expect(getPendingOrders(state).map((order) => order.id)).toEqual([1])
   })
+
+  it('reassigns a returned order to an older idle bot after removing the newest bot', () => {
+    let state = createInitialState()
+
+    state = addOrder(state, 'normal')
+    state = addBot(state)
+    state = assignOrders(state, 0)
+    state = addOrder(state, 'normal')
+    state = addBot(state)
+    state = assignOrders(state, 1_000)
+    state = completeBotOrder(state, 1, PROCESSING_MS, PROCESSING_MS)
+
+    expect(state.bots[0].processing).toBeNull()
+    expect(state.bots[1].processing?.order.id).toBe(2)
+
+    state = assignOrders(removeNewestBot(state), PROCESSING_MS + 2_000)
+
+    expect(getPendingOrders(state)).toEqual([])
+    expect(state.bots).toHaveLength(1)
+    expect(state.bots[0].processing?.order.id).toBe(2)
+    expect(state.bots[0].processing?.startedAt).toBe(PROCESSING_MS + 2_000)
+  })
 })

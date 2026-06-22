@@ -34,7 +34,7 @@ export type OrderControllerState = {
 export type ControllerAction =
   | { type: 'add-order'; kind: OrderKind; now: number }
   | { type: 'add-bot'; now: number }
-  | { type: 'remove-newest-bot' }
+  | { type: 'remove-newest-bot'; now: number }
   | { type: 'complete-bot-order'; botId: number; completesAt: number; now: number }
   | { type: 'reset' }
 
@@ -59,7 +59,7 @@ export function orderControllerReducer(
     case 'add-bot':
       return assignOrders(addBot(state), action.now)
     case 'remove-newest-bot':
-      return removeNewestBot(state)
+      return assignOrders(removeNewestBot(state), action.now)
     case 'complete-bot-order':
       return completeBotOrder(state, action.botId, action.completesAt, action.now)
     case 'reset':

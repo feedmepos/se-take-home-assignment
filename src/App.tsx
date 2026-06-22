@@ -125,7 +125,9 @@ function App() {
                 aria-label="Remove newest bot"
                 className="border-white/25 bg-transparent text-white hover:bg-white hover:text-zinc-950"
                 disabled={state.bots.length === 0}
-                onClick={() => dispatch({ type: 'remove-newest-bot' })}
+                onClick={() =>
+                  dispatch({ type: 'remove-newest-bot', now: Date.now() })
+                }
               >
                 <Minus className="h-4 w-4" />
                 Bot
