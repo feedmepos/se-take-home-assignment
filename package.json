@@ -1,0 +1,28 @@
+{
+  "name": "hermes-order-controller",
+  "version": "0.1.0",
+  "description": "Node.js CLI prototype for the FeedMe McDonald's order controller take-home assignment.",
+  "main": "dist/cli.js",
+  "type": "commonjs",
+  "private": true,
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "cli": "node dist/cli.js",
+    "cli:interactive": "node dist/cli.js --interactive",
+    "start": "node dist/cli.js",
+    "test": "npm run build && node --test test",
+    "test:output": "npm run build && node --test test/cli-output.test.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "take-home",
+    "cli",
+    "order-controller"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}
