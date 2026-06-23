@@ -1,15 +1,13 @@
 #!/bin/bash
 
-# Build Script
-# This script should contain all compilation steps for your CLI application
+set -euo pipefail
 
 echo "Building CLI application..."
 
-# For Go projects:
-# go build -o order-controller ./cmd/main.go
+if [ ! -d node_modules/typescript ]; then
+  npm ci
+fi
 
-# For Node.js projects:
-# npm install
-# npm run build (if needed)
+npm run build
 
 echo "Build completed"
