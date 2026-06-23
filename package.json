@@ -10,7 +10,7 @@
     "cli": "node dist/cli.js",
     "cli:interactive": "node dist/cli.js --interactive",
     "start": "node dist/cli.js",
-    "test": "npm run build && node --test test",
+    "test": "npm run build && node --test test/*.test.js",
     "test:output": "npm run build && node --test test/cli-output.test.js"
   },
   "engines": {
