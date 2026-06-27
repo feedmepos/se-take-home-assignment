@@ -26,7 +26,7 @@ const {
         <div class="brand">
           <span class="brand-mark">M</span>
           <div>
-            <h1>Order Controller</h1>
+            <h1>Order Controller · Kitchen Demo</h1>
             <p class="subtitle">McDonald's Kitchen Automation</p>
           </div>
         </div>
