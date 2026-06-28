@@ -62,3 +62,59 @@ You must implement **either** frontend or backend components as described below:
 - Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.
 - Utilize coding agent to complete the assignment scope your working hour within 1 hour, do not over engineer it. However, ensure you read and understand what your code doing and apply good engineering practice.
 - Complete the implementation as clean as possible, clean code is a strong plus point, do not bring in all the fancy tech stuff.
+
+---
+
+## Frontend Solution (React + TypeScript + Vite)
+
+This repository implements the **frontend** option: an in-browser McDonald's
+order controller that demonstrates every requirement above.
+
+### Tech stack
+- **React 18 + TypeScript + Vite** — no UI framework, no state-management library.
+- **Vitest** for unit tests, **Playwright** for end-to-end tests.
+
+### Run it
+```bash
+npm install
+npm run dev          # http://localhost:5173 — click the four buttons to drive the flow
+npm run build        # type-check + production build into dist/
+npm run preview      # serve the production build
+```
+
+### Test it
+```bash
+npm test             # Vitest unit tests for the pure domain logic
+npx playwright install   # one-time: download the browser
+npm run test:e2e     # Playwright drives the real UI end-to-end
+```
+
+> Cooking time is **10s** by default (requirement 4). Append `?processMs=500` to
+> the URL to speed it up — handy for demos and used by the E2E tests.
+
+### How it works
+The core is a set of **pure functions** over an immutable `SystemState`
+(`src/domain/orderSystem.ts`) — no React, no timers, `now` is passed in — which
+makes the rules trivially testable. React is a thin layer:
+`src/hooks/useOrderSystem.ts` owns the state, runs a 100ms `reconcile` loop, and
+feeds derived view data to small components.
+
+| Requirement | Where |
+|---|---|
+| Unique, increasing order numbers (1, 2) | `addOrder` + `nextOrderId` |
+| VIP ahead of Normal, behind earlier VIPs (2) | `byPriority` sort key `(type, id)` |
+| Bot cooks 10s then completes, picks next (4, 5) | `reconcile` |
+| `+ Bot` / `- Bot`, newest removed returns its order (3, 6) | `addBot` / `removeBot` |
+| In-memory only (7) | all state lives in React, nothing persisted |
+
+A single `(type, id)` sort key elegantly satisfies both VIP queue-jumping and
+returning a removed bot's order to its original position.
+
+### Deployment
+The build output in `dist/` is a static bundle, deploy-ready for any static host
+(GitHub Pages, Vercel, Netlify). It currently runs locally; to publish, host
+`dist/` and set Vite's `base` if serving from a sub-path.
+
+### Bundled Claude Code capabilities
+The skills, review agents, and commands used to build this are committed under
+[`.claude/`](.claude/README.md) so they travel with the repo.
