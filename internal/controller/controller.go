@@ -62,57 +62,43 @@ type Snapshot struct {
 }
 
 type Controller struct {
-	processingDuration time.Duration
-
 	nextOrderID int
 	nextBotID   int
-	nextEventID int
 
-	pending   []*order
+	vipPending    []*order
+	normalPending []*order
+	// completed 只为 CLI/demo 的状态摘要保留在内存中。真实长期运行的 Web 服务
+	// 应该把完成订单持久化，或通过分页/时间窗口查询，避免内存无限增长。
 	completed []*order
 	bots      []*bot
 	botsByID  map[int]*bot
 	orders    map[int]*order
-	events    []completionEvent
 }
 
 type order struct {
-	id     int
-	kind   OrderKind
-	status OrderStatus
+	id              int
+	kind            OrderKind
+	status          OrderStatus
+	processingBotID int
 }
 
 type bot struct {
 	id             int
 	status         BotStatus
 	currentOrderID int
-	completionID   int
 }
 
-type completionEvent struct {
-	id      int
-	dueAt   time.Time
-	botID   int
-	orderID int
-}
-
-func New(processingDuration time.Duration) *Controller {
-	if processingDuration <= 0 {
-		processingDuration = 10 * time.Second
-	}
-
+func New() *Controller {
 	return &Controller{
-		processingDuration: processingDuration,
-		nextOrderID:        defaultFirstOrderID,
-		nextBotID:          defaultFirstBotID,
-		nextEventID:        1,
-		botsByID:           make(map[int]*bot),
-		orders:             make(map[int]*order),
+		nextOrderID: defaultFirstOrderID,
+		nextBotID:   defaultFirstBotID,
+		botsByID:    make(map[int]*bot),
+		orders:      make(map[int]*order),
 	}
 }
 
 func NewDefault() *Controller {
-	return New(10 * time.Second)
+	return New()
 }
 
 func (c *Controller) Initialized(now time.Time) []LogEntry {
@@ -131,14 +117,12 @@ func (c *Controller) AddOrder(kind OrderKind, now time.Time) []LogEntry {
 	}
 	c.nextOrderID++
 	c.orders[o.id] = o
-	c.insertPending(o)
+	c.returnToPendingQueue(o)
 
-	logs := []LogEntry{c.log(now, "Created %s Order #%d - Status: %s", o.kind, o.id, o.status)}
-	logs = append(logs, c.assignIdleBots(now)...)
-	return logs
+	return []LogEntry{c.log(now, "Created %s Order #%d - Status: %s", o.kind, o.id, o.status)}
 }
 
-func (c *Controller) AddBot(now time.Time) []LogEntry {
+func (c *Controller) AddBot(now time.Time) (int, []LogEntry) {
 	b := &bot{
 		id:     c.nextBotID,
 		status: BotIdle,
@@ -147,48 +131,137 @@ func (c *Controller) AddBot(now time.Time) []LogEntry {
 	c.bots = append(c.bots, b)
 	c.botsByID[b.id] = b
 
-	logs := []LogEntry{c.log(now, "Bot #%d created - Status: %s", b.id, b.status)}
-	logs = append(logs, c.startNextOrder(b, now, false)...)
-	return logs
+	return b.id, []LogEntry{c.log(now, "Bot #%d created - Status: %s", b.id, b.status)}
 }
 
-func (c *Controller) RemoveBot(now time.Time) []LogEntry {
+func (c *Controller) RemoveNewestBot(now time.Time) (int, int, []LogEntry) {
 	if len(c.bots) == 0 {
-		return []LogEntry{c.log(now, "No bot available to destroy")}
+		return 0, 0, []LogEntry{c.log(now, "No bot available to destroy")}
 	}
+	return c.removeBotAt(len(c.bots)-1, now)
+}
 
-	lastIndex := len(c.bots) - 1
-	b := c.bots[lastIndex]
-	c.bots = c.bots[:lastIndex]
+func (c *Controller) removeBotAt(removeIndex int, now time.Time) (int, int, []LogEntry) {
+	b := c.bots[removeIndex]
+	orderID := b.currentOrderID
+	c.bots = append(c.bots[:removeIndex], c.bots[removeIndex+1:]...)
 	delete(c.botsByID, b.id)
 
-	if b.status == BotProcessing {
-		o := c.orders[b.currentOrderID]
-		if o != nil {
-			o.status = OrderPending
-			c.insertPending(o)
-			return []LogEntry{
-				c.log(now, "Bot #%d destroyed while processing %s Order #%d - Order returned to PENDING", b.id, o.kind, o.id),
-			}
-		}
+	if orderID != 0 {
+		return b.id, orderID, []LogEntry{c.log(now, "Bot #%d destroyed - Cancellation requested for Order #%d", b.id, orderID)}
 	}
 
-	return []LogEntry{c.log(now, "Bot #%d destroyed while IDLE", b.id)}
+	return b.id, 0, []LogEntry{c.log(now, "Bot #%d destroyed", b.id)}
 }
 
-func (c *Controller) AdvanceTo(now time.Time) []LogEntry {
-	var logs []LogEntry
+func (c *Controller) CancelOrder(botID, orderID int, now time.Time, actualDuration time.Duration) ([]LogEntry, bool) {
+	return c.cancelAssignedOrder(botID, orderID, now, actualDuration)
+}
 
-	for {
-		eventIndex := c.nextDueEventIndex(now)
-		if eventIndex < 0 {
-			return logs
-		}
-
-		event := c.events[eventIndex]
-		c.events = append(c.events[:eventIndex], c.events[eventIndex+1:]...)
-		logs = append(logs, c.completeOrder(event)...)
+func (c *Controller) cancelAssignedOrder(botID, orderID int, now time.Time, actualDuration time.Duration) ([]LogEntry, bool) {
+	o := c.orders[orderID]
+	if o == nil ||
+		o.status != OrderProcessing ||
+		o.processingBotID != botID ||
+		c.botsByID[botID] != nil {
+		return nil, false
 	}
+
+	o.status = OrderPending
+	o.processingBotID = 0
+	c.returnToPendingQueue(o)
+
+	return []LogEntry{
+		c.log(now, "Bot #%d canceled %s Order #%d after %s - Order returned to PENDING", botID, o.kind, o.id, formatDuration(actualDuration)),
+	}, true
+}
+
+func (c *Controller) AssignNextOrder(botID int, now time.Time) (*WorkAssignment, []LogEntry) {
+	b := c.botsByID[botID]
+	if b == nil {
+		return nil, nil
+	}
+
+	o := c.popNextPending()
+	if o == nil {
+		b.status = BotIdle
+		b.currentOrderID = 0
+		return nil, nil
+	}
+
+	o.status = OrderProcessing
+	o.processingBotID = b.id
+	b.status = BotProcessing
+	b.currentOrderID = o.id
+
+	assignment := &WorkAssignment{
+		BotID:   b.id,
+		OrderID: o.id,
+		Kind:    o.kind,
+	}
+	return assignment, []LogEntry{c.log(now, "Bot #%d picked up %s Order #%d - Status: %s", b.id, o.kind, o.id, o.status)}
+}
+
+func (c *Controller) ReturnAssignedOrder(assignment WorkAssignment, now time.Time) []LogEntry {
+	b := c.botsByID[assignment.BotID]
+	if b != nil && b.status == BotProcessing && b.currentOrderID == assignment.OrderID {
+		b.status = BotIdle
+		b.currentOrderID = 0
+	}
+
+	o := c.orders[assignment.OrderID]
+	if o == nil || o.status != OrderProcessing {
+		return nil
+	}
+
+	o.status = OrderPending
+	o.processingBotID = 0
+	c.returnToPendingQueue(o)
+	return []LogEntry{
+		c.log(now, "Bot #%d could not receive %s Order #%d - Order returned to PENDING", assignment.BotID, o.kind, o.id),
+	}
+}
+
+func (c *Controller) CompleteOrder(botID, orderID int, now time.Time, actualDuration time.Duration) (*WorkAssignment, []LogEntry) {
+	o := c.orders[orderID]
+	if o != nil && o.status == OrderProcessing && o.processingBotID == botID && c.botsByID[botID] == nil {
+		logs, _ := c.cancelAssignedOrder(botID, orderID, now, actualDuration)
+		return nil, logs
+	}
+
+	b := c.botsByID[botID]
+	if b == nil || b.status != BotProcessing || b.currentOrderID != orderID {
+		return nil, nil
+	}
+
+	if o == nil || o.status != OrderProcessing {
+		return nil, nil
+	}
+
+	o.status = OrderComplete
+	o.processingBotID = 0
+	c.completed = append(c.completed, o)
+	b.status = BotIdle
+	b.currentOrderID = 0
+
+	logs := []LogEntry{
+		c.log(now, "Bot #%d completed %s Order #%d - Status: %s (Processing time: %s)",
+			b.id,
+			o.kind,
+			o.id,
+			o.status,
+			formatDuration(actualDuration),
+		),
+	}
+
+	next, nextLogs := c.AssignNextOrder(botID, now)
+	if next == nil {
+		logs = append(logs, c.log(now, "Bot #%d is now IDLE - No pending orders", botID))
+		return nil, logs
+	}
+
+	logs = append(logs, nextLogs...)
+	return next, logs
 }
 
 func (c *Controller) Status(now time.Time) []LogEntry {
@@ -231,17 +304,26 @@ func (c *Controller) Summary(now time.Time) []LogEntry {
 
 func (c *Controller) Snapshot() Snapshot {
 	snapshot := Snapshot{
-		Pending:   make([]OrderView, 0, len(c.pending)),
+		Pending:   make([]OrderView, 0, c.pendingCount()),
 		Completed: make([]OrderView, 0, len(c.completed)),
 		Bots:      make([]BotView, 0, len(c.bots)),
 	}
 
-	for _, o := range c.pending {
+	for _, o := range c.vipPending {
+		snapshot.Pending = append(snapshot.Pending, orderView(o))
+	}
+	for _, o := range c.normalPending {
 		snapshot.Pending = append(snapshot.Pending, orderView(o))
 	}
 
 	for _, o := range c.completed {
 		snapshot.Completed = append(snapshot.Completed, orderView(o))
+	}
+
+	for orderID := defaultFirstOrderID; orderID < c.nextOrderID; orderID++ {
+		if o := c.orders[orderID]; o != nil && o.status == OrderProcessing {
+			snapshot.Processing = append(snapshot.Processing, orderView(o))
+		}
 	}
 
 	for _, b := range c.bots {
@@ -250,130 +332,62 @@ func (c *Controller) Snapshot() Snapshot {
 			Status:         b.status,
 			CurrentOrderID: b.currentOrderID,
 		})
-		if b.status == BotProcessing {
-			if o := c.orders[b.currentOrderID]; o != nil {
-				snapshot.Processing = append(snapshot.Processing, orderView(o))
-			}
-		}
 	}
 
 	return snapshot
 }
 
-func (c *Controller) assignIdleBots(now time.Time) []LogEntry {
-	var logs []LogEntry
+func (c *Controller) idleBotIDs() []int {
+	ids := make([]int, 0, len(c.bots))
 	for _, b := range c.bots {
-		if len(c.pending) == 0 {
-			return logs
-		}
 		if b.status == BotIdle {
-			logs = append(logs, c.startNextOrder(b, now, false)...)
+			ids = append(ids, b.id)
 		}
 	}
-	return logs
+	return ids
 }
 
-func (c *Controller) startNextOrder(b *bot, now time.Time, logIdle bool) []LogEntry {
-	if len(c.pending) == 0 {
-		b.status = BotIdle
-		b.currentOrderID = 0
-		b.completionID = 0
-		if logIdle {
-			return []LogEntry{c.log(now, "Bot #%d is now IDLE - No pending orders", b.id)}
-		}
-		return nil
+func (c *Controller) returnToPendingQueue(o *order) {
+	// 订单回到待处理队列时保持原始优先级：VIP 回 VIP 队列，Normal 回 Normal 队列。
+	// 同一队列内按订单号恢复 FIFO，因此取消的旧订单会排在后创建的同类订单前面。
+	if o.kind == VIPOrder {
+		c.vipPending = insertByOriginalOrderID(c.vipPending, o)
+		return
 	}
-
-	o := c.pending[0]
-	c.pending = c.pending[1:]
-	o.status = OrderProcessing
-
-	eventID := c.nextEventID
-	c.nextEventID++
-
-	b.status = BotProcessing
-	b.currentOrderID = o.id
-	b.completionID = eventID
-
-	c.events = append(c.events, completionEvent{
-		id:      eventID,
-		dueAt:   now.Add(c.processingDuration),
-		botID:   b.id,
-		orderID: o.id,
-	})
-
-	return []LogEntry{c.log(now, "Bot #%d picked up %s Order #%d - Status: %s", b.id, o.kind, o.id, o.status)}
+	c.normalPending = insertByOriginalOrderID(c.normalPending, o)
 }
 
-func (c *Controller) completeOrder(event completionEvent) []LogEntry {
-	b := c.botsByID[event.botID]
-	if b == nil || b.status != BotProcessing || b.currentOrderID != event.orderID || b.completionID != event.id {
-		return nil
+func (c *Controller) popNextPending() *order {
+	if len(c.vipPending) > 0 {
+		o := c.vipPending[0]
+		c.vipPending = c.vipPending[1:]
+		return o
 	}
-
-	o := c.orders[event.orderID]
-	if o == nil || o.status != OrderProcessing {
-		return nil
+	if len(c.normalPending) > 0 {
+		o := c.normalPending[0]
+		c.normalPending = c.normalPending[1:]
+		return o
 	}
-
-	o.status = OrderComplete
-	c.completed = append(c.completed, o)
-
-	b.status = BotIdle
-	b.currentOrderID = 0
-	b.completionID = 0
-
-	logs := []LogEntry{
-		c.log(event.dueAt, "Bot #%d completed %s Order #%d - Status: %s (Processing time: %s)",
-			b.id,
-			o.kind,
-			o.id,
-			o.status,
-			formatDuration(c.processingDuration),
-		),
-	}
-	logs = append(logs, c.startNextOrder(b, event.dueAt, true)...)
-	return logs
+	return nil
 }
 
-func (c *Controller) insertPending(o *order) {
-	insertAt := len(c.pending)
-	for i, existing := range c.pending {
-		if orderBefore(o, existing) {
+func (c *Controller) pendingCount() int {
+	return len(c.vipPending) + len(c.normalPending)
+}
+
+func insertByOriginalOrderID(queue []*order, o *order) []*order {
+	insertAt := len(queue)
+	for i, existing := range queue {
+		if o.id < existing.id {
 			insertAt = i
 			break
 		}
 	}
 
-	c.pending = append(c.pending, nil)
-	copy(c.pending[insertAt+1:], c.pending[insertAt:])
-	c.pending[insertAt] = o
-}
-
-func (c *Controller) nextDueEventIndex(now time.Time) int {
-	bestIndex := -1
-	for i, event := range c.events {
-		if event.dueAt.After(now) {
-			continue
-		}
-		if bestIndex == -1 {
-			bestIndex = i
-			continue
-		}
-
-		best := c.events[bestIndex]
-		if event.dueAt.Before(best.dueAt) || (event.dueAt.Equal(best.dueAt) && event.id < best.id) {
-			bestIndex = i
-		}
-	}
-	return bestIndex
-}
-
-func orderBefore(left, right *order) bool {
-	if left.kind != right.kind {
-		return left.kind == VIPOrder
-	}
-	return left.id < right.id
+	queue = append(queue, nil)
+	copy(queue[insertAt+1:], queue[insertAt:])
+	queue[insertAt] = o
+	return queue
 }
 
 func orderView(o *order) OrderView {

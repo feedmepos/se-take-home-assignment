@@ -64,7 +64,7 @@ You must implement **either** frontend or backend components as described below:
 - Complete the implementation as clean as possible, clean code is a strong plus point, do not bring in all the fancy tech stuff.
 
 ### Backend Implementation
-This fork implements the backend option in Go. The order controller keeps all mutable restaurant state in memory and processes order, bot, completion, and cancellation actions through a single event scheduler.
+This fork implements the backend option in Go. CLI commands are handled like incoming HTTP requests: client order/query requests and manager bot requests use separate Go channels, then a service goroutine serializes state changes through one event loop. Each cooking bot is its own goroutine: it waits for work, uses a 10-second timer to cook one order, reports completion back to the service, and can be stopped while processing. Creating an order returns it as `PENDING` immediately; cooking happens in the background and can be cancelled by removing the active bot. Pending orders are stored in separate VIP and normal queues, and bots always consume the VIP queue first while order numbers still increase by request handling order.
 
 Run the project with the provided scripts:
 

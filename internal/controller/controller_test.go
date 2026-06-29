@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func TestVIPOrdersAreInsertedAheadOfNormalOrders(t *testing.T) {
+func TestVIPAndNormalQueuesKeepPriorityAndFIFO(t *testing.T) {
 	now := testTime()
 	c := NewDefault()
 
@@ -22,118 +22,130 @@ func TestVIPOrdersAreInsertedAheadOfNormalOrders(t *testing.T) {
 	}
 }
 
-func TestBotPicksPendingOrderImmediately(t *testing.T) {
+func TestAddBotAssignsVIPBeforeNormal(t *testing.T) {
 	now := testTime()
 	c := NewDefault()
 
+	c.AddOrder(NormalOrder, now)
 	c.AddOrder(VIPOrder, now)
-	c.AddBot(now)
+	botID, _ := c.AddBot(now)
+	assignment, _ := c.AssignNextOrder(botID, now)
+
+	if assignment == nil || assignment.OrderID != 1002 {
+		t.Fatalf("assignment = %+v, want VIP order #1002", assignment)
+	}
 
 	snapshot := c.Snapshot()
-	if len(snapshot.Pending) != 0 {
-		t.Fatalf("pending orders = %v, want empty", snapshot.Pending)
+	if got, want := orderIDs(snapshot.Pending), []int{1001}; !reflect.DeepEqual(got, want) {
+		t.Fatalf("pending order IDs = %v, want %v", got, want)
 	}
-	if len(snapshot.Bots) != 1 {
-		t.Fatalf("bots = %v, want one bot", snapshot.Bots)
-	}
-	if snapshot.Bots[0].Status != BotProcessing || snapshot.Bots[0].CurrentOrderID != 1001 {
-		t.Fatalf("bot state = %+v, want processing order #1001", snapshot.Bots[0])
+	if snapshot.Bots[0].Status != BotProcessing {
+		t.Fatalf("bot status = %s, want %s", snapshot.Bots[0].Status, BotProcessing)
 	}
 }
 
-func TestBotCompletesAndContinuesNextOrder(t *testing.T) {
+func TestCompleteOrderMakesBotContinueNextOrder(t *testing.T) {
 	now := testTime()
 	c := NewDefault()
 
 	c.AddOrder(NormalOrder, now)
 	c.AddOrder(NormalOrder, now)
-	c.AddBot(now)
+	botID, _ := c.AddBot(now)
+	c.AssignNextOrder(botID, now)
 
-	c.AdvanceTo(now.Add(10 * time.Second))
+	next, _ := c.CompleteOrder(botID, 1001, now.Add(10*time.Second), 10*time.Second)
+	if next == nil || next.OrderID != 1002 {
+		t.Fatalf("next assignment = %+v, want order #1002", next)
+	}
 
 	snapshot := c.Snapshot()
 	if got, want := orderIDs(snapshot.Completed), []int{1001}; !reflect.DeepEqual(got, want) {
-		t.Fatalf("completed after first advance = %v, want %v", got, want)
+		t.Fatalf("completed order IDs = %v, want %v", got, want)
 	}
-	if len(snapshot.Bots) != 1 || snapshot.Bots[0].CurrentOrderID != 1002 {
-		t.Fatalf("bot after first completion = %+v, want processing order #1002", snapshot.Bots)
-	}
-
-	c.AdvanceTo(now.Add(20 * time.Second))
-
-	snapshot = c.Snapshot()
-	if got, want := orderIDs(snapshot.Completed), []int{1001, 1002}; !reflect.DeepEqual(got, want) {
-		t.Fatalf("completed after second advance = %v, want %v", got, want)
-	}
-	if snapshot.Bots[0].Status != BotIdle {
-		t.Fatalf("bot status = %s, want %s", snapshot.Bots[0].Status, BotIdle)
+	if got, want := orderIDs(snapshot.Processing), []int{1002}; !reflect.DeepEqual(got, want) {
+		t.Fatalf("processing order IDs = %v, want %v", got, want)
 	}
 }
 
-func TestIdleBotStartsWhenNewOrderArrives(t *testing.T) {
-	now := testTime()
-	c := NewDefault()
-
-	c.AddBot(now)
-	c.AddOrder(NormalOrder, now.Add(time.Second))
-
-	snapshot := c.Snapshot()
-	if len(snapshot.Pending) != 0 {
-		t.Fatalf("pending orders = %v, want empty", snapshot.Pending)
-	}
-	if snapshot.Bots[0].Status != BotProcessing || snapshot.Bots[0].CurrentOrderID != 1001 {
-		t.Fatalf("bot state = %+v, want processing order #1001", snapshot.Bots[0])
-	}
-}
-
-func TestRemoveNewestIdleBot(t *testing.T) {
-	now := testTime()
-	c := NewDefault()
-
-	c.AddBot(now)
-	c.AddBot(now)
-	c.RemoveBot(now)
-
-	snapshot := c.Snapshot()
-	if got, want := botIDs(snapshot.Bots), []int{1}; !reflect.DeepEqual(got, want) {
-		t.Fatalf("active bot IDs = %v, want %v", got, want)
-	}
-}
-
-func TestRemoveProcessingBotReturnsOrderToPriorityQueue(t *testing.T) {
+func TestRemoveProcessingBotReturnsOrderToItsQueue(t *testing.T) {
 	now := testTime()
 	c := NewDefault()
 
 	c.AddOrder(NormalOrder, now)
 	c.AddOrder(NormalOrder, now)
-	c.AddBot(now)
+	botID, _ := c.AddBot(now)
+	c.AssignNextOrder(botID, now)
 	c.AddOrder(VIPOrder, now)
-	c.RemoveBot(now)
+	c.RemoveNewestBot(now)
 
 	snapshot := c.Snapshot()
-	if got, want := orderIDs(snapshot.Pending), []int{1003, 1001, 1002}; !reflect.DeepEqual(got, want) {
-		t.Fatalf("pending order IDs = %v, want %v", got, want)
+	if got, want := orderIDs(snapshot.Pending), []int{1003, 1002}; !reflect.DeepEqual(got, want) {
+		t.Fatalf("pending order IDs before cancel event = %v, want %v", got, want)
+	}
+	if got, want := orderIDs(snapshot.Processing), []int{1001}; !reflect.DeepEqual(got, want) {
+		t.Fatalf("processing order IDs before cancel event = %v, want %v", got, want)
 	}
 	if len(snapshot.Bots) != 0 {
 		t.Fatalf("active bots = %v, want none", snapshot.Bots)
 	}
+
+	c.CancelOrder(botID, 1001, now, time.Second)
+	if got, want := orderIDs(c.Snapshot().Pending), []int{1003, 1001, 1002}; !reflect.DeepEqual(got, want) {
+		t.Fatalf("pending order IDs after cancel event = %v, want %v", got, want)
+	}
 }
 
-func TestCancelledCompletionEventIsIgnored(t *testing.T) {
+func TestCanceledVIPOrderReturnsAheadOfNormalOrders(t *testing.T) {
+	now := testTime()
+	c := NewDefault()
+
+	c.AddOrder(VIPOrder, now)
+	c.AddOrder(NormalOrder, now)
+	botID, _ := c.AddBot(now)
+	c.AssignNextOrder(botID, now)
+	c.RemoveNewestBot(now)
+	c.CancelOrder(botID, 1001, now, time.Second)
+
+	if got, want := orderIDs(c.Snapshot().Pending), []int{1001, 1002}; !reflect.DeepEqual(got, want) {
+		t.Fatalf("pending order IDs after VIP cancel = %v, want %v", got, want)
+	}
+}
+
+func TestLateCompletedEventAfterBotRemovalReturnsOrderToPending(t *testing.T) {
 	now := testTime()
 	c := NewDefault()
 
 	c.AddOrder(NormalOrder, now)
-	c.AddBot(now)
-	c.RemoveBot(now.Add(time.Second))
-	c.AdvanceTo(now.Add(10 * time.Second))
+	c.AddOrder(NormalOrder, now)
+	botID, _ := c.AddBot(now)
+	c.AssignNextOrder(botID, now)
+	c.RemoveNewestBot(now)
+
+	next, _ := c.CompleteOrder(botID, 1001, now.Add(10*time.Second), 10*time.Second)
+	if next != nil {
+		t.Fatalf("next assignment = %+v, want nil after removed bot completes late", next)
+	}
 
 	snapshot := c.Snapshot()
-	if got, want := orderIDs(snapshot.Completed), []int{}; !reflect.DeepEqual(got, want) {
-		t.Fatalf("completed order IDs = %v, want %v", got, want)
+	if got, want := orderIDs(snapshot.Pending), []int{1001, 1002}; !reflect.DeepEqual(got, want) {
+		t.Fatalf("pending order IDs after late completed event = %v, want %v", got, want)
 	}
-	if got, want := orderIDs(snapshot.Pending), []int{1001}; !reflect.DeepEqual(got, want) {
-		t.Fatalf("pending order IDs = %v, want %v", got, want)
+	if got := orderIDs(snapshot.Completed); len(got) != 0 {
+		t.Fatalf("completed order IDs after late completed event = %v, want none", got)
+	}
+}
+
+func TestRemoveIdleBot(t *testing.T) {
+	now := testTime()
+	c := NewDefault()
+
+	c.AddBot(now)
+	c.AddBot(now)
+	c.RemoveNewestBot(now)
+
+	snapshot := c.Snapshot()
+	if got, want := botIDs(snapshot.Bots), []int{1}; !reflect.DeepEqual(got, want) {
+		t.Fatalf("active bot IDs = %v, want %v", got, want)
 	}
 }
 
