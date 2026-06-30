@@ -62,3 +62,49 @@ You must implement **either** frontend or backend components as described below:
 - Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.
 - Utilize coding agent to complete the assignment scope your working hour within 1 hour, do not over engineer it. However, ensure you read and understand what your code doing and apply good engineering practice.
 - Complete the implementation as clean as possible, clean code is a strong plus point, do not bring in all the fancy tech stuff.
+
+### Backend Implementation
+This fork implements the backend option in Go. CLI commands are handled like incoming HTTP requests: client order/query requests and manager bot requests use separate Go channels, then a service goroutine serializes state changes through one event loop. Each cooking bot is its own goroutine: it waits for work, uses a 10-second timer to cook one order, reports completion back to the service, and can be stopped while processing. Creating an order returns it as `PENDING` immediately; cooking happens in the background and can be cancelled by removing the active bot. Pending orders are stored in separate VIP and normal queues, and bots always consume the VIP queue first while order numbers still increase by request handling order.
+
+Run the project with the provided scripts:
+
+```bash
+./scripts/test.sh
+./scripts/build.sh
+./scripts/run.sh
+```
+
+The run script executes a deterministic CLI demo and writes timestamped output to `scripts/result.txt`.
+
+The CLI supports two modes:
+
+- `demo`: Runs a deterministic simulation for GitHub Actions and `result.txt`.
+- `interactive`: Starts an interview-friendly command prompt for manual testing.
+
+```bash
+go build -o order-controller ./cmd/order-controller
+
+./order-controller demo
+./order-controller interactive
+```
+
+On Windows PowerShell, build and run with:
+
+```powershell
+go build -o order-controller.exe ./cmd/order-controller
+
+.\order-controller.exe demo
+.\order-controller.exe interactive
+```
+
+Interactive commands:
+
+| Command | Description |
+| --- | --- |
+| `normal` | Create a normal order and add it to the pending queue. |
+| `vip` | Create a VIP order and place it behind existing VIP orders but ahead of normal orders. |
+| `+bot` | Add a new cooking bot. If orders are pending, the bot starts processing immediately. |
+| `-bot` | Remove the newest cooking bot. If it is processing an order, that order returns to the pending queue. |
+| `status` | Print the current bots, pending orders, processing orders, and completed orders. |
+| `help` | Print the available interactive commands. |
+| `quit` | Print the final summary and exit interactive mode. |
