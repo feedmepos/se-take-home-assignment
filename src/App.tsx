@@ -10,7 +10,6 @@ import {
   RotateCcw,
   ScrollText,
   ShoppingBag,
-  TimerReset,
   User,
 } from "lucide-react";
 import {
@@ -40,6 +39,16 @@ const copy = {
     mapAria: "订单和机器人操作地图",
     rulesTitle: "任务规则",
     rules: ["VIP 优先进入等待队列", "机器人空闲时自动接单", "删除制作中的机器人会把订单退回待处理"],
+    flowTitle: "通关路线",
+    flow: [
+      { title: "1 下单", detail: "普通或 VIP 设施生成订单" },
+      { title: "2 排队", detail: "VIP 插到普通单前面" },
+      { title: "3 制作", detail: "空闲机器人接走下一单" },
+      { title: "4 完成", detail: "10 秒倒计时结束入柜台" },
+    ],
+    legendTitle: "颜色指引",
+    legendVip: "金色 + 皇冠 = VIP 贵宾单，优先处理",
+    legendNormal: "蓝色 + 购物袋 = 普通单，按顺序处理",
     facilities: {
       normal: { title: "村口柜台", meta: "普通客人下单" },
       vip: { title: "王冠包厢", meta: "VIP 贵宾下单" },
@@ -59,6 +68,11 @@ const copy = {
       processing: "烹饪战线",
       complete: "完成柜台",
     },
+    columnHints: {
+      pending: "队列顺序就是下一步接单顺序：VIP 在前，普通单在后。",
+      processing: "这里显示机器人正在制作哪一种订单，以及剩余秒数。",
+      complete: "完成后的订单会进入这里，最近完成的排在最上面。",
+    },
     empty: {
       pending: "暂无待处理订单",
       processing: "暂无制作中订单",
@@ -73,6 +87,14 @@ const copy = {
     bot: "机器人",
     idle: "待命",
     secondsLeft: (seconds: number) => `剩余 ${seconds} 秒`,
+    priorityHint: {
+      VIP: "优先级：VIP 会排在普通单前",
+      NORMAL: "优先级：普通单按创建顺序等待",
+    },
+    processingCaption: {
+      VIP: "正在制作 VIP 贵宾单",
+      NORMAL: "正在制作普通单",
+    },
   },
   en: {
     assignment: "FeedMe take-home assignment",
@@ -87,6 +109,16 @@ const copy = {
     mapAria: "Order and bot command map",
     rulesTitle: "Quest Rules",
     rules: ["VIP orders enter before normal orders", "Idle bots automatically pick the next order", "Removing a busy bot returns its order to pending"],
+    flowTitle: "Run Route",
+    flow: [
+      { title: "1 Create", detail: "Normal or VIP facilities create orders" },
+      { title: "2 Queue", detail: "VIP moves ahead of normal orders" },
+      { title: "3 Cook", detail: "Idle bots pick the next order" },
+      { title: "4 Complete", detail: "10 second countdown sends it to done" },
+    ],
+    legendTitle: "Color Guide",
+    legendVip: "Gold + crown = VIP order, processed first",
+    legendNormal: "Blue + bag = normal order, processed in order",
     facilities: {
       normal: { title: "Village Counter", meta: "New Normal Order" },
       vip: { title: "Crown Booth", meta: "New VIP Order" },
@@ -106,6 +138,11 @@ const copy = {
       processing: "Cooking Lane",
       complete: "Complete Counter",
     },
+    columnHints: {
+      pending: "Queue order is the next pickup order: VIP first, normal after.",
+      processing: "Shows which order type the bot is cooking and how many seconds remain.",
+      complete: "Finished orders land here with the newest completion first.",
+    },
     empty: {
       pending: "No pending orders",
       processing: "No orders in process",
@@ -120,6 +157,14 @@ const copy = {
     bot: "Bot",
     idle: "Idle",
     secondsLeft: (seconds: number) => `${seconds}s left`,
+    priorityHint: {
+      VIP: "Priority: VIP jumps ahead of normal orders",
+      NORMAL: "Priority: normal orders wait by creation order",
+    },
+    processingCaption: {
+      VIP: "Cooking a VIP order",
+      NORMAL: "Cooking a normal order",
+    },
   },
 } as const;
 
@@ -247,6 +292,26 @@ function App() {
         </ul>
       </section>
 
+      <section className="flow-guide" aria-label={t.flowTitle}>
+        <div className="flow-heading">
+          <p className="eyebrow">{t.flowTitle}</p>
+          <div className="type-legend">
+            <span className="type-chip vip">{formatOrderTypeLabel("VIP", language)}</span>
+            <span>{t.legendVip}</span>
+            <span className="type-chip normal">{formatOrderTypeLabel("NORMAL", language)}</span>
+            <span>{t.legendNormal}</span>
+          </div>
+        </div>
+        <ol className="flow-steps">
+          {t.flow.map((step) => (
+            <li key={step.title}>
+              <strong>{step.title}</strong>
+              <span>{step.detail}</span>
+            </li>
+          ))}
+        </ol>
+      </section>
+
       <section className="stats-grid" aria-label="System summary">
         <Metric label={t.metrics.pending} value={pendingOrders.length} tone="normal" />
         <Metric label={t.metrics.processing} value={processingOrders.length} tone="vip" />
@@ -255,29 +320,37 @@ function App() {
       </section>
 
       <section className="workspace">
-        <BoardColumn title={t.columns.pending} count={pendingOrders.length}>
+        <BoardColumn title={t.columns.pending} count={pendingOrders.length} hint={t.columnHints.pending}>
           {pendingOrders.length === 0 ? (
             <EmptyState label={t.empty.pending} />
           ) : (
-            pendingOrders.map((order) => <OrderRow key={order.id} order={order} language={language} label={t.order} />)
+            pendingOrders.map((order) => <OrderRow key={order.id} order={order} language={language} label={t.order} priorityHint={t.priorityHint[order.type]} />)
           )}
         </BoardColumn>
 
-        <BoardColumn title={t.columns.processing} count={processingOrders.length}>
+        <BoardColumn title={t.columns.processing} count={processingOrders.length} hint={t.columnHints.processing}>
           {processingOrders.length === 0 ? (
             <EmptyState label={t.empty.processing} />
           ) : (
             processingOrders.map((order) => (
-              <ProcessingRow key={order.id} order={order} now={now} language={language} labels={{ order: t.order, bot: t.bot, secondsLeft: t.secondsLeft }} />
+              <ProcessingRow
+                key={order.id}
+                order={order}
+                now={now}
+                language={language}
+                labels={{ order: t.order, bot: t.bot, secondsLeft: t.secondsLeft, caption: t.processingCaption[order.type] }}
+              />
             ))
           )}
         </BoardColumn>
 
-        <BoardColumn title={t.columns.complete} count={completedOrders.length}>
+        <BoardColumn title={t.columns.complete} count={completedOrders.length} hint={t.columnHints.complete}>
           {completedOrders.length === 0 ? (
             <EmptyState label={t.empty.complete} />
           ) : (
-            completedOrders.map((order) => <OrderRow key={order.id} order={order} timestamp={order.completedAt} language={language} label={t.order} />)
+            completedOrders.map((order) => (
+              <OrderRow key={order.id} order={order} timestamp={order.completedAt} language={language} label={t.order} priorityHint={t.priorityHint[order.type]} />
+            ))
           )}
         </BoardColumn>
       </section>
@@ -301,6 +374,7 @@ function App() {
                   <div className="bot-row" key={bot.id}>
                     <div>
                       <strong>{t.bot} #{bot.id}</strong>
+                      {order ? <span className={`type-chip ${order.type.toLowerCase()}`}>{formatOrderTypeLabel(order.type, language)}</span> : null}
                       <span>{bot.status === "IDLE" ? t.idle : `${t.order} #${bot.currentOrderId}`}</span>
                     </div>
                     <StatusBadge status={bot.status} language={language} />
@@ -371,11 +445,14 @@ function Metric({ label, value, detail, tone }: { label: string; value: number; 
   );
 }
 
-function BoardColumn({ title, count, children }: { title: string; count: number; children: ReactNode }) {
+function BoardColumn({ title, count, hint, children }: { title: string; count: number; hint: string; children: ReactNode }) {
   return (
     <section className="column">
       <header>
-        <h2>{title}</h2>
+        <div>
+          <h2>{title}</h2>
+          <p>{hint}</p>
+        </div>
         <span>{count}</span>
       </header>
       <div className="column-body">{children}</div>
@@ -388,21 +465,24 @@ function OrderRow({
   timestamp,
   language,
   label,
+  priorityHint,
 }: {
   order: Order;
   timestamp?: number;
   language: Language;
   label: string;
+  priorityHint: string;
 }) {
   return (
     <article className={`order-row ${order.type.toLowerCase()}`}>
       <div className="order-main">
         <span className="order-icon">{order.type === "VIP" ? <Crown size={17} /> : <ShoppingBag size={17} />}</span>
-        <div>
+        <div className="order-copy">
+          <span className={`type-chip ${order.type.toLowerCase()}`}>{formatOrderTypeLabel(order.type, language)}</span>
           <strong>
             {label} #{order.id}
           </strong>
-          <span>{formatOrderTypeLabel(order.type, language)}</span>
+          <span>{priorityHint}</span>
         </div>
       </div>
       {timestamp ? <time>{formatClock(timestamp)}</time> : <StatusBadge status={order.status} language={language} />}
@@ -419,7 +499,7 @@ function ProcessingRow({
   order: Order;
   now: number;
   language: Language;
-  labels: { order: string; bot: string; secondsLeft: (seconds: number) => string };
+  labels: { order: string; bot: string; secondsLeft: (seconds: number) => string; caption: string };
 }) {
   const remainingSeconds = getRemainingSeconds(order, now);
 
@@ -427,9 +507,10 @@ function ProcessingRow({
     <article className={`order-row processing ${order.type.toLowerCase()}`}>
       <div className="order-main">
         <span className="order-icon">
-          <TimerReset size={17} />
+          {order.type === "VIP" ? <Crown size={17} /> : <ShoppingBag size={17} />}
         </span>
-        <div>
+        <div className="order-copy">
+          <span className={`type-chip ${order.type.toLowerCase()}`}>{formatOrderTypeLabel(order.type, language)}</span>
           <strong>
             {labels.order} #{order.id}
           </strong>
@@ -438,7 +519,10 @@ function ProcessingRow({
           </span>
         </div>
       </div>
-      <StatusBadge status={order.status} language={language} />
+      <div className="processing-side">
+        <span>{labels.caption}</span>
+        <StatusBadge status={order.status} language={language} />
+      </div>
       <ProgressBar value={getOrderProgress(order, now)} />
     </article>
   );

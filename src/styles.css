@@ -46,7 +46,8 @@ button,
 .column,
 .panel,
 .game-header,
-.command-map {
+.command-map,
+.flow-guide {
   image-rendering: pixelated;
 }
 
@@ -58,6 +59,7 @@ button,
 
 .game-header,
 .command-map,
+.flow-guide,
 .metric,
 .panel,
 .column {
@@ -362,6 +364,92 @@ h2 {
   font-weight: 900;
 }
 
+.flow-guide {
+  margin-top: 18px;
+  padding: 12px;
+  background: var(--paper);
+}
+
+.flow-heading {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.flow-heading .eyebrow {
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.9rem;
+}
+
+.type-legend {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  padding: 8px;
+  border: 3px solid var(--ink);
+  background: var(--white);
+  box-shadow: 3px 3px 0 var(--ink-2);
+  color: #4c3156;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.flow-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.flow-steps li {
+  position: relative;
+  min-height: 82px;
+  padding: 10px;
+  border: 3px solid var(--ink);
+  background: var(--white);
+  box-shadow: 4px 4px 0 rgba(18, 7, 27, 0.78);
+}
+
+.flow-steps li:not(:last-child)::after {
+  content: ">";
+  position: absolute;
+  top: 50%;
+  right: -15px;
+  z-index: 2;
+  width: 22px;
+  height: 22px;
+  transform: translateY(-50%);
+  border: 3px solid var(--ink);
+  background: var(--amber-2);
+  color: var(--ink);
+  text-align: center;
+  font-weight: 900;
+  line-height: 17px;
+}
+
+.flow-steps strong,
+.flow-steps span {
+  display: block;
+}
+
+.flow-steps strong {
+  margin-bottom: 6px;
+  color: var(--ink);
+}
+
+.flow-steps span {
+  color: #684d61;
+  font-size: 0.8rem;
+  font-weight: 900;
+  line-height: 1.45;
+}
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -430,7 +518,16 @@ h2 {
   background: var(--paper-2);
 }
 
-.column header span {
+.column header p {
+  max-width: 340px;
+  margin: 5px 0 0;
+  color: #60465c;
+  font-size: 0.76rem;
+  font-weight: 900;
+  line-height: 1.35;
+}
+
+.column header > span {
   display: inline-grid;
   min-width: 34px;
   height: 30px;
@@ -482,7 +579,16 @@ h2 {
 
 .order-row.processing {
   padding-bottom: 22px;
-  border-left-color: var(--red);
+}
+
+.order-row.processing.vip {
+  border-left-color: var(--amber);
+  background: #fff5d6;
+}
+
+.order-row.processing.normal {
+  border-left-color: var(--blue);
+  background: #eef8ff;
 }
 
 .order-main {
@@ -516,6 +622,37 @@ h2 {
   box-shadow: 2px 2px 0 var(--ink-2);
 }
 
+.order-row.vip .order-icon,
+.type-chip.vip {
+  background: var(--amber-2);
+}
+
+.order-row.normal .order-icon,
+.type-chip.normal {
+  background: #b7dff3;
+}
+
+.order-copy {
+  min-width: 0;
+}
+
+.type-chip,
+.order-main .type-chip,
+.bot-row .type-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  margin: 0 0 5px;
+  padding: 2px 6px;
+  border: 3px solid var(--ink);
+  color: var(--ink);
+  font-size: 0.72rem;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+  box-shadow: 2px 2px 0 rgba(18, 7, 27, 0.75);
+}
+
 .status-pill {
   display: inline-flex;
   align-items: center;
@@ -527,6 +664,23 @@ h2 {
   background: var(--paper-3);
   color: var(--ink);
   font-size: 0.72rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.processing-side {
+  display: grid;
+  gap: 5px;
+  justify-items: end;
+  min-width: 138px;
+}
+
+.processing-side > span {
+  padding: 4px 6px;
+  border: 3px solid var(--ink);
+  background: var(--ink);
+  color: var(--white);
+  font-size: 0.7rem;
   font-weight: 900;
   text-align: center;
 }
@@ -546,6 +700,10 @@ h2 {
 
 .status-pill.idle {
   background: #e7dcc2;
+}
+
+.bot-row .type-chip {
+  margin: 5px 0 4px;
 }
 
 .progress {
@@ -670,13 +828,20 @@ h2 {
   }
 
   .facility-grid,
-  .stats-grid {
+  .stats-grid,
+  .flow-steps {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .workspace,
-  .lower-grid {
+  .lower-grid,
+  .flow-heading,
+  .type-legend {
     grid-template-columns: 1fr;
+  }
+
+  .flow-steps li:not(:last-child)::after {
+    display: none;
   }
 
   .column {
@@ -711,7 +876,8 @@ h2 {
 
   .facility-grid,
   .stats-grid,
-  .rule-strip {
+  .rule-strip,
+  .flow-steps {
     grid-template-columns: 1fr;
   }
 
