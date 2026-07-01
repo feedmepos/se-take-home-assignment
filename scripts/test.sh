@@ -1,14 +1,7 @@
 #!/bin/bash
-
-# Unit Test Script
-# This script should contain all unit test execution steps
+set -euo pipefail
 
 echo "Running unit tests..."
-
-# For Go projects:
-# go test ./... -v
-
-# For Node.js projects:
-# npm test
-
+npm ci
+npm test
 echo "Unit tests completed"
