@@ -62,3 +62,19 @@ You must implement **either** frontend or backend components as described below:
 - Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.
 - Utilize coding agent to complete the assignment scope your working hour within 1 hour, do not over engineer it. However, ensure you read and understand what your code doing and apply good engineering practice.
 - Complete the implementation as clean as possible, clean code is a strong plus point, do not bring in all the fancy tech stuff.
+
+### Backend Implementation Notes
+This submission uses the backend option with Go. The core order control flow is implemented in `internal/order`, and the CLI simulation entry point is `cmd/order-controller`.
+
+Key decisions:
+- Orders are kept in memory only, as required.
+- VIP orders are always sorted ahead of normal orders, while preserving FIFO ordering within each order type.
+- Each bot processes one order at a time for exactly 10 seconds.
+- Adding a bot immediately assigns the next pending order when one exists.
+- Removing a bot destroys the newest bot. If that bot is processing an order, the order is returned to the pending queue and sorted by the same VIP/normal priority rules.
+- The CLI uses a simulated clock so `scripts/run.sh` completes quickly while still printing meaningful `HH:MM:SS` timestamps.
+
+Useful commands:
+- `./scripts/test.sh`
+- `./scripts/build.sh`
+- `./scripts/run.sh`
