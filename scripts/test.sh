@@ -1,14 +1,7 @@
 #!/bin/bash
-
-# Unit Test Script
-# This script should contain all unit test execution steps
+# Unit Test Script - runs the Node.js test suite (fast, fake-timer based).
+set -e
 
 echo "Running unit tests..."
-
-# For Go projects:
-# go test ./... -v
-
-# For Node.js projects:
-# npm test
-
+npm test
 echo "Unit tests completed"
