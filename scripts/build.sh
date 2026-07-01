@@ -1,15 +1,9 @@
 #!/bin/bash
-
-# Build Script
-# This script should contain all compilation steps for your CLI application
+# Build Script - installs dependencies for the Node.js CLI.
+# JavaScript is interpreted, so there is no separate compile step; this simply
+# prepares the runtime (there are no third-party runtime dependencies).
+set -e
 
 echo "Building CLI application..."
-
-# For Go projects:
-# go build -o order-controller ./cmd/main.go
-
-# For Node.js projects:
-# npm install
-# npm run build (if needed)
-
+npm install
 echo "Build completed"

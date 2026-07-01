@@ -1,0 +1,12 @@
+{
+  "name": "mcd-order-controller",
+  "version": "1.0.0",
+  "description": "McDonald's automated cooking-bot order controller (Node.js CLI prototype)",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "scenario": "node scenario.js",
+    "test": "node --test"
+  },
+  "license": "MIT"
+}
