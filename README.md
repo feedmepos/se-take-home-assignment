@@ -1,4 +1,55 @@
 ## FeedMe Software Engineer Take Home Assignment
+
+### Submitted Prototype
+
+This submission implements the assignment as a frontend prototype using React,
+TypeScript, and Vite. The app runs entirely in memory and demonstrates the
+order controller flow through an interactive browser UI.
+
+#### Features
+
+- Create Normal and VIP orders with unique increasing order numbers.
+- Keep VIP orders ahead of Normal orders while preserving FIFO order inside the
+  same priority.
+- Add cooking bots that immediately process pending orders.
+- Complete each processing order after 10 seconds.
+- Keep bots idle when there is no pending work.
+- Remove the newest bot and return its processing order to the pending queue.
+- Show Pending, Processing, Complete, bot fleet, and timestamped event log views.
+
+#### Local Development
+
+```bash
+npm ci
+npm run dev
+```
+
+#### Test and Build
+
+```bash
+npm test
+npm run build
+```
+
+The original repository includes backend-oriented verification scripts, so this
+submission keeps compatible scripts:
+
+```bash
+./scripts/test.sh
+./scripts/build.sh
+./scripts/run.sh
+```
+
+`scripts/run.sh` writes a timestamped simulation output to `scripts/result.txt`.
+
+#### Deployment
+
+The project is ready for Cloudflare Pages:
+
+- Build command: `npm run build`
+- Build output directory: `dist`
+- Optional Wrangler config: `wrangler.toml`
+
 Below is a take home assignment before the interview of the position. You are required to
 1. Understand the situation and use case. You may contact the interviewer for further clarification.
 2. implement the requirement with **either frontend or backend components**.
