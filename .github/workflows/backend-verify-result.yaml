@@ -1,9 +1,12 @@
 name: backend-verify-result
 
 on:
+  push:
+    branches: [ main ]
   pull_request:
     types: [ opened, synchronize, reopened, edited ]
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   verify-result:
