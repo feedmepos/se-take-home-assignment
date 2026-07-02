@@ -1,19 +1,14 @@
 #!/bin/bash
-
-# Run Script
-# This script should execute your CLI application and output results to result.txt
+set -euo pipefail
+export GOPATH="${GOPATH:-$PWD/.cache/go}"
+export GOCACHE="${GOCACHE:-$PWD/.cache/go-build}"
 
 echo "Running CLI application..."
 
-# For Go projects:
-# ./order-controller > result.txt
+if [ ! -x ./order-controller ]; then
+  go build -o order-controller ./cmd/order-controller
+fi
 
-# For Node.js projects:
-# node index.js > result.txt
-# or npm start > result.txt
-
-# Temporary placeholder - remove this when you implement your CLI
-echo "Added 1 bot" > result.txt
-echo "status: bot: [1], order: []" >> result.txt
+./order-controller > scripts/result.txt
 
 echo "CLI application execution completed"
