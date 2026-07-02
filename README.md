@@ -2,10 +2,7 @@
 
 A frontend prototype of the automated cooking-bot order controller, built with **React + TypeScript + Vite** and **Tailwind CSS**.
 
-> **Live demo:** _<!-- TODO: paste Vercel URL here after deploy -->_
-
-<!-- Optional: add a screenshot at docs/screenshot.png and uncomment:
-![Order controller UI](docs/screenshot.png) -->
+> **Live demo:** https://feedme-se-take-home-assignment-its-mtwl.vercel.app/
 
 ## Quick start
 
