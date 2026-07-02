@@ -1,14 +1,15 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Unit Test Script
-# This script should contain all unit test execution steps
+set -euo pipefail
 
 echo "Running unit tests..."
 
-# For Go projects:
-# go test ./... -v
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 
-# For Node.js projects:
-# npm test
+cd "${ROOT_DIR}"
+export GOCACHE="${GOCACHE:-/tmp/se-take-home-go-cache}"
+
+go test ./...
 
 echo "Unit tests completed"
