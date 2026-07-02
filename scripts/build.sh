@@ -1,15 +1,12 @@
 #!/bin/bash
 
 # Build Script
-# This script should contain all compilation steps for your CLI application
-
 echo "Building CLI application..."
 
-# For Go projects:
-# go build -o order-controller ./cmd/main.go
+if ! command -v node &> /dev/null; then
+    echo "Node.js is required but not installed."
+    exit 1
+fi
 
-# For Node.js projects:
-# npm install
-# npm run build (if needed)
-
+echo "Node.js $(node --version) detected"
 echo "Build completed"

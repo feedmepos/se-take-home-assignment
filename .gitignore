@@ -1,0 +1,5 @@
+# Local Claude Code settings and state
+.claude/
+
+# Agent review / proof-of-work logs (generated per session)
+agent-review/
