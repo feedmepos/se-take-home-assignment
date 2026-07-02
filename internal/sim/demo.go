@@ -8,6 +8,7 @@ import (
 
 	"se-take-home-assignment/internal/order"
 	"se-take-home-assignment/internal/types"
+	"se-take-home-assignment/internal/view"
 )
 
 // RunDemo writes a deterministic simulation for CI and result.txt.
@@ -49,41 +50,12 @@ func RunDemo(w io.Writer) error {
 	)
 
 	for _, events := range steps {
-		if err := writeEvents(w, events); err != nil {
+		if err := view.WriteEvents(w, events); err != nil {
 			return err
 		}
 	}
 
 	return writeStatus(w, controller.Snapshot())
-}
-
-func writeEvents(w io.Writer, events []types.Event) error {
-	for _, event := range events {
-		if _, err := fmt.Fprintln(w, formatEvent(event)); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func formatEvent(event types.Event) string {
-	timestamp := event.At.Format("15:04:05")
-	switch event.Kind {
-	case types.EventOrderPending:
-		return fmt.Sprintf("[%s] Created %s Order #%d - Status: PENDING", timestamp, event.OrderType, event.OrderID)
-	case types.EventBotAdded:
-		return fmt.Sprintf("[%s] Bot #%d created - Status: ACTIVE", timestamp, event.BotID)
-	case types.EventBotStarted:
-		return fmt.Sprintf("[%s] Bot #%d picked up %s Order #%d - Status: PROCESSING", timestamp, event.BotID, event.OrderType, event.OrderID)
-	case types.EventOrderCompleted:
-		return fmt.Sprintf("[%s] Bot #%d completed %s Order #%d - Status: COMPLETE (Processing time: 10s)", timestamp, event.BotID, event.OrderType, event.OrderID)
-	case types.EventBotRemoved:
-		return fmt.Sprintf("[%s] Bot #%d destroyed - Status: REMOVED", timestamp, event.BotID)
-	case types.EventOrderRequeued:
-		return fmt.Sprintf("[%s] %s Order #%d returned to PENDING after Bot #%d was removed", timestamp, event.OrderType, event.OrderID, event.BotID)
-	default:
-		return fmt.Sprintf("[%s] unknown event", timestamp)
-	}
 }
 
 func writeStatus(w io.Writer, snap types.Snapshot) error {
