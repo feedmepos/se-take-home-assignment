@@ -1,4 +1,69 @@
 ## FeedMe Software Engineer Take Home Assignment
+
+### Backend Implementation (Node.js CLI)
+
+This repository implements the **backend option** as a Node.js TypeScript CLI application for the McDonald's order controller (cooking bots).
+
+#### Tech Stack
+- **TypeScript** (ES Modules) compiled to `dist/` via `tsc`
+- **Node.js 22.19.0** (CI version)
+- **node:test** + `node:assert` for unit tests (no external test dependencies)
+- Real `setTimeout(_, 10000)` for the 10-second processing time
+
+#### Running
+
+**Interactive CLI** (for interview demonstration):
+```bash
+npm run build
+npm start
+```
+Commands (typed into stdin):
+- `new normal` — create a Normal order
+- `new vip` — create a VIP order
+- `+ bot` — add a cooking bot
+- `- bot` — remove the newest cooking bot
+- `status` — show current system status
+- `help` — list commands
+- `exit` — quit
+
+**Simulation mode** (writes timestamped output to stdout):
+```bash
+npm run build
+npm run simulate
+```
+
+**CI scripts** (`scripts/`):
+- `test.sh` — builds then runs unit tests via `node --test`
+- `build.sh` — installs deps and compiles TypeScript to `dist/`
+- `run.sh` — builds then runs `--simulate`, redirecting to `scripts/result.txt`
+
+#### Simulation Scenario Coverage
+
+The `--simulate` scenario exercises every requirement:
+1. Normal and VIP order creation with priority queueing (VIP ahead of Normal, behind existing VIP)
+2. `+Bot` immediately picks up the highest-priority pending order
+3. 10-second processing then automatic pickup of the next pending order
+4. Multiple bots processing in parallel
+5. Idle bots wait for new orders
+6. `-Bot` destroys the newest bot; if it was processing, the order returns to its original VIP/Normal priority position and is re-picked-up by a freed bot
+7. Manager decreases bots (idle bot destroyed)
+
+All output lines carry `HH:MM:SS` timestamps. `scripts/result.txt` is the CI artifact verified by the `backend-verify-result` workflow.
+
+#### Tests
+
+Unit tests in `src/test/` cover the domain logic without real timers via an injectable scheduler:
+- Order numbers start at 1001 and increase uniquely
+- VIP priority queueing (ahead of Normal, behind existing VIP)
+- `+Bot` pickup and IDLE behavior
+- Order completion and automatic next-pickup
+- `-Bot` returns in-progress order to its priority position
+
+Run tests:
+```bash
+npm run build
+npm test
+```
 Below is a take home assignment before the interview of the position. You are required to
 1. Understand the situation and use case. You may contact the interviewer for further clarification.
 2. implement the requirement with **either frontend or backend components**.

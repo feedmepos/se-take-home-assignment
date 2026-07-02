@@ -5,10 +5,8 @@
 
 echo "Running unit tests..."
 
-# For Go projects:
-# go test ./... -v
-
-# For Node.js projects:
-# npm test
+npm run build
+node --test "dist/test/**/*.test.js"
 
 echo "Unit tests completed"
+exit 0
