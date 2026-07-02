@@ -1,4 +1,4 @@
-# 🍔 McDonald's Cooking-Bot Order Controller — Solution
+# McDonald's Cooking-Bot Order Controller — Solution
 
 A frontend prototype of the automated cooking-bot order controller, built with **React + TypeScript + Vite** and **Tailwind CSS**.
 
@@ -20,10 +20,10 @@ Click the buttons to drive the simulation:
 
 | Action | Behaviour |
 | --- | --- |
-| **+ New Normal Order** | Adds a Normal order to the back of the queue. |
-| **★ New VIP Order** | Adds a VIP order ahead of all Normal orders, but behind existing VIPs. |
-| **+ Bot** | Adds a cooking bot; it immediately starts on the highest-priority pending order. |
-| **− Bot** | Removes the **newest** bot. If it was mid-cook, its order returns to its priority position in PENDING, un-processed. |
+| **New Normal Order** | Adds a Normal order to the back of the queue. |
+| **New VIP Order** | Adds a VIP order ahead of all Normal orders, but behind existing VIPs. |
+| **Add Bot** | Adds a cooking bot; it immediately starts on the highest-priority pending order. |
+| **Remove Bot** | Removes the **newest** bot. If it was mid-cook, its order returns to its priority position in PENDING, un-processed. |
 
 Each bot cooks **one order at a time**, taking **10 seconds**, then picks up the next pending order or goes IDLE.
 
