@@ -2,13 +2,10 @@ import type { Order } from '../core/types'
 
 interface OrderCardProps {
   order: Order
-  /** When processing, ms remaining and the total, to render a countdown. */
   remainingMs?: number
   totalMs?: number
 }
 
-/** A single order tile. Shows the number, VIP/Normal badge, and — while being
- *  cooked — a shrinking progress bar with the seconds remaining. */
 export function OrderCard({ order, remainingMs, totalMs }: OrderCardProps) {
   const isVip = order.type === 'VIP'
   const isProcessing =
@@ -21,20 +18,22 @@ export function OrderCard({ order, remainingMs, totalMs }: OrderCardProps) {
 
   return (
     <div
-      className={`rounded-lg border p-3 shadow-sm ${
-        isVip ? 'border-amber-300 bg-amber-50' : 'border-slate-200 bg-white'
+      className={`rounded-md border p-3 ${
+        isVip ? 'border-amber-200 bg-amber-50' : 'border-slate-200 bg-white'
       }`}
     >
       <div className="flex items-center justify-between">
-        <span className="font-mono text-sm font-semibold text-slate-700">
+        <span className="font-mono text-sm font-medium text-slate-700">
           #{order.id}
         </span>
         <span
-          className={`rounded-full px-2 py-0.5 text-xs font-bold ${
-            isVip ? 'bg-amber-400 text-amber-900' : 'bg-slate-200 text-slate-600'
+          className={`rounded px-1.5 py-0.5 text-xs font-medium ${
+            isVip
+              ? 'bg-amber-100 text-amber-700'
+              : 'bg-slate-100 text-slate-500'
           }`}
         >
-          {isVip ? '★ VIP' : 'Normal'}
+          {isVip ? 'VIP' : 'Normal'}
         </span>
       </div>
 
@@ -42,7 +41,7 @@ export function OrderCard({ order, remainingMs, totalMs }: OrderCardProps) {
         <div className="mt-2">
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
             <div
-              className="h-full rounded-full bg-red-500 transition-[width] duration-200 ease-linear"
+              className="h-full rounded-full bg-slate-700 transition-[width] duration-200 ease-linear"
               style={{ width: `${pct}%` }}
             />
           </div>

@@ -1,12 +1,8 @@
 import { useEffect, useState } from 'react'
 
 /**
- * Returns a `Date.now()` value that refreshes on an interval, so components can
- * render live countdowns for in-progress orders. Purely presentational — the
- * controller owns the real timers; this just drives the visual tick.
- *
- * The interval only runs while `active` is true (i.e. a bot is actually
- * cooking), so an idle app does no needless re-rendering.
+ * A clock that ticks only while `active`, used to drive the cook-time countdown.
+ * Purely presentational — the controller owns the real completion timers.
  */
 export function useNow(active: boolean, intervalMs = 250): number {
   const [now, setNow] = useState(() => Date.now())

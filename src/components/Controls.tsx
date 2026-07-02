@@ -6,7 +6,6 @@ interface ControlsProps {
   botCount: number
 }
 
-/** The action bar: create orders and scale the bot fleet up or down. */
 export function Controls({
   onNewNormal,
   onNewVip,
@@ -14,29 +13,28 @@ export function Controls({
   onRemoveBot,
   botCount,
 }: ControlsProps) {
-  const btn =
-    'rounded-lg px-4 py-2 font-semibold text-white shadow-sm transition active:scale-95 disabled:cursor-not-allowed disabled:opacity-40'
+  const base =
+    'rounded-md px-3.5 py-2 text-sm font-medium shadow-sm transition active:scale-[.98] disabled:cursor-not-allowed disabled:opacity-40'
+  const secondary = `${base} border border-slate-300 bg-white text-slate-700 hover:bg-slate-50`
+  const primary = `${base} bg-slate-900 text-white hover:bg-slate-700`
+  const vip = `${base} bg-amber-500 text-white hover:bg-amber-600`
 
   return (
-    <div className="flex flex-wrap items-center gap-3">
-      <button className={`${btn} bg-slate-600 hover:bg-slate-700`} onClick={onNewNormal}>
-        + New Normal Order
+    <div className="flex flex-wrap items-center gap-2">
+      <button className={secondary} onClick={onNewNormal}>
+        New Normal Order
       </button>
-      <button className={`${btn} bg-amber-500 hover:bg-amber-600`} onClick={onNewVip}>
-        ★ New VIP Order
+      <button className={vip} onClick={onNewVip}>
+        New VIP Order
       </button>
 
-      <span className="mx-1 h-6 w-px bg-slate-300" aria-hidden />
+      <span className="mx-1 h-6 w-px bg-slate-200" aria-hidden />
 
-      <button className={`${btn} bg-green-600 hover:bg-green-700`} onClick={onAddBot}>
-        + Bot
+      <button className={primary} onClick={onAddBot}>
+        Add Bot
       </button>
-      <button
-        className={`${btn} bg-red-600 hover:bg-red-700`}
-        onClick={onRemoveBot}
-        disabled={botCount === 0}
-      >
-        − Bot
+      <button className={secondary} onClick={onRemoveBot} disabled={botCount === 0}>
+        Remove Bot
       </button>
     </div>
   )
