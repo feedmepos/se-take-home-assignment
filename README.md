@@ -1,3 +1,77 @@
+# 🍔 McDonald's Cooking-Bot Order Controller — Solution
+
+A frontend prototype of the automated cooking-bot order controller, built with **React + TypeScript + Vite** and **Tailwind CSS**.
+
+> **Live demo:** _<!-- TODO: paste Vercel URL here after deploy -->_
+
+<!-- Optional: add a screenshot at docs/screenshot.png and uncomment:
+![Order controller UI](docs/screenshot.png) -->
+
+## Quick start
+
+```bash
+npm install
+npm run dev        # start the app at http://localhost:5173
+npm test           # run the unit tests (Vitest)
+npm run build      # type-check + production build
+npm run lint       # oxlint
+```
+
+## How it works
+
+Click the buttons to drive the simulation:
+
+| Action | Behaviour |
+| --- | --- |
+| **+ New Normal Order** | Adds a Normal order to the back of the queue. |
+| **★ New VIP Order** | Adds a VIP order ahead of all Normal orders, but behind existing VIPs. |
+| **+ Bot** | Adds a cooking bot; it immediately starts on the highest-priority pending order. |
+| **− Bot** | Removes the **newest** bot. If it was mid-cook, its order returns to its priority position in PENDING, un-processed. |
+
+Each bot cooks **one order at a time**, taking **10 seconds**, then picks up the next pending order or goes IDLE.
+
+## Architecture
+
+The domain logic is deliberately **decoupled from React** so it can be unit-tested and reasoned about on its own:
+
+```
+src/
+├─ core/                    # framework-agnostic domain logic (no React)
+│  ├─ types.ts              # Order / Bot / status enums
+│  ├─ OrderController.ts    # all the rules live here
+│  └─ OrderController.test.ts
+├─ hooks/
+│  ├─ useOrderController.ts # binds the controller to React (useSyncExternalStore)
+│  └─ useNow.ts             # drives the live countdown (only ticks while cooking)
+├─ components/              # presentational UI
+│  ├─ Controls.tsx  Column.tsx  BotPanel.tsx  OrderCard.tsx
+└─ App.tsx
+```
+
+### Key design decisions
+
+- **`OrderController` is a plain TS class**, unaware of React. The UI subscribes via `useSyncExternalStore` and reads immutable snapshots — no state duplication, no tearing.
+- **The pending queue is always kept sorted** `[VIP…, NORMAL…]` with FIFO within each group. This makes two operations trivial: a freed bot just takes the front, and a requeued order (from removing a busy bot) re-inserts by priority — which naturally restores its original position.
+- **Single-threaded timer model.** Each bot's 10s cook is one `setTimeout`, tracked by bot id so removal can cancel it. A stale timer from a removed bot is ignored, so no order is ever double-completed.
+- **The countdown interval only runs while a bot is cooking**, so an idle app does zero needless re-rendering.
+
+### Requirement → code mapping
+
+| Requirement | Where |
+| --- | --- |
+| Unique, increasing order numbers | `OrderController.addOrder` (`nextOrderId`) |
+| VIP ahead of Normal, behind VIPs | `OrderController.insertByPriority` |
+| +Bot processes pending immediately | `OrderController.addBot` → `dispatch` |
+| 10s per order, then next / IDLE | `dispatch` + `onProcessingComplete` |
+| −Bot removes newest, requeues its order | `OrderController.removeBot` |
+| In-memory only | entire `core/` — no persistence |
+
+## Testing
+
+17 unit tests in [`src/core/OrderController.test.ts`](src/core/OrderController.test.ts) cover order numbering, VIP priority ordering, bot pickup/completion (with fake timers), parallel bots, and the bot-removal requeue (including the stale-timer edge case). Run with `npm test`.
+
+---
+
 ## FeedMe Software Engineer Take Home Assignment
 Below is a take home assignment before the interview of the position. You are required to
 1. Understand the situation and use case. You may contact the interviewer for further clarification.
