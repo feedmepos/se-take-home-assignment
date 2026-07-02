@@ -62,3 +62,36 @@ You must implement **either** frontend or backend components as described below:
 - Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.
 - Utilize coding agent to complete the assignment scope your working hour within 1 hour, do not over engineer it. However, ensure you read and understand what your code doing and apply good engineering practice.
 - Complete the implementation as clean as possible, clean code is a strong plus point, do not bring in all the fancy tech stuff.
+
+## Backend CLI Implementation
+
+This repository includes a Go CLI implementation for the backend option.
+
+### Scripts
+
+```bash
+./scripts/test.sh
+./scripts/build.sh
+./scripts/run.sh
+```
+
+`run.sh` writes the simulation output to `scripts/result.txt`. Every event line includes an `HH:MM:SS` timestamp.
+
+### Interactive CLI
+
+Build the binary first, then start the interactive shell:
+
+```bash
+./scripts/build.sh
+./bin/order-controller interactive
+```
+
+Commands:
+
+- `normal`: create a normal order
+- `vip`: create a VIP order
+- `+bot`: add a cooking bot
+- `-bot`: remove the newest cooking bot
+- `tick <seconds>`: advance the simulation clock
+- `status`: print current state
+- `quit`: exit
