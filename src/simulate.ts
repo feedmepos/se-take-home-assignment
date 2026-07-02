@@ -6,11 +6,9 @@ function sleep(ms: number): Promise<void> {
 }
 
 export async function runSimulation(): Promise<void> {
+  console.log("McDonald's Order Management System - Simulation Results\n");
   const logger = createTimestampedLogger();
   const controller = new OrderController({ logger });
-
-  console.log("McDonald's Order Management System - Simulation Results");
-  console.log("");
 
   // Requirement 1 & 2: create Normal then VIP then Normal orders.
   // VIP must place ahead of all Normal orders but behind existing VIP.

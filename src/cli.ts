@@ -26,6 +26,7 @@ function printStatus(controller: OrderController): void {
 }
 
 async function runInteractive(): Promise<void> {
+  console.log("McDonald's Order Controller CLI");
   const controller = new OrderController({
     logger: createTimestampedLogger(),
   });
@@ -34,7 +35,6 @@ async function runInteractive(): Promise<void> {
     output: process.stdout,
     terminal: false,
   });
-  console.log("McDonald's Order Controller CLI");
   console.log("Type 'help' for available commands.");
   const handle = (line: string): void => {
     const cmd = line.trim().toLowerCase();
