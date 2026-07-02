@@ -1,15 +1,15 @@
 #!/bin/bash
+set -euo pipefail
 
 # Build Script
-# This script should contain all compilation steps for your CLI application
+# Builds the frontend prototype into the dist directory.
 
-echo "Building CLI application..."
+echo "Building frontend application..."
 
-# For Go projects:
-# go build -o order-controller ./cmd/main.go
+if [ ! -d "node_modules" ]; then
+  npm ci
+fi
 
-# For Node.js projects:
-# npm install
-# npm run build (if needed)
+npm run build
 
 echo "Build completed"

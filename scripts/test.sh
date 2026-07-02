@@ -1,14 +1,15 @@
 #!/bin/bash
+set -euo pipefail
 
 # Unit Test Script
-# This script should contain all unit test execution steps
+# Runs the frontend test suite for the in-memory order controller prototype.
 
-echo "Running unit tests..."
+echo "Running frontend unit tests..."
 
-# For Go projects:
-# go test ./... -v
+if [ ! -d "node_modules" ]; then
+  npm ci
+fi
 
-# For Node.js projects:
-# npm test
+npm run test
 
 echo "Unit tests completed"

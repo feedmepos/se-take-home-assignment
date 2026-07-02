@@ -1,4 +1,69 @@
 ## FeedMe Software Engineer Take Home Assignment
+
+### Implemented Solution: Frontend MVP
+
+This repository implements the assignment as a **frontend prototype** using **Vite + React + TypeScript**. The app demonstrates the McDonald's order controller entirely in browser memory.
+
+#### Features
+
+- Create normal orders with `New Normal Order`
+- Create VIP orders with `New VIP Order`
+- Keep order numbers unique and increasing
+- Queue VIP orders before normal orders while preserving FIFO order within each type
+- Add cooking bots with `+ Bot`
+- Remove the newest cooking bot with `- Bot`
+- Process one order per bot at a time
+- Move orders from `PENDING` to `COMPLETE` after 10 seconds of processing
+- Keep bots `IDLE` when no pending orders are available
+- Return an interrupted processing order to `PENDING` when its bot is removed
+- Store all data in memory only; refreshing the page resets the prototype
+
+#### Local Development
+
+```bash
+npm install
+npm run dev
+```
+
+#### Test and Build
+
+```bash
+npm run test
+npm run build
+```
+
+The existing shell scripts also run the frontend checks for GitHub Actions compatibility:
+
+```bash
+./scripts/test.sh
+./scripts/build.sh
+./scripts/run.sh
+```
+
+#### Deployment
+
+Deploy the app as a static Vite site.
+
+- Build command: `npm run build`
+- Output directory: `dist`
+- Suggested platforms: Vercel, Netlify, or GitHub Pages
+- Public URL: _to be added after deployment_
+
+#### Manual Demo Checklist
+
+1. Create several normal orders and confirm they appear in `PENDING` in increasing order.
+2. Create a VIP order and confirm it appears before pending normal orders.
+3. Add a bot and confirm it immediately processes the highest-priority pending order.
+4. Wait 10 seconds and confirm the order moves to `COMPLETE`.
+5. Confirm the bot automatically picks up the next pending order.
+6. Add multiple bots and confirm each bot processes only one order at a time.
+7. Remove the newest processing bot and confirm its order returns to `PENDING`.
+8. Confirm the interrupted order does not move to `COMPLETE` from the cancelled timer.
+
+---
+
+## Original Assignment
+
 Below is a take home assignment before the interview of the position. You are required to
 1. Understand the situation and use case. You may contact the interviewer for further clarification.
 2. implement the requirement with **either frontend or backend components**.
