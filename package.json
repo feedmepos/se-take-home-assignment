@@ -1,0 +1,14 @@
+{
+    "name": "mcdonalds-order-controller",
+    "version": "1.0.0",
+    "type": "module",
+    "engines": {
+        "node": ">=18"
+    },
+    "scripts": {
+        "start": "node src/index.js",
+        "cli": "node bin/cli.js",
+        "test": "node --test"
+    },
+    "license": "MIT"
+}
