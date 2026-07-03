@@ -62,3 +62,64 @@ You must implement **either** frontend or backend components as described below:
 - Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.
 - Utilize coding agent to complete the assignment scope your working hour within 1 hour, do not over engineer it. However, ensure you read and understand what your code doing and apply good engineering practice.
 - Complete the implementation as clean as possible, clean code is a strong plus point, do not bring in all the fancy tech stuff.
+
+
+---
+
+## Solution — Backend (Node.js CLI)
+
+A McDonald's cooking-bot order controller implemented as a Node.js CLI with
+**no third-party dependencies** — only Node.js built-ins (`node:test`,
+`node:readline`). Requires Node.js >= 18 (CI uses 22.19.0).
+
+### Project structure
+| Path | Purpose |
+|------|---------|
+| `src/OrderController.js` | Core state machine: orders, bots, priority queue, scheduling |
+| `src/constants.js` | Shared constants (10s process time, order types, statuses) |
+| `src/virtualClock.js` | Deterministic scheduler + clock used by tests and the simulation |
+| `src/index.js` | Scripted, non-interactive scenario → timestamped output |
+| `bin/cli.js` | Interactive REPL (real 10-second timers) |
+| `test/OrderController.test.js` | Unit tests (Node built-in test runner) |
+| `scripts/{build,test,run}.sh` | CI entry points |
+
+### Running
+
+**Simulation** (default; instant, writes a timestamped event log — used by CI):
+```
+npm start             # runs src/index.js, prints to stdout
+./scripts/run.sh      # same, but writes to scripts/result.txt
+```
+
+**Interactive mode** (for the live demo — each order takes a real 10 seconds):
+```
+npm run cli           # runs bin/cli.js
+```
+Commands: `normal`, `vip`, `+bot`, `-bot`, `status`, `help`, `exit`.
+
+**Tests:**
+```
+npm test              # or ./scripts/test.sh
+```
+
+### Design decisions
+- **Single sorted PENDING queue.** Orders are kept sorted by
+  `(type rank, order number)` — VIP outranks Normal, FIFO within a type. This
+  makes VIP placement (req #2) and returning an interrupted order to its
+  original position (req #6) fall out of one invariant.
+- **Time is injected.** `OrderController` receives a `scheduler` and a `now()`
+  clock instead of calling `setTimeout` directly. The interactive CLI injects
+  real timers; the simulation and tests inject a virtual clock — so tests are
+  instant and deterministic, CI finishes in under a second, and the output
+  still shows realistic 10-second gaps in `HH:MM:SS`.
+- **Event-driven output.** The controller emits timestamped events via an
+  `onEvent` callback; the CLI and simulation only format them.
+
+### Requirement coverage
+1. New Normal order → PENDING
+2. New VIP order → ahead of Normal, behind existing VIP
+3. Unique, increasing order numbers
+4. `+Bot` processes immediately; 10s → COMPLETE; then picks next
+5. Bot goes IDLE when the queue is empty
+6. `-Bot` removes newest; if processing, order returns to its position
+7. In-memory only, no persistence
