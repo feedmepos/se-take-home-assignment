@@ -48,7 +48,7 @@ src/
 ### Key design decisions
 
 - **`OrderController` is a plain TS class**, unaware of React. The UI subscribes via `useSyncExternalStore` and reads immutable snapshots — no state duplication, no tearing.
-- **The pending queue is always kept sorted** `[VIP…, NORMAL…]` with FIFO within each group. This makes two operations trivial: a freed bot just takes the front, and a requeued order (from removing a busy bot) re-inserts by priority — which naturally restores its original position.
+- **The pending queue is always kept sorted** by (priority, arrival) — `[VIP…, NORMAL…]` with ascending order id within each group. This makes two operations trivial: a freed bot just takes the front, and a requeued order (from removing a busy bot) re-inserts by its arrival id — dropping back into its **original** position, ahead of same-type orders that arrived later.
 - **Single-threaded timer model.** Each bot's 10s cook is one `setTimeout`, tracked by bot id so removal can cancel it. A stale timer from a removed bot is ignored, so no order is ever double-completed.
 - **The countdown interval only runs while a bot is cooking**, so an idle app does zero needless re-rendering.
 
@@ -60,12 +60,12 @@ src/
 | VIP ahead of Normal, behind VIPs | `OrderController.insertByPriority` |
 | +Bot processes pending immediately | `OrderController.addBot` → `dispatch` |
 | 10s per order, then next / IDLE | `dispatch` + `onProcessingComplete` |
-| −Bot removes newest, requeues its order | `OrderController.removeBot` |
+| −Bot removes newest, requeues its order to its original position | `OrderController.removeBot` + `insertByPriority` |
 | In-memory only | entire `core/` — no persistence |
 
 ## Testing
 
-17 unit tests in [`src/core/OrderController.test.ts`](src/core/OrderController.test.ts) cover order numbering, VIP priority ordering, bot pickup/completion (with fake timers), parallel bots, and the bot-removal requeue (including the stale-timer edge case). Run with `npm test`.
+20 unit tests in [`src/core/OrderController.test.ts`](src/core/OrderController.test.ts) cover order numbering, VIP priority ordering, bot pickup/completion (with fake timers), parallel bots, and bot removal — including returning an in-progress order to its **original** queue position (ahead of later same-type orders) and the stale-timer edge case. Run with `npm test`.
 
 ---
 
