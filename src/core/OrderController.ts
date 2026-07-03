@@ -7,9 +7,9 @@ export const DEFAULT_PROCESS_MS = 10_000
  * Order-control logic for the cooking-bot simulation. Framework-agnostic so it
  * can be unit-tested on its own; the UI binds to it via `subscribe`/`getSnapshot`.
  *
- * Invariant: `pending` is always ordered [VIP…, NORMAL…] with FIFO within each
- * group, so a freed bot takes the front and a requeued order re-inserts by
- * priority — restoring its original position.
+ * Invariant: `pending` is always ordered by (priority, arrival) — [VIP…, NORMAL…]
+ * with ascending order id (arrival order) within each group. A freed bot takes
+ * the front; a requeued order re-inserts at its original slot by arrival order.
  */
 export class OrderController {
   private nextOrderId = 1
@@ -90,15 +90,19 @@ export class OrderController {
     return bot
   }
 
-  /** Insert keeping the [VIP…, NORMAL…] + FIFO invariant. */
+  /**
+   * Insert ordered by (priority, arrival): VIP outranks NORMAL, and within a
+   * type ascending id = arrival order. A new order (highest id) lands at the
+   * back of its group; a requeued order (its original, lower id) drops back
+   * into its original slot — ahead of same-type orders that arrived later.
+   */
   private insertByPriority(order: Order): void {
-    if (order.type === 'VIP') {
-      const firstNormal = this.pending.findIndex((o) => o.type === 'NORMAL')
-      if (firstNormal === -1) this.pending.push(order)
-      else this.pending.splice(firstNormal, 0, order)
-    } else {
-      this.pending.push(order)
-    }
+    const rank = (o: Order) => (o.type === 'VIP' ? 0 : 1)
+    const index = this.pending.findIndex(
+      (o) => rank(order) < rank(o) || (rank(order) === rank(o) && order.id < o.id),
+    )
+    if (index === -1) this.pending.push(order)
+    else this.pending.splice(index, 0, order)
   }
 
   /** Assign pending orders to idle bots, front of queue first. */

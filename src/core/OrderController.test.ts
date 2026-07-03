@@ -160,6 +160,34 @@ describe('OrderController', () => {
       expect(s.pending).toHaveLength(1)
     })
 
+    it('returns a VIP to its original slot, ahead of VIPs that arrived later', () => {
+      controller.addOrder('VIP') // #1
+      controller.addBot() // bot grabs #1
+      controller.addOrder('VIP') // #2
+      controller.addOrder('VIP') // #3
+      controller.removeBot() // #1 must return to the FRONT of the VIP group
+      expect(controller.getSnapshot().pending.map((o) => o.id)).toEqual([1, 2, 3])
+    })
+
+    it('returns a normal order ahead of normals that arrived later', () => {
+      controller.addOrder('NORMAL') // #1
+      controller.addBot() // grabs #1
+      controller.addOrder('NORMAL') // #2
+      controller.addOrder('NORMAL') // #3
+      controller.removeBot()
+      expect(controller.getSnapshot().pending.map((o) => o.id)).toEqual([1, 2, 3])
+    })
+
+    it('reinserts a returned VIP by arrival among VIPs and still ahead of normals', () => {
+      controller.addOrder('VIP') // #1
+      controller.addOrder('VIP') // #2
+      controller.addBot() // grabs #1
+      controller.addOrder('VIP') // #3
+      controller.addOrder('NORMAL') // #4  -> pending: [#2, #3, #4]
+      controller.removeBot() // #1 returns to front of VIP group
+      expect(controller.getSnapshot().pending.map((o) => o.id)).toEqual([1, 2, 3, 4])
+    })
+
     it('returns null when there are no bots to remove', () => {
       expect(controller.removeBot()).toBeNull()
     })
