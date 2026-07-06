@@ -5,10 +5,13 @@
 
 echo "Running unit tests..."
 
-# For Go projects:
-# go test ./... -v
+cd "$(dirname "$0")/.."
 
-# For Node.js projects:
-# npm test
+go test ./service -v -race -timeout 120s
 
-echo "Unit tests completed"
+if [ $? -eq 0 ]; then
+    echo "Unit tests completed successfully"
+else
+    echo "Unit tests failed"
+    exit 1
+fi

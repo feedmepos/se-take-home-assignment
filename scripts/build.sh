@@ -5,11 +5,13 @@
 
 echo "Building CLI application..."
 
-# For Go projects:
-# go build -o order-controller ./cmd/main.go
+cd "$(dirname "$0")/.."
 
-# For Node.js projects:
-# npm install
-# npm run build (if needed)
+go build -o order-controller ./cmd/main.go
 
-echo "Build completed"
+if [ $? -eq 0 ]; then
+    echo "Build completed successfully"
+else
+    echo "Build failed"
+    exit 1
+fi

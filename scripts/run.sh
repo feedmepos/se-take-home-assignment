@@ -5,15 +5,15 @@
 
 echo "Running CLI application..."
 
-# For Go projects:
-# ./order-controller > result.txt
+cd "$(dirname "$0")/.."
 
-# For Node.js projects:
-# node index.js > result.txt
-# or npm start > result.txt
+chmod +x ./order-controller
 
-# Temporary placeholder - remove this when you implement your CLI
-echo "Added 1 bot" > result.txt
-echo "status: bot: [1], order: []" >> result.txt
+./order-controller
 
-echo "CLI application execution completed"
+if [ $? -eq 0 ]; then
+    echo "CLI application execution completed"
+else
+    echo "CLI application execution failed"
+    exit 1
+fi
