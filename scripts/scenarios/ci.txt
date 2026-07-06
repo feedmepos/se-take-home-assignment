@@ -1,0 +1,7 @@
+normal
+vip
++bot
++bot
+wait 25s
+status
+quit
