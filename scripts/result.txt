@@ -1,12 +1,12 @@
-00:23:10 SYSTEM started
-00:23:10 ORDER created id=1 type=NORMAL pending=[1]
-00:23:10 ORDER created id=2 type=VIP pending=[2,1]
-00:23:10 BOT created id=1
-00:23:10 BOT id=1 picked order id=2 pickupIndex=0
-00:23:10 BOT created id=2
-00:23:10 BOT id=2 picked order id=1 pickupIndex=0
-00:23:20 BOT id=2 completed order id=1 complete=[1]
-00:23:20 BOT id=2 idle
-00:23:20 BOT id=1 completed order id=2 complete=[1,2]
-00:23:20 BOT id=1 idle
-00:23:20 STATUS bots=1:IDLE,2:IDLE pending=[] complete=[1,2]
+21:31:28 SYSTEM started
+21:31:28 ORDER created id=1 type=NORMAL pending=[1]
+21:31:28 ORDER created id=2 type=VIP pending=[2,1]
+21:31:28 BOT created id=1
+21:31:28 BOT id=1 picked order id=2 pickupIndex=0
+21:31:28 BOT created id=2
+21:31:28 BOT id=2 picked order id=1 pickupIndex=0
+21:31:38 BOT id=2 completed order id=1 complete=[1]
+21:31:38 BOT id=2 idle
+21:31:38 BOT id=1 completed order id=2 complete=[1,2]
+21:31:38 BOT id=1 idle
+21:31:38 STATUS bots=1:IDLE,2:IDLE pending=[] complete=[1,2]

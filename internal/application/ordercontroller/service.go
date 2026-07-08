@@ -86,11 +86,13 @@ func (s *Service) RemoveBot() error {
 		return err
 	}
 
+	// 若 Bot 仍在计时，先 Stop 防止回调在移除后仍触发 CompleteOrder。
 	if timer, ok := s.timers[removal.BotID]; ok {
 		timer.Stop()
 		delete(s.timers, removal.BotID)
 	}
 
+	// 领域层已将中断订单按 pickupIndex 回插；此处仅补审计日志。
 	if removal.Interrupted != nil {
 		s.log.BotInterrupted(removal.BotID, *removal.Interrupted, removal.PickupIndex, s.agg.Pending())
 	}
@@ -128,6 +130,7 @@ func (s *Service) Shutdown() {
 func (s *Service) WaitUntilIdle(timeout time.Duration) error {
 	deadline := s.clock.Now().Add(timeout)
 	for {
+		// 短临界区：只读 idle 状态，避免阻塞定时器回调长时间占锁。
 		s.mu.Lock()
 		idle := s.agg.IsFullyIdle()
 		s.mu.Unlock()
@@ -135,17 +138,20 @@ func (s *Service) WaitUntilIdle(timeout time.Duration) error {
 			return nil
 		}
 		if s.clock.Now().After(deadline) {
-			return errors.New("timeout waiting for idle")
+			return errors.New("等待系统空闲超时")
 		}
+		// Mock 时钟：主动推进模拟时间，触发 AfterFunc 回调以完成订单。
 		if advancer, ok := s.clock.(interface{ Advance(time.Duration) }); ok {
 			advancer.Advance(10 * time.Millisecond)
 		} else {
+			// 真实时钟：短暂 sleep 轮询，等待 wall-clock 定时器自然到期。
 			time.Sleep(10 * time.Millisecond)
 		}
 	}
 }
 
 // wakeOneIdleBot 唤醒 ID 最小的空闲 Bot 取单（每次仅唤醒一个）。
+// 新订单到达时只分配一个 Bot，避免单次下单耗尽所有空闲 Bot。
 func (s *Service) wakeOneIdleBot() {
 	if botID, ok := s.agg.LowestIdleBotID(); ok {
 		s.assignOrder(botID)
@@ -156,10 +162,12 @@ func (s *Service) wakeOneIdleBot() {
 func (s *Service) assignOrder(botID int) {
 	assign, ok := s.agg.TryAssignOrder(botID)
 	if !ok {
+		// Bot 不可接单（非 IDLE）或 pending 为空时静默返回。
 		return
 	}
 
 	s.log.BotPicked(assign.BotID, assign.Order, assign.PickupIndex)
+	// 闭包捕获 botID 副本，避免循环变量在 AfterFunc 延迟执行时被改写。
 	botIDCopy := assign.BotID
 	s.timers[botID] = s.clock.AfterFunc(s.process, func() {
 		s.onProcessingComplete(botIDCopy)
@@ -171,16 +179,19 @@ func (s *Service) onProcessingComplete(botID int) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
+	// 定时器已触发，先从 map 移除，避免 Stop/重复回调干扰。
 	delete(s.timers, botID)
 
 	completion, ok := s.agg.CompleteOrder(botID)
 	if !ok {
+		// Bot 已被 -bot 移除或状态不一致时忽略（RemoveBot 已 Stop 定时器）。
 		return
 	}
 
 	s.log.BotCompleted(completion.BotID, completion.Order, s.agg.CompleteIDs())
 
 	if completion.HasNext && completion.NextAssign != nil {
+		// 链式取单：同一 Bot 连续处理 pending 中的下一单，无需经过 IDLE。
 		next := *completion.NextAssign
 		s.log.BotPicked(next.BotID, next.Order, next.PickupIndex)
 		botIDCopy := next.BotID
@@ -190,5 +201,6 @@ func (s *Service) onProcessingComplete(botID int) {
 		return
 	}
 
+	// pending 已空，Bot 回到 IDLE，等待新订单或 +bot 唤醒。
 	s.log.BotIdle(completion.BotID)
 }

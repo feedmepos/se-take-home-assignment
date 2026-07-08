@@ -49,10 +49,11 @@ func (q *PendingQueue) DequeueNext() (Order, int, bool) {
 	if len(q.VIP) > 0 {
 		order := q.VIP[0]
 		q.VIP = q.VIP[1:]
-		return order, 0, true
+		return order, 0, true // VIP 队首的逻辑索引恒为 0
 	}
 	if len(q.Normal) > 0 {
-		idx := len(q.VIP) // Normal 段在逻辑队列中的起始偏移
+		// 能走到 Normal 分支说明 VIP 段已空，队首 Normal 的逻辑索引为 0。
+		idx := len(q.VIP)
 		order := q.Normal[0]
 		q.Normal = q.Normal[1:]
 		return order, idx, true
@@ -63,6 +64,7 @@ func (q *PendingQueue) DequeueNext() (Order, int, bool) {
 // ReinsertAt 将订单回插到逻辑队列的 pickupIndex 位置，再按类型拆回双段。
 // 用于 Bot 被移除时恢复中断订单的原始排队位置。
 func (q *PendingQueue) ReinsertAt(order Order, pickupIndex int) {
+	// 先展平为逻辑队列，在 pickupIndex 处插入，再按类型拆回双段。
 	logical := q.Flatten()
 	if pickupIndex < 0 {
 		pickupIndex = 0

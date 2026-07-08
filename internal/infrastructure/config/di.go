@@ -21,6 +21,7 @@ type Application struct {
 // Wire 构建依赖图：Real 时钟 → EventLogger → Service，并触发系统启动日志。
 func Wire(out io.Writer, processDuration time.Duration) *Application {
 	clk := clock.Real{}
+	// 日志与时间戳共用同一 Clock，保证 HH:MM:SS 与定时器语义一致。
 	logger := logging.New(out, clk)
 	svc := app.NewService(clk, logger, processDuration)
 	svc.Start()

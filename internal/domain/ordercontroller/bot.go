@@ -33,6 +33,7 @@ func (b *Bot) IsProcessing() bool {
 
 // CanAcceptOrder 判断 Bot 是否可以接受新订单（空闲或刚清空处理状态）。
 func (b *Bot) CanAcceptOrder() bool {
+	// IDLE：常规取单；PROCESSING 且 CurrentOrder==nil：CompleteOrder 链式取下一单前的过渡态。
 	return b.State == BotStateIdle || (b.State == BotStateProcessing && b.CurrentOrder == nil)
 }
 

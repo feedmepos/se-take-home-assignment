@@ -88,12 +88,14 @@ func (m *Mock) Advance(d time.Duration) {
 	m.mu.Lock()
 	m.now = m.now.Add(d)
 	var ready []func()
+	// 按 deadline 顺序弹出所有已到期的定时器。
 	for m.timers.Len() > 0 && !m.timers[0].deadline.After(m.now) {
 		t := heap.Pop(&m.timers).(*mockTimer)
 		t.index = -1
 		ready = append(ready, t.fn)
 	}
 	m.mu.Unlock()
+	// 回调在锁外执行，避免 AfterFunc → onProcessingComplete 重入死锁。
 	for _, fn := range ready {
 		fn()
 	}

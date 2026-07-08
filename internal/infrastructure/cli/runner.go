@@ -51,6 +51,7 @@ func RunREPL(svc *app.Service, in io.Reader, out io.Writer) error {
 		}
 		quit, err := Execute(svc, scanner.Text())
 		if err != nil {
+			// REPL 模式：打印错误后继续，便于演示时纠错。
 			fmt.Fprintf(out, "error: %v\n", err)
 			continue
 		}
@@ -84,6 +85,7 @@ func runLines(svc *app.Service, scanner *bufio.Scanner) error {
 		}
 		quit, err := Execute(svc, line)
 		if err != nil {
+			// 批处理模式：任一命令失败即终止，使 CI 能捕获非零退出码。
 			return fmt.Errorf("executing %q: %w", line, err)
 		}
 		if quit {

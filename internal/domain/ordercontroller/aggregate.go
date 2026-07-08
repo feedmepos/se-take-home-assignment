@@ -82,9 +82,11 @@ func (oc *OrderController) RemoveLatestBot() (BotRemoval, error) {
 		order := *bot.CurrentOrder
 		result.Interrupted = &order
 		result.PickupIndex = bot.PickupIndex
+		// 回插到取单时的逻辑位置，保证 VIP/Normal 相对顺序不变。
 		oc.pending.ReinsertAt(order, bot.PickupIndex)
 	}
 
+	// 从切片末尾删除，即 LIFO 移除最新 Bot。
 	oc.bots = append(oc.bots[:idx], oc.bots[idx+1:]...)
 	return result, nil
 }
@@ -126,6 +128,7 @@ func (oc *OrderController) CompleteOrder(botID int) (Completion, bool) {
 
 	order := *bot.CurrentOrder
 	oc.complete = append(oc.complete, order)
+	// 清空 CurrentOrder 但保持 PROCESSING，使 CanAcceptOrder 允许链式取下一单。
 	bot.ClearProcessing()
 
 	result := Completion{BotID: botID, Order: order}
@@ -170,6 +173,7 @@ func (oc *OrderController) IsFullyIdle() bool {
 		return false
 	}
 	for _, b := range oc.bots {
+		// 链式取单间隙 Bot 可能处于 PROCESSING 但 CurrentOrder 为 nil，仍算处理中。
 		if b.State == BotStateProcessing {
 			return false
 		}
