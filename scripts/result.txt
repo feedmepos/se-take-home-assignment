@@ -1,26 +1,62 @@
-McDonald's Order Management System - Simulation Results
-
-[14:32:01] System initialized with 0 bots
-[14:32:01] Created Normal Order #1001 - Status: PENDING
-[14:32:02] Created VIP Order #1002 - Status: PENDING
-[14:32:02] Created Normal Order #1003 - Status: PENDING
-[14:32:03] Bot #1 created - Status: ACTIVE
-[14:32:03] Bot #1 picked up VIP Order #1002 - Status: PROCESSING
-[14:32:04] Bot #2 created - Status: ACTIVE
-[14:32:04] Bot #2 picked up Normal Order #1001 - Status: PROCESSING
-[14:32:13] Bot #1 completed VIP Order #1002 - Status: COMPLETE (Processing time: 10s)
-[14:32:13] Bot #1 picked up Normal Order #1003 - Status: PROCESSING
-[14:32:14] Bot #2 completed Normal Order #1001 - Status: COMPLETE (Processing time: 10s)
-[14:32:14] Bot #2 is now IDLE - No pending orders
-[14:32:15] Created VIP Order #1004 - Status: PENDING
-[14:32:15] Bot #2 picked up VIP Order #1004 - Status: PROCESSING
-[14:32:23] Bot #1 completed Normal Order #1003 - Status: COMPLETE (Processing time: 10s)
-[14:32:25] Bot #2 completed VIP Order #1004 - Status: COMPLETE (Processing time: 10s)
-[14:32:25] Bot #2 destroyed while IDLE
-[14:32:26] Bot #1 is now IDLE - No pending orders
-
-Final Status:
-- Total Orders Processed: 4 (2 VIP, 2 Normal)
-- Orders Completed: 4
-- Active Bots: 1
-- Pending Orders: 0
+[21:53:13] === 模拟开始 ===
+[21:53:13] 新增普通订单 #1 → 等待中
+[21:53:13] 新增普通订单 #2 → 等待中
+[21:53:13] 新增 VIP 订单 #3 → 等待中
+[21:53:13] 新增 VIP 订单 #4 → 等待中
+[21:53:13] --- PENDING: VIP#3, VIP#4, Normal#1, Normal#2 ---
+[21:53:13] === 状态总览 ===
+[21:53:13] PENDING: 订单 #3 [VIP]
+[21:53:13] PENDING: 订单 #4 [VIP]
+[21:53:13] PENDING: 订单 #1 [普通]
+[21:53:13] PENDING: 订单 #2 [普通]
+[21:53:13] 机器人: (无)
+[21:53:13] COMPLETE: (无)
+[21:53:13] === 状态结束 ===
+[21:53:13] + 机器人 #1 已创建 → 空闲
+[21:53:13] 机器人 #1 领取订单 #3 [VIP] → 处理中
+[21:53:13] + 机器人 #2 已创建 → 空闲
+[21:53:13] 机器人 #2 领取订单 #4 [VIP] → 处理中
+[21:53:13] --- 机器人已创建，等待 12 秒让 VIP 订单完成 ---
+[21:53:23] 机器人 #2 完成订单 #4 → 已完成
+[21:53:23] 机器人 #2 领取订单 #1 [普通] → 处理中
+[21:53:23] 机器人 #1 完成订单 #3 → 已完成
+[21:53:23] 机器人 #1 领取订单 #2 [普通] → 处理中
+[21:53:25] --- VIP 订单完成，机器人开始处理普通订单 ---
+[21:53:25] === 状态总览 ===
+[21:53:25] PENDING: (无)
+[21:53:25] 机器人 #1 → 处理中 订单 #2 [普通]
+[21:53:25] 机器人 #2 → 处理中 订单 #1 [普通]
+[21:53:25] COMPLETE: 订单 #4 [VIP]
+[21:53:25] COMPLETE: 订单 #3 [VIP]
+[21:53:25] === 状态结束 ===
+[21:53:25] + 机器人 #3 已创建 → 空闲
+[21:53:25] --- 机器人#3 创建 → 空闲 ---
+[21:53:25] 新增 VIP 订单 #5 → 等待中
+[21:53:25] 机器人 #3 领取订单 #5 [VIP] → 处理中
+[21:53:25] --- VIP#5 添加 → 机器人#3 立即领取 ---
+[21:53:25] - 机器人 #3 已销毁 → 订单 #5 返回等待中（队列头部）
+[21:53:25] --- 机器人#3 销毁 → VIP#5 返回 PENDING ---
+[21:53:25] === 状态总览 ===
+[21:53:25] PENDING: 订单 #5 [VIP]
+[21:53:25] 机器人 #1 → 处理中 订单 #2 [普通]
+[21:53:25] 机器人 #2 → 处理中 订单 #1 [普通]
+[21:53:25] COMPLETE: 订单 #4 [VIP]
+[21:53:25] COMPLETE: 订单 #3 [VIP]
+[21:53:25] === 状态结束 ===
+[21:53:25] --- 等待 20 秒让剩余机器人完成所有订单 ---
+[21:53:33] 机器人 #1 完成订单 #2 → 已完成
+[21:53:33] 机器人 #1 领取订单 #5 [VIP] → 处理中
+[21:53:33] 机器人 #2 完成订单 #1 → 已完成
+[21:53:43] 机器人 #1 完成订单 #5 → 已完成
+[21:53:45] === 最终状态 ===
+[21:53:45] === 状态总览 ===
+[21:53:45] PENDING: (无)
+[21:53:45] 机器人 #1 → 空闲
+[21:53:45] 机器人 #2 → 空闲
+[21:53:45] COMPLETE: 订单 #4 [VIP]
+[21:53:45] COMPLETE: 订单 #3 [VIP]
+[21:53:45] COMPLETE: 订单 #2 [普通]
+[21:53:45] COMPLETE: 订单 #1 [普通]
+[21:53:45] COMPLETE: 订单 #5 [VIP]
+[21:53:45] === 状态结束 ===
+[21:53:45] === 模拟结束 ===

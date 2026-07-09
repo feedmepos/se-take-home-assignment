@@ -1,0 +1,12 @@
+# 本地文档，不提交到 git
+GUIDE.md
+# Go 编译产物
+*.exe
+
+# 依赖缓存
+vendor/
+
+# IDE
+.idea/
+.vscode/
+*.swp
