@@ -5,6 +5,66 @@ import (
 	"time"
 )
 
+func TestPendingQueue_VIPPriority(t *testing.T) {
+	q := PendingQueue{}
+
+	n1 := &Order{ID: 1, Type: Normal}
+	v1 := &Order{ID: 2, Type: VIP}
+	n2 := &Order{ID: 3, Type: Normal}
+	v2 := &Order{ID: 4, Type: VIP}
+
+	q.AddNormal(n1)
+	q.AddVIP(v1)
+	q.AddNormal(n2)
+	q.AddVIP(v2)
+
+	// 期望顺序：VIP1, VIP2, Normal1, Normal2
+	expected := []int{v1.ID, v2.ID, n1.ID, n2.ID}
+	orders := q.Orders()
+	for i, want := range expected {
+		if orders[i].ID != want {
+			t.Errorf("position %d: expected ID %d, got %d", i, want, orders[i].ID)
+		}
+	}
+}
+
+func TestPendingQueue_Dequeue(t *testing.T) {
+	q := PendingQueue{}
+	if q.Dequeue() != nil {
+		t.Errorf("expected nil when dequeue from empty queue")
+	}
+
+	o := &Order{ID: 1, Type: Normal}
+	q.AddNormal(o)
+	if q.Len() != 1 {
+		t.Errorf("expected len 1, got %d", q.Len())
+	}
+	if got := q.Dequeue(); got != o {
+		t.Errorf("expected to dequeue the same order")
+	}
+	if q.Len() != 0 {
+		t.Errorf("expected len 0 after dequeue, got %d", q.Len())
+	}
+}
+
+func TestPendingQueue_ReturnOrder(t *testing.T) {
+	q := PendingQueue{}
+	n := &Order{ID: 1, Type: Normal}
+	v := &Order{ID: 2, Type: VIP}
+
+	q.AddNormal(n)
+	// 被中断的 VIP 订单应排到 Normal 之前
+	q.ReturnOrder(v)
+
+	orders := q.Orders()
+	if orders[0].ID != v.ID {
+		t.Errorf("expected returned VIP order at front")
+	}
+	if orders[1].ID != n.ID {
+		t.Errorf("expected normal order after VIP")
+	}
+}
+
 func TestOrderController_CreateNormalOrder(t *testing.T) {
 	ctrl := NewOrderController()
 
@@ -18,7 +78,7 @@ func TestOrderController_CreateNormalOrder(t *testing.T) {
 		t.Errorf("Expected order type to be Normal")
 	}
 
-	if order.Status != "PENDING" {
+	if order.Status != StatusPending {
 		t.Errorf("Expected order status to be PENDING, got %s", order.Status)
 	}
 
@@ -34,51 +94,52 @@ func TestOrderController_CreateNormalOrder(t *testing.T) {
 func TestOrderController_CreateVIPOrder(t *testing.T) {
 	ctrl := NewOrderController()
 
-	// Create a normal order first
+	// 先创建普通订单
 	normalOrder := ctrl.CreateNormalOrder()
 
-	// Create a VIP order - should be prioritized
+	// 创建 VIP 订单，应排在普通订单之前
 	vipOrder := ctrl.CreateVIPOrder()
 
 	if vipOrder.Type != VIP {
 		t.Errorf("Expected order type to be VIP")
 	}
 
-	// VIP order should be first in queue
-	ctrl.mu.RLock()
-	if len(ctrl.pendingQueue) != 2 {
-		t.Errorf("Expected 2 orders in pending queue, got %d", len(ctrl.pendingQueue))
+	ctrl.mu.Lock()
+	pending := ctrl.pendingQueue.Orders()
+	if len(pending) != 2 {
+		t.Errorf("Expected 2 orders in pending queue, got %d", len(pending))
 	}
 
-	if ctrl.pendingQueue[0].ID != vipOrder.ID {
+	if pending[0].ID != vipOrder.ID {
 		t.Errorf("Expected VIP order to be first in queue")
 	}
 
-	if ctrl.pendingQueue[1].ID != normalOrder.ID {
+	if pending[1].ID != normalOrder.ID {
 		t.Errorf("Expected normal order to be second in queue")
 	}
-	ctrl.mu.RUnlock()
+	ctrl.mu.Unlock()
 }
 
 func TestOrderController_VIPOrderPriority(t *testing.T) {
 	ctrl := NewOrderController()
 
-	// Create orders in this sequence: Normal, VIP, Normal, VIP
+	// 创建顺序：Normal, VIP, Normal, VIP
 	normal1 := ctrl.CreateNormalOrder()
 	vip1 := ctrl.CreateVIPOrder()
 	normal2 := ctrl.CreateNormalOrder()
 	vip2 := ctrl.CreateVIPOrder()
 
-	// Expected order in queue: VIP1, VIP2, Normal1, Normal2
-	ctrl.mu.RLock()
+	// 期望队列顺序：VIP1, VIP2, Normal1, Normal2
+	ctrl.mu.Lock()
 	expectedOrder := []int{vip1.ID, vip2.ID, normal1.ID, normal2.ID}
+	pending := ctrl.pendingQueue.Orders()
 
 	for i, expectedID := range expectedOrder {
-		if ctrl.pendingQueue[i].ID != expectedID {
-			t.Errorf("Queue position %d: expected order ID %d, got %d", i, expectedID, ctrl.pendingQueue[i].ID)
+		if pending[i].ID != expectedID {
+			t.Errorf("Queue position %d: expected order ID %d, got %d", i, expectedID, pending[i].ID)
 		}
 	}
-	ctrl.mu.RUnlock()
+	ctrl.mu.Unlock()
 }
 
 func TestOrderController_AddBot(t *testing.T) {
@@ -102,16 +163,16 @@ func TestOrderController_AddBot(t *testing.T) {
 func TestOrderController_BotProcessesOrder(t *testing.T) {
 	ctrl := NewOrderController()
 
-	// Create an order
+	// 创建订单
 	order := ctrl.CreateNormalOrder()
 
-	// Add a bot - should immediately start processing
+	// 新增机器人，应立即开始处理
 	bot := ctrl.AddBot()
 
-	// Give it a moment to start processing
+	// 等待处理启动
 	time.Sleep(100 * time.Millisecond)
 
-	ctrl.mu.RLock()
+	ctrl.mu.Lock()
 	if bot.Status != Processing {
 		t.Errorf("Expected bot to be processing")
 	}
@@ -120,24 +181,24 @@ func TestOrderController_BotProcessesOrder(t *testing.T) {
 		t.Errorf("Expected bot to be processing the created order")
 	}
 
-	if order.Status != "PROCESSING" {
+	if order.Status != StatusProcessing {
 		t.Errorf("Expected order status to be PROCESSING, got %s", order.Status)
 	}
 
-	if len(ctrl.pendingQueue) != 0 {
-		t.Errorf("Expected pending queue to be empty, got %d orders", len(ctrl.pendingQueue))
+	if ctrl.pendingQueue.Len() != 0 {
+		t.Errorf("Expected pending queue to be empty, got %d orders", ctrl.pendingQueue.Len())
 	}
-	ctrl.mu.RUnlock()
+	ctrl.mu.Unlock()
 }
 
 func TestOrderController_RemoveBot(t *testing.T) {
 	ctrl := NewOrderController()
 
-	// Create two bots
+	// 创建两个机器人
 	bot1 := ctrl.AddBot()
 	bot2 := ctrl.AddBot()
 
-	// Remove bot (should remove the newest one - bot2)
+	// 移除最新加入的机器人（bot2）
 	removedBot := ctrl.RemoveBot()
 
 	if removedBot.ID != bot2.ID {
@@ -148,70 +209,71 @@ func TestOrderController_RemoveBot(t *testing.T) {
 		t.Errorf("Expected 1 active bot after removal, got %d", ctrl.GetActiveBotCount())
 	}
 
-	// Remaining bot should be bot1
-	ctrl.mu.RLock()
+	// 剩余应为 bot1
+	ctrl.mu.Lock()
 	if ctrl.bots[0].ID != bot1.ID {
 		t.Errorf("Expected remaining bot to be bot1")
 	}
-	ctrl.mu.RUnlock()
+	ctrl.mu.Unlock()
 }
 
 func TestOrderController_RemoveBotWhileProcessing(t *testing.T) {
 	ctrl := NewOrderController()
 
-	// Create an order and a bot
+	// 创建订单与机器人
 	order := ctrl.CreateNormalOrder()
 	bot := ctrl.AddBot()
 
-	// Wait for processing to start
+	// 等待处理启动
 	time.Sleep(100 * time.Millisecond)
 
-	// Verify bot is processing
-	ctrl.mu.RLock()
+	// 确认机器人正在处理
+	ctrl.mu.Lock()
 	if bot.Status != Processing {
 		t.Errorf("Expected bot to be processing")
 	}
-	ctrl.mu.RUnlock()
+	ctrl.mu.Unlock()
 
-	// Remove the bot while it's processing
+	// 移除正在处理的机器人
 	removedBot := ctrl.RemoveBot()
 
 	if removedBot.ID != bot.ID {
 		t.Errorf("Expected to remove the processing bot")
 	}
 
-	// Order should be back in pending queue
+	// 订单应回到待处理队列
 	if ctrl.GetPendingOrderCount() != 1 {
 		t.Errorf("Expected order to be back in pending queue")
 	}
 
-	ctrl.mu.RLock()
-	if ctrl.pendingQueue[0].ID != order.ID {
+	ctrl.mu.Lock()
+	pending := ctrl.pendingQueue.Orders()
+	if pending[0].ID != order.ID {
 		t.Errorf("Expected the interrupted order to be back in pending queue")
 	}
 
-	if ctrl.pendingQueue[0].Status != "PENDING" {
+	if pending[0].Status != StatusPending {
 		t.Errorf("Expected order status to be PENDING after bot removal")
 	}
-	ctrl.mu.RUnlock()
+	ctrl.mu.Unlock()
 }
 
 func TestOrderController_OrderCompletion(t *testing.T) {
 	ctrl := NewOrderController()
 
-	// Create order and bot
+	// 创建订单与机器人
 	order := ctrl.CreateNormalOrder()
 	ctrl.AddBot()
 
-	// Wait for processing to complete (slightly more than 10 seconds)
+	// 等待处理完成（略大于 10 秒）
 	time.Sleep(11 * time.Second)
 
-	// Order should be completed
+	// 订单应已完成
 	if ctrl.GetCompletedOrderCount() != 1 {
 		t.Errorf("Expected 1 completed order, got %d", ctrl.GetCompletedOrderCount())
 	}
 
-	ctrl.mu.RLock()
+	ctrl.mu.Lock()
 	if len(ctrl.completedOrders) != 1 {
 		t.Errorf("Expected 1 order in completed orders")
 	}
@@ -220,19 +282,19 @@ func TestOrderController_OrderCompletion(t *testing.T) {
 		t.Errorf("Expected the created order to be completed")
 	}
 
-	if ctrl.completedOrders[0].Status != "COMPLETE" {
+	if ctrl.completedOrders[0].Status != StatusComplete {
 		t.Errorf("Expected completed order status to be COMPLETE")
 	}
-	ctrl.mu.RUnlock()
+	ctrl.mu.Unlock()
 }
 
 func TestOrderController_EmptyQueue(t *testing.T) {
 	ctrl := NewOrderController()
 
-	// Create bot without orders
+	// 无订单时新增机器人
 	bot := ctrl.AddBot()
 
-	// Bot should remain idle
+	// 机器人应保持空闲
 	time.Sleep(100 * time.Millisecond)
 
 	if bot.Status != Idle {
