@@ -1,0 +1,75 @@
+=== McDonald's Order Management System ===
+
+Time: 11:41:05
+Pending Orders: VIP=0, Normal=0
+Completed Orders: 15
+Bots: Total=2, Idle=2, Working=0
+
+--- Pending Orders ---
+No pending orders
+
+--- Completed Orders ---
+[11:38:13] Order #3 (VIP)
+       Created: 11:38:13
+       Started: 11:38:46 (by Bot #1)
+       Finished: 11:38:56
+[11:38:16] Order #4 (VIP)
+       Created: 11:38:16
+       Started: 11:38:56 (by Bot #1)
+       Finished: 11:39:06
+[11:38:26] Order #5 (VIP)
+       Created: 11:38:26
+       Started: 11:39:06 (by Bot #1)
+       Finished: 11:39:16
+[11:38:08] Order #1 (NORMAL)
+       Created: 11:38:08
+       Started: 11:39:06 (by Bot #2)
+       Finished: 11:39:16
+[11:38:10] Order #2 (NORMAL)
+       Created: 11:38:10
+       Started: 11:39:16 (by Bot #1)
+       Finished: 11:39:26
+[11:38:28] Order #6 (NORMAL)
+       Created: 11:38:28
+       Started: 11:39:26 (by Bot #1)
+       Finished: 11:39:36
+[11:39:30] Order #7 (VIP)
+       Created: 11:39:30
+       Started: 11:39:36 (by Bot #1)
+       Finished: 11:39:46
+[11:39:48] Order #8 (NORMAL)
+       Created: 11:39:48
+       Started: 11:39:48 (by Bot #1)
+       Finished: 11:39:58
+[11:39:54] Order #11 (VIP)
+       Created: 11:39:54
+       Started: 11:39:58 (by Bot #1)
+       Finished: 11:40:08
+[11:39:55] Order #12 (VIP)
+       Created: 11:39:55
+       Started: 11:40:08 (by Bot #1)
+       Finished: 11:40:18
+[11:39:49] Order #9 (NORMAL)
+       Created: 11:39:49
+       Started: 11:40:18 (by Bot #1)
+       Finished: 11:40:28
+[11:40:19] Order #14 (VIP)
+       Created: 11:40:19
+       Started: 11:40:28 (by Bot #1)
+       Finished: 11:40:38
+[11:40:36] Order #15 (VIP)
+       Created: 11:40:36
+       Started: 11:40:38 (by Bot #1)
+       Finished: 11:40:48
+[11:39:51] Order #10 (NORMAL)
+       Created: 11:39:51
+       Started: 11:40:45 (by Bot #3)
+       Finished: 11:40:55
+[11:40:14] Order #13 (NORMAL)
+       Created: 11:40:14
+       Started: 11:40:48 (by Bot #1)
+       Finished: 11:40:58
+
+--- Bots ---
+Bot #1: IDLE
+Bot #3: IDLE
