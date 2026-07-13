@@ -1,64 +1,68 @@
-## FeedMe Software Engineer Take Home Assignment
-Below is a take home assignment before the interview of the position. You are required to
-1. Understand the situation and use case. You may contact the interviewer for further clarification.
-2. implement the requirement with **either frontend or backend components**.
-3. Complete the requirement with **AI** if possible, but perform your own testing.
-4. Provide documentation for the any part that you think is needed.
-5. Bring the source code and functioning prototype to the interview session.
+# FeedMe 自动做菜机器人 — 订单控制器（Go）
 
-### Situation
-McDonald is transforming their business during COVID-19. They wish to build the automated cooking bots to reduce workforce and increase their efficiency. As one of the software engineer in the project. You task is to create an order controller which handle the order control flow. 
+[FeedMe SE take-home](https://github.com/feedmepos/se-take-home-assignment) 的 Go 后端实现：一个管理订单流转与做菜机器人的命令行控制器。
 
-### User Story
-As below is part of the user story:
-1. As McDonald's normal customer, after I submitted my order, I wish to see my order flow into "PENDING" area. After the cooking bot process my order, I want to see it flow into to "COMPLETE" area.
-2. As McDonald's VIP member, after I submitted my order, I want my order being process first before all order by normal customer.  However if there's existing order from VIP member, my order should queue behind his/her order.
-3. As McDonald's manager, I want to increase or decrease number of cooking bot available in my restaurant. When I increase a bot, it should immediately process any pending order. When I decrease a bot, the processing order should remain un-process.
-4. As McDonald bot, it can only pickup and process 1 order at a time, each order required 10 seconds to complete process.
+## 需求覆盖
 
-### Requirements
-1. When "New Normal Order" clicked, a new order should show up "PENDING" Area.
-2. When "New VIP Order" clicked, a new order should show up in "PENDING" Area. It should place in-front of all existing "Normal" order but behind of all existing "VIP" order.
-3. The order number should be unique and increasing.
-4. When "+ Bot" clicked, a bot should be created and start processing the order inside "PENDING" area. after 10 seconds picking up the order, the order should move to "COMPLETE" area. Then the bot should start processing another order if there is any left in "PENDING" area.
-5. If there is no more order in the "PENDING" area, the bot should become IDLE until a new order come in.
-6. When "- Bot" clicked, the newest bot should be destroyed. If the bot is processing an order, it should also stop the process. The order should return to its original position in the "PENDING" area (maintaining VIP/Normal order priority).
-7. No data persistance is needed for this prototype, you may perform all the process inside memory.
+| 需求 | 实现 |
+|---|---|
+| 普通订单进入 PENDING，处理后进入 COMPLETE | `NewOrder(Normal)` + 机器人处理 |
+| VIP 订单优先（排在既有 VIP 之后、普通单之前） | 按 `(类型, 订单号)` 优先级有序入队 |
+| 订单号唯一自增 | 控制器内自增序列 |
+| `+Bot` 立即处理待处理订单，单单 10 秒 | 每台机器人一个 goroutine，`cookTime` 默认 10s |
+| 空闲机器人等待新订单 | `sync.Cond` 等待，新单到达时唤醒 |
+| `-Bot` 移除最新机器人；正在做的单退回 PENDING 原位 | 关闭 `quit`，在途订单按原优先级重新入队 |
+| 无需持久化 | 全内存 |
 
-### Functioning Prototype
-You must implement **either** frontend or backend components as described below:
+## 快速开始
 
-#### 1. Frontend
-- You are free to use **any framework and programming language** of your choice
-- The UI application must be compiled, deployed and hosted on any publicly accessible web platform
-- Must provide a user interface that demonstrates all the requirements listed above
-- Should allow users to interact with the McDonald's order management system
+```bash
+./build.sh                                  # 编译到 bin/orderbot
+./test.sh                                    # go vet + go test -race
+./run.sh --cook 2s                           # 交互运行（把 10s 调成 2s 便于观察）
 
-#### 2. Backend
-- You must use **either Go (Golang) or Node.js** for the backend implementation
-- The backend must be a CLI application that can be executed in GitHub Actions
-- Must implement the following scripts in the `script` directory:
-  - `test.sh`: Contains unit test execution steps
-  - `build.sh`: Contains compilation steps for the CLI application
-  - `run.sh`: Contains execution steps that run the CLI application
-- The CLI application result must be printed to `result.txt`
-- The `result.txt` output must include timestamps in `HH:MM:SS` format to track order completion times
-- Must follow **GitHub Flow**: Create a Pull Request with your changes to this repository
-- Ensure all GitHub Action checks pass successfully
-- **Note**: An interactive CLI implementation is compulsory for the next round of interview. Candidates should be prepared to demonstrate interactive command handling.
+# 脚本化喂命令（管道）
+printf 'vip\nnormal\n+bot\nstatus\n' | ./run.sh --cook 1s
+```
 
-#### Submission Requirements
-- Fork this repository and implement your solution with either frontend or backend
-- **Frontend option**: Deploy to a publicly accessible URL using any technology stack
-- **Backend option**: Must be implemented in Go or Node.js and work within the GitHub Actions environment
-  - Follow GitHub Flow process with Pull Request submission
-  - All tests in `test.sh` must pass
-  - The `result.txt` file must contain meaningful output from your CLI application
-  - All output must include timestamps in `HH:MM:SS` format to track order completion times
-  - Submit a Pull Request and ensure the `backend-verify-result` workflow passes
-- Provide documentation for any part that you think is needed
+事件会带 `HH:MM:SS` 时间戳同时打到终端并写入 `result.txt`。
 
-### Tips on completing this task
-- Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.
-- Utilize coding agent to complete the assignment scope your working hour within 1 hour, do not over engineer it. However, ensure you read and understand what your code doing and apply good engineering practice.
-- Complete the implementation as clean as possible, clean code is a strong plus point, do not bring in all the fancy tech stuff.
+### Web 版（按钮 + 实时状态）
+
+```bash
+./web.sh --cook 2s          # 启动后打开 http://localhost:8080
+```
+
+单页控制台：四个按钮（普通 / VIP 订单、加 / 减机器人），三栏展示 PENDING、机器人（含正在做的单）、COMPLETE，状态每秒轮询刷新。复用同一套 `kitchen` 核心，通过 `POST /api/order/{normal,vip}`、`POST /api/bot/{add,remove}`、`GET /api/state` 交互。
+
+## 命令
+
+```
+normal | n     下一张普通订单
+vip    | v     下一张 VIP 订单
++bot   | b+    新增一台机器人
+-bot   | b-    移除最新一台机器人
+status | s     查看 PENDING / COMPLETE / 机器人状态
+quit   | q     停止所有机器人并退出
+```
+
+## 设计要点
+
+- **优先级队列**：`pending` 始终按 `(VIP 优先, 订单号升序)` 有序，二分插入。
+  被抢占退回的订单用同一规则重新入队，天然回到原相对位置——无需记录下标。
+- **并发模型**：单一互斥锁保护状态；每台机器人一个 goroutine，串行取单。
+  空闲时 `sync.Cond.Wait`，加单 / 加机器人 / 停机器人均 `Broadcast` 唤醒重判。
+- **抢占**：`-Bot` 关闭机器人的 `quit` 通道；若在烹饪中，`select` 命中 `quit`
+  分支，把在途订单退回 `pending` 并唤醒其它机器人接手。
+- **可测试性**：烹饪耗时可注入（测试用 40ms），事件日志可注入（测试传 nil）。
+  测试带 `-race`。
+
+## 目录
+
+```
+cmd/orderbot/main.go   CLI
+kitchen/order.go       订单模型与优先级规则
+kitchen/kitchen.go     控制器与机器人调度
+kitchen/snapshot.go    只读状态快照
+kitchen/kitchen_test.go 单元测试
+```

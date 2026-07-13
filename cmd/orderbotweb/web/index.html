@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>自动做菜机器人 · 订单控制台</title>
+<style>
+  :root { --gap: 12px; }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0;
+         background: #0f172a; color: #e2e8f0; }
+  header { padding: 16px 20px; background: #1e293b; }
+  header h1 { margin: 0; font-size: 18px; }
+  header p { margin: 4px 0 0; font-size: 12px; color: #94a3b8; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: var(--gap); padding: 16px 20px; }
+  button { font-size: 14px; padding: 10px 16px; border: 0; border-radius: 8px;
+           cursor: pointer; color: #fff; font-weight: 600; }
+  .normal { background: #2563eb; }
+  .vip    { background: #d97706; }
+  .addbot { background: #16a34a; }
+  .rmbot  { background: #dc2626; }
+  button:active { transform: translateY(1px); }
+  main { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+         gap: var(--gap); padding: 0 20px 24px; }
+  .col { background: #1e293b; border-radius: 10px; padding: 14px; }
+  .col h2 { margin: 0 0 10px; font-size: 13px; text-transform: uppercase;
+            letter-spacing: .05em; color: #94a3b8; }
+  .card { background: #0f172a; border-radius: 8px; padding: 8px 10px; margin-bottom: 8px;
+          display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
+  .card .num { font-weight: 700; }
+  .tag { font-size: 11px; padding: 2px 8px; border-radius: 999px; }
+  .tag.VIP { background: #d97706; color: #fff; }
+  .tag.Normal { background: #334155; color: #cbd5e1; }
+  .bot { background: #0f172a; border-radius: 8px; padding: 10px; margin-bottom: 8px; font-size: 14px; }
+  .bot .st { font-size: 12px; color: #94a3b8; }
+  .bot.cooking { border-left: 3px solid #22c55e; }
+  .empty { color: #475569; font-size: 13px; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>🍔 自动做菜机器人 · 订单控制台</h1>
+    <p>单张订单烹饪 <span id="cook">…</span> · 状态每秒刷新</p>
+  </header>
+
+  <div class="toolbar">
+    <button class="normal" onclick="post('/api/order/normal')">+ 普通订单</button>
+    <button class="vip"    onclick="post('/api/order/vip')">+ VIP 订单</button>
+    <button class="addbot" onclick="post('/api/bot/add')">+ 机器人</button>
+    <button class="rmbot"  onclick="post('/api/bot/remove')">− 机器人</button>
+  </div>
+
+  <main>
+    <section class="col">
+      <h2>PENDING</h2>
+      <div id="pending"></div>
+    </section>
+    <section class="col">
+      <h2>机器人</h2>
+      <div id="bots"></div>
+    </section>
+    <section class="col">
+      <h2>COMPLETE</h2>
+      <div id="complete"></div>
+    </section>
+  </main>
+
+<script>
+async function post(url) {
+  await fetch(url, { method: 'POST' });
+  refresh();
+}
+
+function orderCard(o) {
+  return `<div class="card"><span class="num">#${o.id}</span>
+          <span class="tag ${o.type}">${o.type}</span></div>`;
+}
+
+function botCard(b) {
+  const cooking = b.cooking > 0;
+  const st = cooking ? `正在做 #${b.cooking}` : '空闲';
+  return `<div class="bot ${cooking ? 'cooking' : ''}">
+            <div>🤖 机器人 #${b.id}</div>
+            <div class="st">${st}</div>
+          </div>`;
+}
+
+function render(id, items, fn) {
+  const el = document.getElementById(id);
+  const list = items || [];
+  el.innerHTML = list.length ? list.map(fn).join('') : '<div class="empty">（空）</div>';
+}
+
+async function refresh() {
+  try {
+    const s = await (await fetch('/api/state')).json();
+    document.getElementById('cook').textContent = s.cook;
+    render('pending',  s.pending,  orderCard);
+    render('complete', s.complete, orderCard);
+    render('bots',     s.bots,     botCard);
+  } catch (e) { /* 忽略瞬时错误，下次轮询重试 */ }
+}
+
+refresh();
+setInterval(refresh, 1000);
+</script>
+</body>
+</html>
