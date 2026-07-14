@@ -8,6 +8,31 @@ import (
 	"feedme-order-controller/internal/usecase/core"
 )
 
+// toOrderView maps a single core.Order into its presentation model, as
+// returned by Controller.CreateOrder.
+func toOrderView(o core.Order) dto.OrderView {
+	return dto.OrderView{
+		ID:     o.ID,
+		Type:   o.Kind.String(),
+		Status: o.Status.String(),
+	}
+}
+
+// toBotView maps a single *core.Bot into its presentation model, as
+// returned by Controller.AddBot/RemoveBot. Unlike toStatusResponse's
+// per-bot mapping (which reads from a core.BotSnapshot already captured in
+// a core.Summary), this reads live off the bot itself.
+func toBotView(b *core.Bot) dto.BotView {
+	v := dto.BotView{
+		ID:     b.ID,
+		Status: b.Status().String(),
+	}
+	if cur := b.Current(); cur != nil {
+		v.ProcessingOrderID = cur.ID
+	}
+	return v
+}
+
 // toStatusResponse maps a core.Summary snapshot into the presentation model
 // rendered by the "status" query: the pending queue and bot states, plus a
 // running completed count.
@@ -51,10 +76,9 @@ func toSummaryResponse(s core.Summary) dto.SummaryResponse {
 
 // renderStatus writes the current pending queue, bot states, and completed
 // count to w. It is used by the "status" REPL command and by the demo
-// scenario to show queue state at key points.
-func renderStatus(w io.Writer, s core.Summary) {
-	sr := toStatusResponse(s)
-
+// scenario to show queue state at key points. It renders directly from the
+// dto.StatusResponse returned by Controller.GetStatus.
+func renderStatus(w io.Writer, sr dto.StatusResponse) {
 	fmt.Fprintln(w, "Status:")
 
 	if len(sr.Pending) == 0 {
@@ -83,9 +107,10 @@ func renderStatus(w io.Writer, s core.Summary) {
 }
 
 // renderFinalSummary writes the closing summary block shown once the
-// controller shuts down (REPL exit or end of the demo scenario).
-func renderFinalSummary(w io.Writer, s core.Summary) {
-	sr := toSummaryResponse(s)
+// controller shuts down (REPL exit or end of the demo scenario). It
+// renders directly from the dto.SummaryResponse returned by
+// Controller.Shutdown.
+func renderFinalSummary(w io.Writer, sr dto.SummaryResponse) {
 	total := sr.CompletedOrders + sr.PendingOrders
 
 	fmt.Fprintln(w, "Final Status:")

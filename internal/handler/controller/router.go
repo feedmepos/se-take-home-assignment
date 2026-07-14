@@ -8,8 +8,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/urfave/cli/v3"
-
+	"feedme-order-controller/internal/handler/dto"
 	"feedme-order-controller/internal/usecase"
 )
 
@@ -31,29 +30,18 @@ const usageHint = `unrecognized command; type "help" for the list of commands`
 
 const prompt = "> "
 
-// NewInteractiveCommand builds the "interactive" subcommand: a REPL loop
-// over the order/bot usecase ports. wire (the composition-root factory
-// injected from cmd/api/main.go) is invoked here, once the effective
-// --processing-time is known, so runInteractive itself only depends on the
-// OrderUsecase/BotUsecase ports and can be exercised in tests with fakes.
-func NewInteractiveCommand(wire WireFunc) *cli.Command {
-	return &cli.Command{
-		Name:  "interactive",
-		Usage: "start an interactive REPL for creating orders and managing bots",
-		Action: func(ctx context.Context, cmd *cli.Command) error {
-			ucOrders, ucBots := wire(cmd.Duration(processingTimeFlagName))
-			return runInteractive(ctx, ucOrders, ucBots, cmd.Reader, cmd.Writer, cmd.ErrWriter)
-		},
-	}
-}
-
-// runInteractive drives the REPL: it prints a short help banner and prompt
+// RunInteractive drives the REPL: it prints a short help banner and prompt
 // to errOut, reads whitespace-tokenized commands line-by-line from in (via
 // a background goroutine so it can select against ctx.Done()), and renders
 // "status" output / the final summary to out. It returns once the user
 // exits, stdin is exhausted (EOF), or ctx is cancelled — in every case it
-// calls bots.Shutdown() and renders the final summary before returning.
-func runInteractive(ctx context.Context, orders OrderUsecase, bots BotUsecase, in io.Reader, out, errOut io.Writer) error {
+// calls c.Shutdown() and renders the final summary before returning.
+//
+// RunInteractive is a thin router: it only parses input into commands and
+// dispatches each one to the corresponding Controller method (route below)
+// — the "router → handler" analogy that names this file. All business
+// logic and dto mapping live in the Controller and presenter, not here.
+func RunInteractive(ctx context.Context, c *Controller, in io.Reader, out, errOut io.Writer) error {
 	fmt.Fprint(errOut, helpText)
 	fmt.Fprint(errOut, prompt)
 
@@ -79,21 +67,20 @@ loop:
 			if !ok {
 				break loop
 			}
-			if exit := handleLine(orders, bots, line, out, errOut); exit {
+			if exit := route(c, line, out, errOut); exit {
 				break loop
 			}
 			fmt.Fprint(errOut, prompt)
 		}
 	}
 
-	summary := bots.Shutdown()
-	renderFinalSummary(out, summary)
+	renderFinalSummary(out, c.Shutdown())
 	return nil
 }
 
-// handleLine parses and executes a single REPL line. It reports whether the
-// REPL should exit.
-func handleLine(orders OrderUsecase, bots BotUsecase, line string, out, errOut io.Writer) (exit bool) {
+// route parses and dispatches a single REPL line to the corresponding
+// Controller method. It reports whether the REPL should exit.
+func route(c *Controller, line string, out, errOut io.Writer) (exit bool) {
 	fields := strings.Fields(line)
 	if len(fields) == 0 {
 		return false
@@ -106,10 +93,10 @@ func handleLine(orders OrderUsecase, bots BotUsecase, line string, out, errOut i
 			return false
 		}
 		switch strings.ToLower(fields[1]) {
-		case "normal":
-			orders.NewNormalOrder()
-		case "vip":
-			orders.NewVIPOrder()
+		case "normal", "vip":
+			if _, err := c.CreateOrder(dto.CreateOrderRequest{Type: fields[1]}); err != nil {
+				fmt.Fprintln(errOut, err)
+			}
 		default:
 			fmt.Fprintln(errOut, usageHint)
 		}
@@ -121,9 +108,9 @@ func handleLine(orders OrderUsecase, bots BotUsecase, line string, out, errOut i
 		}
 		switch strings.ToLower(fields[1]) {
 		case "add", "+":
-			bots.AddBot()
+			c.AddBot()
 		case "remove", "-":
-			if _, err := bots.RemoveBot(); err != nil {
+			if _, err := c.RemoveBot(); err != nil {
 				if errors.Is(err, usecase.ErrNoBots) {
 					fmt.Fprintln(errOut, "no bots to remove")
 				} else {
@@ -135,7 +122,7 @@ func handleLine(orders OrderUsecase, bots BotUsecase, line string, out, errOut i
 		}
 
 	case "status":
-		renderStatus(out, orders.Status())
+		renderStatus(out, c.GetStatus())
 
 	case "help":
 		fmt.Fprint(errOut, helpText)

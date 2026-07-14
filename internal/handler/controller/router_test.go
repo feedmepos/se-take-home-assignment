@@ -64,8 +64,8 @@ func TestRunInteractive_CommandSequence(t *testing.T) {
 	in := strings.NewReader("order normal\norder vip\nbot add\nstatus\nexit\n")
 	var out, errOut bytes.Buffer
 
-	if err := runInteractive(context.Background(), orders, bots, in, &out, &errOut); err != nil {
-		t.Fatalf("runInteractive() error = %v", err)
+	if err := RunInteractive(context.Background(), New(orders, bots), in, &out, &errOut); err != nil {
+		t.Fatalf("RunInteractive() error = %v", err)
 	}
 
 	wantOrderCalls := []string{"order normal", "order vip", "status"}
@@ -93,8 +93,8 @@ func TestRunInteractive_BotRemoveAliases(t *testing.T) {
 	in := strings.NewReader("bot +\nbot -\nexit\n")
 	var out, errOut bytes.Buffer
 
-	if err := runInteractive(context.Background(), orders, bots, in, &out, &errOut); err != nil {
-		t.Fatalf("runInteractive() error = %v", err)
+	if err := RunInteractive(context.Background(), New(orders, bots), in, &out, &errOut); err != nil {
+		t.Fatalf("RunInteractive() error = %v", err)
 	}
 
 	wantBotCalls := []string{"bot add", "bot remove"}
@@ -109,8 +109,8 @@ func TestRunInteractive_UnknownCommandShowsHintAndContinues(t *testing.T) {
 	in := strings.NewReader("bogus\norder normal\nexit\n")
 	var out, errOut bytes.Buffer
 
-	if err := runInteractive(context.Background(), orders, bots, in, &out, &errOut); err != nil {
-		t.Fatalf("runInteractive() error = %v", err)
+	if err := RunInteractive(context.Background(), New(orders, bots), in, &out, &errOut); err != nil {
+		t.Fatalf("RunInteractive() error = %v", err)
 	}
 
 	if !strings.Contains(errOut.String(), usageHint) {
@@ -133,8 +133,8 @@ func TestRunInteractive_ErrNoBotsFriendlyMessage(t *testing.T) {
 	in := strings.NewReader("bot remove\nexit\n")
 	var out, errOut bytes.Buffer
 
-	if err := runInteractive(context.Background(), orders, bots, in, &out, &errOut); err != nil {
-		t.Fatalf("runInteractive() error = %v", err)
+	if err := RunInteractive(context.Background(), New(orders, bots), in, &out, &errOut); err != nil {
+		t.Fatalf("RunInteractive() error = %v", err)
 	}
 
 	if strings.Contains(errOut.String(), "no bots to remove") == false {
@@ -152,8 +152,8 @@ func TestRunInteractive_EOFTriggersShutdown(t *testing.T) {
 	in := strings.NewReader("order normal\n")
 	var out, errOut bytes.Buffer
 
-	if err := runInteractive(context.Background(), orders, bots, in, &out, &errOut); err != nil {
-		t.Fatalf("runInteractive() error = %v", err)
+	if err := RunInteractive(context.Background(), New(orders, bots), in, &out, &errOut); err != nil {
+		t.Fatalf("RunInteractive() error = %v", err)
 	}
 
 	if !bots.shutdownCalled {
@@ -176,15 +176,15 @@ func TestRunInteractive_ContextCancelTriggersShutdown(t *testing.T) {
 	var out, errOut bytes.Buffer
 
 	done := make(chan error, 1)
-	go func() { done <- runInteractive(ctx, orders, bots, in, &out, &errOut) }()
+	go func() { done <- RunInteractive(ctx, New(orders, bots), in, &out, &errOut) }()
 
 	select {
 	case err := <-done:
 		if err != nil {
-			t.Fatalf("runInteractive() error = %v", err)
+			t.Fatalf("RunInteractive() error = %v", err)
 		}
 	case <-time.After(2 * time.Second):
-		t.Fatal("runInteractive() did not return after ctx cancellation")
+		t.Fatal("RunInteractive() did not return after ctx cancellation")
 	}
 
 	if !bots.shutdownCalled {

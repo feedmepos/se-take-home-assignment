@@ -2,12 +2,12 @@
 // interactive REPL and a scripted demo over an in-memory order queue
 // processed by cooking bots. This file is the composition root — it is
 // the only place that imports both the handler layer and the concrete
-// infrastructure/repository adapters, wiring them together via a
-// controller.WireFunc.
+// infrastructure/repository adapters, wiring them together.
 package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"os"
 	"os/signal"
@@ -22,15 +22,23 @@ import (
 	"feedme-order-controller/internal/usecase"
 )
 
-// version is the CLI's reported version. It is a build-time var so it can
-// be overridden via -ldflags "-X main.version=...".
-var version = "dev"
-
-// fallbackProcessingTime is used as the root command's flag default only
-// if config.Load() itself errors (e.g. a malformed FEEDME_PROCESSING_TIME
-// value) — in the normal case the flag default comes from config.Load()'s
-// own Config.ProcessingTime.
+// fallbackProcessingTime is used as the flag default only if config.Load()
+// itself errors (e.g. a malformed FEEDME_PROCESSING_TIME value) — in the
+// normal case the default comes from config.Load()'s own ProcessingTime,
+// which already accounts for the env var and .env file.
 const fallbackProcessingTime = 10 * time.Second
+
+const usage = `usage: feedme [-t duration] <interactive|demo>
+
+subcommands:
+  interactive   start the interactive REPL
+  demo          run the deterministic scripted demo scenario
+
+flags:
+  -t, -processing-time duration
+        how long a bot takes to process one order (default from
+        FEEDME_PROCESSING_TIME / .env, falling back to 10s)
+`
 
 func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
@@ -43,20 +51,29 @@ func main() {
 		defaultProcessingTime = cfg.ProcessingTime
 	}
 
-	// wire is the composition root for a single CLI invocation: it
-	// constructs the concrete logger and in-memory repository adapters and
-	// wires them into a new usecase.Usecase, satisfying both of the
-	// controller's OrderUsecase/BotUsecase ports.
-	wire := func(processingTime time.Duration) (controller.OrderUsecase, controller.BotUsecase) {
-		lg := logger.New(os.Stdout, clock.System{})
-		orders := memory.NewOrderRepository()
-		bots := memory.NewBotRegistry()
-		uc := usecase.New(orders, bots, clock.System{}, lg, processingTime)
-		return uc, uc
-	}
+	var processingTime time.Duration
+	flag.DurationVar(&processingTime, "t", defaultProcessingTime, "how long a bot takes to process one order")
+	flag.DurationVar(&processingTime, "processing-time", defaultProcessingTime, "how long a bot takes to process one order (long form)")
+	flag.Usage = func() { fmt.Fprint(os.Stderr, usage) }
+	flag.Parse()
 
-	cmd := controller.NewRootCommand(version, defaultProcessingTime, wire)
-	if err := cmd.Run(ctx, os.Args); err != nil {
+	// Composition root: construct the concrete adapters, wire them into the
+	// usecase, and hand the usecase to the API-style controller.
+	lg := logger.New(os.Stdout, clock.System{})
+	uc := usecase.New(memory.NewOrderRepository(), memory.NewBotRegistry(), clock.System{}, lg, processingTime)
+	ctrl := controller.New(uc, uc)
+
+	var err error
+	switch flag.Arg(0) {
+	case "interactive":
+		err = controller.RunInteractive(ctx, ctrl, os.Stdin, os.Stdout, os.Stderr)
+	case "demo":
+		err = controller.RunDemo(ctx, ctrl, processingTime, os.Stdout)
+	default:
+		flag.Usage()
+		os.Exit(2)
+	}
+	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}

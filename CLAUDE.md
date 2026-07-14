@@ -11,8 +11,8 @@ This is the FeedMe Software Engineer take-home assignment: build a McDonald's or
 Layered, dependency-rule-respecting Go clean architecture:
 
 ```
-cmd/api/main.go                     entry point: signal handling, cmd.Run
-internal/handler/controller/        CLI layer: cli.Command wiring, REPL, demo, presenters
+cmd/api/main.go                     entry point + composition root: stdlib flag parsing, signal handling, wiring
+internal/handler/controller/        API-style handlers (Controller: one method per action, dto in/out), REPL router, demo driver, presenters
 internal/handler/dto/               presentation models (OrderView, BotView, StatusResponse, SummaryResponse)
 internal/usecase/                   business logic (Usecase, ports: OrderRepository, BotRepository, Clock, Logger)
 internal/usecase/core/              domain models (Order, Bot, Summary, OrderKind/Status, BotStatus)
@@ -22,7 +22,7 @@ infrastructure/{clock,logger,config} concrete, dependency-free adapters (real cl
 pkg/{idgen,queue}                   generic helpers (ID sequence, priority queue)
 ```
 
-Dependency rule: ports are declared by their consumer, not their implementer. `usecase` declares `OrderRepository`/`BotRepository`/`Clock`/`Logger`; `controller` separately declares its own `OrderUsecase`/`BotUsecase` ports (satisfied structurally by `*usecase.Usecase`) so the handler layer never imports usecase's internal port types. `internal/repository/memory` and `infrastructure/*` implement ports structurally with no upward imports. The composition root is `cmd/api/main.go`: it constructs the concrete logger/clock/repository adapters and the `usecase.Usecase`, closes over them in a `controller.WireFunc` (`func(processingTime time.Duration) (controller.OrderUsecase, controller.BotUsecase)`, declared in `internal/handler/controller/port.go`), and passes that factory into `controller.NewRootCommand`, which threads it down to `NewInteractiveCommand`/`NewDemoCommand`. Each subcommand's `Action` invokes the factory once the effective `--processing-time` is known. The handler layer (`internal/handler/controller`) imports no infrastructure or repository packages — only `cmd/api/main.go` does.
+Dependency rule: ports are declared by their consumer, not their implementer. `usecase` declares `OrderRepository`/`BotRepository`/`Clock`/`Logger`; `controller` separately declares its own `OrderUsecase`/`BotUsecase` ports (satisfied structurally by `*usecase.Usecase`) so the handler layer never imports usecase's internal port types. `internal/repository/memory` and `infrastructure/*` implement ports structurally with no upward imports. The composition root is `cmd/api/main.go`: it parses flags with the stdlib `flag` package, constructs the concrete logger/clock/repository adapters and the `usecase.Usecase`, wraps it in `controller.New(uc, uc)` (an API-style `Controller` with one method per action taking/returning `dto` types: `CreateOrder(dto.CreateOrderRequest)`, `AddBot`, `RemoveBot`, `GetStatus`, `Shutdown`), and dispatches the `interactive`/`demo` subcommand to `controller.RunInteractive` / `controller.RunDemo`. `router.go` is a thin REPL router mapping input lines to Controller methods — the CLI analog of routes → handler endpoints. No CLI framework is used. The handler layer (`internal/handler/controller`) imports no infrastructure or repository packages — only `cmd/api/main.go` does.
 
 Model-per-layer: `dto` (controller-facing, string-typed view models) ↔ `core` (usecase-facing domain models, typed enums with `String()`) ↔ `entity` (repository-facing storage models, deliberately decoupled from `core`). The controller's `presenter.go` maps `core.Summary` → `dto.StatusResponse`/`dto.SummaryResponse`; the usecase itself logs all lifecycle events (order creation, bot pickup/completion/destruction) through the injected `Logger` — the handler only renders `status` output and the final summary, never duplicating those log lines.
 
