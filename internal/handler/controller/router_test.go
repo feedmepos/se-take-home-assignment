@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"feedme-order-controller/internal/core"
 	"feedme-order-controller/internal/usecase"
-	"feedme-order-controller/internal/usecase/core"
 )
 
 // fakeOrderUsecase records the sequence of calls made against it so tests

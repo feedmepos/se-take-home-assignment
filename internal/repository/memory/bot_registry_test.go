@@ -3,7 +3,7 @@ package memory
 import (
 	"testing"
 
-	"feedme-order-controller/internal/usecase/core"
+	"feedme-order-controller/internal/core"
 )
 
 func TestBotRegistry_NextBotIDStrictlyIncreasing(t *testing.T) {

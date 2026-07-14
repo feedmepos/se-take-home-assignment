@@ -8,7 +8,7 @@ package usecase
 import (
 	"time"
 
-	"feedme-order-controller/internal/usecase/core"
+	"feedme-order-controller/internal/core"
 )
 
 // Clock abstracts wall-clock access so tests can supply a fake. Any type

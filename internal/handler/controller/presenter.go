@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"io"
 
+	"feedme-order-controller/internal/core"
 	"feedme-order-controller/internal/handler/dto"
-	"feedme-order-controller/internal/usecase/core"
 )
 
 // toOrderView maps a single core.Order into its presentation model, as

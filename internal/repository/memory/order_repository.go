@@ -3,8 +3,8 @@ package memory
 import (
 	"sync"
 
+	"feedme-order-controller/internal/core"
 	"feedme-order-controller/internal/repository/entity"
-	"feedme-order-controller/internal/usecase/core"
 	"feedme-order-controller/pkg/idgen"
 	"feedme-order-controller/pkg/queue"
 )

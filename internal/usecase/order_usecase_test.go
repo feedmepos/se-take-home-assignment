@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"feedme-order-controller/internal/core"
 	"feedme-order-controller/internal/usecase"
-	"feedme-order-controller/internal/usecase/core"
 )
 
 // processingTime used across tests: short enough to keep the suite fast,

@@ -17,7 +17,9 @@ func NewSequence(start int64) *Sequence {
 	return s
 }
 
-// Next atomically returns the next value in the sequence.
+// Next atomically returns the next value in the sequence. The int64→int
+// conversion assumes a 64-bit platform (as in CI and all supported targets);
+// on a 32-bit build it would wrap after ~2.1 billion IDs.
 func (s *Sequence) Next() int {
 	return int(s.counter.Add(1))
 }

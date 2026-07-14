@@ -93,6 +93,10 @@ func (h *innerHeap[T]) Pop() any {
 	old := h.items
 	n := len(old)
 	v := old[n-1]
+	// Zero the vacated slot: T may contain pointers, and without this the
+	// backing array would retain them, blocking GC until overwritten.
+	var zero T
+	old[n-1] = zero
 	h.items = old[:n-1]
 	return v
 }

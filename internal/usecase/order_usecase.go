@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"feedme-order-controller/internal/usecase/core"
+	"feedme-order-controller/internal/core"
 )
 
 // ErrNoBots is returned by RemoveBot when there are no bots to remove.

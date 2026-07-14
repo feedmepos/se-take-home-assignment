@@ -8,7 +8,7 @@
 package controller
 
 import (
-	"feedme-order-controller/internal/usecase/core"
+	"feedme-order-controller/internal/core"
 )
 
 // OrderUsecase is the handler-owned port for order-related operations. It

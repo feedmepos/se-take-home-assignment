@@ -3,8 +3,8 @@ package memory
 import (
 	"sync"
 
+	"feedme-order-controller/internal/core"
 	"feedme-order-controller/internal/repository/entity"
-	"feedme-order-controller/internal/usecase/core"
 	"feedme-order-controller/pkg/idgen"
 )
 
@@ -45,8 +45,15 @@ func (r *BotRegistry) RemoveNewest() (*core.Bot, bool) {
 		return nil, false
 	}
 	e := r.bots[n-1]
+	// Zero the vacated slot so the backing array doesn't retain the removed
+	// entity (and the *core.Bot its Ref points at) until it is overwritten.
+	r.bots[n-1] = entity.BotEntity{}
 	r.bots = r.bots[:n-1]
-	return e.Ref.(*core.Bot), true
+	b, ok := e.Ref.(*core.Bot)
+	if !ok {
+		return nil, false
+	}
+	return b, true
 }
 
 // List returns a copy of the registered bots in insertion order.
@@ -55,7 +62,9 @@ func (r *BotRegistry) List() []*core.Bot {
 	defer r.mu.Unlock()
 	out := make([]*core.Bot, 0, len(r.bots))
 	for _, e := range r.bots {
-		out = append(out, e.Ref.(*core.Bot))
+		if b, ok := e.Ref.(*core.Bot); ok {
+			out = append(out, b)
+		}
 	}
 	return out
 }

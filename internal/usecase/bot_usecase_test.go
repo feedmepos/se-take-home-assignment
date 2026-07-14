@@ -67,7 +67,7 @@ func TestRemoveBot_MidProcessing_OrderRequeued(t *testing.T) {
 	}
 
 	select {
-	case <-bot.Done:
+	case <-bot.Done():
 		// expected: goroutine has exited.
 	default:
 		t.Fatal("expected bot.Done to be closed after RemoveBot()")
@@ -97,7 +97,7 @@ func TestRemoveBot_IdleBot_ReturnsPromptly(t *testing.T) {
 	}
 
 	select {
-	case <-bot.Done:
+	case <-bot.Done():
 	default:
 		t.Fatal("expected bot.Done to be closed after RemoveBot()")
 	}
@@ -135,7 +135,7 @@ func TestShutdown_WaitGroupReturnsAndStopsAllBots(t *testing.T) {
 
 	for _, b := range bots.List() {
 		select {
-		case <-b.Done:
+		case <-b.Done():
 			// expected: every bot's goroutine has exited.
 		default:
 			t.Fatalf("bot #%d Done not closed after Shutdown()", b.ID)

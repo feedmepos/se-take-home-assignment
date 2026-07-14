@@ -1,9 +1,11 @@
 package usecase
 
-import "feedme-order-controller/internal/usecase/core"
+import "feedme-order-controller/internal/core"
 
 // AddBot registers a new bot and starts its worker goroutine, which
-// immediately begins pulling orders off the pending queue.
+// immediately begins pulling orders off the pending queue. AddBot must not
+// be called concurrently with or after Shutdown: Shutdown's wg.Wait assumes
+// no new workers are being added (WaitGroup reuse is undefined behavior).
 func (u *Usecase) AddBot() *core.Bot {
 	bot := core.NewBot(u.bots.NextBotID())
 	u.bots.Add(bot)
@@ -31,7 +33,7 @@ func (u *Usecase) RemoveBot() (*core.Bot, error) {
 
 	bot.Stop()
 	u.orders.WakeAll()
-	<-bot.Done
+	<-bot.Done()
 
 	// Decide which destruction message applies only AFTER the worker has
 	// fully exited: runBot's stop-mid-processing branch leaves Current()

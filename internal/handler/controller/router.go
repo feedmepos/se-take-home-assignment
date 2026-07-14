@@ -45,6 +45,9 @@ func RunInteractive(ctx context.Context, c *Controller, in io.Reader, out, errOu
 	fmt.Fprint(errOut, helpText)
 	fmt.Fprint(errOut, prompt)
 
+	// Note: if ctx is cancelled while Scan is blocked on a read, this
+	// goroutine stays parked until the next line/EOF — the standard
+	// un-interruptible-stdin leak, reclaimed at process exit.
 	lines := make(chan string)
 	go func() {
 		defer close(lines)

@@ -23,19 +23,18 @@ func (s BotStatus) String() string {
 }
 
 // Bot represents a single cooking bot. A bot processes exactly one order at
-// a time. Its lifecycle is controlled via StopCh/Done: closing StopCh signals
-// the bot's worker goroutine to stop, and the goroutine closes Done once it
-// has fully wound down (releasing any in-flight order back to the queue).
+// a time. Its lifecycle is coordinated by two internal channels: Stop closes
+// the stop channel to signal the worker goroutine to stop, and the worker
+// calls MarkDone once it has fully wound down (releasing any in-flight order
+// back to the queue). Both channels are unexported so every close goes
+// through its sync.Once guard — a double close is impossible by construction.
 type Bot struct {
 	ID int
 
-	// StopCh is closed to signal the bot's worker goroutine to stop.
-	StopCh chan struct{}
-	// Done is closed by the worker goroutine once it has finished
-	// shutting down, so callers can wait for a clean stop.
-	Done chan struct{}
-
+	stopCh   chan struct{}
 	stopOnce sync.Once
+	done     chan struct{}
+	doneOnce sync.Once
 
 	mu      sync.Mutex
 	current *Order // nil when idle
@@ -46,17 +45,38 @@ type Bot struct {
 func NewBot(id int) *Bot {
 	return &Bot{
 		ID:     id,
-		StopCh: make(chan struct{}),
-		Done:   make(chan struct{}),
+		stopCh: make(chan struct{}),
+		done:   make(chan struct{}),
 	}
 }
 
 // Stop signals the bot to stop processing. It is safe to call multiple
-// times; only the first call closes StopCh.
+// times; only the first call closes the stop channel.
 func (b *Bot) Stop() {
 	b.stopOnce.Do(func() {
-		close(b.StopCh)
+		close(b.stopCh)
 	})
+}
+
+// StopSignal returns the channel that is closed when Stop is called. The
+// worker goroutine (and the blocking Dequeue it calls) selects on it to
+// notice a pending stop.
+func (b *Bot) StopSignal() <-chan struct{} {
+	return b.stopCh
+}
+
+// MarkDone records that the worker goroutine has fully wound down. It is
+// called exactly once per worker via defer, but is idempotent regardless.
+func (b *Bot) MarkDone() {
+	b.doneOnce.Do(func() {
+		close(b.done)
+	})
+}
+
+// Done returns the channel that is closed once the worker goroutine has
+// finished shutting down, so callers can wait for a clean stop.
+func (b *Bot) Done() <-chan struct{} {
+	return b.done
 }
 
 // SetProcessing marks the bot as actively working on order o.

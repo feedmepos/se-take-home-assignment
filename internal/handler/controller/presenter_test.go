@@ -4,8 +4,8 @@ import (
 	"reflect"
 	"testing"
 
+	"feedme-order-controller/internal/core"
 	"feedme-order-controller/internal/handler/dto"
-	"feedme-order-controller/internal/usecase/core"
 )
 
 func TestToStatusResponse(t *testing.T) {

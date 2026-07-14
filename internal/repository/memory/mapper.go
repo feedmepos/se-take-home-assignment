@@ -4,8 +4,8 @@
 package memory
 
 import (
+	"feedme-order-controller/internal/core"
 	"feedme-order-controller/internal/repository/entity"
-	"feedme-order-controller/internal/usecase/core"
 )
 
 // toEntity converts a core.Order into its storage representation.

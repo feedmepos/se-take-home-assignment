@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"feedme-order-controller/internal/usecase/core"
+	"feedme-order-controller/internal/core"
 )
 
 func mustDequeue(t *testing.T, r *OrderRepository, stop <-chan struct{}) core.Order {

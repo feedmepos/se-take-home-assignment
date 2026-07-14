@@ -12,7 +12,7 @@ func TestBot_StopIsIdempotent(t *testing.T) {
 	b.Stop()
 
 	select {
-	case <-b.StopCh:
+	case <-b.StopSignal():
 		// expected: channel is closed.
 	default:
 		t.Fatal("expected StopCh to be closed after Stop()")
