@@ -64,24 +64,17 @@ func (u *Usecase) newOrder(kind core.OrderKind) core.Order {
 // pending orders, and completion counters.
 func (u *Usecase) Status() core.Summary {
 	pending := u.orders.PendingSnapshot()
-	completed := u.orders.CompletedSnapshot()
+	completed, vip, normal := u.orders.CompletedCounts()
 	bots := u.bots.List()
 
 	summary := core.Summary{
 		ActiveBots:      len(bots),
 		PendingOrders:   len(pending),
-		CompletedOrders: len(completed),
+		CompletedOrders: completed,
+		VIPCompleted:    vip,
+		NormalCompleted: normal,
 		Pending:         pending,
 		Bots:            make([]core.BotSnapshot, 0, len(bots)),
-	}
-
-	for _, o := range completed {
-		switch o.Kind {
-		case core.VIP:
-			summary.VIPCompleted++
-		default:
-			summary.NormalCompleted++
-		}
 	}
 
 	for _, b := range bots {

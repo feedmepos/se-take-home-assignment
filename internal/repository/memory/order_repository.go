@@ -26,9 +26,16 @@ type OrderRepository struct {
 	mu   sync.Mutex
 	cond *sync.Cond
 
-	seq       *idgen.Sequence
-	pending   *queue.PriorityQueue[entity.OrderEntity]
-	completed []entity.OrderEntity
+	seq     *idgen.Sequence
+	pending *queue.PriorityQueue[entity.OrderEntity]
+
+	// Completed orders are never read back individually — every consumer
+	// (status render, final summary) needs only the counts — so instead of
+	// an unboundedly growing slice we keep running counters, updated in
+	// Complete. This makes CompletedCounts O(1) and memory O(1).
+	completedTotal  int
+	completedVIP    int
+	completedNormal int
 }
 
 // NewOrderRepository creates an empty OrderRepository with its ID sequence
@@ -107,7 +114,12 @@ func (r *OrderRepository) Requeue(o core.Order) {
 func (r *OrderRepository) Complete(o core.Order) core.Order {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	r.completed = append(r.completed, toEntity(o))
+	r.completedTotal++
+	if o.Kind == core.VIP {
+		r.completedVIP++
+	} else {
+		r.completedNormal++
+	}
 	done := o
 	done.Status = core.Complete
 	return done
@@ -133,18 +145,12 @@ func (r *OrderRepository) PendingSnapshot() []core.Order {
 	return out
 }
 
-// CompletedSnapshot returns a snapshot of completed orders in completion
-// order, each with Status=Complete.
-func (r *OrderRepository) CompletedSnapshot() []core.Order {
+// CompletedCounts returns the number of completed orders, in total and
+// broken down by kind.
+func (r *OrderRepository) CompletedCounts() (total, vip, normal int) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	out := make([]core.Order, 0, len(r.completed))
-	for _, e := range r.completed {
-		o := toCore(e)
-		o.Status = core.Complete
-		out = append(out, o)
-	}
-	return out
+	return r.completedTotal, r.completedVIP, r.completedNormal
 }
 
 // PendingLen returns the number of orders currently pending.

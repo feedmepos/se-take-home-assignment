@@ -49,8 +49,11 @@ type OrderRepository interface {
 	WakeAll()
 	// PendingSnapshot returns a point-in-time copy of the pending queue.
 	PendingSnapshot() []core.Order
-	// CompletedSnapshot returns a point-in-time copy of completed orders.
-	CompletedSnapshot() []core.Order
+	// CompletedCounts returns the number of completed orders, in total and
+	// broken down by kind. Counts (rather than a snapshot of the orders
+	// themselves) are all any consumer needs, and they let implementations
+	// avoid retaining every completed order forever.
+	CompletedCounts() (total, vip, normal int)
 	// PendingLen returns the number of orders currently pending.
 	PendingLen() int
 }

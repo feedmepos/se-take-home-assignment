@@ -248,9 +248,9 @@ func TestOrderRepository_ConcurrentEnqueueDequeue(t *testing.T) {
 	if consumedCount != numOrders {
 		t.Fatalf("expected %d consumed orders, got %d", numOrders, consumedCount)
 	}
-	completed := r.CompletedSnapshot()
-	if len(completed) != numOrders {
-		t.Fatalf("expected %d completed orders, got %d", numOrders, len(completed))
+	completedTotal, _, _ := r.CompletedCounts()
+	if completedTotal != numOrders {
+		t.Fatalf("expected %d completed orders, got %d", numOrders, completedTotal)
 	}
 	if r.PendingLen() != 0 {
 		t.Fatalf("expected empty pending queue, got %d", r.PendingLen())

@@ -1,7 +1,10 @@
 // Package queue provides a generic priority queue built on container/heap.
 package queue
 
-import "container/heap"
+import (
+	"container/heap"
+	"sort"
+)
 
 // PriorityQueue is a generic priority queue ordered by a caller-supplied
 // less function. It is NOT thread-safe: concurrent callers must provide
@@ -51,25 +54,19 @@ func (pq *PriorityQueue[T]) Len() int {
 }
 
 // Items returns a snapshot of all items in priority order (highest priority
-// first), without mutating the queue. It works against a copy of the
-// underlying slice, so the queue itself is left untouched.
+// first), without mutating the queue. It sorts a copy of the underlying
+// slice with the queue's own comparator — same O(n log n) as draining a
+// scratch heap, but with a single allocation and none of the per-item
+// interface boxing heap.Pop incurs.
 func (pq *PriorityQueue[T]) Items() []T {
 	n := pq.h.Len()
 	if n == 0 {
 		return []T{}
 	}
 
-	// Copy the underlying items and drain a scratch heap so we don't
-	// disturb the real queue.
-	itemsCopy := make([]T, n)
-	copy(itemsCopy, pq.h.items)
-	scratch := &innerHeap[T]{items: itemsCopy, less: pq.h.less}
-	heap.Init(scratch)
-
-	out := make([]T, 0, n)
-	for scratch.Len() > 0 {
-		out = append(out, heap.Pop(scratch).(T))
-	}
+	out := make([]T, n)
+	copy(out, pq.h.items)
+	sort.Slice(out, func(i, j int) bool { return pq.h.less(out[i], out[j]) })
 	return out
 }
 

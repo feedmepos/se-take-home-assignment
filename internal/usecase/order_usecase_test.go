@@ -139,6 +139,22 @@ func (r *fakeOrderRepo) PendingSnapshot() []core.Order {
 	return out
 }
 
+// CompletedCounts implements the usecase.OrderRepository port.
+func (r *fakeOrderRepo) CompletedCounts() (total, vip, normal int) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	for _, o := range r.completed {
+		if o.Kind == core.VIP {
+			vip++
+		} else {
+			normal++
+		}
+	}
+	return len(r.completed), vip, normal
+}
+
+// CompletedSnapshot is a test-only helper (not part of the port) so tests
+// can assert on the actual completed order values.
 func (r *fakeOrderRepo) CompletedSnapshot() []core.Order {
 	r.mu.Lock()
 	defer r.mu.Unlock()
