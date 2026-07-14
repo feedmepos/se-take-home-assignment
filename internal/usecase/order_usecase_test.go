@@ -69,10 +69,10 @@ func (r *fakeOrderRepo) NextOrderID() int {
 // insertLocked inserts o preserving priority order (VIP ahead of Normal,
 // FIFO within a kind). Caller must hold r.mu.
 func (r *fakeOrderRepo) insertLocked(o core.Order) {
-	if o.Kind == core.VIP {
+	if o.Kind == core.KindVIP {
 		idx := len(r.pending)
 		for i, p := range r.pending {
-			if p.Kind != core.VIP {
+			if p.Kind != core.KindVIP {
 				idx = i
 				break
 			}
@@ -93,7 +93,7 @@ func (r *fakeOrderRepo) Enqueue(o core.Order) {
 }
 
 func (r *fakeOrderRepo) Requeue(o core.Order) {
-	o.Status = core.Pending
+	o.Status = core.StatusPending
 	r.mu.Lock()
 	r.insertLocked(o)
 	r.mu.Unlock()
@@ -112,7 +112,7 @@ func (r *fakeOrderRepo) Dequeue(stop <-chan struct{}) (core.Order, bool) {
 		if len(r.pending) > 0 {
 			o := r.pending[0]
 			r.pending = r.pending[1:]
-			o.Status = core.Processing
+			o.Status = core.StatusProcessing
 			return o, true
 		}
 		r.cond.Wait()
@@ -120,7 +120,7 @@ func (r *fakeOrderRepo) Dequeue(stop <-chan struct{}) (core.Order, bool) {
 }
 
 func (r *fakeOrderRepo) Complete(o core.Order) core.Order {
-	o.Status = core.Complete
+	o.Status = core.StatusComplete
 	r.mu.Lock()
 	r.completed = append(r.completed, o)
 	r.mu.Unlock()
@@ -144,7 +144,7 @@ func (r *fakeOrderRepo) CompletedCounts() (total, vip, normal int) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	for _, o := range r.completed {
-		if o.Kind == core.VIP {
+		if o.Kind == core.KindVIP {
 			vip++
 		} else {
 			normal++

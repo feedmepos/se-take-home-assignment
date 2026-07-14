@@ -42,7 +42,7 @@ type OrderRepository interface {
 	// position (used when a bot is destroyed mid-processing).
 	Requeue(o core.Order)
 	// Complete marks an order as completed and returns the completed
-	// order (with Status=core.Complete).
+	// order (with Status=core.StatusComplete).
 	Complete(o core.Order) core.Order
 	// WakeAll wakes any goroutines blocked in Dequeue so they can re-check
 	// their stop channel.

@@ -5,9 +5,12 @@ import "sync"
 // BotStatus represents whether a bot is currently working on an order.
 type BotStatus int
 
+// A bot's status is always derived from whether it currently holds an order
+// (see Bot.Status), never from an uninitialized value, so BotIdle is a safe
+// zero value and no Unknown sentinel is needed.
 const (
-	// Idle means the bot has no order assigned and is waiting for work.
-	Idle BotStatus = iota
+	// BotIdle means the bot has no order assigned and is waiting for work.
+	BotIdle BotStatus = iota
 	// BotProcessing means the bot is actively cooking an order.
 	BotProcessing
 )
@@ -40,7 +43,7 @@ type Bot struct {
 	current *Order // nil when idle
 }
 
-// NewBot creates a new bot with the given ID in the Idle state, allocating
+// NewBot creates a new bot with the given ID in the BotIdle state, allocating
 // the channels used to coordinate shutdown.
 func NewBot(id int) *Bot {
 	return &Bot{
@@ -106,12 +109,12 @@ func (b *Bot) Current() *Order {
 	return &oc
 }
 
-// Status reports whether the bot is Idle or BotProcessing.
+// Status reports whether the bot is BotIdle or BotProcessing.
 func (b *Bot) Status() BotStatus {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	if b.current == nil {
-		return Idle
+		return BotIdle
 	}
 	return BotProcessing
 }

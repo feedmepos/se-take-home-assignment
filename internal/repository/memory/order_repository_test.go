@@ -33,14 +33,14 @@ func mustDequeue(t *testing.T, r *OrderRepository, stop <-chan struct{}) core.Or
 
 func TestDequeue_VIPBeforeNormal(t *testing.T) {
 	r := NewOrderRepository()
-	r.Enqueue(core.Order{ID: 1, Kind: core.Normal, Status: core.Pending})
-	r.Enqueue(core.Order{ID: 2, Kind: core.VIP, Status: core.Pending})
+	r.Enqueue(core.Order{ID: 1, Kind: core.KindNormal, Status: core.StatusPending})
+	r.Enqueue(core.Order{ID: 2, Kind: core.KindVIP, Status: core.StatusPending})
 
 	got := mustDequeue(t, r, nil)
-	if got.ID != 2 || got.Kind != core.VIP {
+	if got.ID != 2 || got.Kind != core.KindVIP {
 		t.Fatalf("expected VIP order 2 first, got %+v", got)
 	}
-	if got.Status != core.Processing {
+	if got.Status != core.StatusProcessing {
 		t.Fatalf("expected Status=Processing, got %v", got.Status)
 	}
 
@@ -53,12 +53,12 @@ func TestDequeue_VIPBeforeNormal(t *testing.T) {
 func TestDequeue_FIFOWithinKind(t *testing.T) {
 	r := NewOrderRepository()
 	// Multiple VIPs
-	r.Enqueue(core.Order{ID: 1, Kind: core.VIP})
-	r.Enqueue(core.Order{ID: 2, Kind: core.VIP})
-	r.Enqueue(core.Order{ID: 3, Kind: core.VIP})
+	r.Enqueue(core.Order{ID: 1, Kind: core.KindVIP})
+	r.Enqueue(core.Order{ID: 2, Kind: core.KindVIP})
+	r.Enqueue(core.Order{ID: 3, Kind: core.KindVIP})
 	// Multiple Normals
-	r.Enqueue(core.Order{ID: 4, Kind: core.Normal})
-	r.Enqueue(core.Order{ID: 5, Kind: core.Normal})
+	r.Enqueue(core.Order{ID: 4, Kind: core.KindNormal})
+	r.Enqueue(core.Order{ID: 5, Kind: core.KindNormal})
 
 	wantOrder := []int{1, 2, 3, 4, 5}
 	for _, want := range wantOrder {
@@ -71,17 +71,17 @@ func TestDequeue_FIFOWithinKind(t *testing.T) {
 
 func TestRequeue_ReproducesOriginalPosition(t *testing.T) {
 	r := NewOrderRepository()
-	r.Enqueue(core.Order{ID: 2, Kind: core.VIP})    // V#2
-	r.Enqueue(core.Order{ID: 1, Kind: core.Normal}) // N#1
-	r.Enqueue(core.Order{ID: 3, Kind: core.Normal}) // N#3
+	r.Enqueue(core.Order{ID: 2, Kind: core.KindVIP})    // V#2
+	r.Enqueue(core.Order{ID: 1, Kind: core.KindNormal}) // N#1
+	r.Enqueue(core.Order{ID: 3, Kind: core.KindNormal}) // N#3
 
 	head := mustDequeue(t, r, nil) // pops V#2
 	if head.ID != 2 {
 		t.Fatalf("expected to dequeue V#2 first, got %+v", head)
 	}
 
-	r.Enqueue(core.Order{ID: 4, Kind: core.VIP}) // V#4
-	r.Requeue(head)                              // re-insert V#2
+	r.Enqueue(core.Order{ID: 4, Kind: core.KindVIP}) // V#4
+	r.Requeue(head)                                  // re-insert V#2
 
 	snap := r.PendingSnapshot()
 	wantIDs := []int{2, 4, 1, 3}
@@ -92,7 +92,7 @@ func TestRequeue_ReproducesOriginalPosition(t *testing.T) {
 		if snap[i].ID != want {
 			t.Fatalf("position %d: expected order ID %d, got %d (full snapshot: %+v)", i, want, snap[i].ID, snap)
 		}
-		if snap[i].Status != core.Pending {
+		if snap[i].Status != core.StatusPending {
 			t.Fatalf("expected Status=Pending in snapshot, got %v", snap[i].Status)
 		}
 	}
@@ -117,7 +117,7 @@ func TestDequeue_BlocksUntilEnqueue(t *testing.T) {
 	case <-time.After(100 * time.Millisecond):
 	}
 
-	r.Enqueue(core.Order{ID: 1, Kind: core.Normal})
+	r.Enqueue(core.Order{ID: 1, Kind: core.KindNormal})
 
 	select {
 	case o := <-done:
@@ -177,9 +177,9 @@ func TestOrderRepository_ConcurrentEnqueueDequeue(t *testing.T) {
 		produced.Add(1)
 		go func(i int) {
 			defer produced.Done()
-			kind := core.Normal
+			kind := core.KindNormal
 			if i%3 == 0 {
-				kind = core.VIP
+				kind = core.KindVIP
 			}
 			r.Enqueue(core.Order{ID: i + 1, Kind: kind})
 		}(i)

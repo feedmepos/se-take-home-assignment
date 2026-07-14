@@ -5,8 +5,9 @@ package entity
 
 // OrderEntity is the persisted (in-memory) representation of an order.
 //
-// Kind mirrors core.OrderKind but is stored as a plain int (0=Normal,
-// 1=VIP) to keep this package free of any dependency on usecase/core.
+// Kind mirrors core.OrderKind but is stored as a plain int (same numeric
+// values; higher = higher priority) to keep this package free of any
+// dependency on the core domain package.
 type OrderEntity struct {
 	ID   int
 	Kind int

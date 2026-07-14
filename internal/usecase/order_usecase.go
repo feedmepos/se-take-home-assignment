@@ -9,7 +9,7 @@ import (
 )
 
 // ErrNoBots is returned by RemoveBot when there are no bots to remove.
-var ErrNoBots = errors.New("no bots to remove")
+var ErrNoBots = errors.New("usecase: no bots to remove")
 
 // Usecase implements the order-controller application logic: creating
 // orders, reporting status, and managing the lifecycle of processing bots.
@@ -41,19 +41,19 @@ func New(orders OrderRepository, bots BotRepository, clock Clock, logger Logger,
 // NewNormalOrder creates a new Normal-priority order, enqueues it, and
 // returns it.
 func (u *Usecase) NewNormalOrder() core.Order {
-	return u.newOrder(core.Normal)
+	return u.newOrder(core.KindNormal)
 }
 
 // NewVIPOrder creates a new VIP-priority order, enqueues it, and returns it.
 func (u *Usecase) NewVIPOrder() core.Order {
-	return u.newOrder(core.VIP)
+	return u.newOrder(core.KindVIP)
 }
 
 func (u *Usecase) newOrder(kind core.OrderKind) core.Order {
 	o := core.Order{
 		ID:     u.orders.NextOrderID(),
 		Kind:   kind,
-		Status: core.Pending,
+		Status: core.StatusPending,
 	}
 	u.orders.Enqueue(o)
 	u.logger.Logf("Created %s Order #%d - Status: PENDING", o.Kind, o.ID)

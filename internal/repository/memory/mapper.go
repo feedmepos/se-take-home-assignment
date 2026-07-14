@@ -30,6 +30,6 @@ func toCore(e entity.OrderEntity) core.Order {
 	return core.Order{
 		ID:     e.ID,
 		Kind:   core.OrderKind(e.Kind),
-		Status: core.Pending,
+		Status: core.StatusPending,
 	}
 }

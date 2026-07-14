@@ -7,20 +7,25 @@ package core
 type OrderKind int
 
 const (
-	// Normal is a regular, non-priority order.
-	Normal OrderKind = iota
-	// VIP is a priority order: it queues ahead of all Normal orders but
+	// KindUnknown is the zero value, so an uninitialized Order is never
+	// silently treated as a deliberately chosen kind.
+	KindUnknown OrderKind = iota
+	// KindNormal is a regular, non-priority order.
+	KindNormal
+	// KindVIP is a priority order: it queues ahead of all Normal orders but
 	// behind any VIP orders already waiting.
-	VIP
+	KindVIP
 )
 
 // String returns the human-readable name of the order kind.
 func (k OrderKind) String() string {
 	switch k {
-	case VIP:
+	case KindNormal:
+		return "Normal"
+	case KindVIP:
 		return "VIP"
 	default:
-		return "Normal"
+		return "UNKNOWN"
 	}
 }
 
@@ -28,22 +33,25 @@ func (k OrderKind) String() string {
 type OrderStatus int
 
 const (
-	// Pending orders are waiting in the queue for a bot to pick them up.
-	Pending OrderStatus = iota
-	// Processing orders are currently being cooked by a bot.
-	Processing
-	// Complete orders have finished processing.
-	Complete
+	// StatusUnknown is the zero value, so an uninitialized Order is never
+	// silently treated as being in a real lifecycle state.
+	StatusUnknown OrderStatus = iota
+	// StatusPending orders are waiting in the queue for a bot to pick them up.
+	StatusPending
+	// StatusProcessing orders are currently being cooked by a bot.
+	StatusProcessing
+	// StatusComplete orders have finished processing.
+	StatusComplete
 )
 
 // String returns the human-readable name of the order status.
 func (s OrderStatus) String() string {
 	switch s {
-	case Pending:
+	case StatusPending:
 		return "PENDING"
-	case Processing:
+	case StatusProcessing:
 		return "PROCESSING"
-	case Complete:
+	case StatusComplete:
 		return "COMPLETE"
 	default:
 		return "UNKNOWN"

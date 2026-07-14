@@ -9,12 +9,13 @@ import (
 	"feedme-order-controller/pkg/queue"
 )
 
-// orderLess is the priority comparator for the pending queue: VIP orders
-// (Kind==1) are served before Normal orders (Kind==0); within the same kind,
-// lower IDs (older orders) are served first.
+// orderLess is the priority comparator for the pending queue: VIP orders are
+// served before Normal orders (entity.OrderEntity.Kind mirrors
+// core.OrderKind's numeric values, where higher means higher priority);
+// within the same kind, lower IDs (older orders) are served first.
 func orderLess(a, b entity.OrderEntity) bool {
 	if a.Kind != b.Kind {
-		return a.Kind > b.Kind // VIP (1) before Normal (0)
+		return a.Kind > b.Kind // higher kind (VIP) first
 	}
 	return a.ID < b.ID
 }
@@ -81,7 +82,7 @@ func (r *OrderRepository) Dequeue(stop <-chan struct{}) (core.Order, bool) {
 
 		if e, ok := r.pending.Pop(); ok {
 			o := toCore(e)
-			o.Status = core.Processing
+			o.Status = core.StatusProcessing
 			return o, true
 		}
 
@@ -115,13 +116,13 @@ func (r *OrderRepository) Complete(o core.Order) core.Order {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	r.completedTotal++
-	if o.Kind == core.VIP {
+	if o.Kind == core.KindVIP {
 		r.completedVIP++
 	} else {
 		r.completedNormal++
 	}
 	done := o
-	done.Status = core.Complete
+	done.Status = core.StatusComplete
 	return done
 }
 

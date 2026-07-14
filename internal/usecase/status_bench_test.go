@@ -32,18 +32,18 @@ func BenchmarkStatus(b *testing.B) {
 	u := usecase.New(orders, bots, benchClock{}, benchLogger{}, time.Second)
 
 	for i := 0; i < 10_000; i++ {
-		kind := core.Normal
+		kind := core.KindNormal
 		if i%2 == 0 {
-			kind = core.VIP
+			kind = core.KindVIP
 		}
-		orders.Complete(core.Order{ID: orders.NextOrderID(), Kind: kind, Status: core.Processing})
+		orders.Complete(core.Order{ID: orders.NextOrderID(), Kind: kind, Status: core.StatusProcessing})
 	}
 	for i := 0; i < 100; i++ {
-		kind := core.Normal
+		kind := core.KindNormal
 		if i%2 == 0 {
-			kind = core.VIP
+			kind = core.KindVIP
 		}
-		orders.Enqueue(core.Order{ID: orders.NextOrderID(), Kind: kind, Status: core.Pending})
+		orders.Enqueue(core.Order{ID: orders.NextOrderID(), Kind: kind, Status: core.StatusPending})
 	}
 
 	b.ReportAllocs()

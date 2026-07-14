@@ -20,12 +20,12 @@ type fakeOrderUsecase struct {
 
 func (f *fakeOrderUsecase) NewNormalOrder() core.Order {
 	f.calls = append(f.calls, "order normal")
-	return core.Order{ID: len(f.calls), Kind: core.Normal}
+	return core.Order{ID: len(f.calls), Kind: core.KindNormal}
 }
 
 func (f *fakeOrderUsecase) NewVIPOrder() core.Order {
 	f.calls = append(f.calls, "order vip")
-	return core.Order{ID: len(f.calls), Kind: core.VIP}
+	return core.Order{ID: len(f.calls), Kind: core.KindVIP}
 }
 
 func (f *fakeOrderUsecase) Status() core.Summary {

@@ -15,9 +15,9 @@ cmd/api/main.go                     entry point + composition root: urfave/cli v
 internal/handler/controller/        API-style handlers (Controller: one method per action, dto in/out), REPL router, demo driver, presenters
 internal/handler/dto/               presentation models (OrderView, BotView, StatusResponse, SummaryResponse)
 internal/usecase/                   business logic (Usecase, ports: OrderRepository, BotRepository, Clock, Logger)
-internal/usecase/core/              domain models (Order, Bot, Summary, OrderKind/Status, BotStatus)
+internal/core/                      domain models (Order, Bot, Summary; enums KindNormal/KindVIP, StatusPending/…, BotIdle/BotProcessing)
 internal/repository/memory/         in-memory adapters (OrderRepository, BotRegistry) satisfying usecase ports
-internal/repository/entity/         storage-layer models, decoupled from usecase/core
+internal/repository/entity/         storage-layer models, decoupled from internal/core
 infrastructure/{clock,logger,config} concrete, dependency-free adapters (real clock, timestamped logger, env/.env config)
 pkg/{idgen,queue}                   generic helpers (ID sequence, priority queue)
 ```

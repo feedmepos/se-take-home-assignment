@@ -25,11 +25,11 @@ func TestBot_SetProcessingAndCurrentRoundTrip(t *testing.T) {
 	if got := b.Current(); got != nil {
 		t.Fatalf("new bot should be idle: Current() = %+v, want nil", got)
 	}
-	if b.Status() != Idle {
-		t.Fatalf("new bot Status() = %v, want Idle", b.Status())
+	if b.Status() != BotIdle {
+		t.Fatalf("new bot Status() = %v, want BotIdle", b.Status())
 	}
 
-	o := Order{ID: 42, Kind: VIP, Status: Processing}
+	o := Order{ID: 42, Kind: KindVIP, Status: StatusProcessing}
 	b.SetProcessing(o)
 
 	got := b.Current()
@@ -55,7 +55,7 @@ func TestBot_SetProcessingAndCurrentRoundTrip(t *testing.T) {
 	if b.Current() != nil {
 		t.Fatal("expected Current() = nil after SetIdle()")
 	}
-	if b.Status() != Idle {
-		t.Fatalf("Status() = %v after SetIdle(), want Idle", b.Status())
+	if b.Status() != BotIdle {
+		t.Fatalf("Status() = %v after SetIdle(), want BotIdle", b.Status())
 	}
 }

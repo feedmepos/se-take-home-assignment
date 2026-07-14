@@ -12,12 +12,12 @@ func TestToStatusResponse(t *testing.T) {
 	summary := core.Summary{
 		CompletedOrders: 2,
 		Pending: []core.Order{
-			{ID: 3, Kind: core.VIP, Status: core.Pending},
-			{ID: 1, Kind: core.Normal, Status: core.Pending},
+			{ID: 3, Kind: core.KindVIP, Status: core.StatusPending},
+			{ID: 1, Kind: core.KindNormal, Status: core.StatusPending},
 		},
 		Bots: []core.BotSnapshot{
 			{ID: 1, Status: core.BotProcessing, ProcessingOrderID: 3},
-			{ID: 2, Status: core.Idle},
+			{ID: 2, Status: core.BotIdle},
 		},
 	}
 
