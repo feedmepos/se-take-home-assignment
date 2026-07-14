@@ -320,6 +320,19 @@ func TestShutdown_WithInFlightOrders_NoOrderLost(t *testing.T) {
 	if got := len(orders.PendingSnapshot()) + len(orders.CompletedSnapshot()); got != numOrders {
 		t.Fatalf("repository pending+completed = %d, want %d", got, numOrders)
 	}
+
+	seen := map[int]bool{}
+	for _, o := range orders.PendingSnapshot() {
+		seen[o.ID] = true
+	}
+	for _, o := range orders.CompletedSnapshot() {
+		seen[o.ID] = true
+	}
+	for _, o := range created {
+		if !seen[o.ID] {
+			t.Fatalf("order #%d missing from both pending and completed", o.ID)
+		}
+	}
 }
 
 func TestSmoke_TwoBotsFiveMixedOrders_AllComplete(t *testing.T) {

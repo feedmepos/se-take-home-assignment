@@ -116,9 +116,10 @@ func (r *OrderRepository) Complete(o core.Order) core.Order {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	r.completedTotal++
-	if o.Kind == core.KindVIP {
+	switch o.Kind {
+	case core.KindVIP:
 		r.completedVIP++
-	} else {
+	case core.KindNormal:
 		r.completedNormal++
 	}
 	done := o

@@ -13,7 +13,9 @@ var ErrNoBots = errors.New("usecase: no bots to remove")
 
 // Usecase implements the order-controller application logic: creating
 // orders, reporting status, and managing the lifecycle of processing bots.
-// It is safe for concurrent use.
+// Creating orders and reading Status are safe for concurrent use. The
+// lifecycle methods (AddBot, RemoveBot, Shutdown), however, must be called
+// from a single goroutine — see AddBot's doc comment for why.
 type Usecase struct {
 	orders OrderRepository
 	bots   BotRepository
