@@ -1,14 +1,13 @@
 #!/bin/bash
 
 # Unit Test Script
-# This script should contain all unit test execution steps
+# Runs all unit tests for the CLI application
+
+set -euo pipefail
+cd "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 echo "Running unit tests..."
 
-# For Go projects:
-# go test ./... -v
-
-# For Node.js projects:
-# npm test
+go test ./... -race -v
 
 echo "Unit tests completed"
