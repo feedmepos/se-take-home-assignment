@@ -21,15 +21,17 @@ const settleDelay = 80 * time.Millisecond
 // NewDemoCommand builds the "demo" subcommand: a deterministic scripted
 // scenario that drives the order/bot usecase ports directly, exercising
 // every assignment requirement (VIP priority, bot pickup, mid-processing
-// bot removal and requeue, idle bot removal, and final summary).
-func NewDemoCommand() *cli.Command {
+// bot removal and requeue, idle bot removal, and final summary). wire
+// (the composition-root factory injected from cmd/api/main.go) is invoked
+// here, once the effective --processing-time is known.
+func NewDemoCommand(wire WireFunc) *cli.Command {
 	return &cli.Command{
 		Name:  "demo",
 		Usage: "run a deterministic scripted demo scenario",
 		Action: func(ctx context.Context, cmd *cli.Command) error {
-			processingTime := resolveProcessingTime(cmd)
-			uc := wire(processingTime)
-			return runDemo(ctx, uc, uc, processingTime, cmd.Writer)
+			processingTime := cmd.Duration(processingTimeFlagName)
+			ucOrders, ucBots := wire(processingTime)
+			return runDemo(ctx, ucOrders, ucBots, processingTime, cmd.Writer)
 		},
 	}
 }

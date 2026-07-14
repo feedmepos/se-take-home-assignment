@@ -32,17 +32,17 @@ const usageHint = `unrecognized command; type "help" for the list of commands`
 const prompt = "> "
 
 // NewInteractiveCommand builds the "interactive" subcommand: a REPL loop
-// over the order/bot usecase ports. Wiring (constructing the real usecase
-// from --processing-time) is done here so runInteractive itself only
-// depends on the OrderUsecase/BotUsecase ports and can be exercised in
-// tests with fakes.
-func NewInteractiveCommand() *cli.Command {
+// over the order/bot usecase ports. wire (the composition-root factory
+// injected from cmd/api/main.go) is invoked here, once the effective
+// --processing-time is known, so runInteractive itself only depends on the
+// OrderUsecase/BotUsecase ports and can be exercised in tests with fakes.
+func NewInteractiveCommand(wire WireFunc) *cli.Command {
 	return &cli.Command{
 		Name:  "interactive",
 		Usage: "start an interactive REPL for creating orders and managing bots",
 		Action: func(ctx context.Context, cmd *cli.Command) error {
-			uc := wire(resolveProcessingTime(cmd))
-			return runInteractive(ctx, uc, uc, cmd.Reader, cmd.Writer, cmd.ErrWriter)
+			ucOrders, ucBots := wire(cmd.Duration(processingTimeFlagName))
+			return runInteractive(ctx, ucOrders, ucBots, cmd.Reader, cmd.Writer, cmd.ErrWriter)
 		},
 	}
 }
