@@ -19,10 +19,9 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"se-take-home-assignment1/kitchen"
 	"strings"
 	"time"
-
-	"orderbot/kitchen"
 )
 
 func main() {

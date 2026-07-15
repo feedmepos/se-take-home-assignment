@@ -12,9 +12,8 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"se-take-home-assignment1/kitchen"
 	"time"
-
-	"orderbot/kitchen"
 )
 
 //go:embed web/index.html
