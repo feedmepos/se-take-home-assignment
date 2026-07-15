@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# 运行全部单元测试（含 -race 竞态检测）。
+set -euo pipefail
+cd "$(dirname "$0")"
+go vet ./...
+go test -race -count=1 ./...
