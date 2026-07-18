@@ -633,3 +633,264 @@ func TestConcurrentAddAndRemoveBots(t *testing.T) {
 
 	ctrl.Shutdown()
 }
+
+	// =============================================================================
+	// 连锁通知（Chain Notification）测试
+	// botLoop 中 dequeueOrder 后若队列仍有订单，会调用 notifyBot 唤醒下一个 Bot，
+	// 形成连锁：Bot A 取单 → 通知 Bot B → Bot B 取单 → 通知 Bot C → …
+	// =============================================================================
+
+	// TestChainNotification_OneBotManyOrders 单个 Bot 通过自唤醒连锁处理多个订单
+	// Bot 取走最后一个订单时不发通知（len(orders)==0），所以不会死等
+	func TestChainNotification_OneBotManyOrders(t *testing.T) {
+		ctrl := newTestController()
+
+		const numOrders = 10
+		for i := 0; i < numOrders; i++ {
+			ctrl.CreateNormalOrder()
+		}
+
+		ctrl.AddBot() // 只有一个 Bot
+
+		// 等待所有订单通过连锁通知处理完毕（10ms 处理时间 × 10 ≈ 100ms，给充足缓冲）
+		time.Sleep(500 * time.Millisecond)
+
+		if ctrl.CompletedOrders() != numOrders {
+			t.Errorf("expected %d completed orders, got %d", numOrders, ctrl.CompletedOrders())
+		}
+		if ctrl.PendingOrders() != 0 {
+			t.Errorf("expected 0 pending orders, got %d", ctrl.PendingOrders())
+		}
+
+		ctrl.Shutdown()
+	}
+
+	// TestChainNotification_MultipleBotsChain 多个 Bot 连锁取单
+	// Bot #1 取第一单后通知 Bot #2，Bot #2 取第二单后通知 Bot #3 ...
+	func TestChainNotification_MultipleBotsChain(t *testing.T) {
+		ctrl := newTestControllerSlow() // 慢速便于验证中间状态
+
+		const numOrders = 5
+		for i := 0; i < numOrders; i++ {
+			ctrl.CreateNormalOrder()
+		}
+
+		const numBots = 3
+		for i := 0; i < numBots; i++ {
+			ctrl.AddBot()
+		}
+
+		// Bot 取单极快（<10ms），给足时间让所有 Bot 通过连锁通知取到订单
+		time.Sleep(50 * time.Millisecond)
+
+		// 此时应有 3 个 Bot 正在处理、2 个订单仍在队列中
+		processing := ctrl.ProcessingOrders()
+		pending := ctrl.PendingOrders()
+		if processing != numBots {
+			t.Errorf("expected %d processing orders, got %d", numBots, processing)
+		}
+		if pending != numOrders-numBots {
+			t.Errorf("expected %d pending orders, got %d", numOrders-numBots, pending)
+		}
+
+		// 等待所有处理完成 + 连锁
+		time.Sleep(2 * time.Second)
+
+		if ctrl.CompletedOrders() != numOrders {
+			t.Errorf("expected %d completed orders, got %d", numOrders, ctrl.CompletedOrders())
+		}
+		if ctrl.PendingOrders() != 0 {
+			t.Errorf("expected 0 pending orders, got %d", ctrl.PendingOrders())
+		}
+
+		ctrl.Shutdown()
+	}
+
+	// TestChainNotification_MoreBotsThanOrders 机器人比订单多时，多余 Bot 保持空闲
+	func TestChainNotification_MoreBotsThanOrders(t *testing.T) {
+		ctrl := newTestController()
+
+		ctrl.CreateNormalOrder() // #1001
+		ctrl.CreateVIPOrder()    // #1002
+
+		// 3 个 Bot，只需 2 个
+		ctrl.AddBot() // Bot #1
+		ctrl.AddBot() // Bot #2
+		ctrl.AddBot() // Bot #3 — 保持空闲
+
+		time.Sleep(200 * time.Millisecond)
+
+		if ctrl.CompletedOrders() != 2 {
+			t.Errorf("expected 2 completed orders, got %d", ctrl.CompletedOrders())
+		}
+
+		// 2 个订单已完成，Bot #3 应该空闲
+		if ctrl.ProcessingOrders() != 0 {
+			t.Errorf("expected 0 processing orders (all idle), got %d", ctrl.ProcessingOrders())
+		}
+
+		ctrl.Shutdown()
+	}
+
+	// TestChainNotification_AllIdleThenNewOrder 所有 Bot 空闲时新订单到来，单次通知即可唤醒
+	func TestChainNotification_AllIdleThenNewOrder(t *testing.T) {
+		ctrl := newTestController()
+
+		// 创建 3 个订单，2 个 Bot 处理完进入空闲
+		ctrl.CreateNormalOrder() // #1001
+		ctrl.CreateNormalOrder() // #1002
+		ctrl.CreateNormalOrder() // #1003
+		ctrl.AddBot()
+		ctrl.AddBot()
+
+		time.Sleep(200 * time.Millisecond)
+
+		if ctrl.CompletedOrders() != 3 {
+			t.Fatalf("expected 3 completed from first batch, got %d", ctrl.CompletedOrders())
+		}
+
+		// 所有 Bot 空闲，现在创建新订单
+		ctrl.CreateVIPOrder()    // #1004
+		ctrl.CreateNormalOrder() // #1005
+
+		time.Sleep(200 * time.Millisecond)
+
+		if ctrl.CompletedOrders() != 5 {
+			t.Errorf("expected 5 completed orders total, got %d", ctrl.CompletedOrders())
+		}
+		if ctrl.PendingOrders() != 0 {
+			t.Errorf("expected 0 pending orders, got %d", ctrl.PendingOrders())
+		}
+
+		ctrl.Shutdown()
+	}
+
+	// TestChainNotification_HighVolume 压力测试：大量订单 + 少量 Bot，验证连锁通知全覆盖
+	func TestChainNotification_HighVolume(t *testing.T) {
+		ctrl := newTestController()
+
+		const numOrders = 50
+		for i := 0; i < numOrders; i++ {
+			if i%2 == 0 {
+				ctrl.CreateVIPOrder()
+			} else {
+				ctrl.CreateNormalOrder()
+			}
+		}
+
+		const numBots = 5
+		for i := 0; i < numBots; i++ {
+			ctrl.AddBot()
+		}
+
+		// 50 个订单 × 10ms / 5 bots = ~100ms 理论时间，给 1s 缓冲
+		time.Sleep(1 * time.Second)
+
+		completed := ctrl.CompletedOrders()
+		pending := ctrl.PendingOrders()
+		processing := ctrl.ProcessingOrders()
+
+		if completed != numOrders {
+			t.Errorf("expected %d completed orders, got %d (pending=%d, processing=%d)",
+				numOrders, completed, pending, processing)
+		}
+		if pending != 0 {
+			t.Errorf("expected 0 pending orders, got %d", pending)
+		}
+
+		ctrl.Shutdown()
+	}
+
+	// TestChainNotification_VIPPriority 连锁通知中 VIP 订单仍然优先
+	// 验证：即使通过链式通知唤醒，取单顺序仍遵循 VIP 优先
+	func TestChainNotification_VIPPriority(t *testing.T) {
+		ctrl := newTestControllerSlow()
+
+		// 创建混合订单：Normal、VIP、Normal
+		ctrl.CreateNormalOrder() // #1001
+		ctrl.CreateVIPOrder()    // #1002
+		ctrl.CreateNormalOrder() // #1003
+
+		ctrl.AddBot() // Bot #1 — 应取到 VIP #1002
+		time.Sleep(20 * time.Millisecond)
+
+		// VIP #1002 已被 Bot #1 取走开始处理，剩余 Normal #1001 + Normal #1003
+		processing := ctrl.ProcessingOrders()
+		pending := ctrl.PendingOrders()
+		if processing != 1 {
+			t.Errorf("expected 1 processing order (VIP), got %d", processing)
+		}
+		if pending != 2 {
+			t.Errorf("expected 2 pending orders (both Normal), got %d", pending)
+		}
+
+		ctrl.Shutdown()
+	}
+
+	// TestChainNotification_AddBotMidProcessing 处理过程中添加新 Bot，连锁通知接力
+	func TestChainNotification_AddBotMidProcessing(t *testing.T) {
+		ctrl := newTestControllerSlow()
+
+		ctrl.CreateNormalOrder() // #1001
+		ctrl.CreateNormalOrder() // #1002
+		ctrl.CreateNormalOrder() // #1003
+		ctrl.CreateNormalOrder() // #1004
+
+		ctrl.AddBot() // Bot #1 取走 #1001
+		time.Sleep(20 * time.Millisecond)
+
+		// Bot #1 正在处理 #1001，还有 3 个在队列
+		// 加入 Bot #2 — wakeCh 中已有信号（Bot #1 取单后通知的）
+		ctrl.AddBot() // Bot #2 加入后应被唤醒并取走 #1002
+		time.Sleep(20 * time.Millisecond)
+
+		processing := ctrl.ProcessingOrders()
+		if processing != 2 {
+			t.Errorf("expected 2 bots processing, got %d", processing)
+		}
+
+		// 等待全部完成
+		time.Sleep(3 * time.Second)
+		if ctrl.CompletedOrders() != 4 {
+			t.Errorf("expected 4 completed orders, got %d", ctrl.CompletedOrders())
+		}
+
+		ctrl.Shutdown()
+	}
+
+	// TestChainNotification_RemoveBotMidChain Bot 被移除后，连锁通知仍继续
+	func TestChainNotification_RemoveBotMidChain(t *testing.T) {
+		ctrl := newTestControllerSlow()
+
+		ctrl.CreateNormalOrder() // #1001
+		ctrl.CreateNormalOrder() // #1002
+		ctrl.CreateNormalOrder() // #1003
+
+		ctrl.AddBot() // Bot #1 取走 #1001
+		time.Sleep(20 * time.Millisecond)
+
+		// 移除 Bot #1，订单 #1001 应退回队列
+		err := ctrl.RemoveBot()
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		// 队列应恢复为 3 个订单（退回的 #1001 + 原有的 #1002、#1003）
+		if ctrl.PendingOrders() != 3 {
+			t.Errorf("expected 3 pending orders after removal, got %d", ctrl.PendingOrders())
+		}
+
+		// 新 Bot 加入，应能通过连锁通知处理所有订单
+		ctrl.AddBot()
+		ctrl.AddBot()
+		time.Sleep(3 * time.Second)
+
+		if ctrl.CompletedOrders() != 3 {
+			t.Errorf("expected 3 completed orders, got %d", ctrl.CompletedOrders())
+		}
+		if ctrl.PendingOrders() != 0 {
+			t.Errorf("expected 0 pending orders, got %d", ctrl.PendingOrders())
+		}
+
+		ctrl.Shutdown()
+	}

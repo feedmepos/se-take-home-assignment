@@ -29,7 +29,7 @@ func New(processDuration time.Duration) *Controller {
 		orderIDGen:      utils.New(1001),
 		botIDGen:        utils.New(1),
 		processDuration: processDuration,
-		wakeCh:          make(chan struct{}, 64),
+		wakeCh:          make(chan struct{}, 1),
 	}
 }
 
@@ -168,6 +168,10 @@ func (c *Controller) botLoop(bot *model.Bot) {
 		}
 
 		order := c.dequeueOrder()
+		if len(c.orders) > 0 { // 通知下一个机器人
+			c.notifyBot()
+		}
+
 		if order != nil {
 			bot.TakeOrder(order)
 			c.mu.Unlock()
