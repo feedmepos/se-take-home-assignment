@@ -1,0 +1,5 @@
+# 编译产物
+order-controller
+
+# 运行输出（CI 生成）
+scripts/result.txt
