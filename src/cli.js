@@ -2,7 +2,8 @@
 
 const readline = require('node:readline');
 
-const { Controller, OrderType } = require('./controller');
+const { Controller } = require('./controller');
+const { OrderType } = require('./order');
 const { timestamp, describeEvent, renderState } = require('./logger');
 
 const HELP = `Commands:

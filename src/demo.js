@@ -3,7 +3,8 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
-const { Controller, OrderType } = require('./controller');
+const { Controller } = require('./controller');
+const { OrderType } = require('./order');
 const { timestamp, describeEvent, renderState } = require('./logger');
 
 const RESULT_FILE = path.join(__dirname, '..', 'scripts', 'result.txt');

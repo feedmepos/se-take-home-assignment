@@ -3,13 +3,18 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const { Controller, OrderType, OrderStatus } = require('../src/controller');
-const { BotStatus } = require('../src/bot');
+const { Controller } = require('../src/controller');
+const { Order, OrderType, OrderStatus } = require('../src/order');
+const { Bot, BotStatus } = require('../src/bot');
 const { FakeTimers } = require('./fake-timers');
 
 const COOK_MS = 10_000;
 
 function setup() {
+  // Order and bot numbering is process-wide, so restart it per scenario.
+  Order.resetSequence();
+  Bot.resetSequence();
+
   const timers = new FakeTimers();
   const controller = new Controller({ processingMs: COOK_MS, timers });
   return { controller, timers };

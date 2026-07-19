@@ -15,6 +15,11 @@ class Bot {
   #timers;
   #processingMs;
 
+  /** Test hook, so each scenario starts numbering from bot 1. */
+  static resetSequence() {
+    Bot.#nextId = 1;
+  }
+
   constructor({ timers, processingMs }) {
     this.#id = Bot.#nextId++;
     this.#timers = timers;

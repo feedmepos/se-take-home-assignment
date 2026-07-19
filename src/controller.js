@@ -1,9 +1,7 @@
 'use strict';
 
 const { Bot, BotStatus } = require('./bot');
-
-const OrderType = Object.freeze({ NORMAL: 'NORMAL', VIP: 'VIP' });
-const OrderStatus = Object.freeze({ PENDING: 'PENDING', PROCESSING: 'PROCESSING', COMPLETE: 'COMPLETE' });
+const { Order } = require('./order');
 
 const DEFAULT_PROCESSING_MS = 10_000;
 
@@ -21,7 +19,6 @@ const systemTimers = {
  * demo, or an HTTP server.
  */
 class Controller {
-  #nextOrderId = 1;
   #vipQueue = [];
   #normalQueue = [];
   #completed = [];
@@ -54,11 +51,8 @@ class Controller {
   }
 
   newOrder(type) {
-    if (type !== OrderType.NORMAL && type !== OrderType.VIP) {
-      throw new Error(`Unknown order type: ${type}`);
-    }
-    const order = { id: this.#nextOrderId++, type, status: OrderStatus.PENDING };
-    this.#queueFor(type).push(order);
+    const order = new Order(type);
+    this.#queueFor(order).push(order);
     this.#emit('ORDER_CREATED', { order });
     this.#assignAnyIdleBot();
     return order;
@@ -96,8 +90,8 @@ class Controller {
     return bot;
   }
 
-  #queueFor(type) {
-    return type === OrderType.VIP ? this.#vipQueue : this.#normalQueue;
+  #queueFor(order) {
+    return order.isVip ? this.#vipQueue : this.#normalQueue;
   }
 
   /**
@@ -105,8 +99,8 @@ class Controller {
    * queue restores its original position without tracking indices.
    */
   #requeue(order) {
-    order.status = OrderStatus.PENDING;
-    const queue = this.#queueFor(order.type);
+    order.markPending();
+    const queue = this.#queueFor(order);
     const at = queue.findIndex((queued) => queued.id > order.id);
     if (at === -1) {
       queue.push(order);
@@ -134,13 +128,13 @@ class Controller {
       return;
     }
 
-    order.status = OrderStatus.PROCESSING;
+    order.markProcessing();
     bot.startCooking(order, (cooked) => this.#complete(bot, cooked));
     this.#emit('ORDER_PICKED', { bot, order });
   }
 
   #complete(bot, order) {
-    order.status = OrderStatus.COMPLETE;
+    order.markCompleted();
     this.#completed.push(order);
     this.#emit('ORDER_COMPLETED', { bot, order });
     this.#assign(bot);
@@ -151,4 +145,4 @@ class Controller {
   }
 }
 
-module.exports = { Controller, OrderType, OrderStatus, DEFAULT_PROCESSING_MS };
+module.exports = { Controller, DEFAULT_PROCESSING_MS };
