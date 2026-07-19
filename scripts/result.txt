@@ -1,64 +1,64 @@
 McDonald's Automated Cooking Bot - Order Controller Demo
 Each order takes 10s to cook. One bot cooks one order at a time.
 
-[17:26:51] === Two normal customers and two VIP members submit orders ===
-[17:26:51] Order NORMAL#1 submitted -> PENDING
-[17:26:51] Order NORMAL#2 submitted -> PENDING
-[17:26:51] Order VIP#3 submitted -> PENDING
-[17:26:51] Order VIP#4 submitted -> PENDING
+[17:43:53] === Two normal customers and two VIP members submit orders ===
+[17:43:53] Order NORMAL#1 submitted -> PENDING
+[17:43:53] Order NORMAL#2 submitted -> PENDING
+[17:43:53] Order VIP#3 submitted -> PENDING
+[17:43:53] Order VIP#4 submitted -> PENDING
   PENDING  : VIP#3, VIP#4, NORMAL#1, NORMAL#2
   COMPLETE : -
   BOTS     : -
   -> Both VIP orders jumped ahead of the normal orders, and VIP#4 queued behind VIP#3.
 
-[17:26:51] === Manager adds the first bot ===
-[17:26:51] Bot 1 created
-[17:26:51] Bot 1 picked up VIP#3 -> PROCESSING
+[17:43:53] === Manager adds the first bot ===
+[17:43:53] Bot 1 created
+[17:43:53] Bot 1 picked up VIP#3 -> PROCESSING
   PENDING  : VIP#4, NORMAL#1, NORMAL#2
   COMPLETE : -
   BOTS     : Bot 1: VIP#3
 
-[17:26:51] === Waiting 10s for the first order to finish ===
-[17:27:01] Bot 1 finished VIP#3 -> COMPLETE
-[17:27:01] Bot 1 picked up VIP#4 -> PROCESSING
+[17:43:53] === Waiting 10s for the first order to finish ===
+[17:44:03] Bot 1 finished VIP#3 -> COMPLETE
+[17:44:03] Bot 1 picked up VIP#4 -> PROCESSING
   PENDING  : NORMAL#1, NORMAL#2
   COMPLETE : VIP#3
   BOTS     : Bot 1: VIP#4
 
-[17:27:02] === Manager removes the bot while it is still cooking ===
-[17:27:05] Order VIP#4 returned to PENDING (cooking cancelled)
-[17:27:05] Bot 1 destroyed
+[17:44:04] === Manager removes the bot while it is still cooking ===
+[17:44:07] Order VIP#4 returned to PENDING (cooking cancelled)
+[17:44:07] Bot 1 destroyed
   PENDING  : VIP#4, NORMAL#1, NORMAL#2
   COMPLETE : VIP#3
   BOTS     : -
   -> The interrupted order went back to PENDING, still ahead of the normal orders.
 
-[17:27:05] === Manager adds two bots to catch up ===
-[17:27:05] Bot 2 created
-[17:27:05] Bot 2 picked up VIP#4 -> PROCESSING
-[17:27:05] Bot 3 created
-[17:27:05] Bot 3 picked up NORMAL#1 -> PROCESSING
+[17:44:07] === Manager adds two bots to catch up ===
+[17:44:07] Bot 2 created
+[17:44:07] Bot 2 picked up VIP#4 -> PROCESSING
+[17:44:07] Bot 3 created
+[17:44:07] Bot 3 picked up NORMAL#1 -> PROCESSING
   PENDING  : NORMAL#2
   COMPLETE : VIP#3
   BOTS     : Bot 2: VIP#4 | Bot 3: NORMAL#1
 
-[17:27:05] === Waiting 10s while both bots cook in parallel ===
-[17:27:15] Bot 2 finished VIP#4 -> COMPLETE
-[17:27:15] Bot 2 picked up NORMAL#2 -> PROCESSING
-[17:27:15] Bot 3 finished NORMAL#1 -> COMPLETE
-[17:27:15] Bot 3 is IDLE
+[17:44:07] === Waiting 10s while both bots cook in parallel ===
+[17:44:17] Bot 2 finished VIP#4 -> COMPLETE
+[17:44:17] Bot 2 picked up NORMAL#2 -> PROCESSING
+[17:44:17] Bot 3 finished NORMAL#1 -> COMPLETE
+[17:44:17] Bot 3 is IDLE
   PENDING  : -
   COMPLETE : VIP#3, VIP#4, NORMAL#1
   BOTS     : Bot 2: NORMAL#2 | Bot 3: IDLE
 
-[17:27:16] === Waiting 10s for the last order ===
-[17:27:25] Bot 2 finished NORMAL#2 -> COMPLETE
-[17:27:25] Bot 2 is IDLE
+[17:44:18] === Waiting 10s for the last order ===
+[17:44:27] Bot 2 finished NORMAL#2 -> COMPLETE
+[17:44:27] Bot 2 is IDLE
   PENDING  : -
   COMPLETE : VIP#3, VIP#4, NORMAL#1, NORMAL#2
   BOTS     : Bot 2: IDLE | Bot 3: IDLE
 
-[17:27:27] === Summary ===
+[17:44:29] === Summary ===
   Orders completed : 4 (2 VIP, 2 normal)
   Orders pending   : 0
   Bots alive       : 2 (all idle)

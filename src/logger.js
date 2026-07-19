@@ -1,6 +1,7 @@
 'use strict';
 
 const { BotStatus } = require('./bot');
+const { ControllerEvent } = require('./controller');
 
 /** Timestamps are required by the CI check, which greps for HH:MM:SS. */
 function timestamp(date = new Date()) {
@@ -15,21 +16,21 @@ function labelOrder(order) {
 
 function describeEvent(event) {
   switch (event.type) {
-    case 'ORDER_CREATED':
+    case ControllerEvent.ORDER_CREATED:
       return `Order ${labelOrder(event.order)} submitted -> PENDING`;
-    case 'ORDER_PICKED':
+    case ControllerEvent.ORDER_PICKED:
       return `Bot ${event.bot.id} picked up ${labelOrder(event.order)} -> PROCESSING`;
-    case 'ORDER_COMPLETED':
+    case ControllerEvent.ORDER_COMPLETED:
       return `Bot ${event.bot.id} finished ${labelOrder(event.order)} -> COMPLETE`;
-    case 'ORDER_REQUEUED':
+    case ControllerEvent.ORDER_REQUEUED:
       return `Order ${labelOrder(event.order)} returned to PENDING (cooking cancelled)`;
-    case 'BOT_ADDED':
+    case ControllerEvent.BOT_ADDED:
       return `Bot ${event.bot.id} created`;
-    case 'BOT_REMOVED':
+    case ControllerEvent.BOT_REMOVED:
       return `Bot ${event.bot.id} destroyed`;
-    case 'BOT_REMOVE_NOOP':
+    case ControllerEvent.BOT_REMOVE_NOOP:
       return 'No bot to destroy';
-    case 'BOT_IDLE':
+    case ControllerEvent.BOT_IDLE:
       return `Bot ${event.bot.id} is IDLE`;
     default:
       return null;

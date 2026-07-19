@@ -3,6 +3,18 @@
 const { Bot, BotStatus } = require('./bot');
 const { Order } = require('./order');
 
+/** Everything the controller reports through `onEvent`. */
+const ControllerEvent = Object.freeze({
+  ORDER_CREATED: 'ORDER_CREATED',
+  ORDER_PICKED: 'ORDER_PICKED',
+  ORDER_COMPLETED: 'ORDER_COMPLETED',
+  ORDER_REQUEUED: 'ORDER_REQUEUED',
+  BOT_ADDED: 'BOT_ADDED',
+  BOT_REMOVED: 'BOT_REMOVED',
+  BOT_REMOVE_NOOP: 'BOT_REMOVE_NOOP',
+  BOT_IDLE: 'BOT_IDLE',
+});
+
 const DEFAULT_PROCESSING_MS = 10_000;
 
 /** Real timers. Tests inject a fake so the suite runs instantly. */
@@ -53,7 +65,7 @@ class Controller {
   newOrder(type) {
     const order = new Order(type);
     this.#queueFor(order).push(order);
-    this.#emit('ORDER_CREATED', { order });
+    this.#emit(ControllerEvent.ORDER_CREATED, { order });
     this.#assignAnyIdleBot();
     return order;
   }
@@ -61,7 +73,7 @@ class Controller {
   addBot() {
     const bot = new Bot({ timers: this.#timers, processingMs: this.#processingMs });
     this.#bots.push(bot);
-    this.#emit('BOT_ADDED', { bot });
+    this.#emit(ControllerEvent.BOT_ADDED, { bot });
     this.#assign(bot);
     return bot;
   }
@@ -74,7 +86,7 @@ class Controller {
   removeBot() {
     const bot = this.#bots.pop();
     if (!bot) {
-      this.#emit('BOT_REMOVE_NOOP', {});
+      this.#emit(ControllerEvent.BOT_REMOVE_NOOP, {});
       return null;
     }
 
@@ -83,7 +95,7 @@ class Controller {
       this.#requeue(interrupted);
     }
 
-    this.#emit('BOT_REMOVED', { bot, interrupted });
+    this.#emit(ControllerEvent.BOT_REMOVED, { bot, interrupted });
     if (interrupted) {
       this.#assignAnyIdleBot();
     }
@@ -107,7 +119,7 @@ class Controller {
     } else {
       queue.splice(at, 0, order);
     }
-    this.#emit('ORDER_REQUEUED', { order });
+    this.#emit(ControllerEvent.ORDER_REQUEUED, { order });
   }
 
   #assignAnyIdleBot() {
@@ -124,19 +136,19 @@ class Controller {
 
     const order = this.#vipQueue.shift() ?? this.#normalQueue.shift();
     if (!order) {
-      this.#emit('BOT_IDLE', { bot });
+      this.#emit(ControllerEvent.BOT_IDLE, { bot });
       return;
     }
 
     order.markProcessing();
     bot.startCooking(order, (cooked) => this.#complete(bot, cooked));
-    this.#emit('ORDER_PICKED', { bot, order });
+    this.#emit(ControllerEvent.ORDER_PICKED, { bot, order });
   }
 
   #complete(bot, order) {
     order.markCompleted();
     this.#completed.push(order);
-    this.#emit('ORDER_COMPLETED', { bot, order });
+    this.#emit(ControllerEvent.ORDER_COMPLETED, { bot, order });
     this.#assign(bot);
   }
 
@@ -145,4 +157,4 @@ class Controller {
   }
 }
 
-module.exports = { Controller, DEFAULT_PROCESSING_MS };
+module.exports = { Controller, ControllerEvent, DEFAULT_PROCESSING_MS };
