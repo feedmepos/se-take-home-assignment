@@ -21,14 +21,27 @@ function main() {
     prompt: '> ',
   });
 
+  /**
+   * Bot events arrive from timers, so they can land while the user is midway
+   * through typing a command. Wipe the prompt line before writing, then redraw
+   * the prompt along with whatever was already typed.
+   */
+  const printEvent = (line) => {
+    if (process.stdout.isTTY) {
+      readline.cursorTo(process.stdout, 0);
+      readline.clearLine(process.stdout, 0);
+    }
+    console.log(line);
+    rl.prompt(true);
+  };
+
   const controller = new Controller({
     onEvent: (event) => {
       const message = describeEvent(event);
       if (!message) {
         return;
       }
-      console.log(`[${timestamp()}] ${message}`);
-      rl.prompt(true);
+      printEvent(`[${timestamp()}] ${message}`);
     },
   });
 
