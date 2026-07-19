@@ -1,8 +1,9 @@
 'use strict';
 
+const { Bot, BotStatus } = require('./bot');
+
 const OrderType = Object.freeze({ NORMAL: 'NORMAL', VIP: 'VIP' });
 const OrderStatus = Object.freeze({ PENDING: 'PENDING', PROCESSING: 'PROCESSING', COMPLETE: 'COMPLETE' });
-const BotStatus = Object.freeze({ IDLE: 'IDLE', PROCESSING: 'PROCESSING' });
 
 const DEFAULT_PROCESSING_MS = 10_000;
 
@@ -21,7 +22,6 @@ const systemTimers = {
  */
 class Controller {
   #nextOrderId = 1;
-  #nextBotId = 1;
   #vipQueue = [];
   #normalQueue = [];
   #completed = [];
@@ -65,7 +65,7 @@ class Controller {
   }
 
   addBot() {
-    const bot = { id: this.#nextBotId++, status: BotStatus.IDLE, order: null, timer: null };
+    const bot = new Bot({ timers: this.#timers, processingMs: this.#processingMs });
     this.#bots.push(bot);
     this.#emit('BOT_ADDED', { bot });
     this.#assign(bot);
@@ -84,17 +84,10 @@ class Controller {
       return null;
     }
 
-    if (bot.timer !== null) {
-      this.#timers.clearTimeout(bot.timer);
-      bot.timer = null;
-    }
-
-    const interrupted = bot.order;
+    const interrupted = bot.stopCooking();
     if (interrupted) {
-      bot.order = null;
       this.#requeue(interrupted);
     }
-    bot.status = BotStatus.IDLE;
 
     this.#emit('BOT_REMOVED', { bot, interrupted });
     if (interrupted) {
@@ -137,25 +130,18 @@ class Controller {
 
     const order = this.#vipQueue.shift() ?? this.#normalQueue.shift();
     if (!order) {
-      bot.status = BotStatus.IDLE;
       this.#emit('BOT_IDLE', { bot });
       return;
     }
 
     order.status = OrderStatus.PROCESSING;
-    bot.order = order;
-    bot.status = BotStatus.PROCESSING;
+    bot.startCooking(order, (cooked) => this.#complete(bot, cooked));
     this.#emit('ORDER_PICKED', { bot, order });
-    bot.timer = this.#timers.setTimeout(() => this.#complete(bot), this.#processingMs);
   }
 
-  #complete(bot) {
-    const order = bot.order;
+  #complete(bot, order) {
     order.status = OrderStatus.COMPLETE;
     this.#completed.push(order);
-    bot.order = null;
-    bot.timer = null;
-    bot.status = BotStatus.IDLE;
     this.#emit('ORDER_COMPLETED', { bot, order });
     this.#assign(bot);
   }
@@ -165,4 +151,4 @@ class Controller {
   }
 }
 
-module.exports = { Controller, OrderType, OrderStatus, BotStatus, DEFAULT_PROCESSING_MS };
+module.exports = { Controller, OrderType, OrderStatus, DEFAULT_PROCESSING_MS };

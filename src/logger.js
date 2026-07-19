@@ -1,6 +1,6 @@
 'use strict';
 
-const { BotStatus } = require('./controller');
+const { BotStatus } = require('./bot');
 
 /** Timestamps are required by the CI check, which greps for HH:MM:SS. */
 function timestamp(date = new Date()) {

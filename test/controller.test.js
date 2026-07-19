@@ -3,7 +3,8 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const { Controller, OrderType, OrderStatus, BotStatus } = require('../src/controller');
+const { Controller, OrderType, OrderStatus } = require('../src/controller');
+const { BotStatus } = require('../src/bot');
 const { FakeTimers } = require('./fake-timers');
 
 const COOK_MS = 10_000;
