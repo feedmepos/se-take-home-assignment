@@ -31,6 +31,8 @@ const systemTimers = {
  * demo, or an HTTP server.
  */
 class Controller {
+  #nextOrderId = 1;
+  #nextBotId = 1;
   #vipQueue = [];
   #normalQueue = [];
   #completed = [];
@@ -63,7 +65,7 @@ class Controller {
   }
 
   newOrder(type) {
-    const order = new Order(type);
+    const order = new Order(this.#nextOrderId++, type);
     this.#queueFor(order).push(order);
     this.#emit(ControllerEvent.ORDER_CREATED, { order });
     this.#assignAnyIdleBot();
@@ -71,7 +73,11 @@ class Controller {
   }
 
   addBot() {
-    const bot = new Bot({ timers: this.#timers, processingMs: this.#processingMs });
+    const bot = new Bot({
+      id: this.#nextBotId++,
+      timers: this.#timers,
+      processingMs: this.#processingMs,
+    });
     this.#bots.push(bot);
     this.#emit(ControllerEvent.BOT_ADDED, { bot });
     this.#assign(bot);

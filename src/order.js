@@ -3,24 +3,17 @@
 const OrderType = Object.freeze({ NORMAL: 'NORMAL', VIP: 'VIP' });
 const OrderStatus = Object.freeze({ PENDING: 'PENDING', PROCESSING: 'PROCESSING', COMPLETE: 'COMPLETE' });
 
-/** A customer order. Ids are unique and increasing across both types. */
+/** A customer order. The controller numbers it; ids increase across both types. */
 class Order {
-  static #nextId = 1;
-
   #id;
   #type;
   #status = OrderStatus.PENDING;
 
-  /** Test hook, so each scenario starts numbering from #1. */
-  static resetSequence() {
-    Order.#nextId = 1;
-  }
-
-  constructor(type) {
+  constructor(id, type) {
     if (type !== OrderType.NORMAL && type !== OrderType.VIP) {
       throw new Error(`Unknown order type: ${type}`);
     }
-    this.#id = Order.#nextId++;
+    this.#id = id;
     this.#type = type;
   }
 

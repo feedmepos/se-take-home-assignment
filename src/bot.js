@@ -7,21 +7,14 @@ const BotStatus = Object.freeze({ IDLE: 'IDLE', PROCESSING: 'PROCESSING' });
  * whatever it is cooking, so the order and the timer can never disagree.
  */
 class Bot {
-  static #nextId = 1;
-
   #id;
   #order = null;
   #timer = null;
   #timers;
   #processingMs;
 
-  /** Test hook, so each scenario starts numbering from bot 1. */
-  static resetSequence() {
-    Bot.#nextId = 1;
-  }
-
-  constructor({ timers, processingMs }) {
-    this.#id = Bot.#nextId++;
+  constructor({ id, timers, processingMs }) {
+    this.#id = id;
     this.#timers = timers;
     this.#processingMs = processingMs;
   }

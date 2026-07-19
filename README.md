@@ -125,11 +125,12 @@ decides which queue an order joins, so a stray assignment to either would break 
 the demo each render them their own way. Adding a third frontend (for example an HTTP server) would
 not touch the state machine.
 
-**One caveat.** Order and bot ids come from process-wide static counters, so a second `Controller`
-in the same process would continue the same numbering rather than starting fresh. That never happens
-here — each entry point builds one controller — but it is why both classes expose a `resetSequence()`
-hook that the test setup calls to keep scenarios independent. Per-controller sequences would remove
-the hook at the cost of moving id generation back out of the domain objects.
+**The controller owns the id sequences.** `Order` and `Bot` are handed their id rather than
+generating it. A static counter on each class would have let them number themselves, but ids would
+then have been process-wide: a second `Controller` would carry on from wherever the first left off,
+and tests would inherit numbering from whichever scenario ran before them. Passing the id in keeps
+each controller's numbering independent, which is both closer to how a restaurant numbers orders and
+enough on its own to make the tests isolated — no reset hook needed.
 
 ### Test coverage
 
