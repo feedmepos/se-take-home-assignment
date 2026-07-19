@@ -6,14 +6,12 @@
 echo "Running CLI application..."
 
 # For Go projects:
-# ./order-controller > result.txt
-
-# For Node.js projects:
-# node index.js > result.txt
-# or npm start > result.txt
+SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
+cd "$SCRIPT_DIR"/../scripts
+ ./order-controller > result.txt
 
 # Temporary placeholder - remove this when you implement your CLI
-echo "Added 1 bot" > result.txt
-echo "status: bot: [1], order: []" >> result.txt
+#echo "Added 1 bot" > result.txt
+#echo "status: bot: [1], order: []" >> result.txt
 
 echo "CLI application execution completed"

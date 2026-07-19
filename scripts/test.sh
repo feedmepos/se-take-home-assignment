@@ -6,9 +6,8 @@
 echo "Running unit tests..."
 
 # For Go projects:
-# go test ./... -v
-
-# For Node.js projects:
-# npm test
+SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
+cd "$SCRIPT_DIR"/../cmd
+go test -v
 
 echo "Unit tests completed"
