@@ -1,0 +1,21 @@
+# Fly.io config for the McDonald's order controller backend.
+# State is in-memory, so we run exactly ONE always-on machine (no auto-stop, no HA).
+app = "feedme-order-controller"
+primary_region = "sin"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "8080"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "off"
+  auto_start_machines = false
+  min_machines_running = 1
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"

@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: feedme-order-server
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /healthz
+    envVars:
+      - key: PORT
+        value: "8080"

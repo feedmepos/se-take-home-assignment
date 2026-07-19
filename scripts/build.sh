@@ -1,15 +1,10 @@
 #!/bin/bash
+set -e
 
-# Build Script
-# This script should contain all compilation steps for your CLI application
+# Run from repo root (CI invokes ./scripts/build.sh from root).
+cd "$(dirname "$0")/.."
 
-echo "Building CLI application..."
-
-# For Go projects:
-# go build -o order-controller ./cmd/main.go
-
-# For Node.js projects:
-# npm install
-# npm run build (if needed)
-
+echo "Building binaries into bin/..."
+go build -o bin/order-cli ./cmd/cli
+go build -o bin/order-server ./cmd/server
 echo "Build completed"

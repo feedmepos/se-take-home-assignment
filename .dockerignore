@@ -1,0 +1,5 @@
+.git
+bin/
+scripts/result.txt
+*.md
+.github

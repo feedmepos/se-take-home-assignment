@@ -1,26 +1,29 @@
-McDonald's Order Management System - Simulation Results
-
-[14:32:01] System initialized with 0 bots
-[14:32:01] Created Normal Order #1001 - Status: PENDING
-[14:32:02] Created VIP Order #1002 - Status: PENDING
-[14:32:02] Created Normal Order #1003 - Status: PENDING
-[14:32:03] Bot #1 created - Status: ACTIVE
-[14:32:03] Bot #1 picked up VIP Order #1002 - Status: PROCESSING
-[14:32:04] Bot #2 created - Status: ACTIVE
-[14:32:04] Bot #2 picked up Normal Order #1001 - Status: PROCESSING
-[14:32:13] Bot #1 completed VIP Order #1002 - Status: COMPLETE (Processing time: 10s)
-[14:32:13] Bot #1 picked up Normal Order #1003 - Status: PROCESSING
-[14:32:14] Bot #2 completed Normal Order #1001 - Status: COMPLETE (Processing time: 10s)
-[14:32:14] Bot #2 is now IDLE - No pending orders
-[14:32:15] Created VIP Order #1004 - Status: PENDING
-[14:32:15] Bot #2 picked up VIP Order #1004 - Status: PROCESSING
-[14:32:23] Bot #1 completed Normal Order #1003 - Status: COMPLETE (Processing time: 10s)
-[14:32:25] Bot #2 completed VIP Order #1004 - Status: COMPLETE (Processing time: 10s)
-[14:32:25] Bot #2 destroyed while IDLE
-[14:32:26] Bot #1 is now IDLE - No pending orders
-
-Final Status:
-- Total Orders Processed: 4 (2 VIP, 2 Normal)
-- Orders Completed: 4
-- Active Bots: 1
-- Pending Orders: 0
+[03:05:08] === McDonald's Order Controller — scenario (processing duration = 2s) ===
+[03:05:08] STEP 1: create 2 NORMAL then 1 VIP order (VIP must jump the queue)
+[03:05:08] created order #1 NORMAL
+[03:05:08] created order #2 NORMAL
+[03:05:08] created order #3 VIP
+[03:05:08] STATE  pending:[#3(VIP), #1(NORMAL), #2(NORMAL)]  processing:[-]  complete:[-]  bots:[-]
+[03:05:08] STEP 2: add bot #1 (should immediately grab VIP #3)
+[03:05:08] added bot #1
+[03:05:08] STATE  pending:[#1(NORMAL), #2(NORMAL)]  processing:[#3(VIP)]  complete:[-]  bots:[bot1->#3(2s)]
+[03:05:08] STEP 3: add bot #2 (should grab NORMAL #1)
+[03:05:08] added bot #2
+[03:05:09] STATE  pending:[#2(NORMAL)]  processing:[#3(VIP), #1(NORMAL)]  complete:[-]  bots:[bot1->#3(2s), bot2->#1(2s)]
+[03:05:09] STEP 4: wait for cooking to finish...
+[03:05:11] STATE  pending:[-]  processing:[#2(NORMAL)]  complete:[#3(VIP), #1(NORMAL)]  bots:[bot1->#2(1s), bot2(IDLE)]
+[03:05:14] STATE  pending:[-]  processing:[-]  complete:[#3(VIP), #1(NORMAL), #2(NORMAL)]  bots:[bot1(IDLE), bot2(IDLE)]
+[03:05:14] STEP 5: remove newest bot (both idle now) to leave a single bot
+[03:05:14] removed bot #2
+[03:05:14] STATE  pending:[-]  processing:[-]  complete:[#3(VIP), #1(NORMAL), #2(NORMAL)]  bots:[bot1(IDLE)]
+[03:05:14] STEP 6: add another VIP order, then remove the bot WHILE it cooks
+[03:05:14] created order #4 VIP
+[03:05:14] STATE  pending:[-]  processing:[#4(VIP)]  complete:[#3(VIP), #1(NORMAL), #2(NORMAL)]  bots:[bot1->#4(2s)]
+[03:05:14] removed bot #1 mid-processing -> order #4 must return to pending
+[03:05:14] STATE  pending:[#4(VIP)]  processing:[-]  complete:[#3(VIP), #1(NORMAL), #2(NORMAL)]  bots:[-]
+[03:05:14] STEP 7: add a fresh bot to finish the requeued order
+[03:05:14] added bot #3
+[03:05:17] STATE  pending:[-]  processing:[-]  complete:[#3(VIP), #1(NORMAL), #2(NORMAL), #4(VIP)]  bots:[bot3(IDLE)]
+[03:05:17] === Summary: 4 completed, 0 pending, 0 processing, 1 active bot(s) ===
+[03:05:17] completed orders (in completion order): #3(VIP), #1(NORMAL), #2(NORMAL), #4(VIP)
+[03:05:17] scenario finished
