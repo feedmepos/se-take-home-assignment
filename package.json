@@ -1,0 +1,16 @@
+{
+  "name": "mcdonalds-order-controller",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Order controller for McDonald's automated cooking bots",
+  "main": "src/controller.js",
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "start": "node src/cli.js",
+    "demo": "node src/demo.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "MIT"
+}
