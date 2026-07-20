@@ -1,14 +1,9 @@
 #!/bin/bash
+set -e
 
-# Unit Test Script
-# This script should contain all unit test execution steps
+# Run from repo root (CI invokes ./scripts/test.sh from root).
+cd "$(dirname "$0")/.."
 
 echo "Running unit tests..."
-
-# For Go projects:
-# go test ./... -v
-
-# For Node.js projects:
-# npm test
-
+go test ./... -v
 echo "Unit tests completed"

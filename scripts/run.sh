@@ -1,19 +1,15 @@
 #!/bin/bash
+set -e
 
-# Run Script
-# This script should execute your CLI application and output results to result.txt
+# Run from repo root (CI invokes ./scripts/run.sh from root).
+cd "$(dirname "$0")/.."
 
-echo "Running CLI application..."
+# Ensure the CLI binary exists (in case run.sh is invoked without build.sh).
+if [ ! -x bin/order-cli ]; then
+  echo "bin/order-cli not found, building..."
+  go build -o bin/order-cli ./cmd/cli
+fi
 
-# For Go projects:
-# ./order-controller > result.txt
-
-# For Node.js projects:
-# node index.js > result.txt
-# or npm start > result.txt
-
-# Temporary placeholder - remove this when you implement your CLI
-echo "Added 1 bot" > result.txt
-echo "status: bot: [1], order: []" >> result.txt
-
-echo "CLI application execution completed"
+echo "Running scenario, writing scripts/result.txt..."
+./bin/order-cli --scenario | tee scripts/result.txt
+echo "Run completed"
