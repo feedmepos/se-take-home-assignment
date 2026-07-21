@@ -1,15 +1,16 @@
 #!/bin/bash
 
 # Build Script
-# This script should contain all compilation steps for your CLI application
+# The CLI is plain Node.js with zero dependencies, so there is nothing to
+# compile. Instead we syntax-check every source file to catch parse errors
+# before the run step.
+
+set -euo pipefail
+cd "$(dirname "$0")/.."
 
 echo "Building CLI application..."
-
-# For Go projects:
-# go build -o order-controller ./cmd/main.go
-
-# For Node.js projects:
-# npm install
-# npm run build (if needed)
-
-echo "Build completed"
+for file in src/*.js test/*.js; do
+  node --check "$file"
+  echo "  checked $file"
+done
+echo "Build completed (no compilation needed - plain Node.js, zero dependencies)"

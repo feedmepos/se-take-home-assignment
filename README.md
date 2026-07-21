@@ -62,3 +62,80 @@ You must implement **either** frontend or backend components as described below:
 - Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.
 - Utilize coding agent to complete the assignment scope your working hour within 1 hour, do not over engineer it. However, ensure you read and understand what your code doing and apply good engineering practice.
 - Complete the implementation as clean as possible, clean code is a strong plus point, do not bring in all the fancy tech stuff.
+
+---
+
+## Solution (Backend, Node.js)
+
+Plain Node.js 22, **zero dependencies**, CommonJS. Tests use the built-in `node:test` runner.
+
+### Layout
+
+```
+src/order.js        Order, OrderType, OrderStatus
+src/bot.js          Bot, BotStatus — owns its own cooking timer
+src/controller.js   Queues and orchestration (no I/O, no printing)
+src/logger.js       HH:MM:SS timestamps and state rendering
+src/demo.js         Scripted scenario -> scripts/result.txt
+src/cli.js          Interactive REPL
+test/               Unit tests + a fake clock
+scripts/            test.sh / build.sh / run.sh
+```
+
+### Running it
+
+```bash
+./scripts/test.sh    # unit tests (milliseconds)
+./scripts/build.sh   # syntax-checks sources; nothing to compile
+./scripts/run.sh     # scripted demo, ~40s, writes scripts/result.txt
+
+npm start            # interactive CLI
+```
+
+Interactive commands: `normal`, `vip`, `bot+`, `bot-`, `status`, `help`, `exit`.
+
+### Design notes
+
+**Two queues, not one.** `Controller` keeps a VIP queue and a normal queue. Bots always drain VIP
+first. This satisfies "VIP ahead of normal, behind existing VIP" without any sorting or priority
+field on the order.
+
+**Requeue by id.** When a bot is destroyed mid-cook (requirement 6), the order returns to its own
+queue at the position where its id belongs. Because order ids are globally increasing, sorting by id
+*is* the original position — no index bookkeeping, and VIP priority is preserved for free. The order
+restarts the full 10 seconds when picked up again; there is no partial credit.
+
+**Injected clock.** `Controller` takes `setTimeout`/`clearTimeout` through its constructor and hands
+them to each `Bot`. Tests inject a fake clock and advance it instantly, so the suite genuinely
+exercises 10-second cooking without waiting for it. The demo injects real timers, so `result.txt`
+carries honest wall-clock timestamps.
+
+**A bot owns its timer.** `Bot.startCooking(order, onDone)` takes the order and schedules its own
+completion; `stopCooking()` cancels and hands back the unfinished order. The timer is therefore
+created and cleared alongside the order it belongs to, and cannot be left dangling — which is the
+bug requirement 6 invites, since a destroyed bot's order must never complete later.
+
+**No settable state on the domain objects.** `Order` and `Bot` keep every field private behind
+read-only getters, and change state through named methods (`markCompleted()`, `stopCooking()`).
+`Bot.status` is derived from whether it holds an order rather than stored, so the two cannot drift.
+This matters most for `id` and `type`: `#requeue` restores position by sorting on `id`, and `type`
+decides which queue an order joins, so a stray assignment to either would break queueing silently.
+
+**No printing in the core.** `Controller` emits events through an `onEvent` callback; the REPL and
+the demo each render them their own way. Adding a third frontend (for example an HTTP server) would
+not touch the state machine.
+
+**The controller owns the id sequences.** `Order` and `Bot` are handed their id rather than
+generating it. A static counter on each class would have let them number themselves, but ids would
+then have been process-wide: a second `Controller` would carry on from wherever the first left off,
+and tests would inherit numbering from whichever scenario ran before them. Passing the id in keeps
+each controller's numbering independent, which is both closer to how a restaurant numbers orders and
+enough on its own to make the tests isolated — no reset hook needed.
+
+### Test coverage
+
+15 tests over the requirements: VIP/normal ordering, ids unique and increasing, pickup and
+completion timing, idle-then-resume, parallel bots, newest-bot-destroyed-first, requeue position,
+requeue preserving VIP priority, and cancellation (a destroyed bot's order must never complete
+later — the easiest bug to write here).
+
