@@ -62,3 +62,45 @@ You must implement **either** frontend or backend components as described below:
 - Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.
 - Utilize coding agent to complete the assignment scope your working hour within 1 hour, do not over engineer it. However, ensure you read and understand what your code doing and apply good engineering practice.
 - Complete the implementation as clean as possible, clean code is a strong plus point, do not bring in all the fancy tech stuff.
+
+### Backend implementation notes
+
+This repository implements the backend option in Go with two executables:
+
+- `order-server`: an HTTP server that owns the in-memory order controller and writes simulation events to `scripts/result.txt`.
+- `order-cli`: a CLI client that accepts one JSON command at a time and talks to the server over HTTP.
+
+Core behavior:
+
+- Orders are producers and cooking bots are consumers.
+- Each bot runs in its own goroutine.
+- The controller passes pending orders to idle bots through Go channels.
+- VIP orders are queued before normal orders while preserving FIFO order within each type.
+- Adding a bot starts its goroutine immediately.
+- Removing a bot stops the newest bot; if it is processing an order, the order is returned to the pending queue with `PENDING` status.
+- During processing, order status changes from `PENDING` to `PROCESSING`, then to `COMPLETE` when the bot finishes.
+
+Useful commands:
+
+- `./scripts/test.sh` runs unit tests.
+- `./scripts/build.sh` builds both executables into `bin/`.
+- `./scripts/run.sh` starts the server, runs multiple CLI JSON commands through HTTP, and leaves the generated output in `scripts/result.txt`.
+
+CLI command examples:
+
+- `./bin/order-cli '{"action":"add","object":"orders","type":"vip"}'`
+- `./bin/order-cli '{"action":"add","object":"orders","type":"normal"}'`
+- `./bin/order-cli '{"action":"add","object":"bots"}'`
+- `./bin/order-cli '{"action":"remove","object":"bots"}'`
+- `./bin/order-cli '{"action":"finalize"}'`
+
+The CLI defaults to `127.0.0.1:18080`; use `-addr` only when the server is running elsewhere.
+
+HTTP endpoints:
+
+- `POST /orders?type=normal`
+- `POST /orders?type=vip`
+- `POST /bots`
+- `DELETE /bots`
+- `GET /status`
+- `POST /finalize`
