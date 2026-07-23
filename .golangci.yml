@@ -1,0 +1,9 @@
+run:
+  timeout: 1m
+linters:
+  enable:
+    - errcheck     # 检查未处理的错误
+    - gosimple     # 简化代码建议
+    - govet        # 官方静态分析工具（检查锁拷贝、Format格式等）
+    - ineffassign  # 检查无效赋值
+    - staticcheck  # 高级代码检查
