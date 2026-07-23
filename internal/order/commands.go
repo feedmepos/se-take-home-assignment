@@ -17,7 +17,7 @@ const (
 type Command struct {
 	Type    CommandType
 	Payload any
-	Reply   chan<- Response
+	ReplyCh chan<- Response
 }
 
 type Event struct {

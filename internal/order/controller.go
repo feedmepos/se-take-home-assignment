@@ -118,8 +118,8 @@ func NewController() *Controller {
 // ---------------------------------------------------------
 
 func (c *Controller) Send(ctx context.Context, cmd Command) Response {
-	reply := make(chan Response, 1)
-	cmd.Reply = reply
+	replyCh := make(chan Response, 1)
+	cmd.ReplyCh = replyCh
 	select {
 	case c.cmdCh <- cmd:
 	case <-c.stopCh:
@@ -128,7 +128,7 @@ func (c *Controller) Send(ctx context.Context, cmd Command) Response {
 		return Response{Err: ctx.Err()}
 	}
 	select {
-	case response := <-reply:
+	case response := <-replyCh:
 		return response
 	case <-c.stopCh:
 		return Response{Err: errors.New("controller has stopped")}
@@ -196,8 +196,8 @@ func (c *Controller) handleCommand(cmd Command) {
 		replyVal.State = c.onGetState()
 	}
 
-	if cmd.Reply != nil {
-		cmd.Reply <- replyVal
+	if cmd.ReplyCh != nil {
+		cmd.ReplyCh <- replyVal
 	}
 }
 

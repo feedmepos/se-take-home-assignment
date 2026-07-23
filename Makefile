@@ -2,10 +2,21 @@
 APP_NAME := order-controller
 
 # Phony targets
-.PHONY: all build run interactive simulate test clean
+.PHONY: all build run interactive simulate test clean lint check
 
 # Default: build
 all: build
+
+# 静态检查，约束 AI 生成的代码质量
+lint:
+	@echo "=> Running static analysis..."
+	@golangci-lint run ./... || go vet ./...
+
+# 终极一键断言（编译 + 检查 + 测试）
+check: lint test
+	@echo "=> All quality gates passed successfully!"
+
+
 
 # Build CLI application
 build:
