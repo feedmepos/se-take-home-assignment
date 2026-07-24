@@ -1,15 +1,11 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-# Build Script
-# This script should contain all compilation steps for your CLI application
+cd "$(dirname "$0")/.."
+export GOCACHE="${GOCACHE:-$PWD/.cache/go-build}"
+mkdir -p "$GOCACHE"
 
 echo "Building CLI application..."
-
-# For Go projects:
-# go build -o order-controller ./cmd/main.go
-
-# For Node.js projects:
-# npm install
-# npm run build (if needed)
-
+mkdir -p bin
+go build -o bin/feedme ./cmd/feedme
 echo "Build completed"
