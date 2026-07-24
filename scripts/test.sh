@@ -1,14 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-# Unit Test Script
-# This script should contain all unit test execution steps
+cd "$(dirname "$0")/.."
+export GOCACHE="${GOCACHE:-$PWD/.cache/go-build}"
+mkdir -p "$GOCACHE"
 
 echo "Running unit tests..."
-
-# For Go projects:
-# go test ./... -v
-
-# For Node.js projects:
-# npm test
-
+go test ./... -v
 echo "Unit tests completed"
