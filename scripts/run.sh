@@ -1,19 +1,13 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-# Run Script
-# This script should execute your CLI application and output results to result.txt
+cd "$(dirname "$0")/.."
 
 echo "Running CLI application..."
+if [ ! -x bin/feedme ]; then
+  scripts/build.sh
+fi
 
-# For Go projects:
-# ./order-controller > result.txt
-
-# For Node.js projects:
-# node index.js > result.txt
-# or npm start > result.txt
-
-# Temporary placeholder - remove this when you implement your CLI
-echo "Added 1 bot" > result.txt
-echo "status: bot: [1], order: []" >> result.txt
+bin/feedme > scripts/result.txt
 
 echo "CLI application execution completed"
