@@ -1,19 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
 
-# Run Script
-# This script should execute your CLI application and output results to result.txt
+if [ ! -f bin/order_bot ]; then
+	echo "run.sh: bin/order_bot not found, run scripts/build.sh first" >&2
+	exit 1
+fi
 
-echo "Running CLI application..."
-
-# For Go projects:
-# ./order-controller > result.txt
-
-# For Node.js projects:
-# node index.js > result.txt
-# or npm start > result.txt
-
-# Temporary placeholder - remove this when you implement your CLI
-echo "Added 1 bot" > result.txt
-echo "status: bot: [1], order: []" >> result.txt
-
-echo "CLI application execution completed"
+./bin/order_bot
