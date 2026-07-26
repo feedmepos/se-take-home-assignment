@@ -1,14 +1,14 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
 
-# Unit Test Script
-# This script should contain all unit test execution steps
+if ! command -v go >/dev/null 2>&1; then
+	echo "test.sh: go is not installed or not in PATH" >&2
+	exit 1
+fi
 
-echo "Running unit tests..."
+go version
 
-# For Go projects:
-# go test ./... -v
+go mod tidy
 
-# For Node.js projects:
-# npm test
-
-echo "Unit tests completed"
+go test ./internal/...

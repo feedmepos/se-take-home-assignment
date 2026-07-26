@@ -1,15 +1,14 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
 
-# Build Script
-# This script should contain all compilation steps for your CLI application
+if ! command -v go >/dev/null 2>&1; then
+	echo "build.sh: go is not installed or not in PATH" >&2
+	exit 1
+fi
 
-echo "Building CLI application..."
+go version
 
-# For Go projects:
-# go build -o order-controller ./cmd/main.go
+go mod tidy
 
-# For Node.js projects:
-# npm install
-# npm run build (if needed)
-
-echo "Build completed"
+go build -o bin/order_bot ./cli
