@@ -1,17 +1,11 @@
-[12:08:20] System initialized with 0 bots
-[12:08:20] Created NORMAL Order #1001 - Status: PENDING
-[12:08:20] Created VIP Order #1002 - Status: PENDING
-[12:08:20] Created NORMAL Order #1003 - Status: PENDING
-[12:08:20] Bot #1 created - Status: IDLE
-[12:08:20] Bot #1 picked up VIP Order #1002 - Status: PROCESSING
-[12:08:20] Bot #2 created - Status: IDLE
-[12:08:20] Bot #2 picked up NORMAL Order #1001 - Status: PROCESSING
-[12:08:20] Created NORMAL Order #1004 - Status: PENDING
-[12:08:20] Created VIP Order #1005 - Status: PENDING
-[12:08:20] Created NORMAL Order #1006 - Status: PENDING
-[12:08:21] Bot #2 destroyed while processing Order #1001; order returned to PENDING
-[12:08:30] Bot #1 completed VIP Order #1002 - Status: COMPLETED (Processing time: 10s)
-[12:08:30] Bot #1 picked up VIP Order #1005 - Status: PROCESSING
-[12:08:40] Bot #1 completed VIP Order #1005 - Status: COMPLETED (Processing time: 10s)
-[12:08:40] Bot #1 picked up NORMAL Order #1001 - Status: PROCESSING
-[12:08:42] Status: bots=1, pending=3, processing=1, completed=2
+[09:36:48] System initialized with 0 bots
+[09:36:48] Created NORMAL Order #1001 - Status: PENDING
+[09:36:48] Created VIP Order #1002 - Status: PENDING
+[09:36:48] Created NORMAL Order #1003 - Status: PENDING
+[09:36:48] Bot #1 created - Status: IDLE
+[09:36:48] Bot #1 picked up VIP Order #1002 - Status: PROCESSING
+[09:36:48] Bot #2 created - Status: IDLE
+[09:36:48] Bot #2 picked up NORMAL Order #1001 - Status: PROCESSING
+[09:36:49] Bot #2 destroyed while processing Order #1001; order returned to PENDING
+[09:36:49] Bot #1 destroyed while processing Order #1002; order returned to PENDING
+[09:37:10] Status: bots=0, pending=3, processing=0, completed=0

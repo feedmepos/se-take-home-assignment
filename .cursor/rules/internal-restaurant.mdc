@@ -1,0 +1,30 @@
+---
+description: internal/restaurant 领域模型与并发约定
+globs: internal/restaurant/**/*.go
+alwaysApply: false
+---
+
+# Restaurant 领域约定
+
+## 并发
+
+- 所有 `Restaurant` / `orderQueue` / `robotFleet` 可变状态只在 `Controller.run` 事件循环内读写
+- 对外只通过 `Controller.Submit` / `Close`；不要给领域对象加锁来「绕过」单循环
+- `Tick` 完成订单后必须再 `Schedule`；`AddOrder` / `AddRobot` / `RemoveNewestRobot` 末尾同样要调度
+
+## 订单队列
+
+- 内部用 `vipPending` / `normalPending` 两个 FIFO；`takeNextPending` 先 VIP 后 NORMAL
+- `returnToPending`：状态回 `PENDING`，清 `ProductionStartedAt`，按 `OrderNo` 插回同优先级队列（保持 FIFO）
+- `ProcessingDuration = 10s`；完成判定用 `now.Sub(*ProductionStartedAt)`
+
+## 机器人
+
+- 默认名 `Bot #N`；`removeNewest` 只删列表末尾
+- 忙碌被删时：订单回队列，机器人 `CurrentOrderID = nil`、`Status = Idle`（再销毁）
+
+## 测试
+
+- 行为测放在对应文件旁：`order_test.go` / `robot_test.go` / `restaurant_test.go` / `controller_test.go`
+- 用显式 `time.Time` 驱动，不要依赖真实 sleep 测调度逻辑
+- 改调度/优先级/退回语义时，优先补或更新表驱动边界用例，再改实现

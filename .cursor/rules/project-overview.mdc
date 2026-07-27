@@ -1,0 +1,37 @@
+---
+description: FeedMe 订单控制器项目概览；新会话先读此规则再动手
+alwaysApply: true
+---
+
+# 项目概览
+
+麦当劳自动化烹饪订单控制器（面试作业）。Go 1.23 后端 CLI；无持久化，状态全在内存。
+
+## 目录
+
+- `cmd/order-controller/`：交互式 CLI + `--demo`
+- `internal/restaurant/`：领域与事件循环（唯一可变状态入口）
+- `scripts/`：`test.sh` / `build.sh` / `run.sh`；`result.txt` 为 Demo 输出
+- `README.md`：作业要求与当前实现说明
+
+## 架构（必守）
+
+- `Controller`：单 goroutine 事件循环；命令与 100ms tick 串行进入，禁止在循环外改 `Restaurant` 状态
+- `Restaurant`：聚合根，协调 `orderQueue` + `robotFleet`；`Schedule` 仅由该拥有者调用
+- 订单：`PENDING` → `PROCESSING`（10s）→ `COMPLETED`；编号从 `1001` 递增
+- 优先级：VIP 先于 NORMAL；同优先级 FIFO；移除忙碌机器人时订单回 `PENDING` 并清 `ProductionStartedAt`
+- 机器人：一次一单；`remove` 销毁最新创建的机器人
+
+## 验证
+
+```bash
+./scripts/test.sh    # go test ./...
+./scripts/build.sh   # 产出 ./order-controller
+./scripts/run.sh     # --demo → scripts/result.txt（约 22s）
+```
+
+改用户可见行为后，同步 CLI/`help`/Demo/README/`result.txt`（见 `feature-surface-sync`）。
+
+## 文档
+
+设计与计划若存在，在 `docs/superpowers/specs/`、`docs/superpowers/plans/`。实现前先读相关 spec，避免口头约定漂移。
