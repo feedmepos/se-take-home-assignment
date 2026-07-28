@@ -1,64 +1,105 @@
-## FeedMe Software Engineer Take Home Assignment
-Below is a take home assignment before the interview of the position. You are required to
-1. Understand the situation and use case. You may contact the interviewer for further clarification.
-2. implement the requirement with **either frontend or backend components**.
-3. Complete the requirement with **AI** if possible, but perform your own testing.
-4. Provide documentation for the any part that you think is needed.
-5. Bring the source code and functioning prototype to the interview session.
+## FeedMe 软件工程师面试作业
+这是职位面试前的作业，请完成以下事项：
+1. 理解业务情境和使用场景；如需进一步说明，可联系面试官。
+2. 使用**前端或后端**其中一种方式实现需求。
+3. 可借助 AI 完成，但必须自行测试。
+4. 为你认为有必要的部分提供文档。
+5. 面试时携带源代码与可运行的原型。
 
-### Situation
-McDonald is transforming their business during COVID-19. They wish to build the automated cooking bots to reduce workforce and increase their efficiency. As one of the software engineer in the project. You task is to create an order controller which handle the order control flow. 
+### 业务情境
+麦当劳希望通过自动化烹饪机器人减少人力并提高效率。作为项目的软件工程师，你需要创建一个负责订单流程的订单控制器。
 
-### User Story
-As below is part of the user story:
-1. As McDonald's normal customer, after I submitted my order, I wish to see my order flow into "PENDING" area. After the cooking bot process my order, I want to see it flow into to "COMPLETE" area.
-2. As McDonald's VIP member, after I submitted my order, I want my order being process first before all order by normal customer.  However if there's existing order from VIP member, my order should queue behind his/her order.
-3. As McDonald's manager, I want to increase or decrease number of cooking bot available in my restaurant. When I increase a bot, it should immediately process any pending order. When I decrease a bot, the processing order should remain un-process.
-4. As McDonald bot, it can only pickup and process 1 order at a time, each order required 10 seconds to complete process.
+### 用户故事
+1. 作为普通顾客，提交订单后，我希望订单进入 `PENDING`（待处理）区域；烹饪机器人完成处理后，订单进入 `COMPLETED`（已完成）区域。
+2. 作为 VIP 顾客，我希望订单优先于所有普通订单处理；但若已有 VIP 订单，则应排在已有 VIP 订单之后。
+3. 作为餐厅经理，我希望能够增加或减少可用烹饪机器人的数量。新增机器人后应立即处理待处理订单；减少机器人时，正在处理的订单应停止处理。
+4. 作为烹饪机器人，一次只能领取并处理一个订单；每个订单需要 10 秒完成。
 
-### Requirements
-1. When "New Normal Order" clicked, a new order should show up "PENDING" Area.
-2. When "New VIP Order" clicked, a new order should show up in "PENDING" Area. It should place in-front of all existing "Normal" order but behind of all existing "VIP" order.
-3. The order number should be unique and increasing.
-4. When "+ Bot" clicked, a bot should be created and start processing the order inside "PENDING" area. after 10 seconds picking up the order, the order should move to "COMPLETE" area. Then the bot should start processing another order if there is any left in "PENDING" area.
-5. If there is no more order in the "PENDING" area, the bot should become IDLE until a new order come in.
-6. When "- Bot" clicked, the newest bot should be destroyed. If the bot is processing an order, it should also stop the process. The order should return to its original position in the "PENDING" area (maintaining VIP/Normal order priority).
-7. No data persistance is needed for this prototype, you may perform all the process inside memory.
+### 功能要求
+1. 创建普通订单时，新订单应进入 `PENDING` 区域。
+2. 创建 VIP 订单时，新订单应进入 `PENDING` 区域，排在所有普通订单之前、已有 VIP 订单之后。
+3. 订单编号必须唯一且递增。
+4. 新增机器人时，机器人应立即处理 `PENDING` 区域内的订单；领取订单 10 秒后，订单应进入 `COMPLETED` 区域。若仍有待处理订单，机器人应继续处理下一单。
+5. 没有待处理订单时，机器人应保持 `IDLE`（空闲）状态，直到有新订单。
+6. 移除机器人时，应销毁最新创建的机器人。若该机器人正在处理订单，订单应停止处理并回到 `PENDING` 区域，同时保持 VIP/普通订单优先级规则。
+7. 此原型不需要数据持久化，所有数据均可保存在内存中。
 
-### Functioning Prototype
-You must implement **either** frontend or backend components as described below:
+### 可运行原型
+你必须使用以下其中一种方式实现：
 
-#### 1. Frontend
-- You are free to use **any framework and programming language** of your choice
-- The UI application must be compiled, deployed and hosted on any publicly accessible web platform
-- Must provide a user interface that demonstrates all the requirements listed above
-- Should allow users to interact with the McDonald's order management system
+#### 1. 前端
+- 可自由选择**任意框架和编程语言**。
+- UI 应用必须编译、部署并托管在可公开访问的平台。
+- 必须提供可展示上述所有需求的用户界面。
+- 应允许用户与麦当劳订单管理系统交互。
 
-#### 2. Backend
-- You must use **either Go (Golang) or Node.js** for the backend implementation
-- The backend must be a CLI application that can be executed in GitHub Actions
-- Must implement the following scripts in the `script` directory:
-  - `test.sh`: Contains unit test execution steps
-  - `build.sh`: Contains compilation steps for the CLI application
-  - `run.sh`: Contains execution steps that run the CLI application
-- The CLI application result must be printed to `result.txt`
-- The `result.txt` output must include timestamps in `HH:MM:SS` format to track order completion times
-- Must follow **GitHub Flow**: Create a Pull Request with your changes to this repository
-- Ensure all GitHub Action checks pass successfully
-- **Note**: An interactive CLI implementation is compulsory for the next round of interview. Candidates should be prepared to demonstrate interactive command handling.
+#### 2. 后端
+- 后端必须使用 **Go（Golang）或 Node.js** 实现。
+- 后端必须是能在 GitHub Actions 中执行的 CLI 应用。
+- 必须在 `scripts` 目录实现以下脚本：
+  - `test.sh`：执行单元测试。
+  - `build.sh`：编译 CLI 应用。
+  - `run.sh`：运行 CLI 应用。
+- CLI 的结果必须输出至 `result.txt`。
+- `result.txt` 必须包含 `HH:MM:SS` 格式的时间戳，用于追踪订单完成时间。
+- 必须遵循 **GitHub Flow**：为改动创建 Pull Request。
+- 必须确保所有 GitHub Actions 检查通过。
+- **注意**：下一轮面试必须演示交互式 CLI；候选人应准备好展示交互式命令处理。
 
-#### Submission Requirements
-- Fork this repository and implement your solution with either frontend or backend
-- **Frontend option**: Deploy to a publicly accessible URL using any technology stack
-- **Backend option**: Must be implemented in Go or Node.js and work within the GitHub Actions environment
-  - Follow GitHub Flow process with Pull Request submission
-  - All tests in `test.sh` must pass
-  - The `result.txt` file must contain meaningful output from your CLI application
-  - All output must include timestamps in `HH:MM:SS` format to track order completion times
-  - Submit a Pull Request and ensure the `backend-verify-result` workflow passes
-- Provide documentation for any part that you think is needed
+#### 提交要求
+- Fork 本仓库，并使用前端或后端方式实现方案。
+- **前端方案**：使用任意技术栈部署至公开可访问的 URL。
+- **后端方案**：必须使用 Go 或 Node.js，并可在 GitHub Actions 环境中运行。
+  - 遵循 GitHub Flow 并提交 Pull Request。
+  - `test.sh` 中的所有测试必须通过。
+  - `result.txt` 必须包含 CLI 应用有意义的输出。
+  - 所有输出必须包含 `HH:MM:SS` 格式的时间戳。
+  - 提交 Pull Request，并确保 `backend-verify-result` 工作流通过。
+- 为你认为有必要的部分提供文档。
 
-### Tips on completing this task
-- Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.
-- Utilize coding agent to complete the assignment scope your working hour within 1 hour, do not over engineer it. However, ensure you read and understand what your code doing and apply good engineering practice.
-- Complete the implementation as clean as possible, clean code is a strong plus point, do not bring in all the fancy tech stuff.
+### 完成建议
+- 充分测试，确保原型可运行且满足全部需求。
+- 可使用编码助手在一小时内完成作业范围，但避免过度设计；请确保理解自己的代码并遵循良好的工程实践。
+- 尽可能保持实现简洁、清晰；干净的代码是加分项。
+
+## 当前实现
+
+本仓库使用 Go 1.23 实现后端方案。
+
+`Restaurant` 是协调 `Order` 与 `Robot` 的聚合根；订单队列和机器人列表已拆分为独立领域组件并各自拥有单元测试。控制器通过单个事件循环 goroutine 管理所有可变状态：交互式 CLI 命令和每 100ms 的定时器都作为事件进入该循环，因此订单分配、完成与退回不会发生竞争。
+
+- 订单按 VIP 优先分配；相同优先级按 FIFO 顺序处理。
+- 订单编号从 `1001` 开始，并在进程生命周期内递增。
+- 每个机器人最多拥有一个 `CurrentOrderID`。
+- 移除最新创建的忙碌机器人时，其订单会回到 `PENDING`，并清除生产开始时间。
+- 每次生产尝试在 10 秒后完成。
+
+### 运行
+
+```bash
+./scripts/test.sh
+./scripts/build.sh
+./scripts/run.sh
+```
+
+最后一条命令会运行实时演示，并将带时间戳的输出写入 `scripts/result.txt`；运行时间约为 22 秒。
+
+### 交互式 CLI
+
+构建完成后运行：
+
+```bash
+./order-controller
+```
+
+支持的命令：
+
+```text
+normal [cents]
+vip [cents]
+add-bot [name]
+remove-bot
+status
+help
+quit
+```

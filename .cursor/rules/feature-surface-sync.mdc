@@ -1,0 +1,23 @@
+---
+description: 防止新增功能遗漏 CLI 提示、Demo 和示例输出
+alwaysApply: true
+---
+
+# 功能影响面同步检查
+
+修改或新增用户可见功能时，不得只实现领域逻辑。完成前必须检查并同步所有相关入口和演示面：
+
+- CLI 启动提示、`help` 输出、参数解析和命令分发
+- `runDemo` 场景，覆盖新功能的主要成功与失败路径
+- `README.md` 中的命令列表和行为说明
+- `scripts/result.txt`，使用最新代码实际运行 Demo 后重新生成
+- 根目录 CLI 二进制必须通过 `scripts/build.sh` 重建，避免验证到旧程序
+
+声明完成前必须执行：
+
+1. `go test ./...`
+2. `./scripts/build.sh`
+3. `./scripts/run.sh`
+4. 人工核对 `scripts/result.txt` 和实际 `help` 输出包含新功能
+
+若某一项不适用，必须明确说明原因，不能默认忽略。

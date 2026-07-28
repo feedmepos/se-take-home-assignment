@@ -1,0 +1,39 @@
+---
+description: CLI 命令、Demo 与 scripts 约定
+globs: cmd/**/*.go,scripts/**
+alwaysApply: false
+---
+
+# CLI 与 Scripts
+
+## 入口
+
+- `./order-controller`：交互模式（stdin）
+- `./order-controller --demo`：非交互演示，供 `scripts/run.sh` 写入 `scripts/result.txt`
+- 日志时间戳格式：`15:04:05`（`HH:MM:SS`）
+
+## 命令（须与 help / README 一致）
+
+```text
+normal [cents]     # 默认 1000
+vip [cents]
+add-bot [name]
+remove-bot
+status
+help
+quit
+```
+
+解析失败打印错误，不退出进程；未知命令提示 `help`。
+
+## Demo
+
+- `runDemo` 应能演示：创建订单、VIP 优先、加减机器人、忙碌机器人销毁后退回 PENDING、完成与 status
+- 改领域行为后必须更新 Demo 时间线注释，并用 `./scripts/run.sh` 重生成 `result.txt`
+- 不要手工编造 `result.txt`；以实际运行输出为准
+
+## Scripts
+
+- `test.sh` → `go test ./... -v`
+- `build.sh` → `go build -o order-controller ./cmd/order-controller`
+- `run.sh` → 依赖已构建的 `./order-controller`，重定向到 `scripts/result.txt`
