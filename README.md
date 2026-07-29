@@ -65,15 +65,23 @@ You must implement **either** frontend or backend components as described below:
 
 ### Backend (Go) — 本仓库实现
 
+**前置：** Go 1.23+（`go version` 可用）。若本机未安装，可将官方 toolchain 放到仓库内 `.tools/go/`（`scripts/_go_env.sh` 会自动加入 PATH）。
+
 ```bash
+# 在仓库根目录（含 go.mod 的分支，如 feat/order-controller-cli）
+chmod +x scripts/*.sh
 ./scripts/test.sh
 ./scripts/build.sh
 ./scripts/run.sh   # 写入 scripts/result.txt
 
-# 交互模式
+# 交互模式（默认每单 10s）
 ./bin/order-controller
-# 或自定义处理时长
-./bin/order-controller -process-time=10s
+# 或加快处理便于本地演示
+./bin/order-controller -process-time=1s
+# 非交互 demo
+./bin/order-controller -demo -process-time=100ms
 ```
+
+命令：`n` 普通单 / `v` VIP 单 / `+` 加机器人 / `-` 减机器人 / `s` 状态 / `q` 退出。
 
 设计文档：`docs/superpowers/specs/2026-07-29-order-controller-design.md`
