@@ -62,3 +62,42 @@ You must implement **either** frontend or backend components as described below:
 - Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.
 - Utilize coding agent to complete the assignment scope your working hour within 1 hour, do not over engineer it. However, ensure you read and understand what your code doing and apply good engineering practice.
 - Complete the implementation as clean as possible, clean code is a strong plus point, do not bring in all the fancy tech stuff.
+
+### Backend (Go) — 本仓库实现
+
+**前置：** Go 1.23+（`go version` 可用）。若本机未安装，可将官方 toolchain 放到仓库内 `.tools/go/`（`scripts/_go_env.sh` 会自动加入 PATH）。
+
+```bash
+# 在仓库根目录（含 go.mod 的分支，如 feat/order-controller-cli）
+chmod +x scripts/*.sh
+./scripts/test.sh
+./scripts/build.sh
+./scripts/run.sh   # 写入 scripts/result.txt
+
+# 交互模式（默认每单 10s）
+./bin/order-controller
+# 或加快处理便于本地演示
+./bin/order-controller -process-time=1s
+# 非交互 demo
+./bin/order-controller -demo -process-time=100ms
+```
+
+命令：`n` 普通单 / `v` VIP 单 / `+` 加机器人 / `-` 减机器人 / `s` 状态 / `q` 退出。
+
+设计文档：`docs/superpowers/specs/2026-07-29-order-controller-design.md`
+
+### Web UI（Vue）
+
+**前置：** Node.js ≥ 18（`web/` 下 Vite 构建需要；例如 `nvm use 20`）。
+
+```bash
+cd web && npm install && npm run build && cd ..
+./scripts/build.sh
+./bin/order-controller -serve -process-time=2s
+# 浏览器打开 http://localhost:8080/
+# 若 8080 被占用，可指定端口：./bin/order-controller -serve -addr=:8081
+```
+
+开发联调：先 `-serve`，再在 `web/` 执行 `npm run dev`（Vite 将 `/api` 代理到 `:8080`）。
+
+命令：页面按钮对应 New Normal / New VIP / + Bot / - Bot；状态每 300ms 刷新。

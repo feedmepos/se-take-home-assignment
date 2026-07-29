@@ -1,0 +1,5 @@
+.worktrees/
+.tools/
+bin/
+archives/
+.DS_Store
