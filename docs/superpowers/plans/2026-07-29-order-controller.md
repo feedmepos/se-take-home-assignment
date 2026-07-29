@@ -220,7 +220,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Splinglove/se-take-home-assignment/internal/bot"
 	"github.com/Splinglove/se-take-home-assignment/internal/controller"
 	"github.com/Splinglove/se-take-home-assignment/internal/order"
 )
@@ -411,12 +410,17 @@ git commit -m "feat: add bot model and controller order creation"
 - Produces:
   - `(*Controller) AddBot() *bot.Bot`
   - `(*Controller) RemoveBot() (*bot.Bot, bool)` — 无 Bot 时返回 `(nil, false)`
-  - `(*Controller) WaitIdle(timeout time.Duration) bool` — 测试辅助：所有 bot IDLE 且 pending 空（或仅等待完成）
-  - 内部：`runBot(h *botHandle)` goroutine
+  - 内部：`runBot(h *botHandle)` goroutine（测试用轮询 `Snapshot`，不强制 `WaitIdle`）
 
 - [ ] **Step 1: 追加失败测试**
 
-在 `controller_test.go` 追加：
+在 `controller_test.go` 的 import 中增加：
+
+```go
+"github.com/Splinglove/se-take-home-assignment/internal/bot"
+```
+
+然后追加：
 
 ```go
 func TestAddBot_PicksPendingAndCompletes(t *testing.T) {
