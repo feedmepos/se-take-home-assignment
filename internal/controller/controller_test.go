@@ -58,17 +58,21 @@ func TestAddBot_PicksPendingAndCompletes(t *testing.T) {
 func TestRemoveBot_RequeuesProcessingOrderWithPriority(t *testing.T) {
 	c := controller.New(2*time.Second, func(string) {})
 	n := c.CreateNormalOrder()
-	_ = n
 	c.AddBot()
 
 	// wait until processing starts
+	sawProcessing := false
 	deadline := time.Now().Add(200 * time.Millisecond)
 	for time.Now().Before(deadline) {
 		snap := c.Snapshot()
 		if len(snap.Bots) == 1 && snap.Bots[0].Status == bot.StatusProcessing {
+			sawProcessing = true
 			break
 		}
 		time.Sleep(5 * time.Millisecond)
+	}
+	if !sawProcessing {
+		t.Fatal("timeout waiting for bot to enter PROCESSING")
 	}
 
 	c.CreateVIPOrder() // VIP while normal is processing / will be requeued
@@ -90,6 +94,9 @@ func TestRemoveBot_RequeuesProcessingOrderWithPriority(t *testing.T) {
 	}
 	if snap.Pending[0].Status != order.StatusPending || snap.Pending[1].Status != order.StatusPending {
 		t.Fatal("requeued orders must be PENDING")
+	}
+	if snap.Pending[1].ID != n.ID {
+		t.Fatalf("requeued normal id=%d want %d", snap.Pending[1].ID, n.ID)
 	}
 }
 
