@@ -42,10 +42,6 @@ func (c *CLI) RunInteractive() error {
 	return sc.Err()
 }
 
-func (c *CLI) RunDemo() error {
-	return fmt.Errorf("demo not implemented")
-}
-
 func (c *CLI) HandleLine(line string) bool {
 	cmd := strings.TrimSpace(strings.ToLower(line))
 	switch cmd {
