@@ -85,3 +85,19 @@ chmod +x scripts/*.sh
 命令：`n` 普通单 / `v` VIP 单 / `+` 加机器人 / `-` 减机器人 / `s` 状态 / `q` 退出。
 
 设计文档：`docs/superpowers/specs/2026-07-29-order-controller-design.md`
+
+### Web UI（Vue）
+
+**前置：** Node.js ≥ 18（`web/` 下 Vite 构建需要；例如 `nvm use 20`）。
+
+```bash
+cd web && npm install && npm run build && cd ..
+./scripts/build.sh
+./bin/order-controller -serve -process-time=2s
+# 浏览器打开 http://localhost:8080/
+# 若 8080 被占用，可指定端口：./bin/order-controller -serve -addr=:8081
+```
+
+开发联调：先 `-serve`，再在 `web/` 执行 `npm run dev`（Vite 将 `/api` 代理到 `:8080`）。
+
+命令：页面按钮对应 New Normal / New VIP / + Bot / - Bot；状态每 300ms 刷新。
