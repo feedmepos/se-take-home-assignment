@@ -62,3 +62,18 @@ You must implement **either** frontend or backend components as described below:
 - Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.
 - Utilize coding agent to complete the assignment scope your working hour within 1 hour, do not over engineer it. However, ensure you read and understand what your code doing and apply good engineering practice.
 - Complete the implementation as clean as possible, clean code is a strong plus point, do not bring in all the fancy tech stuff.
+
+### Backend (Go) — 本仓库实现
+
+```bash
+./scripts/test.sh
+./scripts/build.sh
+./scripts/run.sh   # 写入 scripts/result.txt
+
+# 交互模式
+./bin/order-controller
+# 或自定义处理时长
+./bin/order-controller -process-time=10s
+```
+
+设计文档：`docs/superpowers/specs/2026-07-29-order-controller-design.md`
