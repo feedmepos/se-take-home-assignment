@@ -25,6 +25,7 @@ function applyState(st) {
 async function refresh() {
   try {
     applyState(await fetchState())
+    error.value = ''
   } catch (e) {
     error.value = e.message || String(e)
   }
