@@ -1,3 +1,35 @@
+## Node.js order controller
+
+Requires Node.js 22 or newer. No packages need installing.
+
+```bash
+./scripts/test.sh   # unit and CLI smoke tests
+./scripts/build.sh  # syntax checks; JavaScript needs no compilation
+./scripts/run.sh    # scripted demo, written to scripts/result.txt
+npm start           # interactive CLI with real 10-second cooking times
+```
+
+In the CLI, enter `normal`, `vip`, `+ bot`, `- bot`, `status`, or `quit`.
+The longer commands `new normal order`, `new vip order`, `add bot`, and
+`remove bot` also work. `status` shows the PENDING area, COMPLETE area,
+and each bot. A processing order stays visible in PENDING with status
+`PROCESSING` until its 10 seconds finish. Events and status lines use
+`HH:MM:SS` UTC timestamps. Piped commands can be used in automation;
+after input ends, active cooks continue until complete. `quit` cancels
+active cooks and exits immediately.
+
+Orders receive increasing IDs. Waiting orders are selected VIP first,
+then by order ID within each class. Cooking orders are not preempted by
+new VIP orders. Removing a bot removes the newest live bot and cancels
+its timer; its order returns to its priority position in PENDING. Each
+bot processes at most one order at a time and becomes IDLE when no
+waiting order remains. All state is in memory.
+
+The demo uses a simulated clock so it can show multiple exact 10-second
+completions without slowing down GitHub Actions. The interactive CLI uses
+real timers. The existing `backend-verify-result` workflow runs the three
+scripts and checks `scripts/result.txt`.
+
 ## FeedMe Software Engineer Take Home Assignment
 Below is a take home assignment before the interview of the position. You are required to
 1. Understand the situation and use case. You may contact the interviewer for further clarification.

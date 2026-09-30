@@ -1,0 +1,15 @@
+{
+  "name": "feedme-order-controller",
+  "version": "1.0.0",
+  "private": true,
+  "description": "In-memory restaurant order controller CLI",
+  "scripts": {
+    "test": "node --test",
+    "build": "node --check src/order-controller.js && node --check src/cli.js && node --check src/demo.js && node --check src/virtual-clock.js && node --check src/format.js",
+    "start": "node src/cli.js",
+    "demo": "node src/demo.js"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
