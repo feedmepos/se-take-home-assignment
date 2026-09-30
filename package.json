@@ -1,0 +1,13 @@
+{
+  "name": "feedme-order-controller",
+  "version": "1.0.0",
+  "private": true,
+  "description": "In-memory order controller and interactive CLI",
+  "scripts": {
+    "test": "node --test",
+    "build": "node --check src/order-controller.js && node --check src/cli.js"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
