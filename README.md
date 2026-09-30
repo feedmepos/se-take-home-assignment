@@ -1,4 +1,36 @@
-## FeedMe Software Engineer Take Home Assignment
+## Node.js order controller prototype
+
+This repository contains an in-memory cooking bot controller and an interactive CLI. It uses Node.js 22 and has no external packages.
+
+### Run it
+
+```sh
+./scripts/test.sh   # Unit and CLI tests
+./scripts/build.sh  # Check the JavaScript files for syntax errors
+./scripts/run.sh    # Write the demonstration to scripts/result.txt
+node src/cli.js     # Start the interactive CLI with real 10-second timers
+```
+
+In the interactive CLI, type `normal`, `vip`, `+ bot`, `- bot`, `status`, `help`, or `exit`. The full phrases `new normal order` and `new vip order` also work. `status` shows the pending queue, orders being processed, completed orders, and bot states. Each output line is timestamped in UTC (`HH:MM:SS`).
+
+The `run.sh` demonstration uses the same controller with a simulated clock so GitHub Actions can show several 10-second completions immediately. Its generated `scripts/result.txt` includes timestamps, a canceled order returning to the queue, and a bot taking new work after becoming idle. Interactive mode uses real timers.
+
+### Order behavior
+
+- Orders receive increasing IDs beginning at 1. VIP orders precede normal orders; each class keeps its submission order.
+- A bot takes one pending order at a time. An order being cooked appears under `PROCESSING` and enters `COMPLETE` after 10 seconds. Existing work is not interrupted by a later VIP order.
+- Adding a bot immediately assigns queued work. A bot with no work stays idle and takes the next order when it arrives.
+- Removing a bot removes the newest one. If it was cooking, its timer is canceled and its order returns to the pending queue according to its original submission order and priority. A new pickup starts a fresh 10 seconds.
+- All state is in memory and resets when the CLI exits.
+
+### Files
+
+- `src/order-controller.js`: queue, bots, dispatch, and cancellation.
+- `src/cli.js`: interactive commands and CI demonstration.
+- `src/manual-clock.js`: deterministic clock for tests and demonstration.
+- `test/`: controller and CLI tests using Node's built-in test runner.
+
+## Original assignment
 Below is a take home assignment before the interview of the position. You are required to
 1. Understand the situation and use case. You may contact the interviewer for further clarification.
 2. implement the requirement with **either frontend or backend components**.
